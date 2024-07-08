@@ -1,4 +1,4 @@
-using KittySaver.Extensions;
+using KittySaver.Api.Extensions;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace KittySaver.Persistence;
+namespace KittySaver.Api.Persistence;
 
 public class ApplicationDbContext : DbContext
 {
