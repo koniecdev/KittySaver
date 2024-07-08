@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
-namespace KittySaver.Persistence.Factories;
+namespace KittySaver.Api.Persistence.Factories;
 
 internal abstract class DesignTimeDbContextFactoryBase<TContext> :
     IDesignTimeDbContextFactory<TContext> where TContext : DbContext

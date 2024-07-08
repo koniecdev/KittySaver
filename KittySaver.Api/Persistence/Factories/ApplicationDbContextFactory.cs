@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace KittySaver.Persistence.Factories;
+namespace KittySaver.Api.Persistence.Factories;
 
 internal sealed class ApplicationDbContextFactoryFactory : DesignTimeDbContextFactoryBase<ApplicationDbContext>
 {

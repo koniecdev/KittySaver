@@ -1,4 +1,4 @@
-﻿namespace KittySaver.Extensions;
+﻿namespace KittySaver.Api.Extensions;
 
 internal static class SwaggerExtensions
 {
