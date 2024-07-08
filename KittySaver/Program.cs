@@ -1,6 +1,17 @@
-var builder = WebApplication.CreateBuilder(args);
-var app = builder.Build();
+using KittySaver.Extensions;
 
-app.MapGet("/", () => "Hello World!");
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerServices();
+
+WebApplication app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.AddSwagger();
+}
+
+app.UseHttpsRedirection();
 
 app.Run();
