@@ -1,0 +1,6 @@
+﻿services:
+  kittysaver:
+    image: kittysaver
+    build:
+      context: .
+      dockerfile: KittySaver/Dockerfile
