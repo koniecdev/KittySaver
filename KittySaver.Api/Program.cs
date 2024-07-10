@@ -1,3 +1,4 @@
+using KittySaver.Api.Exceptions;
 using KittySaver.Api.Extensions;
 using Serilog;
 
@@ -21,16 +22,16 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerServices();
 
-    WebApplication app = builder.Build();
+    builder.Services.AddEveryExceptionHandler();
     
+    WebApplication app = builder.Build();
+    app.UseExceptionHandler();
     if (app.Environment.IsDevelopment())
     {
         app.AddSwagger();
     }
-
     app.UseHttpsRedirection();
     app.UseSerilogRequestLogging();
-
     app.Run();
 }
 catch(Exception exception)
