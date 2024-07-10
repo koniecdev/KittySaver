@@ -1,4 +1,7 @@
+using KittySaver.Api.Exceptions;
 using KittySaver.Api.Extensions;
+using KittySaver.Api.Middlewares;
+using KittySaver.Api.Middlewares.ExceptionHandlers;
 using Serilog;
 
 IConfigurationRoot configuration = new ConfigurationBuilder()
@@ -21,16 +24,17 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerServices();
 
-    WebApplication app = builder.Build();
+    builder.Services.AddEveryExceptionHandler();
+    builder.Services.AddProblemDetails();
     
+    WebApplication app = builder.Build();
+    app.UseExceptionHandler();
     if (app.Environment.IsDevelopment())
     {
         app.AddSwagger();
     }
-
     app.UseHttpsRedirection();
     app.UseSerilogRequestLogging();
-
     app.Run();
 }
 catch(Exception exception)
