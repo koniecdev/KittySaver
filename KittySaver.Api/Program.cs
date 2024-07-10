@@ -23,7 +23,6 @@ try
     builder.Services.AddSwaggerServices();
 
     builder.Services.AddEveryExceptionHandler();
-    builder.Services.AddProblemDetails();
     
     WebApplication app = builder.Build();
     app.UseExceptionHandler();

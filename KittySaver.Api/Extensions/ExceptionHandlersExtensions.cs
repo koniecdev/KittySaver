@@ -9,6 +9,8 @@ internal static class ExceptionHandlersExtensions
         serviceCollection.AddExceptionHandler<NotFoundExceptionHandler>();
         serviceCollection.AddExceptionHandler<BadRequestExceptionHandler>();
         serviceCollection.AddExceptionHandler<GlobalExceptionHandler>();
+        serviceCollection.AddProblemDetails();
+
         return serviceCollection;
     }
 }
