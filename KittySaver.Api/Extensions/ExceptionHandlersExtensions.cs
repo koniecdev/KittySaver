@@ -1,4 +1,4 @@
-﻿using KittySaver.Api.Middlewares.ExceptionHandlers;
+﻿using KittySaver.Api.Infrastructure.ExceptionHandlers;
 
 namespace KittySaver.Api.Extensions;
 

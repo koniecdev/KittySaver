@@ -1,7 +1,5 @@
 using KittySaver.Api.Exceptions;
 using KittySaver.Api.Extensions;
-using KittySaver.Api.Middlewares;
-using KittySaver.Api.Middlewares.ExceptionHandlers;
 using Serilog;
 
 IConfigurationRoot configuration = new ConfigurationBuilder()
