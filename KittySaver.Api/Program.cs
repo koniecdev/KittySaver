@@ -1,17 +1,43 @@
 using KittySaver.Api.Extensions;
+using Serilog;
 
-WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+IConfigurationRoot configuration = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json")
+    .Build();
 
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerServices();
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom
+    .Configuration(configuration)
+    .CreateLogger();
 
-WebApplication app = builder.Build();
-
-if (app.Environment.IsDevelopment())
+try
 {
-    app.AddSwagger();
+    Log.Information("Application is starting up");
+    
+    WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+    builder.Host.UseSerilog();
+    
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerServices();
+
+    WebApplication app = builder.Build();
+    
+    if (app.Environment.IsDevelopment())
+    {
+        app.AddSwagger();
+    }
+
+    app.UseHttpsRedirection();
+    app.UseSerilogRequestLogging();
+
+    app.Run();
 }
-
-app.UseHttpsRedirection();
-
-app.Run();
+catch(Exception exception)
+{
+    Log.Fatal(exception, "Could not start application");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
