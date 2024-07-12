@@ -43,7 +43,6 @@ try
 
     ApiVersionSet apiVersionSet = app.NewApiVersionSet()
         .HasApiVersion(new ApiVersion(1))
-        .HasApiVersion(new ApiVersion(2))
         .ReportApiVersions()
         .Build();
     RouteGroupBuilder versionedGroup = app
