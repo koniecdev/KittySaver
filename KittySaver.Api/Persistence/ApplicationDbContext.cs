@@ -1,8 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using KittySaver.Api.Entites;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace KittySaver.Api.Persistence;
 
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
+internal sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) 
+    : IdentityDbContext<Person, IdentityRole<Guid>, Guid>(options)
 {
-    
+    public DbSet<Person> Persons => Set<Person>();
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+        builder.ApplyConfigurationsFromAssembly(typeof(Program).Assembly);
+    }
 }
