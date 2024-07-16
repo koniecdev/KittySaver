@@ -16,21 +16,29 @@ internal sealed class BadRequestExceptionHandler(ILogger<BadRequestExceptionHand
             return false;
         }
 
-        logger.LogError(
-            badRequestException,
-            "Following errors occurred: {Message}",
-            badRequestException.Message);
-
         ProblemDetails problemDetails = new()
         {
             Status = StatusCodes.Status400BadRequest,
             Type = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400",
-            Title = "One or more request processing errors occurred",
-            Extensions = new Dictionary<string, object?>()
+            Title = "One or more request processing validation errors occurred",
+            Extensions = new Dictionary<string, object?>
             {
-                { "errors", new[] { badRequestException.Message } }
+                {
+                    "errors", 
+                    new IApplicationError[]
+                    {
+                        badRequestException
+                    }
+                }
             }
         };
+
+        logger.LogError(
+            badRequestException,
+            "Following errors occurred: {type} | {code} | {description}",
+            problemDetails.Status.Value,
+            badRequestException.ApplicationCode,
+            badRequestException.Description);
 
         httpContext.Response.StatusCode = problemDetails.Status.Value;
 
