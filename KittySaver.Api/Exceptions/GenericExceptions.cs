@@ -1,5 +1,21 @@
-﻿namespace KittySaver.Api.Exceptions;
+﻿using KittySaver.Api.SharedKernel;
 
-public class NotFoundException(string objectName, string id) : Exception($"Could not found {objectName} with identifier: {id}");
+namespace KittySaver.Api.Exceptions;
 
-public class BadRequestException(string message) : Exception(message);
+public interface IApplicationError
+{
+    string ApplicationCode { get; }
+    string Description { get; }
+}
+
+public class NotFoundException(string applicationCode, string description) : Exception, IApplicationError
+{
+    public string ApplicationCode { get; } = applicationCode;
+    public string Description { get; } = description;
+}
+
+public class BadRequestException(string applicationCode, string description) : Exception, IApplicationError
+{
+    public string ApplicationCode { get; } = applicationCode;
+    public string Description { get; } = description;
+}
