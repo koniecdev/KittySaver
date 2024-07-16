@@ -21,11 +21,15 @@ internal sealed class BadRequestExceptionHandler(ILogger<BadRequestExceptionHand
             "Following errors occurred: {Message}",
             badRequestException.Message);
 
-        var problemDetails = new ProblemDetails
+        ProblemDetails problemDetails = new()
         {
             Status = StatusCodes.Status400BadRequest,
-            Title = "Bad Request",
-            Detail = badRequestException.Message
+            Type = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400",
+            Title = "One or more request processing errors occurred",
+            Extensions = new Dictionary<string, object?>()
+            {
+                { "errors", new[] { badRequestException.Message } }
+            }
         };
 
         httpContext.Response.StatusCode = problemDetails.Status.Value;
