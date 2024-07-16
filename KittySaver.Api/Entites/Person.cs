@@ -62,12 +62,28 @@ public class Person : IdentityUser<Guid>
         }
     }
     
-    private static class Exceptions
+    public static class Exceptions
     {
-        public sealed class EmptyEmailException() : BadRequestException("Email must not be empty");
-        public sealed class InvalidEmailFormatException() : BadRequestException("Email is in incorrect format");
-        public sealed class EmptyPhoneNumberException() : BadRequestException("Phone number must not be empty");
-        public sealed class InvalidPhoneNumberFormatException() : BadRequestException("Phone number is in incorrect format");
+        public sealed class PersonNotFoundException() 
+            : NotFoundException("Person.Email.Empty", "Email is empty");
+        
+        public static class Email
+        {
+            public sealed class EmptyException() 
+                : BadRequestException("Person.Email.Empty", "Email is empty");
+            public sealed class InvalidFormatException() 
+                : BadRequestException("Person.Email.InvalidFormat", "Email format is invalid");
+            public sealed class NotUniqueException() 
+                : BadRequestException("Person.Email.NotUnique", "Email is not unique");
+        }
+
+        public static class PhoneNumber
+        {
+            public sealed class EmptyException() 
+                : BadRequestException("Person.PhoneNumber.Empty", "Phone number is empty");
+            public sealed class InvalidFormatException() 
+                : BadRequestException("Person.PhoneNumber.InvalidFormat", "Phone number is invalid");
+        }
     }
 }
 
