@@ -114,5 +114,18 @@ internal class PersonConfiguration : IEntityTypeConfiguration<Person>
             .Property(m=>m.PhoneNumber)
             .HasMaxLength(31)
             .IsRequired();
+
+        builder
+            .HasIndex(m => m.Email)
+            .IsUnique();
+        builder
+            .HasIndex(m => m.NormalizedEmail)
+            .IsUnique();
+        builder
+            .HasIndex(m => m.UserName)
+            .IsUnique();
+        builder
+            .HasIndex(m => m.NormalizedUserName)
+            .IsUnique();
     }
 }
