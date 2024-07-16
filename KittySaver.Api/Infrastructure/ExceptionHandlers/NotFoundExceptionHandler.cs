@@ -16,17 +16,29 @@ internal sealed class NotFoundExceptionHandler(ILogger<NotFoundExceptionHandler>
             return false;
         }
 
-        logger.LogError(
-            notFoundException,
-            "Exception occurred: {Message}",
-            notFoundException.Message);
-
-        var problemDetails = new ProblemDetails
+        ProblemDetails problemDetails = new()
         {
             Status = StatusCodes.Status404NotFound,
-            Title = "Not Found",
-            Detail = notFoundException.Message
+            Type = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404",
+            Title = "Resource could not be found",
+            Extensions = new Dictionary<string, object?>
+            {
+                {
+                    "errors",
+                    new IApplicationError[]
+                    {
+                        notFoundException
+                    }
+                }
+            }
         };
+
+        logger.LogError(
+            notFoundException,
+            "Following errors occurred: {type} | {code} | {description}",
+            problemDetails.Status.Value,
+            notFoundException.ApplicationCode,
+            notFoundException.Description);
 
         httpContext.Response.StatusCode = problemDetails.Status.Value;
 
