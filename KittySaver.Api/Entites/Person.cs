@@ -34,11 +34,11 @@ public class Person : IdentityUser<Guid>
         {
             if (string.IsNullOrWhiteSpace(value))
             {
-                throw new Exceptions.EmptyEmailException();
+                throw new Exceptions.Email.EmptyException();
             }
             if (!Regex.IsMatch(value, EmailPattern))
             {
-                throw new Exceptions.InvalidEmailFormatException();
+                throw new Exceptions.Email.InvalidFormatException();
             }
             _email = value;
             _userName = value;
@@ -52,11 +52,11 @@ public class Person : IdentityUser<Guid>
         {
             if (string.IsNullOrWhiteSpace(value))
             {
-                throw new Exceptions.EmptyPhoneNumberException();
+                throw new Exceptions.PhoneNumber.EmptyException();
             }
             if (!Regex.IsMatch(value, EmailPattern))
             {
-                throw new Exceptions.InvalidPhoneNumberFormatException();
+                throw new Exceptions.PhoneNumber.InvalidFormatException();
             }
             _phoneNumber = value;
         }
