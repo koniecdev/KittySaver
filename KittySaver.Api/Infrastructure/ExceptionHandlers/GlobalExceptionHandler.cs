@@ -10,14 +10,17 @@ internal sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> log
         Exception exception,
         CancellationToken cancellationToken)
     {
-        logger.LogError(
-            exception, "Exception occurred: {Message}", exception.Message);
 
         ProblemDetails problemDetails = new()
         {
             Status = StatusCodes.Status500InternalServerError,
-            Title = "Server error"
+            Title = "Sorry, an internal server error has occurred, there is nothing You can do."
         };
+
+        logger.LogError(
+            exception, "Exception occurred: {type} | {message}",
+            problemDetails.Status.Value,
+            exception.Message);
 
         httpContext.Response.StatusCode = problemDetails.Status.Value;
 
