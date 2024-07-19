@@ -20,4 +20,8 @@
         <Using Include="Xunit"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\src\KittySaver.Api\KittySaver.Api.csproj" />
+    </ItemGroup>
+
 </Project>
