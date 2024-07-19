@@ -1,6 +1,6 @@
-﻿using KittySaver.Api.Infrastructure.ExceptionHandlers;
+﻿using KittySaver.Api.Shared.Infrastructure.ExceptionHandlers;
 
-namespace KittySaver.Api.Extensions;
+namespace KittySaver.Api.Shared.Extensions;
 
 internal static class ExceptionHandlersExtensions
 {

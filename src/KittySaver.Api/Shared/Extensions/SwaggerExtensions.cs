@@ -1,7 +1,7 @@
 ﻿using Asp.Versioning.ApiExplorer;
-using KittySaver.Api.OpenApi;
+using KittySaver.Api.Shared.OpenApi;
 
-namespace KittySaver.Api.Extensions;
+namespace KittySaver.Api.Shared.Extensions;
 
 internal static class SwaggerExtensions
 {

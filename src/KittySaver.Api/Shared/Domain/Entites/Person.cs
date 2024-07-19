@@ -1,11 +1,10 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Text.RegularExpressions;
-using KittySaver.Api.Exceptions;
+﻿using System.Text.RegularExpressions;
+using KittySaver.Api.Shared.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace KittySaver.Api.Entites;
+namespace KittySaver.Api.Shared.Domain.Entites;
 
 public class Person : IdentityUser<Guid>
 {

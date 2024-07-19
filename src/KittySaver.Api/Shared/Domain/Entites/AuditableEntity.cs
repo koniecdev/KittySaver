@@ -1,4 +1,4 @@
-﻿namespace KittySaver.Api.SharedKernel;
+﻿namespace KittySaver.Api.Shared.Domain.Entites;
 
 public abstract class AuditableEntity
 {

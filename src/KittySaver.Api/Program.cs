@@ -1,7 +1,6 @@
 using Asp.Versioning;
 using Asp.Versioning.Builder;
-using KittySaver.Api.Exceptions;
-using KittySaver.Api.Extensions;
+using KittySaver.Api.Shared.Extensions;
 using Serilog;
 
 IConfigurationRoot configuration = new ConfigurationBuilder()

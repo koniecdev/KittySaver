@@ -1,6 +1,4 @@
-﻿using KittySaver.Api.SharedKernel;
-
-namespace KittySaver.Api.Exceptions;
+﻿namespace KittySaver.Api.Shared.Exceptions;
 
 public interface IApplicationError
 {
