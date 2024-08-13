@@ -24,6 +24,8 @@ try
     builder.Services.AddSwaggerServices();
 
     builder.Services.AddEveryExceptionHandler();
+    builder.Services.RegisterInfrastructureServices();
+    builder.Services.RegisterPersistenceServices(builder.Configuration);
 
     builder.Services.AddApiVersioning(options =>
     {

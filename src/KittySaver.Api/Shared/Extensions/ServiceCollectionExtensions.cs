@@ -1,0 +1,35 @@
+﻿using KittySaver.Api.Shared.Domain.Entites;
+using KittySaver.Api.Shared.Infrastructure.Services;
+using KittySaver.Api.Shared.Persistence;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+
+namespace KittySaver.Api.Shared.Extensions;
+
+public static class ServiceCollectionExtensions
+{
+    public static IServiceCollection RegisterInfrastructureServices(this IServiceCollection services)
+    {
+        services.AddScoped<IDateTimeProvider, DefaultDateTimeProvider>();
+        return services;
+    }
+    public static IServiceCollection RegisterPersistenceServices(this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.AddDbContext<ApplicationDbContext>(
+            o => o.UseSqlServer(configuration.GetConnectionString("Database")
+                                ?? throw new Exceptions.Database.MissingConnectionStringException()));
+        services.AddIdentityCore<Person>()
+            .AddRoles<IdentityRole<Guid>>()
+            .AddEntityFrameworkStores<ApplicationDbContext>();
+        return services;
+    }
+
+    public static class Exceptions
+    {
+        public static class Database
+        {
+            public sealed class MissingConnectionStringException() : Exception("Connection string not found");
+        }
+    } 
+}
