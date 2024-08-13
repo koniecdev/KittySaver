@@ -12,6 +12,8 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection RegisterInfrastructureServices(this IServiceCollection services)
     {
+        services.AddHttpContextAccessor();
+        services.AddScoped<ICurrentEnvironmentService, CurrentEnvironmentService>();
         services.AddScoped<IDateTimeProvider, DefaultDateTimeProvider>();
         return services;
     }
