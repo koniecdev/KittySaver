@@ -1,4 +1,5 @@
 ﻿using KittySaver.Api.Shared.Infrastructure.Services;
+using KittySaver.Api.Shared.Security;
 using Microsoft.EntityFrameworkCore;
 
 namespace KittySaver.Api.Shared.Persistence.Factories;
@@ -7,7 +8,7 @@ internal sealed class ApplicationDbContextFactoryFactory : DesignTimeDbContextFa
 {
     protected override ApplicationDbContext CreateNewInstance(DbContextOptions<ApplicationDbContext> options)
     {
-        var db = new ApplicationDbContext(options, new DefaultDateTimeProvider());
+        ApplicationDbContext db = new ApplicationDbContext(options, new DefaultDateTimeProvider(), new DesignTimeMigrationsCurrentUserService());
         return db;
     }
 }

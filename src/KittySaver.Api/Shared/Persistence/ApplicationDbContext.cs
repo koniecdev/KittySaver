@@ -1,14 +1,17 @@
 ﻿using KittySaver.Api.Shared.Domain.Entites;
 using KittySaver.Api.Shared.Infrastructure.Services;
+using KittySaver.Api.Shared.Security;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace KittySaver.Api.Shared.Persistence;
 
-internal sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IDateTimeProvider dateTimeProvider) 
+internal sealed class ApplicationDbContext(
+    DbContextOptions<ApplicationDbContext> options,
+    IDateTimeProvider dateTimeProvider,
+    ICurrentUserService currentUserService) 
     : IdentityDbContext<Person, IdentityRole<Guid>, Guid>(options)
 {
     public DbSet<Person> Persons => Set<Person>();
@@ -26,7 +29,7 @@ internal sealed class ApplicationDbContext(DbContextOptions<ApplicationDbContext
             {
                 case EntityState.Added:
                     entity.Entity.CreatedOn = dateTimeProvider.Now;
-                    entity.Entity.CreatedBy = "";
+                    entity.Entity.CreatedBy = currentUserService.UserId;
                     break;
                 case EntityState.Detached:
                 case EntityState.Unchanged:
