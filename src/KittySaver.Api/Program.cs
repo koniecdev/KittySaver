@@ -1,6 +1,8 @@
+using System.Net;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
 using KittySaver.Api.Shared.Extensions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Serilog;
 
 IConfigurationRoot configuration = new ConfigurationBuilder()
@@ -36,12 +38,18 @@ try
         options.GroupNameFormat = "'v'V";
         options.SubstituteApiVersionInUrl = true;
     });
+
+    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer();
+    builder.Services.AddAuthorization();
     
     WebApplication app = builder.Build();
     app.UseExceptionHandler();
     app.UseHttpsRedirection();
     app.UseSerilogRequestLogging();
-
+    app.UseAuthentication();
+    app.UseAuthorization();
+    
     ApiVersionSet apiVersionSet = app.NewApiVersionSet()
         .HasApiVersion(new ApiVersion(1))
         .ReportApiVersions()
