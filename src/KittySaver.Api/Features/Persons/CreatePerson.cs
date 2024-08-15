@@ -17,6 +17,7 @@ public class CreatePerson : IEndpoint
         string LastName,
         string Email,
         string PhoneNumber,
+        string Password,
         Guid UserIdentityId);
     
     public sealed record CreatePersonCommand(
@@ -44,13 +45,12 @@ public class CreatePerson : IEndpoint
         }
     }
     
-    internal sealed class CreatePersonCommandHandler(ApplicationDbContext db) : IRequestHandler<CreatePersonCommand, Guid>
+    internal sealed class CreatePersonCommandHandler(UserManager<Person> userManager) : IRequestHandler<CreatePersonCommand, Guid>
     {
         public async Task<Guid> Handle(CreatePersonCommand request, CancellationToken cancellationToken)
         {
             Person person = request.ToEntity();
-            db.Persons.Add(person);
-            await db.SaveChangesAsync(cancellationToken);
+            await userManager.CreateAsync(person, request.Password);
             return person.Id;
         }
     }
