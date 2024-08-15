@@ -34,38 +34,38 @@ public class RoleConfiguration : IEntityTypeConfiguration<IdentityRole<Guid>>
         );
     }
 }
-//
-// public class AdminConfiguration(IConfiguration configuration) : IEntityTypeConfiguration<Person>
-// {
-//     public void Configure(EntityTypeBuilder<Person> builder)
-//     {
-//         Person admin = new()
-//         {
-//             Id = FixedIdsHelper.AdminId,
-//             UserName = "defaultadmin@koniec.dev",
-//             NormalizedUserName = "DEFAULTADMIN@KONIEC.DEV",
-//             FirstName = "Default",
-//             LastName = "Admin",
-//             Email = "defaultadmin@koniec.dev",
-//             NormalizedEmail = "DEFAULTADMIN@KONIEC.DEV",
-//             PhoneNumber = "XXXXXXXXX",
-//             EmailConfirmed = true,
-//             PhoneNumberConfirmed = true,
-//             SecurityStamp = FixedIdsHelper.AdminStamp.ToString(),
-//             UserIdentityId = FixedIdsHelper.AdminUserIdentityId
-//         };
-//
-//         admin.PasswordHash = PassGenerate(admin);
-//
-//         builder.HasData(admin);
-//     }
-//
-//     private string PassGenerate(Person user)
-//     {
-//         PasswordHasher<Person> passHash = new();
-//         return passHash.HashPassword(user, configuration["Data:DefaultAdminPassword"]!);
-//     }
-// }
+
+public class AdminConfiguration : IEntityTypeConfiguration<Person>
+{
+    public void Configure(EntityTypeBuilder<Person> builder)
+    {
+        Person admin = new()
+        {
+            Id = FixedIdsHelper.AdminId,
+            UserName = "defaultadmin@koniec.dev",
+            NormalizedUserName = "DEFAULTADMIN@KONIEC.DEV",
+            FirstName = "Default",
+            LastName = "Admin",
+            Email = "defaultadmin@koniec.dev",
+            NormalizedEmail = "DEFAULTADMIN@KONIEC.DEV",
+            PhoneNumber = "XXXXXXXXX",
+            EmailConfirmed = true,
+            PhoneNumberConfirmed = true,
+            SecurityStamp = FixedIdsHelper.AdminStamp.ToString(),
+            UserIdentityId = FixedIdsHelper.AdminUserIdentityId
+        };
+
+        admin.PasswordHash = PassGenerate(admin);
+
+        builder.HasData(admin);
+    }
+
+    private static string PassGenerate(Person user)
+    {
+        PasswordHasher<Person> passHash = new();
+        return passHash.HashPassword(user, "DefaultPassword123!");
+    }
+}
 //
 // public class UsersWithRolesConfiguration : IEntityTypeConfiguration<IdentityUserRole<Guid>>
 // {
