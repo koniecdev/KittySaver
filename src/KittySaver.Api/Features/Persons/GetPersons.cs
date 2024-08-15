@@ -13,7 +13,7 @@ namespace KittySaver.Api.Features.Persons;
 
 public sealed class GetPersons : IEndpoint
 {
-    public sealed class GetPersonQuery : IRequest<ICollection<PersonResponse>>
+    public sealed class GetPersonsQuery : IQuery<ICollection<PersonResponse>>
     {
         public List<ApiFilter>? Filters { get; init; } = [];
         public List<ApiSort>? Sorts { get; init; } = [];
