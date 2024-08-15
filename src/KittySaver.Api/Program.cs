@@ -18,11 +18,11 @@ Log.Logger = new LoggerConfiguration()
 try
 {
     Log.Information("Application is starting up");
-    
+
     WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
     builder.Host.UseSerilog();
-    
+
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerServices();
 
@@ -40,19 +40,29 @@ try
         options.SubstituteApiVersionInUrl = true;
     });
 
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowedPolicies",
+            corsBuilder =>
+            {
+                corsBuilder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+            });
+    });
+
     builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer();
     builder.Services.AddAuthorization();
 
     builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
-    
+
     WebApplication app = builder.Build();
     app.UseExceptionHandler();
     app.UseHttpsRedirection();
     app.UseSerilogRequestLogging();
+    app.UseCors("AllowedPolicies");
     app.UseAuthentication();
     app.UseAuthorization();
-    
+
     ApiVersionSet apiVersionSet = app.NewApiVersionSet()
         .HasApiVersion(new ApiVersion(1))
         .ReportApiVersions()
@@ -60,21 +70,23 @@ try
     RouteGroupBuilder versionedGroup = app
         .MapGroup("api/v{apiVersion:apiVersion}")
         .WithApiVersionSet(apiVersionSet);
-    
+
     app.MapEndpoints(versionedGroup);
-    
+
     if (app.Environment.IsDevelopment())
     {
         app.AddSwagger();
     }
+
     app.Run();
 }
-catch(Exception exception)
+catch (Exception exception)
 {
     if (exception is HostAbortedException)
     {
         return;
     }
+
     Log.Fatal(exception, "Could not start application");
 }
 finally
