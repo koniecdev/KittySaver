@@ -1,7 +1,10 @@
-﻿using KittySaver.Api.Shared.Domain.Entites;
+﻿using FluentValidation;
+using KittySaver.Api.Shared.Domain.Entites;
+using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Infrastructure.Endpoints;
 using KittySaver.Api.Shared.Persistence;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Riok.Mapperly.Abstractions;
 
@@ -21,7 +24,25 @@ public class CreatePerson : IEndpoint
         string LastName,
         string Email,
         string PhoneNumber,
-        Guid UserIdentityId) : IRequest<Guid>;
+        string Password,
+        Guid UserIdentityId) : ICommand<Guid>;
+
+    public sealed class CreatePersonCommandValidator 
+        : AbstractValidator<CreatePersonCommand>
+    {
+        private const string EmailPattern = @"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$";
+
+        public CreatePersonCommandValidator()
+        {
+            RuleFor(x => x.FirstName).NotEmpty();
+            RuleFor(x => x.LastName).NotEmpty();
+            RuleFor(x => x.PhoneNumber).NotEmpty();
+            RuleFor(x => x.UserIdentityId).NotEmpty();
+            RuleFor(x => x.Email)
+                .Matches(EmailPattern)
+                .NotEmpty();
+        }
+    }
     
     internal sealed class CreatePersonCommandHandler(ApplicationDbContext db) : IRequestHandler<CreatePersonCommand, Guid>
     {
