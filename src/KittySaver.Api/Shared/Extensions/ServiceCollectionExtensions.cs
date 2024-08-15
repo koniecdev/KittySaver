@@ -1,4 +1,6 @@
 ﻿using System.Reflection;
+using FluentValidation;
+using KittySaver.Api.Shared.Behaviours;
 using KittySaver.Api.Shared.Domain.Entites;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
@@ -13,10 +15,12 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection RegisterInfrastructureServices(this IServiceCollection services)
     {
+        Assembly assembly = Assembly.GetExecutingAssembly();
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentEnvironmentService, CurrentEnvironmentService>();
         services.AddScoped<IDateTimeProvider, DefaultDateTimeProvider>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddValidatorsFromAssembly(assembly);
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
