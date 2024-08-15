@@ -1,4 +1,5 @@
-﻿using KittySaver.Api.Shared.Domain.Entites;
+﻿using System.Reflection;
+using KittySaver.Api.Shared.Domain.Entites;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Api.Shared.Security;
@@ -16,6 +17,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICurrentEnvironmentService, CurrentEnvironmentService>();
         services.AddScoped<IDateTimeProvider, DefaultDateTimeProvider>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+        });
         return services;
     }
     public static IServiceCollection RegisterPersistenceServices(this IServiceCollection services,
