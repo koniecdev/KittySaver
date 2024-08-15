@@ -23,7 +23,8 @@ public static class ServiceCollectionExtensions
         services.AddValidatorsFromAssembly(assembly);
         services.AddMediatR(cfg =>
         {
-            cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+            cfg.RegisterServicesFromAssembly(assembly);
+            cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
         });
         return services;
     }
