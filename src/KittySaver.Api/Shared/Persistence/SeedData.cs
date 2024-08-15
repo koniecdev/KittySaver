@@ -66,20 +66,20 @@ public class AdminConfiguration : IEntityTypeConfiguration<Person>
         return passHash.HashPassword(user, "DefaultPassword123!");
     }
 }
-//
-// public class UsersWithRolesConfiguration : IEntityTypeConfiguration<IdentityUserRole<Guid>>
-// {
-//     private readonly Guid _adminId = FixedIdsHelper.AdminId;
-//     private readonly Guid _adminRoleId = FixedIdsHelper.AdminRoleId;
-//
-//     public void Configure(EntityTypeBuilder<IdentityUserRole<Guid>> builder)
-//     {
-//         IdentityUserRole<Guid> iur = new IdentityUserRole<Guid>
-//         {
-//             RoleId = _adminRoleId,
-//             UserId = _adminId
-//         };
-//
-//         builder.HasData(iur);
-//     }
-// }
+
+public class UsersWithRolesConfiguration : IEntityTypeConfiguration<IdentityUserRole<Guid>>
+{
+    private readonly Guid _adminId = FixedIdsHelper.AdminId;
+    private readonly Guid _adminRoleId = FixedIdsHelper.AdminRoleId;
+
+    public void Configure(EntityTypeBuilder<IdentityUserRole<Guid>> builder)
+    {
+        IdentityUserRole<Guid> iur = new IdentityUserRole<Guid>
+        {
+            RoleId = _adminRoleId,
+            UserId = _adminId
+        };
+
+        builder.HasData(iur);
+    }
+}
