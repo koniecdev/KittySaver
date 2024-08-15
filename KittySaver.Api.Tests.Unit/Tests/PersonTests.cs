@@ -5,6 +5,7 @@ namespace KittySaver.Api.Tests.Unit.Tests;
 
 public class PersonTests
 {
+    private readonly Guid _userIdentityId = Guid.NewGuid();
     private const string DefaultProperFirstName = "artur";
     private const string DefaultProperLastName = "koniec";
     private const string DefaultProperEmail = "fake@fake.fake";
@@ -23,7 +24,8 @@ public class PersonTests
             LastName = DefaultProperLastName,
             UserName = DefaultProperEmail,
             Email = DefaultProperEmail,
-            PhoneNumber = DefaultProperPhone
+            PhoneNumber = DefaultProperPhone,
+            UserIdentityId = _userIdentityId
         };
         //Assert
         sut.FirstName.Should().Be("Artur");
@@ -42,7 +44,8 @@ public class PersonTests
             LastName = lastName,
             UserName = DefaultProperEmail,
             Email = DefaultProperEmail,
-            PhoneNumber = DefaultProperPhone
+            PhoneNumber = DefaultProperPhone,
+            UserIdentityId = _userIdentityId
         };
         //Assert
         sut.LastName.Should().Be("Koniec");
@@ -57,7 +60,8 @@ public class PersonTests
             FirstName = DefaultProperFirstName,
             LastName = DefaultProperLastName,
             Email = DefaultProperEmail,
-            PhoneNumber = DefaultProperPhone
+            PhoneNumber = DefaultProperPhone,
+            UserIdentityId = _userIdentityId
         };
         
         //Assert
@@ -77,7 +81,8 @@ public class PersonTests
             LastName = DefaultProperLastName,
             UserName = username,
             Email = DefaultProperEmail,
-            PhoneNumber = DefaultProperPhone
+            PhoneNumber = DefaultProperPhone,
+            UserIdentityId = _userIdentityId
         };
         
         Person validPerson = new()
@@ -86,7 +91,8 @@ public class PersonTests
             LastName = DefaultProperLastName,
             UserName = DefaultProperEmail,
             Email = DefaultProperEmail,
-            PhoneNumber = DefaultProperPhone
+            PhoneNumber = DefaultProperPhone,
+            UserIdentityId = _userIdentityId
         };
 
         //Assert
@@ -109,7 +115,8 @@ public class PersonTests
             FirstName = DefaultProperFirstName,
             LastName = DefaultProperLastName,
             Email = DefaultProperEmail,
-            PhoneNumber = DefaultProperPhone
+            PhoneNumber = DefaultProperPhone,
+            UserIdentityId = _userIdentityId
         };
         
         //Assert
@@ -126,7 +133,8 @@ public class PersonTests
             LastName = DefaultProperLastName,
             UserName = DefaultProperEmail,
             Email = DefaultProperEmail,
-            PhoneNumber = DefaultProperPhone
+            PhoneNumber = DefaultProperPhone,
+            UserIdentityId = _userIdentityId
         };
         
         //Assert
@@ -150,7 +158,8 @@ public class PersonTests
                 FirstName = DefaultProperFirstName,
                 LastName = DefaultProperLastName,
                 Email = emptyEmail,
-                PhoneNumber = DefaultProperPhone
+                PhoneNumber = DefaultProperPhone,
+                UserIdentityId = _userIdentityId
             };
         };
         
@@ -174,7 +183,8 @@ public class PersonTests
                 FirstName = DefaultProperFirstName,
                 LastName = DefaultProperLastName,
                 Email = invalidEmail,
-                PhoneNumber = DefaultProperPhone
+                PhoneNumber = DefaultProperPhone,
+                UserIdentityId = _userIdentityId
             };
         };
         
@@ -200,7 +210,8 @@ public class PersonTests
                 FirstName = DefaultProperFirstName,
                 LastName = DefaultProperLastName,
                 Email = DefaultProperEmail,
-                PhoneNumber = emptyPhoneNumber
+                PhoneNumber = emptyPhoneNumber,
+                UserIdentityId = _userIdentityId
             };
         };
         
