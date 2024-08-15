@@ -71,6 +71,10 @@ try
 }
 catch(Exception exception)
 {
+    if (exception is HostAbortedException)
+    {
+        return;
+    }
     Log.Fatal(exception, "Could not start application");
 }
 finally
