@@ -16,7 +16,7 @@ public sealed class Person : IdentityUser<Guid>
     private string _firstName = null!;
     private string _lastName = null!;
 
-    public required Guid UserId { get; init; }
+    public required Guid UserIdentityId { get; init; }
     public required string FirstName
     {
         get => _firstName;
@@ -132,7 +132,7 @@ internal class PersonConfiguration : IEntityTypeConfiguration<Person>
             .IsRequired();
 
         builder
-            .HasIndex(m => m.UserId)
+            .HasIndex(m => m.UserIdentityId)
             .IsUnique();
         builder
             .HasIndex(m => m.Email)

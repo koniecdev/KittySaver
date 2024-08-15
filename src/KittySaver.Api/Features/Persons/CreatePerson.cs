@@ -14,14 +14,14 @@ public class CreatePerson : IEndpoint
         string LastName,
         string Email,
         string PhoneNumber,
-        Guid UserId);
+        Guid UserIdentityId);
     
     public sealed record CreatePersonCommand(
         string FirstName,
         string LastName,
         string Email,
         string PhoneNumber,
-        Guid UserId) : IRequest<Guid>;
+        Guid UserIdentityId) : IRequest<Guid>;
     
     internal sealed class CreatePersonCommandHandler(ApplicationDbContext db) : IRequestHandler<CreatePersonCommand, Guid>
     {
