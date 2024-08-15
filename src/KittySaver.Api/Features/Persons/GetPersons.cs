@@ -19,10 +19,10 @@ public sealed class GetPersons : IEndpoint
         public List<ApiSort>? Sorts { get; init; } = [];
     }
 
-    internal sealed class GetPersonQueryHandler(ApplicationDbContext db)
-        : IRequestHandler<GetPersonQuery, ICollection<PersonResponse>>
+    internal sealed class GetPersonsQueryHandler(ApplicationDbContext db)
+        : IRequestHandler<GetPersonsQuery, ICollection<PersonResponse>>
     {
-        public async Task<ICollection<PersonResponse>> Handle(GetPersonQuery request, CancellationToken cancellationToken)
+        public async Task<ICollection<PersonResponse>> Handle(GetPersonsQuery request, CancellationToken cancellationToken)
         {
             List<PersonResponse> persons = await db.Persons
                 .AsNoTracking()
@@ -40,7 +40,7 @@ public sealed class GetPersons : IEndpoint
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            GetPersonQuery query = new();
+            GetPersonsQuery query = new();
             var persons = await sender.Send(query, cancellationToken);
             return Results.Ok(persons);
         });
