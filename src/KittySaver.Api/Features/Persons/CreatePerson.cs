@@ -45,12 +45,12 @@ public class CreatePerson : IEndpoint
         }
     }
     
-    internal sealed class CreatePersonCommandHandler(UserManager<Person> userManager) : IRequestHandler<CreatePersonCommand, Guid>
+    internal sealed class CreatePersonCommandHandler() : IRequestHandler<CreatePersonCommand, Guid>
     {
         public async Task<Guid> Handle(CreatePersonCommand request, CancellationToken cancellationToken)
         {
+            throw new NotImplementedException();
             Person person = request.ToEntity();
-            await userManager.CreateAsync(person, request.Password);
             return person.Id;
         }
     }

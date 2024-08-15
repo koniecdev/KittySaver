@@ -2,7 +2,7 @@ using System.Net;
 using System.Reflection;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
-using KittySaver.Api.Shared.Extensions;
+using KittySaver.Auth.Api.Shared.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Serilog;
 

@@ -1,15 +1,14 @@
 ﻿using System.Reflection;
 using FluentValidation;
-using KittySaver.Api.Shared.Behaviours;
-using KittySaver.Api.Shared.Domain.Entites;
-using KittySaver.Api.Shared.Infrastructure.Services;
-using KittySaver.Api.Shared.Persistence;
-using KittySaver.Api.Shared.Security;
+using KittySaver.Auth.Api.Shared.Behaviours;
+using KittySaver.Auth.Api.Shared.Domain.Entites;
+using KittySaver.Auth.Api.Shared.Infrastructure.Services;
+using KittySaver.Auth.Api.Shared.Persistence;
+using KittySaver.Auth.Api.Shared.Security;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace KittySaver.Api.Shared.Extensions;
+namespace KittySaver.Auth.Api.Shared.Extensions;
 
 public static class ServiceCollectionExtensions
 {
@@ -34,6 +33,9 @@ public static class ServiceCollectionExtensions
         services.AddDbContext<ApplicationDbContext>(
             o => o.UseSqlServer(configuration.GetConnectionString("Database")
                                 ?? throw new Exceptions.Database.MissingConnectionStringException()));
+        services.AddIdentityCore<ApplicationUser>()
+            .AddRoles<IdentityRole<Guid>>()
+            .AddEntityFrameworkStores<ApplicationDbContext>();
         return services;
     }
 

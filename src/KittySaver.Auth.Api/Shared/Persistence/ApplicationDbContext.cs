@@ -1,20 +1,20 @@
-﻿using KittySaver.Api.Shared.Domain.Entites;
-using KittySaver.Api.Shared.Infrastructure.Services;
-using KittySaver.Api.Shared.Security;
+﻿using KittySaver.Auth.Api.Shared.Domain.Entites;
+using KittySaver.Auth.Api.Shared.Infrastructure.Services;
+using KittySaver.Auth.Api.Shared.Security;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace KittySaver.Api.Shared.Persistence;
+namespace KittySaver.Auth.Api.Shared.Persistence;
 
 internal sealed class ApplicationDbContext(
     DbContextOptions<ApplicationDbContext> options,
     IDateTimeProvider dateTimeProvider,
     ICurrentUserService currentUserService) 
-    : DbContext(options)
+    : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>(options)
 {
-    public DbSet<Person> Persons => Set<Person>();
+    public DbSet<ApplicationUser> ApplicationUsers => Set<ApplicationUser>();
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

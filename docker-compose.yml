@@ -4,3 +4,9 @@
     build:
       context: .
       dockerfile: KittySaver/Dockerfile
+
+  kittysaver.auth.api:
+    image: kittysaver.auth.api
+    build:
+      context: .
+      dockerfile: KittySaver.Auth.Api/Dockerfile

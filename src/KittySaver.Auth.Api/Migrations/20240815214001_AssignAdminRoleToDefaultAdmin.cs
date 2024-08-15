@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace KittySaver.Api.Migrations
+namespace KittySaver.Auth.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class AssignAdminRoleToDefaultUser : Migration
+    public partial class AssignAdminRoleToDefaultAdmin : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -21,7 +21,7 @@ namespace KittySaver.Api.Migrations
                 keyColumn: "Id",
                 keyValue: new Guid("c4ff57f4-2d8c-4c66-b62d-333ad2e3c424"),
                 columns: new[] { "ConcurrencyStamp", "PasswordHash" },
-                values: new object[] { "1e6862c5-7298-4bad-adfd-29672c4854cb", "AQAAAAIAAYagAAAAELAqGLMmIUMpGoIZQYw5x50MRPa24yJfCPJ7MP4xbyvgjo0VmTlcbfFudgeGx1wIoQ==" });
+                values: new object[] { "7919206e-3c54-4acd-9e26-247cfe62f3f9", "AQAAAAIAAYagAAAAEGjIleXwF0TtJ+tZU+yimF24NhElOX/ariLon66C4b8sT+/EZLybTY7utONZXFR4rQ==" });
         }
 
         /// <inheritdoc />
@@ -37,7 +37,7 @@ namespace KittySaver.Api.Migrations
                 keyColumn: "Id",
                 keyValue: new Guid("c4ff57f4-2d8c-4c66-b62d-333ad2e3c424"),
                 columns: new[] { "ConcurrencyStamp", "PasswordHash" },
-                values: new object[] { "7ba7044b-9720-4123-abec-70a2c6686402", "AQAAAAIAAYagAAAAEMSI4isQu0fNtl+ss2ulj6nNueR+ciD6GfzKyiLl101NTqjxMDvigehNuoQ43Ufotw==" });
+                values: new object[] { "024c9a04-8f34-4c91-9ae8-1d763ec8fc5e", "AQAAAAIAAYagAAAAEKUVlaAp9vxi3Gc19ngmEne84gdhAxFqm9wQQEasZ58ADtftN7iDMcq7IfLlTKqTqQ==" });
         }
     }
 }

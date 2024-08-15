@@ -1,28 +1,19 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Text.RegularExpressions;
-using KittySaver.Api.Shared.Exceptions;
+﻿using System.Text.RegularExpressions;
+using KittySaver.Auth.Api.Shared.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace KittySaver.Api.Shared.Domain.Entites;
+namespace KittySaver.Auth.Api.Shared.Domain.Entites;
 
-public sealed class Person : AuditableEntity
+public sealed class ApplicationUser : IdentityUser<Guid>
 {
-    public enum Role
-    {
-        Regular,
-        Shelter,
-        Admin
-    }
     private static readonly string EmailPattern = @"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$";
-    private string _phoneNumber = null!;
-    private string _email = null!;
+    private string? _userName;
+    private string? _email;
+    private string? _phoneNumber;
     private string _firstName = null!;
     private string _lastName = null!;
-
-    public Role CurrentRole { get; private set; } = Role.Regular;
-    public required Guid UserIdentityId { get; init; }
     public required string FirstName
     {
         get => _firstName;
@@ -48,11 +39,23 @@ public sealed class Person : AuditableEntity
     }
 
     public string FullName => $"{FirstName} {LastName}";
+    public override string? UserName
+    {
+        get => _userName;
+        set 
+        {
+            if (value != Email)
+            {
+                _userName = Email;
+            }
+            _userName = value;
+        }
+    }
 
-    public required string Email
+    public override required string? Email
     {
         get => _email;
-        init
+        set
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(Email));
             if (!Regex.IsMatch(value, EmailPattern))
@@ -60,26 +63,18 @@ public sealed class Person : AuditableEntity
                 throw new Exceptions.Email.InvalidFormatException();
             }
             _email = value;
+            _userName = value;
         }
     }
 
-    public required string PhoneNumber
+    public override required string? PhoneNumber
     {
         get => _phoneNumber;
-        init
+        set
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(PhoneNumber));
             _phoneNumber = value;
         }
-    }
-
-    public void PromoteToShelter()
-    {
-        if (CurrentRole is Role.Admin)
-        {
-            return;
-        }
-        CurrentRole = Role.Shelter;
     }
     
     public static class Exceptions
@@ -97,9 +92,9 @@ public sealed class Person : AuditableEntity
     }
 }
 
-internal class PersonConfiguration : IEntityTypeConfiguration<Person>
+internal class PersonConfiguration : IEntityTypeConfiguration<ApplicationUser>
 {
-    public void Configure(EntityTypeBuilder<Person> builder)
+    public void Configure(EntityTypeBuilder<ApplicationUser> builder)
     {
         builder
             .Property(m=>m.FirstName)
@@ -114,14 +109,36 @@ internal class PersonConfiguration : IEntityTypeConfiguration<Person>
             .HasMaxLength(254)
             .IsRequired();
         builder
+            .Property(m => m.NormalizedEmail)
+            .HasMaxLength(254)
+            .IsRequired();
+        builder
+            .Property(m=>m.UserName)
+            .HasMaxLength(254)
+            .IsRequired();
+        builder
+            .Property(m => m.NormalizedUserName)
+            .HasMaxLength(254)
+            .IsRequired();
+        builder
+            .Property(m=>m.PasswordHash)
+            .IsRequired();
+        builder
             .Property(m=>m.PhoneNumber)
             .HasMaxLength(31)
             .IsRequired();
-        builder
-            .HasIndex(m => m.UserIdentityId)
-            .IsUnique();
+        
         builder
             .HasIndex(m => m.Email)
+            .IsUnique();
+        builder
+            .HasIndex(m => m.NormalizedEmail)
+            .IsUnique();
+        builder
+            .HasIndex(m => m.UserName)
+            .IsUnique();
+        builder
+            .HasIndex(m => m.NormalizedUserName)
             .IsUnique();
     }
 }
