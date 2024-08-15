@@ -35,8 +35,8 @@ public sealed class GetPersons : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
         endpointRouteBuilder.MapGet("persons", async
-            (string filterBy,
-            string sortBy,
+            (string? filterBy,
+            string? sortBy,
             ISender sender,
             CancellationToken cancellationToken) =>
         {
