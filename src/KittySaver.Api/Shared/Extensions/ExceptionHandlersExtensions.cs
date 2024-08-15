@@ -6,6 +6,7 @@ internal static class ExceptionHandlersExtensions
 {
     internal static IServiceCollection AddEveryExceptionHandler(this IServiceCollection serviceCollection)
     {
+        serviceCollection.AddExceptionHandler<ValidationExceptionHandler>();
         serviceCollection.AddExceptionHandler<NotFoundExceptionHandler>();
         serviceCollection.AddExceptionHandler<BadRequestExceptionHandler>();
         serviceCollection.AddExceptionHandler<GlobalExceptionHandler>();
