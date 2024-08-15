@@ -1,4 +1,5 @@
 using System.Net;
+using System.Reflection;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
 using KittySaver.Api.Shared.Extensions;
@@ -42,6 +43,8 @@ try
     builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer();
     builder.Services.AddAuthorization();
+
+    builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
     
     WebApplication app = builder.Build();
     app.UseExceptionHandler();
@@ -57,14 +60,13 @@ try
     RouteGroupBuilder versionedGroup = app
         .MapGroup("api/v{apiVersion:apiVersion}")
         .WithApiVersionSet(apiVersionSet);
-
-    versionedGroup.MapGet("hello", () => "Hello!");
+    
+    app.MapEndpoints(versionedGroup);
     
     if (app.Environment.IsDevelopment())
     {
         app.AddSwagger();
     }
-    
     app.Run();
 }
 catch(Exception exception)
