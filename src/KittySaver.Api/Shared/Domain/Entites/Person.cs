@@ -36,7 +36,7 @@ public sealed class Person : IdentityUser<Guid>
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(LastName));
             string firstChar = value[0].ToString().ToUpper();
-            string rest = value[1..].ToLower();
+            string rest = value[1..];
             _lastName = $"{firstChar}{rest}";
         } 
     }
