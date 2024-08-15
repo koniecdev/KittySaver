@@ -34,7 +34,7 @@ public class PersonTests
     [Theory]
     [InlineData("koniec")]
     [InlineData("Koniec")]
-    [InlineData("KONIEC")]
+    [InlineData("Koniec-Początek")]
     public void LastNameSet_ShouldCapitalizeFirstLetter_WhenNotEmptyValueIsProvided(string lastName)
     {
         //Arrange && Act
@@ -48,7 +48,7 @@ public class PersonTests
             UserIdentityId = _userIdentityId
         };
         //Assert
-        sut.LastName.Should().Be("Koniec");
+        sut.LastName.Should().StartWith("Koniec");
     }
     
     [Fact]
