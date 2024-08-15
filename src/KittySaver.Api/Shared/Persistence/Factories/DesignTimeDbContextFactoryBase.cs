@@ -7,7 +7,7 @@ internal abstract class DesignTimeDbContextFactoryBase<TContext> :
     IDesignTimeDbContextFactory<TContext> where TContext : DbContext
 
 {
-    private const string ConnectionStringName = "DefaultDatabase";
+    private const string ConnectionStringName = "Database";
 
     public TContext CreateDbContext(string[] args)
     {
