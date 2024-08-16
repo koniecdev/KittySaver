@@ -23,3 +23,5 @@ public class ApiSort
     public required string PropertyName { get; init; }
     public required bool IsDescending { get; init; }
 }
+
+public interface IAsyncValidator{}

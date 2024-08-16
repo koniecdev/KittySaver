@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace KittySaver.Api.Shared.Persistence;
 
-internal sealed class ApplicationDbContext(
+public sealed class ApplicationDbContext(
     DbContextOptions<ApplicationDbContext> options,
     IDateTimeProvider dateTimeProvider,
     ICurrentUserService currentUserService) 

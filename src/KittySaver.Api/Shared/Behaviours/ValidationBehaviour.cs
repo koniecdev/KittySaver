@@ -16,11 +16,29 @@ public sealed class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidat
     {
         ValidationContext<TRequest> context = new ValidationContext<TRequest>(request);
 
-        List<ValidationResult> validationFailures = validators
+        List<IValidator<TRequest>> syncValidators = [];
+        List<IValidator<TRequest>> asyncValidators = [];
+        
+        foreach (IValidator<TRequest> validator in validators)
+        {
+            if (validator is IAsyncValidator)
+            {
+                asyncValidators.Add(validator);
+                continue;
+            }
+            syncValidators.Add(validator);
+        }
+        
+        List<ValidationResult> syncValidatorsFailures = syncValidators
             .Select(validator => validator.Validate(context))
             .ToList();
+        ValidationResult[] asyncValidatorsFailures = await Task.WhenAll(
+            asyncValidators
+                .Select(validator => validator.ValidateAsync(context, cancellationToken)));
 
-        var errors = validationFailures
+        List<ValidationResult> validationResults = syncValidatorsFailures.Concat(asyncValidatorsFailures).ToList();
+
+        List<ValidationFailure> errors = validationResults
             .Where(validationResult => !validationResult.IsValid)
             .SelectMany(validationResult => validationResult.Errors)
             .Where(m => m is not null)
