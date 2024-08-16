@@ -26,19 +26,29 @@ public class Register : IEndpoint
         string PhoneNumber,
         string Password) : ICommand<Guid>;
 
-    public sealed class RegisterCommandValidator 
-        : AbstractValidator<RegisterCommand>
+    public sealed class RegisterCommandValidator
+        : AbstractValidator<RegisterCommand>, IAsyncValidator
     {
+        private readonly ApplicationDbContext _db;
         private const string EmailPattern = @"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$";
 
-        public RegisterCommandValidator()
+        public RegisterCommandValidator(ApplicationDbContext db)
         {
+            _db = db;
             RuleFor(x => x.FirstName).NotEmpty();
             RuleFor(x => x.LastName).NotEmpty();
             RuleFor(x => x.PhoneNumber).NotEmpty();
             RuleFor(x => x.Email)
                 .Matches(EmailPattern)
                 .NotEmpty();
+            RuleFor(x => x.Email)
+                .MustAsync(async (email, ct) => await IsEmailNotAlreadyRegisteredInDb(email, ct))
+                .WithMessage("Email is already registered in database");
+        }
+        
+        private async Task<bool> IsEmailNotAlreadyRegisteredInDb(string email, CancellationToken ct)
+        {
+            return await _db.ApplicationUsers.AnyAsync(x=>x.Email != email, ct);
         }
     }
     
