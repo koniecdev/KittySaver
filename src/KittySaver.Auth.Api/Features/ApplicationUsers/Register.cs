@@ -2,8 +2,10 @@
 using KittySaver.Auth.Api.Shared.Domain.Entites;
 using KittySaver.Auth.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Auth.Api.Shared.Infrastructure.Endpoints;
+using KittySaver.Auth.Api.Shared.Persistence;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Riok.Mapperly.Abstractions;
 
 namespace KittySaver.Auth.Api.Features.ApplicationUsers;

@@ -4,8 +4,7 @@ using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Infrastructure.Endpoints;
 using KittySaver.Api.Shared.Persistence;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Riok.Mapperly.Abstractions;
 
 namespace KittySaver.Api.Features.Persons;
@@ -17,7 +16,6 @@ public class CreatePerson : IEndpoint
         string LastName,
         string Email,
         string PhoneNumber,
-        string Password,
         Guid UserIdentityId);
     
     public sealed record CreatePersonCommand(
