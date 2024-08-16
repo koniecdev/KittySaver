@@ -1,9 +1,9 @@
 ﻿using FluentAssertions;
-using KittySaver.Api.Shared.Domain.Entites;
+using KittySaver.Auth.Api.Shared.Domain.Entites;
 
-namespace KittySaver.Api.Tests.Unit.Tests;
+namespace KittySaver.Auth.Api.Tests.Unit.Tests;
 
-public class PersonTests
+public class ApplicationUserTests
 {
     private readonly Guid _userIdentityId = Guid.NewGuid();
     private const string DefaultProperFirstName = "artur";
@@ -18,14 +18,13 @@ public class PersonTests
     public void FirstNameSet_ShouldCapitalizeFirstLetter_WhenNotEmptyValueIsProvided(string firstName)
     {
         //Arrange && Act
-        Person sut = new Person
+        ApplicationUser sut = new ApplicationUser
         {
             FirstName = firstName,
             LastName = DefaultProperLastName,
             UserName = DefaultProperEmail,
             Email = DefaultProperEmail,
             PhoneNumber = DefaultProperPhone,
-            UserIdentityId = _userIdentityId
         };
         //Assert
         sut.FirstName.Should().Be("Artur");
@@ -38,14 +37,13 @@ public class PersonTests
     public void LastNameSet_ShouldCapitalizeFirstLetter_WhenNotEmptyValueIsProvided(string lastName)
     {
         //Arrange && Act
-        Person sut = new Person
+        ApplicationUser sut = new ApplicationUser
         {
             FirstName = DefaultProperFirstName,
             LastName = lastName,
             UserName = DefaultProperEmail,
             Email = DefaultProperEmail,
-            PhoneNumber = DefaultProperPhone,
-            UserIdentityId = _userIdentityId
+            PhoneNumber = DefaultProperPhone
         };
         //Assert
         sut.LastName.Should().StartWith("Koniec");
@@ -55,13 +53,12 @@ public class PersonTests
     public void FullNameGet_ShouldReturnProperlyConcatenatedName_WhenBothFirstNameAndLastNameAreProperlyProvided()
     {
         //Arrange && Act
-        Person sut = new Person
+        ApplicationUser sut = new ApplicationUser
         {
             FirstName = DefaultProperFirstName,
             LastName = DefaultProperLastName,
             Email = DefaultProperEmail,
-            PhoneNumber = DefaultProperPhone,
-            UserIdentityId = _userIdentityId
+            PhoneNumber = DefaultProperPhone
         };
         
         //Assert
@@ -75,29 +72,27 @@ public class PersonTests
         //Arrange && Act
         const string username = "invalid";
         
-        Person sut = new Person
+        ApplicationUser sut = new ApplicationUser
         {
             FirstName = DefaultProperFirstName,
             LastName = DefaultProperLastName,
             UserName = username,
             Email = DefaultProperEmail,
-            PhoneNumber = DefaultProperPhone,
-            UserIdentityId = _userIdentityId
+            PhoneNumber = DefaultProperPhone
         };
         
-        Person validPerson = new()
+        ApplicationUser validApplicationUser = new()
         {
             FirstName = DefaultProperFirstName,
             LastName = DefaultProperLastName,
             UserName = DefaultProperEmail,
             Email = DefaultProperEmail,
-            PhoneNumber = DefaultProperPhone,
-            UserIdentityId = _userIdentityId
+            PhoneNumber = DefaultProperPhone
         };
 
         //Assert
         sut.Should()
-            .BeEquivalentTo(validPerson,
+            .BeEquivalentTo(validApplicationUser,
                 options =>
                 {
                     return options
@@ -110,13 +105,12 @@ public class PersonTests
     public void EmailSet_ShouldSetBothEmailAndUsername_WhenNoUsernameIsProvided()
     {
         //Arrange && Act
-        Person sut = new Person
+        ApplicationUser sut = new ApplicationUser
         {
             FirstName = DefaultProperFirstName,
             LastName = DefaultProperLastName,
             Email = DefaultProperEmail,
-            PhoneNumber = DefaultProperPhone,
-            UserIdentityId = _userIdentityId
+            PhoneNumber = DefaultProperPhone
         };
         
         //Assert
@@ -127,14 +121,13 @@ public class PersonTests
     public void EmailSet_ShouldSetBothEmailAndUsername_WhenMatchingUsernameIsProvided()
     {
         //Arrange && Act
-        Person sut = new Person
+        ApplicationUser sut = new ApplicationUser
         {
             FirstName = DefaultProperFirstName,
             LastName = DefaultProperLastName,
             UserName = DefaultProperEmail,
             Email = DefaultProperEmail,
-            PhoneNumber = DefaultProperPhone,
-            UserIdentityId = _userIdentityId
+            PhoneNumber = DefaultProperPhone
         };
         
         //Assert
@@ -148,18 +141,17 @@ public class PersonTests
     public void EmailSet_ShouldThrowEmailEmptyException_WhenEmptyEmailIsProvided(string emptyEmail)
     {
         //Arrange
-        Person sut = null!;
+        ApplicationUser sut = null!;
         
         //Act
         Action creation = () =>
         {
-            sut = new Person
+            sut = new ApplicationUser
             {
                 FirstName = DefaultProperFirstName,
                 LastName = DefaultProperLastName,
                 Email = emptyEmail,
-                PhoneNumber = DefaultProperPhone,
-                UserIdentityId = _userIdentityId
+                PhoneNumber = DefaultProperPhone
             };
         };
         
@@ -173,24 +165,23 @@ public class PersonTests
     public void EmailSet_ShouldThrowEmailInvalidFormatException_WhenInvalidEmailIsProvided(string invalidEmail)
     {
         //Arrange
-        Person sut = null!;
+        ApplicationUser sut = null!;
         
         //Act
         Action creation = () =>
         {
-            sut = new Person
+            sut = new ApplicationUser
             {
                 FirstName = DefaultProperFirstName,
                 LastName = DefaultProperLastName,
                 Email = invalidEmail,
-                PhoneNumber = DefaultProperPhone,
-                UserIdentityId = _userIdentityId
+                PhoneNumber = DefaultProperPhone
             };
         };
         
         //Assert
         sut.Should().BeNull();
-        creation.Should().Throw<Person.Exceptions.Email.InvalidFormatException>();
+        creation.Should().Throw<ApplicationUser.Exceptions.Email.InvalidFormatException>();
     }
     
     [Theory]
@@ -200,18 +191,17 @@ public class PersonTests
     public void PhoneNumberSet_ShouldThrowPhoneNumberEmptyException_WhenEmptyPhoneNumberIsProvided(string emptyPhoneNumber)
     {
         //Arrange
-        Person sut = null!;
+        ApplicationUser sut = null!;
         
         //Act
         Action creation = () =>
         {
-            sut = new Person
+            sut = new ApplicationUser
             {
                 FirstName = DefaultProperFirstName,
                 LastName = DefaultProperLastName,
                 Email = DefaultProperEmail,
-                PhoneNumber = emptyPhoneNumber,
-                UserIdentityId = _userIdentityId
+                PhoneNumber = emptyPhoneNumber
             };
         };
         

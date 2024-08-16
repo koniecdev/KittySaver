@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.Api", "src\Kitty
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.Auth.Api", "src\KittySaver.Auth.Api\KittySaver.Auth.Api.csproj", "{D17EC53F-9014-49AF-B694-0C83C523B560}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.Api.Tests.Unit", "tests\KittySaver.Api.Tests.Unit\KittySaver.Api.Tests.Unit.csproj", "{D496F3D5-A04C-4A05-B623-E34B8F14362F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.Auth.Api.Tests.Unit", "tests\KittySaver.Auth.Api.Tests.Unit\KittySaver.Auth.Api.Tests.Unit.csproj", "{D496F3D5-A04C-4A05-B623-E34B8F14362F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
