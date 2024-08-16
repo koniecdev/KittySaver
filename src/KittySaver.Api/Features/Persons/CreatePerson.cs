@@ -23,16 +23,17 @@ public class CreatePerson : IEndpoint
         string LastName,
         string Email,
         string PhoneNumber,
-        string Password,
         Guid UserIdentityId) : ICommand<Guid>;
 
     public sealed class CreatePersonCommandValidator 
-        : AbstractValidator<CreatePersonCommand>
+        : AbstractValidator<CreatePersonCommand>, IAsyncValidator
     {
+        private readonly ApplicationDbContext _db;
         private const string EmailPattern = @"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$";
 
-        public CreatePersonCommandValidator()
+        public CreatePersonCommandValidator(ApplicationDbContext db)
         {
+            _db = db;
             RuleFor(x => x.FirstName).NotEmpty();
             RuleFor(x => x.LastName).NotEmpty();
             RuleFor(x => x.PhoneNumber).NotEmpty();
@@ -40,15 +41,32 @@ public class CreatePerson : IEndpoint
             RuleFor(x => x.Email)
                 .Matches(EmailPattern)
                 .NotEmpty();
+            RuleFor(x => x.Email)
+                .MustAsync(async (email, ct) => await IsEmailNotAlreadyRegisteredInDb(email, ct))
+                .WithMessage("Email is already registered in database");
+            RuleFor(x => x.UserIdentityId)
+                .MustAsync(async (userIdentityId, ct) => await IsUserIdentityIdNotAlreadyRegisteredInDb(userIdentityId, ct))
+                .WithMessage("UserIdentityId is already registered in database");
+        }
+
+        private async Task<bool> IsEmailNotAlreadyRegisteredInDb(string email, CancellationToken ct)
+        {
+            return await _db.Persons.AnyAsync(x=>x.Email != email, ct);
+        }
+        
+        private async Task<bool> IsUserIdentityIdNotAlreadyRegisteredInDb(Guid userIdentityId, CancellationToken ct)
+        {
+            return await _db.Persons.AnyAsync(x=>x.UserIdentityId != userIdentityId, ct);
         }
     }
     
-    internal sealed class CreatePersonCommandHandler() : IRequestHandler<CreatePersonCommand, Guid>
+    internal sealed class CreatePersonCommandHandler(ApplicationDbContext db) : IRequestHandler<CreatePersonCommand, Guid>
     {
         public async Task<Guid> Handle(CreatePersonCommand request, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
             Person person = request.ToEntity();
+            db.Persons.Add(person);
+            await db.SaveChangesAsync(cancellationToken);
             return person.Id;
         }
     }
