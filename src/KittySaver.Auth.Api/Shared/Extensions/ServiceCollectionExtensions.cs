@@ -39,8 +39,16 @@ public static class ServiceCollectionExtensions
         services.AddDbContext<ApplicationDbContext>(
             o => o.UseSqlServer(configuration.GetConnectionString("Database")
                                 ?? throw new Exceptions.Database.MissingConnectionStringException()));
-        services.AddIdentityCore<ApplicationUser>()
-            .AddRoles<IdentityRole<Guid>>()
+        services
+            .AddIdentityCore<ApplicationUser>(x =>
+            {
+                x.Password.RequireNonAlphanumeric = false;
+                x.Password.RequireDigit = true;
+                x.Password.RequiredLength = 8;
+                x.Password.RequireLowercase = true;
+                x.Password.RequireUppercase = true;
+                x.Password.RequiredUniqueChars = 0;
+            }).AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<ApplicationDbContext>();
         return services;
     }
