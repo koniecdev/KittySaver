@@ -3,7 +3,9 @@ using System.Reflection;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
 using KittySaver.Auth.Api.Shared.Extensions;
+using KittySaver.Auth.Api.Shared.Infrastructure.Clients;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Serilog;
 
 IConfigurationRoot configuration = new ConfigurationBuilder()
@@ -27,9 +29,9 @@ try
     builder.Services.AddSwaggerServices();
 
     builder.Services.AddEveryExceptionHandler();
-    builder.Services.RegisterInfrastructureServices();
+    builder.Services.RegisterInfrastructureServices(builder.Configuration);
     builder.Services.RegisterPersistenceServices(builder.Configuration);
-
+    
     builder.Services.AddApiVersioning(options =>
     {
         options.DefaultApiVersion = new ApiVersion(1);
