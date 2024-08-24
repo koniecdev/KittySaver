@@ -1,6 +1,8 @@
 ﻿using FluentValidation;
 using KittySaver.Auth.Api.Shared.Domain.Entites;
+using KittySaver.Auth.Api.Shared.Exceptions;
 using KittySaver.Auth.Api.Shared.Infrastructure.ApiComponents;
+using KittySaver.Auth.Api.Shared.Infrastructure.Clients;
 using KittySaver.Auth.Api.Shared.Infrastructure.Endpoints;
 using KittySaver.Auth.Api.Shared.Persistence;
 using MediatR;
@@ -35,30 +37,54 @@ public class Register : IEndpoint
         public RegisterCommandValidator(ApplicationDbContext db)
         {
             _db = db;
+            RuleFor(x => x.Password)
+                .NotEmpty();
+            RuleFor(x => x.Password)
+                .NotEmpty().WithMessage("'Password' is not in the correct format. Your password cannot be empty")
+                .MinimumLength(8).WithMessage("'Password' is not in the correct format. Your password length must be at least 8.")
+                .Matches("[A-Z]+").WithMessage("'Password' is not in the correct format. Your password must contain at least one uppercase letter.")
+                .Matches("[a-z]+").WithMessage("'Password' is not in the correct format. Your password must contain at least one lowercase letter.")
+                .Matches("[0-9]+").WithMessage("'Password' is not in the correct format. Your password must contain at least one number.");
             RuleFor(x => x.FirstName).NotEmpty();
             RuleFor(x => x.LastName).NotEmpty();
             RuleFor(x => x.PhoneNumber).NotEmpty();
             RuleFor(x => x.Email)
-                .Matches(EmailPattern)
-                .NotEmpty();
+                .NotEmpty()
+                .Matches(EmailPattern);
             RuleFor(x => x.Email)
-                .MustAsync(async (email, ct) => await IsEmailNotAlreadyRegisteredInDb(email, ct))
+                .MustAsync(async (email, ct) => !await IsEmailAlreadyRegisteredInDb(email, ct))
                 .WithMessage("Email is already registered in database");
         }
         
-        private async Task<bool> IsEmailNotAlreadyRegisteredInDb(string email, CancellationToken ct)
+        private async Task<bool> IsEmailAlreadyRegisteredInDb(string email, CancellationToken ct)
         {
-            return await _db.ApplicationUsers.AnyAsync(x=>x.Email != email, ct);
+            return await _db.ApplicationUsers.AnyAsync(x=>x.Email == email, ct);
         }
     }
     
-    internal sealed class RegisterCommandHandler(UserManager<ApplicationUser> userManager) : IRequestHandler<RegisterCommand, Guid>
+    internal sealed class RegisterCommandHandler(UserManager<ApplicationUser> userManager, IKittySaverApiClient client)
+        : IRequestHandler<RegisterCommand, Guid>
     {
         public async Task<Guid> Handle(RegisterCommand request, CancellationToken cancellationToken)
         {
             ApplicationUser user = request.ToEntity();
-            await userManager.CreateAsync(user, request.Password);
-            return user.Id;
+            IdentityResult identityResult = await userManager.CreateAsync(user, request.Password);
+            if (!identityResult.Succeeded)
+            {
+                throw new IdentityResultException(identityResult.Errors);
+            }
+
+            try
+            {
+                _ = await client.CreatePerson(new IKittySaverApiClient.CreatePersonDto(
+                    user.FirstName, user.LastName, user.Email!, user.PhoneNumber!, user.Id));
+                return user.Id;
+            }
+            catch (Exception)
+            {
+                _ = await userManager.DeleteAsync(user);
+                throw;
+            }
         }
     }
     
@@ -71,7 +97,7 @@ public class Register : IEndpoint
         {
             RegisterCommand command = request.ToRegisterCommand();
             Guid personId = await sender.Send(command, cancellationToken);
-            return Results.Created($"/application-users/{personId}", new { Id = personId });
+            return Results.Created($"/api/v1/application-users/{personId}", new { Id = personId });
         });
     }
 }
