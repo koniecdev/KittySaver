@@ -37,7 +37,7 @@ public sealed class GetApplicationUsers : IEndpoint
             GetApplicationUsersQuery query = new();
             ICollection<ApplicationUserResponse> applicationUsers = await sender.Send(query, cancellationToken);
             return Results.Ok(applicationUsers);
-        });
+        }).RequireAuthorization();
     }
 }
 
