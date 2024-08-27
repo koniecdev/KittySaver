@@ -4,7 +4,10 @@ using Asp.Versioning;
 using Asp.Versioning.Builder;
 using KittySaver.Auth.Api.Shared.Extensions;
 using KittySaver.Auth.Api.Shared.Infrastructure.Clients;
+using KittySaver.Auth.Api.Shared.Security;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Serilog;
 
@@ -29,7 +32,7 @@ try
     builder.Services.AddSwaggerServices();
 
     builder.Services.AddEveryExceptionHandler();
-    builder.Services.RegisterInfrastructureServices(builder.Configuration);
+    builder.Services.RegisterInfrastructureServices(builder.Configuration, builder.Environment);
     builder.Services.RegisterPersistenceServices(builder.Configuration);
     
     builder.Services.AddApiVersioning(options =>
@@ -51,10 +54,6 @@ try
             });
     });
 
-    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-        .AddJwtBearer();
-    builder.Services.AddAuthorization();
-
     builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
 
     WebApplication app = builder.Build();
@@ -72,7 +71,7 @@ try
     RouteGroupBuilder versionedGroup = app
         .MapGroup("api/v{apiVersion:apiVersion}")
         .WithApiVersionSet(apiVersionSet);
-
+    
     app.MapEndpoints(versionedGroup);
 
     if (app.Environment.IsDevelopment())
