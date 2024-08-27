@@ -90,7 +90,7 @@ public class Register : IEndpoint
     
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapPost("application-users/register", async 
+        endpointRouteBuilder.MapPost("application-users/register", async
             (RegisterRequest request,
             ISender sender,
             CancellationToken cancellationToken) =>
@@ -103,7 +103,7 @@ public class Register : IEndpoint
 }
 
 [Mapper]
-public static partial class CreatePersonMapper
+public static partial class RegisterMapper
 {
     public static partial Register.RegisterCommand ToRegisterCommand(this Register.RegisterRequest request);
     public static partial ApplicationUser ToEntity(this Register.RegisterCommand command);
