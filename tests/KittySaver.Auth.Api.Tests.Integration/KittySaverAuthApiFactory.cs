@@ -36,7 +36,7 @@ public class KittySaverAuthApiFactory : WebApplicationFactory<IApiMarker>, IAsyn
                 options.UseSqlServer(_msSqlContainer.GetConnectionString());
             });
             
-            var clientDescriptor = services.SingleOrDefault(
+            ServiceDescriptor? clientDescriptor = services.SingleOrDefault(
                 d => d.ServiceType == typeof(IKittySaverApiClient) &&
                      d.ImplementationType == typeof(KittySaverApiClient));
 
@@ -47,12 +47,11 @@ public class KittySaverAuthApiFactory : WebApplicationFactory<IApiMarker>, IAsyn
 
             // Create a mock instance of IKittySaverApiClient
             IKittySaverApiClient mockKittySaverApiClient = Substitute.For<IKittySaverApiClient>();
-
             
             mockKittySaverApiClient
                 .CreatePerson(Arg.Any<IKittySaverApiClient.CreatePersonDto>())
                 .Returns(callInfo => {
-                    var createPersonDto = callInfo.Arg<IKittySaverApiClient.CreatePersonDto>();
+                    IKittySaverApiClient.CreatePersonDto? createPersonDto = callInfo.Arg<IKittySaverApiClient.CreatePersonDto>();
                     if (createPersonDto.Email == "apiFactoryWill@Throw.IntServErr") {
                         throw new Exception("Internal Server Error");
                     }
