@@ -41,7 +41,7 @@ public sealed class GetPersons : IEndpoint
             CancellationToken cancellationToken) =>
         {
             GetPersonsQuery query = new();
-            var persons = await sender.Send(query, cancellationToken);
+            ICollection<PersonResponse> persons = await sender.Send(query, cancellationToken);
             return Results.Ok(persons);
         });
     }
