@@ -1,4 +1,4 @@
-﻿namespace KittySaver.Auth.Api.Features.ApplicationUsers.Contracts;
+﻿namespace KittySaver.Auth.Api.Features.ApplicationUsers.SharedContracts;
 
 public sealed class ApplicationUserResponse
 {

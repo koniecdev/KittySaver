@@ -79,20 +79,20 @@ public sealed class ApplicationUser : IdentityUser<Guid>
     
     public static class Exceptions
     {
-        public sealed class PersonNotFoundException() 
-            : NotFoundException("Person.Email.Empty", "Email is empty");
+        public sealed class ApplicationUserNotFoundException() 
+            : NotFoundException("ApplicationUser.Email.Empty", "Email is empty");
         
         public static class Email
         {
             public sealed class InvalidFormatException() 
-                : BadRequestException("Person.Email.InvalidFormat", "Email format is invalid");
+                : BadRequestException("ApplicationUser.Email.InvalidFormat", "Email format is invalid");
             public sealed class NotUniqueException() 
-                : BadRequestException("Person.Email.NotUnique", "Email is not unique");
+                : BadRequestException("ApplicationUser.Email.NotUnique", "Email is not unique");
         }
     }
 }
 
-internal class PersonConfiguration : IEntityTypeConfiguration<ApplicationUser>
+internal class ApplicationUserConfiguration : IEntityTypeConfiguration<ApplicationUser>
 {
     public void Configure(EntityTypeBuilder<ApplicationUser> builder)
     {
