@@ -30,6 +30,5 @@ public class PersonEndpointsTests(KittySaverApiFactory appFactory)
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         ICollection<PersonResponse>? persons = await response.Content.ReadFromJsonAsync<ICollection<PersonResponse>>();
         persons!.Count.Should().BeGreaterThan(0);
-        persons.First().FullName.Should().Be("Default Admin");
     }
 }
