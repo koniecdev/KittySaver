@@ -39,7 +39,7 @@ public sealed class Login : IEndpoint
     {
         private const string EmailPattern = @"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$";
 
-        public LoginCommandValidator(ApplicationDbContext db)
+        public LoginCommandValidator()
         {
             RuleFor(x => x.Password)
                 .NotEmpty();
@@ -65,7 +65,7 @@ public sealed class Login : IEndpoint
 
             if (!areUserCredentialsValid)
             {
-                throw new UnauthorizedAccessException("Provided credentials are invalid");
+                throw new UnauthorizedAccessException();
             }
             
             IList<string> roles = await userManager.GetRolesAsync(user);
