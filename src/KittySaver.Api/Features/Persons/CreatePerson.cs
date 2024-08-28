@@ -80,8 +80,8 @@ public class CreatePerson : IEndpoint
         {
             CreatePersonCommand command = request.ToCreatePersonCommand();
             Guid personId = await sender.Send(command, cancellationToken);
-            return Results.Created($"/persons/{personId}", new { Id = personId });
-        });
+            return Results.Created($"/api/v1/persons/{personId}", new { Id = personId });
+        }).RequireAuthorization();
     }
 }
 
