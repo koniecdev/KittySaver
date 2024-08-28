@@ -1,5 +1,6 @@
 using FluentAssertions;
 using KittySaver.Api.Shared.Domain.Entites;
+using Shared;
 
 namespace KittySaver.Api.Tests.Unit;
 
@@ -93,7 +94,7 @@ public class PersonTests
     }
 
     [Theory]
-    [MemberData(nameof(InvalidEmails))]
+    [ClassData(typeof(InvalidEmailData))]
     public void EmailSet_ShouldThrowEmailInvalidFormatException_WhenInvalidEmailIsProvided(string invalidEmail)
     {
         //Arrange
@@ -143,26 +144,4 @@ public class PersonTests
         sut.Should().BeNull();
         creation.Should().Throw<ArgumentException>();
     }
-
-    public static IEnumerable<object[]> InvalidEmails =>
-        new List<object[]>
-        {
-            new object[] { "plainaddress" },
-            new object[] { "@missingusername.com" },
-            new object[] { "missingatsign.com" },
-            new object[] { "username@.com" },
-            new object[] { "username@com" },
-            new object[] { "username@missingtld." },
-            new object[] { "username@.missingtld" },
-            new object[] { "username@domain,com" },
-            new object[] { "username@domain#com" },
-            new object[] { "username@domain!com" },
-            new object[] { "username@domain.com (Joe Smith)" },
-            new object[] { "username@domain.com>" },
-            new object[] { "user name@domain.com" },
-            new object[] { "username@ domain.com" },
-            new object[] { "username@domain .com" },
-            new object[] { " username@domain.com" },
-            new object[] { "username@domain.com " },
-        };
 }

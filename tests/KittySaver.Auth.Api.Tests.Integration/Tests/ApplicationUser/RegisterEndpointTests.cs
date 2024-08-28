@@ -1,21 +1,19 @@
 ﻿using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Text.Json;
 using Bogus;
 using FluentAssertions;
-using KittySaver.Api.Features.Persons;
 using KittySaver.Auth.Api.Features.ApplicationUsers;
 using Microsoft.AspNetCore.Mvc;
+using Shared;
 
-namespace KittySaver.Auth.Api.Tests.Integration.Tests;
+namespace KittySaver.Auth.Api.Tests.Integration.Tests.ApplicationUser;
 
 [Collection("AuthApi")]
 public class RegisterEndpointTests(KittySaverAuthApiFactory appFactory)
 {
     private readonly HttpClient _httpClient = appFactory.CreateClient();
 
-    private readonly Faker<Register.RegisterRequest> _createPersonRequestGenerator =
+    private readonly Faker<Register.RegisterRequest> _createApplicationUserRequestGenerator =
         new Faker<Register.RegisterRequest>()
             .CustomInstantiator( faker =>
                 new Register.RegisterRequest(
@@ -30,7 +28,7 @@ public class RegisterEndpointTests(KittySaverAuthApiFactory appFactory)
     public async Task Register_ShouldRegisterUser_WhenValidDataIsProvided()
     {
         //Arrange
-        Register.RegisterRequest request = _createPersonRequestGenerator.Generate();
+        Register.RegisterRequest request = _createApplicationUserRequestGenerator.Generate();
         
         //Act
         HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/application-users/register", request);
@@ -42,8 +40,9 @@ public class RegisterEndpointTests(KittySaverAuthApiFactory appFactory)
         registerResponse?.Id.Should().NotBeEmpty();
     }
     
-    [Fact]
-    public async Task Register_ShouldReturnValidationProblemDetails_WhenInvalidEmailIsProvided()
+    [Theory]
+    [ClassData(typeof(InvalidEmailData))]
+    public async Task Register_ShouldReturnValidationProblemDetails_WhenInvalidEmailIsProvided(string email)
     {
         //Arrange
         Register.RegisterRequest request = new Faker<Register.RegisterRequest>()
@@ -51,7 +50,7 @@ public class RegisterEndpointTests(KittySaverAuthApiFactory appFactory)
                 new Register.RegisterRequest(
                     FirstName: faker.Person.FirstName,
                     LastName: faker.Person.LastName,
-                    Email: "ReallyIncorrectEmail",
+                    Email: email,
                     PhoneNumber: faker.Person.Phone,
                     Password: "Default1234%"
                 ));
@@ -150,7 +149,7 @@ public class RegisterEndpointTests(KittySaverAuthApiFactory appFactory)
     public async Task Register_ShouldReturnValidationProblemDetails_WhenDuplicatedRequestOccur()
     {
         //Arrange
-        Register.RegisterRequest request = _createPersonRequestGenerator.Generate();
+        Register.RegisterRequest request = _createApplicationUserRequestGenerator.Generate();
         _ = await _httpClient.PostAsJsonAsync("api/v1/application-users/register", request);
         
         //Act
@@ -162,6 +161,7 @@ public class RegisterEndpointTests(KittySaverAuthApiFactory appFactory)
         validationProblemDetails?.Status.Should().Be(400);
         validationProblemDetails?.Errors["Email"][0].Should().StartWith("Email is already registered in database");
     }
+    
     [Fact]
     public async Task Register_ShouldReturnProblemDetails_WhenApiIsDown()
     {

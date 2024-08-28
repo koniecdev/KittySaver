@@ -1,11 +1,11 @@
 ﻿using FluentAssertions;
 using KittySaver.Auth.Api.Shared.Domain.Entites;
+using Shared;
 
 namespace KittySaver.Auth.Api.Tests.Unit.Tests;
 
 public class ApplicationUserTests
 {
-    private readonly Guid _userIdentityId = Guid.NewGuid();
     private const string DefaultProperFirstName = "artur";
     private const string DefaultProperLastName = "koniec";
     private const string DefaultProperEmail = "fake@fake.fake";
@@ -160,7 +160,7 @@ public class ApplicationUserTests
     }
     
     [Theory]
-    [MemberData(nameof(InvalidEmails))]
+    [ClassData(typeof(InvalidEmailData))]
     public void EmailSet_ShouldThrowEmailInvalidFormatException_WhenInvalidEmailIsProvided(string invalidEmail)
     {
         //Arrange
@@ -208,25 +208,4 @@ public class ApplicationUserTests
         creation.Should().Throw<ArgumentException>();
     }
     
-    public static IEnumerable<object[]> InvalidEmails =>
-        new List<object[]>
-        {
-            new object[] { "plainaddress" },
-            new object[] { "@missingusername.com" },
-            new object[] { "missingatsign.com" },
-            new object[] { "username@.com" },
-            new object[] { "username@com" },
-            new object[] { "username@missingtld." },
-            new object[] { "username@.missingtld" },
-            new object[] { "username@domain,com" },
-            new object[] { "username@domain#com" },
-            new object[] { "username@domain!com" },
-            new object[] { "username@domain.com (Joe Smith)" },
-            new object[] { "username@domain.com>" },
-            new object[] { "user name@domain.com" },
-            new object[] { "username@ domain.com" },
-            new object[] { "username@domain .com" },
-            new object[] { " username@domain.com" },
-            new object[] { "username@domain.com " },
-        };
 }

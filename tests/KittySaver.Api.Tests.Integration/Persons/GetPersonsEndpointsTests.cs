@@ -8,17 +8,9 @@ using KittySaver.Api.Features.Persons.Contracts;
 namespace KittySaver.Api.Tests.Integration.Persons;
 
 [Collection("Api")]
-public class PersonEndpointsTests(KittySaverApiFactory appFactory)
+public class GetPersonsEndpointsTests(KittySaverApiFactory appFactory)
 {
     private readonly HttpClient _httpClient = appFactory.CreateClient();
-
-    private readonly Faker<CreatePerson.CreatePersonRequest> _createPersonRequestGenerator =
-        new Faker<CreatePerson.CreatePersonRequest>()
-            .RuleFor(x => x.FirstName, f => f.Person.FirstName)
-            .RuleFor(x => x.LastName, f => f.Person.LastName)
-            .RuleFor(x => x.Email, f => f.Person.Email)
-            .RuleFor(x => x.PhoneNumber, f => f.Person.Phone)
-            .RuleFor(x => x.UserIdentityId, Guid.NewGuid());
 
     [Fact]
     public async Task GetPersons_ShouldReturnAtLeastDefaultAdmin_WhenEndpointIsCalled()
@@ -28,6 +20,6 @@ public class PersonEndpointsTests(KittySaverApiFactory appFactory)
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         ICollection<PersonResponse>? persons = await response.Content.ReadFromJsonAsync<ICollection<PersonResponse>>();
-        persons!.Count.Should().BeGreaterThan(0);
+        persons?.Count.Should().BeGreaterThan(0);
     }
 }
