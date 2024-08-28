@@ -38,20 +38,20 @@ public class CreatePerson : IEndpoint
             RuleFor(x => x.LastName).NotEmpty();
             RuleFor(x => x.PhoneNumber).NotEmpty();
             RuleFor(x => x.UserIdentityId).NotEmpty();
-            RuleFor(x => x.Email)
-                .Matches(EmailPattern)
-                .NotEmpty();
-            RuleFor(x => x.Email)
-                .MustAsync(async (email, ct) => await IsEmailNotAlreadyRegisteredInDb(email, ct))
-                .WithMessage("Email is already registered in database");
             RuleFor(x => x.UserIdentityId)
                 .MustAsync(async (userIdentityId, ct) => await IsUserIdentityIdNotAlreadyRegisteredInDb(userIdentityId, ct))
                 .WithMessage("UserIdentityId is already registered in database");
+            RuleFor(x => x.Email)
+                .NotEmpty()
+                .Matches(EmailPattern);
+            RuleFor(x => x.Email)
+                .MustAsync(async (email, ct) => !await IsEmailAlreadyRegisteredInDb(email, ct))
+                .WithMessage("Email is already registered in database");
         }
-
-        private async Task<bool> IsEmailNotAlreadyRegisteredInDb(string email, CancellationToken ct)
+        
+        private async Task<bool> IsEmailAlreadyRegisteredInDb(string email, CancellationToken ct)
         {
-            return await _db.Persons.AnyAsync(x=>x.Email != email, ct);
+            return await _db.Persons.AnyAsync(x=>x.Email == email, ct);
         }
         
         private async Task<bool> IsUserIdentityIdNotAlreadyRegisteredInDb(Guid userIdentityId, CancellationToken ct)

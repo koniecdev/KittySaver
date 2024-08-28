@@ -17,7 +17,8 @@ using Riok.Mapperly.Abstractions;
 
 namespace KittySaver.Auth.Api.Features.ApplicationUsers;
 
-public class Login : IEndpoint
+// ReSharper disable once ClassNeverInstantiated.Global
+public sealed class Login : IEndpoint
 {
     public sealed class LoginResponse
     {

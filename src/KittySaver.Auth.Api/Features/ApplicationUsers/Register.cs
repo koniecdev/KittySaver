@@ -12,7 +12,8 @@ using Riok.Mapperly.Abstractions;
 
 namespace KittySaver.Auth.Api.Features.ApplicationUsers;
 
-public class Register : IEndpoint
+// ReSharper disable once ClassNeverInstantiated.Global
+public sealed class Register : IEndpoint
 {
     public sealed record RegisterRequest(
         string FirstName,
