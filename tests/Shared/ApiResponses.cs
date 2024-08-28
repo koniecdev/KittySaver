@@ -1,4 +1,4 @@
-﻿namespace KittySaver.Auth.Api.Tests.Integration;
+﻿namespace Shared;
 
 public sealed class ApiResponses
 {
