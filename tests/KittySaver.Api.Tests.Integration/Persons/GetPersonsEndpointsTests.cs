@@ -4,9 +4,8 @@ using Bogus;
 using FluentAssertions;
 using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Features.Persons.Contracts;
-using Microsoft.AspNetCore.Mvc.Testing;
 
-namespace KittySaver.Api.Tests.Integration;
+namespace KittySaver.Api.Tests.Integration.Persons;
 
 [Collection("Api")]
 public class PersonEndpointsTests(KittySaverApiFactory appFactory)
