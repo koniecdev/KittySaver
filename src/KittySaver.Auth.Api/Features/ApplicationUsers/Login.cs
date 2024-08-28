@@ -95,7 +95,7 @@ public sealed class Login : IEndpoint
             SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["AppSettings:Token"]!));
 
             SigningCredentials credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
-            DateTimeOffset expiresAt = dateTimeProvider.Now.AddMinutes(5);
+            DateTimeOffset expiresAt = dateTimeProvider.Now.AddMinutes(int.Parse(configuration["AppSettings:MinutesTokenExpiresIn"]!));
             JwtSecurityToken token = new JwtSecurityToken(
                 claims: claims,
                 expires: expiresAt.DateTime,
