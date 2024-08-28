@@ -2,8 +2,8 @@
 using System.Text;
 using System.Text.Encodings.Web;
 using KittySaver.Auth.Api.Shared.Infrastructure.Clients;
+using KittySaver.Auth.Api.Shared.Infrastructure.Services;
 using KittySaver.Auth.Api.Shared.Persistence;
-using KittySaver.Auth.Api.Shared.Security;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
@@ -19,39 +20,38 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
+using Shared;
 using Testcontainers.MsSql;
 
 namespace KittySaver.Auth.Api.Tests.Integration;
-public class TestAuthHandler(
-    IOptionsMonitor<AuthenticationSchemeOptions> options,
-    ILoggerFactory logger,
-    UrlEncoder encoder)
-    : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
-{
-    protected override Task<AuthenticateResult> HandleAuthenticateAsync()
-    {
-        // Here we set up the claims that your application needs
-        Claim[] claims = [
-            new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString()),
-            new Claim(ClaimTypes.Role, "SuperAdmin"),
-            new Claim(ClaimTypes.Email, "defaultadmin@koniec.dev")
-        ];
-
-        ClaimsIdentity identity = new ClaimsIdentity(claims, "TestAuthType");
-        ClaimsPrincipal principal = new ClaimsPrincipal(identity);
-        AuthenticationTicket ticket = new AuthenticationTicket(principal, "TestScheme");
-
-        return Task.FromResult(AuthenticateResult.Success(ticket));
-    }
-}
 
 public class KittySaverAuthApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLifetime
 {
     private readonly MsSqlContainer _msSqlContainer
         = new MsSqlBuilder().Build();
     
+    public const string DefaultAdminEmail = "defaultadmin@koniec.dev";
+    public static DateTimeOffset FixedDateTime => new(2024, 1, 1, 0, 0, 0, TimeSpan.Zero);
+    public static int FixedMinutesJwtExpire => 5;
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        builder.ConfigureAppConfiguration((context, configBuilder) =>
+        {
+            // Remove the default configuration options
+            configBuilder.Sources.Clear();
+
+            // Add custom configuration file(s) for your tests
+            configBuilder.AddJsonFile("appsettings.json")
+                .AddJsonFile("appsettings.Test.json", optional: true)
+                .AddEnvironmentVariables();
+
+            // You can also add in-memory configuration for overriding specific values
+            configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "AppSettings:MinutesTokenExpiresIn", $"{FixedMinutesJwtExpire}" }
+            });
+        });
+        
         builder.ConfigureLogging(logging =>
         {
             logging.ClearProviders();
@@ -59,6 +59,29 @@ public class KittySaverAuthApiFactory : WebApplicationFactory<IApiMarker>, IAsyn
 
         builder.ConfigureTestServices(services =>
         {
+            services.RemoveAll(typeof(IDateTimeProvider));
+            IDateTimeProvider dateTimeSub = Substitute.For<IDateTimeProvider>();
+            
+            dateTimeSub
+                .Now
+                .Returns(FixedDateTime);
+            services.AddScoped<IDateTimeProvider>(_ => dateTimeSub);
+            
+            services.RemoveAll(typeof(IAuthenticationService));
+            services.RemoveAll(typeof(IAuthorizationHandler));
+            
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = "TestScheme";
+                options.DefaultChallengeScheme = "TestScheme";
+            }).AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("TestScheme", _ => { });
+
+            services.AddAuthorizationBuilder()
+                .SetDefaultPolicy(new AuthorizationPolicyBuilder()
+                    .AddAuthenticationSchemes("TestScheme")
+                    .RequireAssertion(_ => true)
+                    .Build());
+            
             ServiceDescriptor? descriptor = services.SingleOrDefault(m => m.ServiceType == typeof(DbContextOptions<ApplicationDbContext>));
             if(descriptor is not null)
             {
@@ -78,10 +101,6 @@ public class KittySaverAuthApiFactory : WebApplicationFactory<IApiMarker>, IAsyn
                 services.Remove(clientDescriptor);
             }
             
-            services.RemoveAll(typeof(IAuthenticationService));
-            services.RemoveAll(typeof(IAuthorizationHandler));
-            AddTestSchemeAuth();
-            
             IKittySaverApiClient mockKittySaverApiClient = Substitute.For<IKittySaverApiClient>();
             
             mockKittySaverApiClient
@@ -95,22 +114,6 @@ public class KittySaverAuthApiFactory : WebApplicationFactory<IApiMarker>, IAsyn
                 });
             
             services.AddSingleton(mockKittySaverApiClient);
-            return;
-            
-            void AddTestSchemeAuth()
-            {
-                services.AddAuthentication(options =>
-                {
-                    options.DefaultAuthenticateScheme = "TestScheme";
-                    options.DefaultChallengeScheme = "TestScheme";
-                }).AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("TestScheme", _ => { });
-
-                services.AddAuthorizationBuilder()
-                    .SetDefaultPolicy(new AuthorizationPolicyBuilder()
-                        .AddAuthenticationSchemes("TestScheme")
-                        .RequireAssertion(_ => true)
-                        .Build());
-            }
         });
     }
 

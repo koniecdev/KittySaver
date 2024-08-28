@@ -1,10 +1,17 @@
 ﻿using KittySaver.Api.Shared.Persistence;
+using KittySaver.Auth.Api.Shared.Infrastructure.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using NSubstitute;
+using Shared;
 using Testcontainers.MsSql;
 
 namespace KittySaver.Api.Tests.Integration;
@@ -14,10 +21,28 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
     private readonly MsSqlContainer _msSqlContainer
         = new MsSqlBuilder().Build();
 
-    // private readonly AuthApiServer _authApiServer = new();
+    public static DateTimeOffset FixedDateTime => new(2024, 1, 1, 0, 0, 0, TimeSpan.Zero);
+    public static int FixedMinutesJwtExpire => 5;
     
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        builder.ConfigureAppConfiguration((context, configBuilder) =>
+        {
+            // Remove the default configuration options
+            configBuilder.Sources.Clear();
+
+            // Add custom configuration file(s) for your tests
+            configBuilder.AddJsonFile("appsettings.json")
+                .AddJsonFile("appsettings.Test.json", optional: true)
+                .AddEnvironmentVariables();
+
+            // You can also add in-memory configuration for overriding specific values
+            configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "AppSettings:MinutesTokenExpiresIn", $"{FixedMinutesJwtExpire}" }
+            });
+        });
+        
         builder.ConfigureLogging(logging =>
         {
             logging.ClearProviders();
@@ -25,6 +50,29 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
 
         builder.ConfigureTestServices(services =>
         {
+            services.RemoveAll(typeof(IDateTimeProvider));
+            IDateTimeProvider dateTimeSub = Substitute.For<IDateTimeProvider>();
+            
+            dateTimeSub
+                .Now
+                .Returns(FixedDateTime);
+            services.AddScoped<IDateTimeProvider>(_ => dateTimeSub);
+            
+            services.RemoveAll(typeof(IAuthenticationService));
+            services.RemoveAll(typeof(IAuthorizationHandler));
+            
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = "TestScheme";
+                options.DefaultChallengeScheme = "TestScheme";
+            }).AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("TestScheme", _ => { });
+
+            services.AddAuthorizationBuilder()
+                .SetDefaultPolicy(new AuthorizationPolicyBuilder()
+                    .AddAuthenticationSchemes("TestScheme")
+                    .RequireAssertion(_ => true)
+                    .Build());
+            
             ServiceDescriptor? descriptor = services.SingleOrDefault(m => m.ServiceType == typeof(DbContextOptions<ApplicationDbContext>));
             if(descriptor is not null)
             {
