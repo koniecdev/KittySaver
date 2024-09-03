@@ -1,4 +1,4 @@
-﻿using KittySaver.Api.Features.Persons.Contracts;
+﻿using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Shared.Domain.Entites;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Infrastructure.Endpoints;
@@ -45,11 +45,4 @@ public sealed class GetPersons : IEndpoint
             return Results.Ok(persons);
         });
     }
-}
-
-[Mapper]
-public static partial class GetPersonsMapper
-{
-    public static partial IQueryable<PersonResponse> ProjectToDto(
-        this IQueryable<Person> persons);
 }

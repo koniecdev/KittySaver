@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Shared.Domain.Entites;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Infrastructure.Endpoints;
@@ -29,7 +30,6 @@ public class CreatePerson : IEndpoint
         : AbstractValidator<CreatePersonCommand>, IAsyncValidator
     {
         private readonly ApplicationDbContext _db;
-        private const string EmailPattern = @"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$";
 
         public CreatePersonCommandValidator(ApplicationDbContext db)
         {
@@ -43,7 +43,7 @@ public class CreatePerson : IEndpoint
                 .WithMessage("UserIdentityId is already registered in database");
             RuleFor(x => x.Email)
                 .NotEmpty()
-                .Matches(EmailPattern);
+                .Matches(ValidationPatterns.EmailPattern);
             RuleFor(x => x.Email)
                 .MustAsync(async (email, ct) => !await IsEmailAlreadyRegisteredInDb(email, ct))
                 .WithMessage("Email is already registered in database");

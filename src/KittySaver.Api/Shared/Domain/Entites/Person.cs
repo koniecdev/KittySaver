@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
+using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Shared.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace KittySaver.Api.Shared.Domain.Entites;
 
-public sealed class Person : AuditableEntity
+public sealed partial class Person : AuditableEntity
 {
     public enum Role
     {
@@ -15,7 +16,6 @@ public sealed class Person : AuditableEntity
         Shelter,
         Admin
     }
-    private static readonly string EmailPattern = @"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$";
     private string _phoneNumber = null!;
     private string _email = null!;
     private string _firstName = null!;
@@ -55,7 +55,7 @@ public sealed class Person : AuditableEntity
         init
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(Email));
-            if (!Regex.IsMatch(value, EmailPattern))
+            if (!EmailRegex().IsMatch(value))
             {
                 throw new Exceptions.Email.InvalidFormatException();
             }
@@ -95,6 +95,9 @@ public sealed class Person : AuditableEntity
                 : BadRequestException("Person.Email.NotUnique", "Email is not unique");
         }
     }
+
+    [GeneratedRegex(ValidationPatterns.EmailPattern)]
+    private static partial Regex EmailRegex();
 }
 
 internal class PersonConfiguration : IEntityTypeConfiguration<Person>
