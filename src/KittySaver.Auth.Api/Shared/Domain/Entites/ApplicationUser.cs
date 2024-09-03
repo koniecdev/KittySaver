@@ -17,7 +17,7 @@ public sealed class ApplicationUser : IdentityUser<Guid>
     public required string FirstName
     {
         get => _firstName;
-        init
+        set
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(FirstName));
             string firstChar = value[0].ToString().ToUpper();
@@ -29,7 +29,7 @@ public sealed class ApplicationUser : IdentityUser<Guid>
     public required string LastName
     {
         get => _lastName;
-        init
+        set
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(LastName));
             string firstChar = value[0].ToString().ToUpper();
