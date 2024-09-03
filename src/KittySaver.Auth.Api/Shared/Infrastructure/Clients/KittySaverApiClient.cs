@@ -2,6 +2,7 @@
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using KittySaver.Auth.Api.Shared.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KittySaver.Auth.Api.Shared.Infrastructure.Clients;
@@ -22,13 +23,19 @@ public interface IKittySaverApiClient
     protected record IdResponse(Guid Id);
     public sealed record PersonDto(Guid Id, string Email, string FullName, string PhoneNumber);
     public sealed record CreatePersonDto(string FirstName, string LastName, string Email, string PhoneNumber, Guid UserIdentityId);
+    public sealed record UpdatePersonDto(string FirstName, string LastName, string Email, string PhoneNumber);
     Task<ICollection<PersonDto>> GetPersons();
     public Task<Guid> CreatePerson(CreatePersonDto request);
-
+    public Task UpdatePerson(string id, UpdatePersonDto request);
 }
 
 public class KittySaverApiClient(HttpClient client) : IKittySaverApiClient
 {
+    public static class Exceptions
+    {
+            public sealed class DeserializationOfApiResponseException() 
+                : BadRequestException("ExternalApi.Response", "Something went wrong with deserialization of external api response");
+    }
     public async Task<ICollection<IKittySaverApiClient.PersonDto>> GetPersons()
     {
         HttpResponseMessage response = await client.GetAsync("v1/persons");
