@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using KittySaver.Auth.Api.Features.ApplicationUsers.SharedContracts;
 using KittySaver.Auth.Api.Shared.Domain.Entites;
 using KittySaver.Auth.Api.Shared.Exceptions;
 using KittySaver.Auth.Api.Shared.Infrastructure.ApiComponents;
@@ -33,7 +34,6 @@ public sealed class Register : IEndpoint
         : AbstractValidator<RegisterCommand>, IAsyncValidator
     {
         private readonly ApplicationDbContext _db;
-        private const string EmailPattern = @"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$";
 
         public RegisterCommandValidator(ApplicationDbContext db)
         {
@@ -51,7 +51,7 @@ public sealed class Register : IEndpoint
             RuleFor(x => x.PhoneNumber).NotEmpty();
             RuleFor(x => x.Email)
                 .NotEmpty()
-                .Matches(EmailPattern);
+                .Matches(ValidationPatterns.EmailPattern);
             RuleFor(x => x.Email)
                 .MustAsync(async (email, ct) => !await IsEmailAlreadyRegisteredInDb(email, ct))
                 .WithMessage("Email is already registered in database");
