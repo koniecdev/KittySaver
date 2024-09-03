@@ -40,10 +40,3 @@ public sealed class GetApplicationUsers : IEndpoint
         }).RequireAuthorization();
     }
 }
-
-[Mapper]
-public static partial class GetApplicationUsersMapper
-{
-    public static partial IQueryable<ApplicationUserResponse> ProjectToDto(
-        this IQueryable<ApplicationUser> applicationUsers);
-}
