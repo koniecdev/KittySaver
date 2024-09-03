@@ -63,10 +63,32 @@ public class KittySaverApiClient(HttpClient client) : IKittySaverApiClient
                 throw new ApiException(problemDetails);
             }
 
-            throw new Exception("Dupa");
+            throw new Exceptions.DeserializationOfApiResponseException();
         }
         IKittySaverApiClient.IdResponse idResponse = await response.Content.ReadFromJsonAsync<IKittySaverApiClient.IdResponse>()
-            ?? throw new Exception("Could not deserialize id");
+            ?? throw new Exceptions.DeserializationOfApiResponseException();
         return idResponse.Id;
+    }
+    
+    public async Task UpdatePerson(string id, IKittySaverApiClient.UpdatePersonDto request)
+    {
+        string serializedRequest = JsonSerializer.Serialize(request);
+        StringContent bodyContent = new StringContent(serializedRequest, Encoding.UTF8, "application/json");
+        HttpResponseMessage response = await client.PostAsync($"v1/persons/{id}", bodyContent);
+        if (!response.IsSuccessStatusCode)
+        {
+            ValidationProblemDetails? validationProblemDetails =
+                await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+            ProblemDetails? problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+            if (validationProblemDetails is not null)
+            {
+                throw new ApiValidationException(validationProblemDetails);
+            }
+            if (problemDetails is not null)
+            {
+                throw new ApiException(problemDetails);
+            }
+            throw new Exceptions.DeserializationOfApiResponseException();
+        }
     }
 }
