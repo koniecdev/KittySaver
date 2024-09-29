@@ -115,7 +115,7 @@ public class PersonTests
 
         //Assert
         sut.Should().BeNull();
-        creation.Should().Throw<Person.Exceptions.Email.InvalidFormatException>();
+        creation.Should().Throw<Person.DomainExceptions.Email.InvalidFormatException>();
     }
 
     [Theory]

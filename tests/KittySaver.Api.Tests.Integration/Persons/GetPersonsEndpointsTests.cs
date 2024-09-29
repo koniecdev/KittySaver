@@ -1,8 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-using Bogus;
 using FluentAssertions;
-using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Features.Persons.SharedContracts;
 
 namespace KittySaver.Api.Tests.Integration.Persons;

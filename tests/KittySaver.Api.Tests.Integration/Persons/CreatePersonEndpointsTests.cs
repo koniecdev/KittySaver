@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using Bogus;
 using FluentAssertions;
 using KittySaver.Api.Features.Persons;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
 
@@ -25,7 +26,7 @@ public class CreatePersonEndpointsTests(KittySaverApiFactory appFactory)
                 ));
     
     [Fact]
-    public async Task CreatePerson_ShouldCreatePerson_WhenValidDataIsProvided()
+    public async Task CreatePerson_ShouldReturnSuccess_WhenValidDataIsProvided()
     {
         //Arrange
         CreatePerson.CreatePersonRequest request = _createPersonRequestGenerator.Generate();
@@ -40,9 +41,45 @@ public class CreatePersonEndpointsTests(KittySaverApiFactory appFactory)
         registerResponse?.Id.Should().NotBeEmpty();
     }
     
+    [Fact]
+    public async Task CreatePerson_ShouldReturnBadRequest_WhenEmptyDataAreProvided()
+    {
+        //Arrange
+        CreatePerson.CreatePersonRequest request = new(
+            FirstName: "",
+            LastName: "",
+            Email: "",
+            PhoneNumber: "",
+            UserIdentityId: Guid.Empty
+        );
+        
+        //Act
+        HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/persons", request);
+        
+        //Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        ValidationProblemDetails? validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        validationProblemDetails.Should().NotBeNull();
+        validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
+        validationProblemDetails.Errors.Count.Should().Be(5);
+        validationProblemDetails.Errors.Keys.Should().BeEquivalentTo([
+            nameof(CreatePerson.CreatePersonRequest.FirstName),
+            nameof(CreatePerson.CreatePersonRequest.LastName),
+            nameof(CreatePerson.CreatePersonRequest.Email),
+            nameof(CreatePerson.CreatePersonRequest.PhoneNumber),
+            nameof(CreatePerson.CreatePersonRequest.UserIdentityId)
+        ]);
+        validationProblemDetails.Errors.Values.Count.Should().Be(5);
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.FirstName)][0].Should().Be("'First Name' must not be empty.");
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.LastName)][0].Should().Be("'Last Name' must not be empty.");
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.PhoneNumber)][0].Should().Be("'Phone Number' must not be empty.");
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.Email)][0].Should().Be("'Email' must not be empty.");
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.UserIdentityId)][0].Should().Be("'User Identity Id' must not be empty.");
+    }
+    
     [Theory]
     [ClassData(typeof(InvalidEmailData))]
-    public async Task CreatePerson_ShouldReturnValidationProblemDetails_WhenInvalidEmailIsProvided(string email)
+    public async Task CreatePerson_ShouldReturnBadRequest_WhenInvalidEmailIsProvided(string email)
     {
         //Arrange
         CreatePerson.CreatePersonRequest request = new Faker<CreatePerson.CreatePersonRequest>()
@@ -60,39 +97,21 @@ public class CreatePersonEndpointsTests(KittySaverApiFactory appFactory)
         
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        ValidationProblemDetails? validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
-        validationProblemDetails?.Status.Should().Be(400);
-        validationProblemDetails?.Errors["Email"][0].Should().Be("'Email' is not in the correct format.");
+        ValidationProblemDetails? validationProblemDetails =
+            await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        validationProblemDetails.Should().NotBeNull();
+        validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
+        validationProblemDetails.Errors.Count.Should().Be(1);
+        validationProblemDetails.Errors.Keys.Should().BeEquivalentTo([
+            nameof(CreatePerson.CreatePersonRequest.Email)
+        ]);
+        validationProblemDetails.Errors.Values.Count.Should().Be(1);
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.Email)][0]
+            .Should().StartWith("'Email' is not in the correct format.");
     }
     
     [Fact]
-    public async Task CreatePerson_ShouldReturnValidationProblemDetails_WhenEmptyDataIsProvided()
-    {
-        //Arrange
-        CreatePerson.CreatePersonRequest request = new(
-            FirstName: "",
-            LastName: "",
-            Email: "",
-            PhoneNumber: "",
-            UserIdentityId: Guid.Empty
-        );
-        
-        //Act
-        HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/persons", request);
-        
-        //Assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        ValidationProblemDetails? validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
-        validationProblemDetails?.Status.Should().Be(400);
-        validationProblemDetails?.Errors["FirstName"][0].Should().Be("'First Name' must not be empty.");
-        validationProblemDetails?.Errors["LastName"][0].Should().Be("'Last Name' must not be empty.");
-        validationProblemDetails?.Errors["PhoneNumber"][0].Should().Be("'Phone Number' must not be empty.");
-        validationProblemDetails?.Errors["Email"][0].Should().Be("'Email' must not be empty.");
-        validationProblemDetails?.Errors["UserIdentityId"][0].Should().Be("'User Identity Id' must not be empty.");
-    }
-    
-    [Fact]
-    public async Task CreatePerson_ShouldReturnValidationProblemDetails_WhenDuplicatedRequestOccur()
+    public async Task CreatePerson_ShouldReturnBadRequest_WhenAlreadyTakenUniquePropertiesAreProvided()
     {
         //Arrange
         CreatePerson.CreatePersonRequest request = _createPersonRequestGenerator.Generate();
@@ -103,8 +122,22 @@ public class CreatePersonEndpointsTests(KittySaverApiFactory appFactory)
         
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        ValidationProblemDetails? validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
-        validationProblemDetails?.Status.Should().Be(400);
-        validationProblemDetails?.Errors["Email"][0].Should().StartWith("Email is already registered in database");
+        ValidationProblemDetails? validationProblemDetails =
+            await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        validationProblemDetails.Should().NotBeNull();
+        validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
+        validationProblemDetails.Errors.Count.Should().Be(3);
+        validationProblemDetails.Errors.Keys.Should().BeEquivalentTo([
+            nameof(CreatePerson.CreatePersonRequest.Email),
+            nameof(CreatePerson.CreatePersonRequest.PhoneNumber),
+            nameof(CreatePerson.CreatePersonRequest.UserIdentityId)
+        ]);
+        validationProblemDetails.Errors.Values.Count.Should().Be(3);
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.Email)][0]
+            .Should().Be("'Email' is already used by another user.");
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.PhoneNumber)][0]
+            .Should().Be("'Phone Number' is already used by another user.");
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.UserIdentityId)][0]
+            .Should().Be("'User Identity Id' is already used by another user.");
     }
 }
