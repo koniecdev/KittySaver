@@ -1,6 +1,7 @@
-﻿using KittySaver.Api.Shared.Infrastructure.ExceptionHandlers;
+﻿using KittySaver.Api.Shared.Exceptions.Handlers;
+using KittySaver.Api.Shared.Infrastructure.ExceptionHandlers;
 
-namespace KittySaver.Api.Shared.Extensions;
+namespace KittySaver.Api.Shared.Exceptions;
 
 internal static class ExceptionHandlersExtensions
 {
@@ -9,7 +10,7 @@ internal static class ExceptionHandlersExtensions
         serviceCollection.AddExceptionHandler<UnauthorizedAccessExceptionHandler>();
         serviceCollection.AddExceptionHandler<ValidationExceptionHandler>();
         serviceCollection.AddExceptionHandler<NotFoundExceptionHandler>();
-        serviceCollection.AddExceptionHandler<BadRequestExceptionHandler>();
+        serviceCollection.AddExceptionHandler<DomainExceptionHandler>();
         serviceCollection.AddExceptionHandler<GlobalExceptionHandler>();
         serviceCollection.AddProblemDetails();
 

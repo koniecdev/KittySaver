@@ -1,24 +1,28 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace KittySaver.Api.Shared.Infrastructure.ExceptionHandlers;
+namespace KittySaver.Api.Shared.Exceptions.Handlers;
 
-internal sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
+internal sealed class UnauthorizedAccessExceptionHandler(ILogger<UnauthorizedAccessExceptionHandler> logger) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
         Exception exception,
         CancellationToken cancellationToken)
     {
-
+        if (exception is not UnauthorizedAccessException)
+        {
+            return false;
+        }
+        
         ProblemDetails problemDetails = new()
         {
-            Status = StatusCodes.Status500InternalServerError,
-            Title = "Sorry, an internal server error has occurred, there is nothing You can do."
+            Status = StatusCodes.Status401Unauthorized,
+            Title = "Provided credentials are not valid"
         };
 
         logger.LogError(
-            exception, "Exception occurred: {type} | {message}",
+            exception, "Unauthorized Exception occurred: {type} | {message}",
             problemDetails.Status.Value,
             exception.Message);
 

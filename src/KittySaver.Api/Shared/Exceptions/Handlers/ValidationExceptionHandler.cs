@@ -1,8 +1,5 @@
-﻿using System.Text;
-using System.Text.Json;
+﻿using System.Text.Json;
 using FluentValidation;
-using FluentValidation.Results;
-using KittySaver.Api.Shared.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -45,11 +42,10 @@ internal sealed class ValidationExceptionHandler(ILogger<ValidationExceptionHand
         
         logger.LogError(
             validationException,
-            "Following errors occurred: {type} | {code} | {description}",
+            "Following errors occurred: {type} | {code} | {message}",
             problemDetails.Status.Value,
             "FluentValidationException",
-            JsonSerializer.Serialize(validationException.Errors)
-            );
+            JsonSerializer.Serialize(validationException.Errors));
 
         httpContext.Response.StatusCode = problemDetails.Status.Value;
 

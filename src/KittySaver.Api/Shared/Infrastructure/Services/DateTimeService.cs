@@ -1,10 +1,10 @@
 ﻿namespace KittySaver.Api.Shared.Infrastructure.Services;
 
-public interface IDateTimeProvider
+public interface IDateTimeService
 {
     public DateTimeOffset Now { get; }
 }
-public sealed class DefaultDateTimeProvider : IDateTimeProvider
+public sealed class DefaultDateTimeService : IDateTimeService
 {
     public DateTimeOffset Now => DateTimeOffset.Now;
 }

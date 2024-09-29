@@ -1,17 +1,16 @@
-﻿using KittySaver.Api.Shared.Exceptions;
-using Microsoft.AspNetCore.Diagnostics;
+﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace KittySaver.Api.Shared.Infrastructure.ExceptionHandlers;
+namespace KittySaver.Api.Shared.Exceptions.Handlers;
 
-internal sealed class BadRequestExceptionHandler(ILogger<BadRequestExceptionHandler> logger) : IExceptionHandler
+internal sealed class DomainExceptionHandler(ILogger<DomainExceptionHandler> logger) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
         Exception exception,
         CancellationToken cancellationToken)
     {
-        if (exception is not BadRequestException badRequestException)
+        if (exception is not DomainException domainException)
         {
             return false;
         }
@@ -24,21 +23,24 @@ internal sealed class BadRequestExceptionHandler(ILogger<BadRequestExceptionHand
             Extensions = new Dictionary<string, object?>
             {
                 {
-                    "errors", 
-                    new IApplicationError[]
+                    "errors",
+                    new Dictionary<string, string[]>
                     {
-                        badRequestException
+                        {
+                            domainException.ApplicationCode,
+                            [domainException.Message]
+                        }
                     }
                 }
             }
         };
 
         logger.LogError(
-            badRequestException,
-            "Following errors occurred: {type} | {code} | {description}",
+            domainException,
+            "Following errors occurred: {type} | {code} | {message}",
             problemDetails.Status.Value,
-            badRequestException.ApplicationCode,
-            badRequestException.Description);
+            domainException.ApplicationCode,
+            domainException.Message);
 
         httpContext.Response.StatusCode = problemDetails.Status.Value;
 
