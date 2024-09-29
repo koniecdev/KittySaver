@@ -1,6 +1,6 @@
 ﻿using KittySaver.Api.Features.Persons.SharedContracts;
+using KittySaver.Api.Shared.Domain.Entites;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
-using KittySaver.Api.Shared.Infrastructure.Endpoints;
 using KittySaver.Api.Shared.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -9,31 +9,32 @@ namespace KittySaver.Api.Features.Persons;
 
 public class GetPerson : IEndpoint
 {
-    public sealed class GetPersonsQuery : IQuery<ICollection<PersonResponse>>
-    {
-    }
+    public sealed record GetPersonQuery(Guid Id) : IQuery<PersonResponse>;
 
-    internal sealed class GetPersonsQueryHandler(ApplicationDbContext db)
-        : IRequestHandler<GetPersonsQuery, ICollection<PersonResponse>>
+    internal sealed class GetPersonQueryHandler(ApplicationDbContext db)
+        : IRequestHandler<GetPersonQuery, PersonResponse>
     {
-        public async Task<ICollection<PersonResponse>> Handle(GetPersonsQuery request, CancellationToken cancellationToken)
+        public async Task<PersonResponse> Handle(GetPersonQuery request, CancellationToken cancellationToken)
         {
-            List<PersonResponse> persons = await db.Persons
+            PersonResponse person = await db.Persons
                 .AsNoTracking()
+                .Where(x=>x.Id == request.Id)
                 .ProjectToDto()
-                .ToListAsync(cancellationToken);
-            return persons;
+                .FirstOrDefaultAsync(cancellationToken)
+                ?? throw new Person.PersonNotFoundException(request.Id);
+            return person;
         }
     }
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapGet("persons", async (ISender sender,
+        endpointRouteBuilder.MapGet("persons/{id:guid}", async (Guid id,
+            ISender sender,
             CancellationToken cancellationToken) =>
         {
-            GetPersonsQuery query = new();
-            ICollection<PersonResponse> persons = await sender.Send(query, cancellationToken);
-            return Results.Ok(persons);
-        }).RequireAuthorization();
+            GetPersonQuery query = new(id);
+            PersonResponse person = await sender.Send(query, cancellationToken);
+            return Results.Ok(person);
+        });
     }
 }
