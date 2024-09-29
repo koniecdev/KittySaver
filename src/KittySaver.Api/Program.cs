@@ -1,9 +1,9 @@
-using System.Net;
 using System.Reflection;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
+using KittySaver.Api.Shared.Exceptions;
 using KittySaver.Api.Shared.Extensions;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using KittySaver.Api.Shared.Infrastructure.Extensions;
 using Serilog;
 
 IConfigurationRoot configuration = new ConfigurationBuilder()
@@ -27,7 +27,7 @@ try
     builder.Services.AddSwaggerServices();
 
     builder.Services.AddEveryExceptionHandler();
-    builder.Services.RegisterInfrastructureServices();
+    builder.Services.RegisterInfrastructureServices(builder.Configuration, builder.Environment);
     builder.Services.RegisterPersistenceServices(builder.Configuration);
 
     builder.Services.AddApiVersioning(options =>
@@ -48,10 +48,6 @@ try
                 corsBuilder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
             });
     });
-
-    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-        .AddJwtBearer();
-    builder.Services.AddAuthorization();
 
     builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
 

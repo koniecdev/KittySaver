@@ -1,5 +1,4 @@
 ﻿using KittySaver.Api.Shared.Domain.Entites;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -8,6 +7,8 @@ namespace KittySaver.Api.Shared.Persistence;
 public static class FixedIdsHelper
 {
     public static Guid AdminId { get; } = Guid.Parse("a4018ea1-525a-48eb-a701-a96c1a261e72");
+    public const string AdminEmail = "defaultadmin@koniec.dev";
+    public const string AdminPhone = "XXXXXXXXX";
     public static Guid AdminUserIdentityId { get; } = Guid.Parse("c4ff57f4-2d8c-4c66-b62d-333ad2e3c424");
 }
 

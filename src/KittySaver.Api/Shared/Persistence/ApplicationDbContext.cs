@@ -1,8 +1,6 @@
 ﻿using KittySaver.Api.Shared.Domain.Entites;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Security;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -10,7 +8,7 @@ namespace KittySaver.Api.Shared.Persistence;
 
 public sealed class ApplicationDbContext(
     DbContextOptions<ApplicationDbContext> options,
-    IDateTimeProvider dateTimeProvider,
+    IDateTimeService dateTimeProvider,
     ICurrentUserService currentUserService) 
     : DbContext(options)
 {
