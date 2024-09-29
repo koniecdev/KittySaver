@@ -2,7 +2,6 @@
 using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Shared.Domain.Entites;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
-using KittySaver.Api.Shared.Infrastructure.Endpoints;
 using KittySaver.Api.Shared.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -36,28 +35,31 @@ public class CreatePerson : IEndpoint
             _db = db;
             RuleFor(x => x.FirstName).NotEmpty();
             RuleFor(x => x.LastName).NotEmpty();
+            
             RuleFor(x => x.PhoneNumber).NotEmpty();
+            RuleFor(x => x.PhoneNumber)
+                .MustAsync(async (phoneNumber, ct) => await IsPhoneNumberUniqueAsync(phoneNumber, ct))
+                .WithMessage("'Phone Number' is already used by another user.");
+            
             RuleFor(x => x.UserIdentityId).NotEmpty();
             RuleFor(x => x.UserIdentityId)
-                .MustAsync(async (userIdentityId, ct) => await IsUserIdentityIdNotAlreadyRegisteredInDb(userIdentityId, ct))
-                .WithMessage("UserIdentityId is already registered in database");
+                .MustAsync(async (userIdentityId, ct) => await IsUserIdentityIdUniqueAsync(userIdentityId, ct))
+                .WithMessage("'User Identity Id' is already used by another user.");
+            
             RuleFor(x => x.Email)
                 .NotEmpty()
                 .Matches(ValidationPatterns.EmailPattern);
             RuleFor(x => x.Email)
-                .MustAsync(async (email, ct) => !await IsEmailAlreadyRegisteredInDb(email, ct))
-                .WithMessage("Email is already registered in database");
+                .MustAsync(async (email, ct) => await IsEmailUniqueAsync(email, ct))
+                .WithMessage("'Email' is already used by another user.");
         }
-        
-        private async Task<bool> IsEmailAlreadyRegisteredInDb(string email, CancellationToken ct)
-        {
-            return await _db.Persons.AnyAsync(x=>x.Email == email, ct);
-        }
-        
-        private async Task<bool> IsUserIdentityIdNotAlreadyRegisteredInDb(Guid userIdentityId, CancellationToken ct)
-        {
-            return await _db.Persons.AnyAsync(x=>x.UserIdentityId != userIdentityId, ct);
-        }
+        private async Task<bool> IsPhoneNumberUniqueAsync(string phone, CancellationToken ct) 
+            => !await _db.Persons.AnyAsync(x=>x.PhoneNumber == phone, ct);
+        private async Task<bool> IsEmailUniqueAsync(string email, CancellationToken ct) 
+            => !await _db.Persons.AnyAsync(x=>x.Email == email, ct);
+
+        private async Task<bool> IsUserIdentityIdUniqueAsync(Guid userIdentityId, CancellationToken ct) 
+            => !await _db.Persons.AnyAsync(x=>x.UserIdentityId == userIdentityId, ct);
     }
     
     internal sealed class CreatePersonCommandHandler(ApplicationDbContext db) : IRequestHandler<CreatePersonCommand, Guid>
