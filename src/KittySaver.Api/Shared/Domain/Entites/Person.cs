@@ -1,8 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Shared.Exceptions;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -57,7 +55,7 @@ public sealed partial class Person : AuditableEntity
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(Email));
             if (!EmailRegex().IsMatch(value))
             {
-                throw new Exceptions.Email.InvalidFormatException();
+                throw new DomainExceptions.Email.InvalidFormatException();
             }
             _email = value;
         }
@@ -82,17 +80,21 @@ public sealed partial class Person : AuditableEntity
         CurrentRole = Role.Shelter;
     }
     
-    public static class Exceptions
+    public sealed class PersonNotFoundException : NotFoundException
     {
-        public sealed class PersonNotFoundException() 
-            : NotFoundException("Person.Email.Empty", "Email is empty");
-        
+        public PersonNotFoundException(Guid id) : base("Person.NotFound", id.ToString())
+        {
+        }
+        public PersonNotFoundException(string identifier) : base("Person.NotFound", identifier)
+        {
+        }
+    }
+    public static class DomainExceptions
+    {
         public static class Email
         {
             public sealed class InvalidFormatException() 
-                : BadRequestException("Person.Email.InvalidFormat", "Email format is invalid");
-            public sealed class NotUniqueException() 
-                : BadRequestException("Person.Email.NotUnique", "Email is not unique");
+                : DomainException("Person.Email.InvalidFormat", "Email format is invalid");
         }
     }
 
@@ -121,10 +123,16 @@ internal class PersonConfiguration : IEntityTypeConfiguration<Person>
             .HasMaxLength(31)
             .IsRequired();
         builder
+            .Property(x=>x.UserIdentityId)
+            .IsRequired();
+        builder
             .HasIndex(m => m.UserIdentityId)
             .IsUnique();
         builder
             .HasIndex(m => m.Email)
+            .IsUnique();
+        builder
+            .HasIndex(m => m.PhoneNumber)
             .IsUnique();
     }
 }
