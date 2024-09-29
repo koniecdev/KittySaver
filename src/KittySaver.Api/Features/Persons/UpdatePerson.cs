@@ -59,11 +59,18 @@ public sealed class UpdatePerson : IEndpoint
     {
         public async Task Handle(UpdatePersonCommand request, CancellationToken cancellationToken)
         {
-            Person user = await db.Persons
-                .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken)
-                ?? throw new Person.Exceptions.PersonNotFoundException();
-            UpdatePersonMapper.UpdateEntityWithCommandData(request, user);
-            await db.SaveChangesAsync(cancellationToken);
+            int numberOfUpdatedPersons = await db.Persons
+                .Where(x => x.Id == request.Id)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(x=>x.FirstName, request.FirstName)
+                    .SetProperty(x=>x.LastName, request.LastName)
+                    .SetProperty(x=>x.Email, request.Email)
+                    .SetProperty(x=>x.PhoneNumber, request.PhoneNumber),
+                    cancellationToken);
+            if (numberOfUpdatedPersons == 0)
+            {
+                throw new Person.PersonNotFoundException(request.Id);
+            }
         }
     }
     
@@ -86,6 +93,4 @@ public sealed class UpdatePerson : IEndpoint
 public static partial class UpdatePersonMapper
 {
     public static partial UpdatePerson.UpdatePersonCommand ToUpdateCommand(this UpdatePerson.UpdatePersonRequest request, Guid id);
-    public static partial void UpdateEntityWithCommandData(UpdatePerson.UpdatePersonCommand source,
-        Person target);
 }
