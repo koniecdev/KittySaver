@@ -29,12 +29,13 @@ public sealed class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidat
             syncValidators.Add(validator);
         }
         
+        IEnumerable<Task<ValidationResult>> asyncValidatorsFailuresTasks = asyncValidators
+                .Select(validator => validator.ValidateAsync(context, cancellationToken));
+        
         List<ValidationResult> syncValidatorsFailures = syncValidators
             .Select(validator => validator.Validate(context))
             .ToList();
-        ValidationResult[] asyncValidatorsFailures = await Task.WhenAll(
-            asyncValidators
-                .Select(validator => validator.ValidateAsync(context, cancellationToken)));
+        ValidationResult[] asyncValidatorsFailures = await Task.WhenAll(asyncValidatorsFailuresTasks);
 
         List<ValidationResult> validationResults = syncValidatorsFailures.Concat(asyncValidatorsFailures).ToList();
 
