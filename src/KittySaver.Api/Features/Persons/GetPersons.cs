@@ -1,13 +1,8 @@
 ﻿using KittySaver.Api.Features.Persons.SharedContracts;
-using KittySaver.Api.Shared.Domain.Entites;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
-using KittySaver.Api.Shared.Infrastructure.Endpoints;
 using KittySaver.Api.Shared.Persistence;
 using MediatR;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Riok.Mapperly.Abstractions;
 
 namespace KittySaver.Api.Features.Persons;
 
