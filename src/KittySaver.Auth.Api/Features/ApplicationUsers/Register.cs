@@ -41,7 +41,6 @@ public sealed class Register : IEndpoint
             RuleFor(x => x.Password)
                 .NotEmpty();
             RuleFor(x => x.Password)
-                .NotEmpty().WithMessage("'Password' is not in the correct format. Your password cannot be empty")
                 .MinimumLength(8).WithMessage("'Password' is not in the correct format. Your password length must be at least 8.")
                 .Matches("[A-Z]+").WithMessage("'Password' is not in the correct format. Your password must contain at least one uppercase letter.")
                 .Matches("[a-z]+").WithMessage("'Password' is not in the correct format. Your password must contain at least one lowercase letter.")
@@ -53,14 +52,12 @@ public sealed class Register : IEndpoint
                 .NotEmpty()
                 .Matches(ValidationPatterns.EmailPattern);
             RuleFor(x => x.Email)
-                .MustAsync(async (email, ct) => !await IsEmailAlreadyRegisteredInDb(email, ct))
+                .MustAsync(async (email, ct) => !await IsEmailUniqueAsync(email, ct))
                 .WithMessage("Email is already registered in database");
         }
         
-        private async Task<bool> IsEmailAlreadyRegisteredInDb(string email, CancellationToken ct)
-        {
-            return await _db.ApplicationUsers.AnyAsync(x=>x.Email == email, ct);
-        }
+        private async Task<bool> IsEmailUniqueAsync(string email, CancellationToken ct) 
+            => !await _db.ApplicationUsers.AnyAsync(x=>x.Email == email, ct);
     }
     
     internal sealed class RegisterCommandHandler(UserManager<ApplicationUser> userManager, IKittySaverApiClient client)

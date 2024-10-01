@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using System.Text;
 using FluentValidation;
+using KittySaver.Auth.Api.Features.ApplicationUsers.SharedContracts;
 using KittySaver.Auth.Api.Shared.Domain.Entites;
 using KittySaver.Auth.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Auth.Api.Shared.Infrastructure.Endpoints;
@@ -34,15 +35,13 @@ public sealed class Login : IEndpoint
     public sealed class LoginCommandValidator
         : AbstractValidator<LoginCommand>
     {
-        private const string EmailPattern = @"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$";
-
         public LoginCommandValidator()
         {
             RuleFor(x => x.Password)
                 .NotEmpty();
             RuleFor(x => x.Email)
                 .NotEmpty()
-                .Matches(EmailPattern);
+                .Matches(ValidationPatterns.EmailPattern);
         }
     }
     
