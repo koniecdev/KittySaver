@@ -38,22 +38,18 @@ public sealed class UpdateApplicationUser : IEndpoint
             RuleFor(x => x.FirstName).NotEmpty();
             RuleFor(x => x.LastName).NotEmpty();
             RuleFor(x => x.PhoneNumber).NotEmpty();
-            RuleFor(x => x.Id)
-                .MustAsync(async (id, ct) => await IsUserExistingInDatabase(id, ct))
-                .WithMessage("User must exist in database to delete it");
             RuleFor(x => x.Email)
                 .NotEmpty()
                 .Matches(ValidationPatterns.EmailPattern);
             RuleFor(x => x.Email)
-                .MustAsync(async (command, email, ct) => !await IsEmailAlreadyUsedBySomeoneElseInDb(command, email, ct))
-                .WithMessage("Email is already used by different account in database");
+                .MustAsync(async (email, ct) => await IsEmailUniqueAsync(email, ct))
+                .WithMessage("Email is already used by another user.");
         }
 
-        private async Task<bool> IsEmailAlreadyUsedBySomeoneElseInDb(UpdateApplicationUserCommand command, string email, CancellationToken ct) 
-            => await _db.ApplicationUsers.AnyAsync(x => x.Email == email && x.Id != command.Id, ct);
-
-        private async Task<bool> IsUserExistingInDatabase(Guid id, CancellationToken ct) 
-            => await _db.ApplicationUsers.AnyAsync(x=>x.Id == id, ct);
+        private async Task<bool> IsEmailUniqueAsync(string email, CancellationToken ct) 
+            => !await _db.ApplicationUsers
+                .AsNoTracking()
+                .AnyAsync(x=>x.Email == email, ct);
     }
     
     internal sealed class UpdateApplicationUserCommandHandler(ApplicationDbContext db, IKittySaverApiClient client)
