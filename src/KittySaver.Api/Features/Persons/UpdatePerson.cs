@@ -46,7 +46,7 @@ public sealed class UpdatePerson : IEndpoint
                 .WithMessage("'Email' is already used by another user.");
         }
         private async Task<bool> IsEmailUniqueAsync(UpdatePersonCommand command, string email, CancellationToken ct)
-            =>!await _db.Persons
+            => !await _db.Persons
                 .AnyAsync(x=>x.Email == email && x.Id != command.Id, ct);
         
         private async Task<bool> IsPhoneUniqueAsync(UpdatePersonCommand command, string phone, CancellationToken ct)
