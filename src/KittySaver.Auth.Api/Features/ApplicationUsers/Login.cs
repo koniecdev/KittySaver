@@ -23,11 +23,11 @@ public sealed class Login : IEndpoint
         public required string AccessToken { get; init; }
         public required DateTimeOffset AccessTokenExpiresAt { get; init; }
     }
-    
+
     public sealed record LoginRequest(
         string Email,
         string Password);
-    
+
     public sealed record LoginCommand(
         string Email,
         string Password) : ICommand<LoginResponse>;
@@ -44,7 +44,7 @@ public sealed class Login : IEndpoint
                 .Matches(ValidationPatterns.EmailPattern);
         }
     }
-    
+
     internal sealed class LoginCommandHandler(
         UserManager<ApplicationUser> userManager,
         IConfiguration configuration,
@@ -54,8 +54,9 @@ public sealed class Login : IEndpoint
         public async Task<LoginResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
         {
             ApplicationUser user = await userManager.Users
-                .FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken)
-                ?? throw new ApplicationUser.Exceptions.ApplicationUserNotFoundException();
+                                       .AsNoTracking()
+                                       .FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken)
+                                   ?? throw new ApplicationUser.Exceptions.ApplicationUserNotFoundException();
 
             bool areUserCredentialsValid = await userManager.CheckPasswordAsync(user, request.Password);
 
@@ -63,9 +64,9 @@ public sealed class Login : IEndpoint
             {
                 throw new UnauthorizedAccessException();
             }
-            
+
             IList<string> roles = await userManager.GetRolesAsync(user);
-            
+
             (string token, DateTimeOffset expiresAt) tokenResults = CreateToken(user, roles);
             LoginResponse response = new()
             {
@@ -77,7 +78,8 @@ public sealed class Login : IEndpoint
 
         private (string token, DateTimeOffset expiresAt) CreateToken(ApplicationUser user, ICollection<string> roles)
         {
-            List<Claim> claims = [
+            List<Claim> claims =
+            [
                 new Claim(ClaimTypes.Email, user.Email!),
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
             ];
@@ -88,10 +90,12 @@ public sealed class Login : IEndpoint
                 claims.Add(roleClaim);
             }
 
-            SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["AppSettings:Token"]!));
+            SymmetricSecurityKey key =
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["AppSettings:Token"]!));
 
             SigningCredentials credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
-            DateTimeOffset expiresAt = dateTimeProvider.Now.AddMinutes(int.Parse(configuration["AppSettings:MinutesTokenExpiresIn"]!));
+            DateTimeOffset expiresAt =
+                dateTimeProvider.Now.AddMinutes(int.Parse(configuration["AppSettings:MinutesTokenExpiresIn"]!));
             JwtSecurityToken token = new JwtSecurityToken(
                 claims: claims,
                 expires: expiresAt.DateTime,
@@ -100,11 +104,11 @@ public sealed class Login : IEndpoint
             return (jwt, expiresAt);
         }
     }
-    
+
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapPost("application-users/login", async 
-            (LoginRequest request,
+        endpointRouteBuilder.MapPost("application-users/login", async
+        (LoginRequest request,
             ISender sender,
             CancellationToken cancellationToken) =>
         {
