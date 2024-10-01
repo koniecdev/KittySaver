@@ -47,10 +47,12 @@ public sealed class UpdatePerson : IEndpoint
         }
         private async Task<bool> IsEmailUniqueAsync(UpdatePersonCommand command, string email, CancellationToken ct)
             => !await _db.Persons
+                .AsNoTracking()
                 .AnyAsync(x=>x.Email == email && x.Id != command.Id, ct);
         
         private async Task<bool> IsPhoneUniqueAsync(UpdatePersonCommand command, string phone, CancellationToken ct)
             => !await _db.Persons
+                .AsNoTracking()
                 .AnyAsync(x=>x.PhoneNumber == phone && x.Id != command.Id, ct);
     }
     

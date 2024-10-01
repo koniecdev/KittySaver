@@ -54,12 +54,18 @@ public class CreatePerson : IEndpoint
                 .WithMessage("'Email' is already used by another user.");
         }
         private async Task<bool> IsPhoneNumberUniqueAsync(string phone, CancellationToken ct) 
-            => !await _db.Persons.AnyAsync(x=>x.PhoneNumber == phone, ct);
+            => !await _db.Persons
+                .AsNoTracking()
+                .AnyAsync(x=>x.PhoneNumber == phone, ct);
         private async Task<bool> IsEmailUniqueAsync(string email, CancellationToken ct) 
-            => !await _db.Persons.AnyAsync(x=>x.Email == email, ct);
+            => !await _db.Persons
+                .AsNoTracking()
+                .AnyAsync(x=>x.Email == email, ct);
 
         private async Task<bool> IsUserIdentityIdUniqueAsync(Guid userIdentityId, CancellationToken ct) 
-            => !await _db.Persons.AnyAsync(x=>x.UserIdentityId == userIdentityId, ct);
+            => !await _db.Persons
+                .AsNoTracking()
+                .AnyAsync(x=>x.UserIdentityId == userIdentityId, ct);
     }
     
     internal sealed class CreatePersonCommandHandler(ApplicationDbContext db) : IRequestHandler<CreatePersonCommand, Guid>

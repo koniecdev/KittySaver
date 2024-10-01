@@ -52,12 +52,14 @@ public sealed class Register : IEndpoint
                 .NotEmpty()
                 .Matches(ValidationPatterns.EmailPattern);
             RuleFor(x => x.Email)
-                .MustAsync(async (email, ct) => !await IsEmailUniqueAsync(email, ct))
+                .MustAsync(async (email, ct) => await IsEmailUniqueAsync(email, ct))
                 .WithMessage("Email is already registered in database");
         }
         
         private async Task<bool> IsEmailUniqueAsync(string email, CancellationToken ct) 
-            => !await _db.ApplicationUsers.AnyAsync(x=>x.Email == email, ct);
+            => !await _db.ApplicationUsers
+                .AsNoTracking()
+                .AnyAsync(x=>x.Email == email, ct);
     }
     
     internal sealed class RegisterCommandHandler(UserManager<ApplicationUser> userManager, IKittySaverApiClient client)
