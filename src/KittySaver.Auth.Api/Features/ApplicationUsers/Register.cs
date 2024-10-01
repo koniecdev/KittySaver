@@ -53,7 +53,7 @@ public sealed class Register : IEndpoint
                 .Matches(ValidationPatterns.EmailPattern);
             RuleFor(x => x.Email)
                 .MustAsync(async (email, ct) => await IsEmailUniqueAsync(email, ct))
-                .WithMessage("Email is already registered in database");
+                .WithMessage("Email is already used by another user.");
         }
         
         private async Task<bool> IsEmailUniqueAsync(string email, CancellationToken ct) 
@@ -68,12 +68,8 @@ public sealed class Register : IEndpoint
         public async Task<Guid> Handle(RegisterCommand request, CancellationToken cancellationToken)
         {
             ApplicationUser user = request.ToEntity();
-            IdentityResult identityResult = await userManager.CreateAsync(user, request.Password);
-            if (!identityResult.Succeeded)
-            {
-                throw new IdentityResultException(identityResult.Errors);
-            }
-
+            await userManager.CreateAsync(user, request.Password);
+            
             try
             {
                 _ = await client.CreatePerson(new IKittySaverApiClient.CreatePersonDto(
@@ -82,7 +78,7 @@ public sealed class Register : IEndpoint
             }
             catch (Exception)
             {
-                _ = await userManager.DeleteAsync(user);
+                await userManager.DeleteAsync(user);
                 throw;
             }
         }
