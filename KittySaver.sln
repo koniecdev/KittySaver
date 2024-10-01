@@ -1,11 +1,29 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.Api", "KittySaver.Api\KittySaver.Api.csproj", "{B9DD6FD4-F20F-4D36-A78D-73D48C86DB6A}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{74DEC7A6-AEB4-444C-A522-11F65EAFA372}"
 	ProjectSection(SolutionItems) = preProject
 		docker-compose.yml = docker-compose.yml
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8E9504A6-C398-4B17-864D-58F6254B0F7D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{EAA93F7D-FC99-4667-84A2-22C4C7C672AD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.Api", "src\KittySaver.Api\KittySaver.Api.csproj", "{A39A287C-B9B7-42A6-9A97-C839EF25818A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.Auth.Api", "src\KittySaver.Auth.Api\KittySaver.Auth.Api.csproj", "{D17EC53F-9014-49AF-B694-0C83C523B560}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.Auth.Api.Tests.Unit", "tests\KittySaver.Auth.Api.Tests.Unit\KittySaver.Auth.Api.Tests.Unit.csproj", "{D496F3D5-A04C-4A05-B623-E34B8F14362F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.Api.Tests.Unit", "tests\KittySaver.Api.Tests.Unit\KittySaver.Api.Tests.Unit.csproj", "{985A7DA6-8A0A-4DE5-9BC9-6EF02117EB16}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.Api.Tests.Integration", "tests\KittySaver.Api.Tests.Integration\KittySaver.Api.Tests.Integration.csproj", "{37EC39F0-9189-4B3B-9E61-35E5057072B2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.Auth.Api.Tests.Integration", "tests\KittySaver.Auth.Api.Tests.Integration\KittySaver.Auth.Api.Tests.Integration.csproj", "{89D62D13-A990-4FB8-9118-AF3FFD27869C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "tests\Shared\Shared.csproj", "{7740A292-2F7D-4A0B-A74B-1BAD9AD3170E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.WebApplication", "KittySaver.WebApplication\KittySaver.WebApplication.csproj", "{5B1BF275-4117-4C8C-8B8B-1A172B9D3E53}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,9 +31,49 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B9DD6FD4-F20F-4D36-A78D-73D48C86DB6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B9DD6FD4-F20F-4D36-A78D-73D48C86DB6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B9DD6FD4-F20F-4D36-A78D-73D48C86DB6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B9DD6FD4-F20F-4D36-A78D-73D48C86DB6A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A39A287C-B9B7-42A6-9A97-C839EF25818A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A39A287C-B9B7-42A6-9A97-C839EF25818A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A39A287C-B9B7-42A6-9A97-C839EF25818A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A39A287C-B9B7-42A6-9A97-C839EF25818A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D17EC53F-9014-49AF-B694-0C83C523B560}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D17EC53F-9014-49AF-B694-0C83C523B560}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D17EC53F-9014-49AF-B694-0C83C523B560}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D17EC53F-9014-49AF-B694-0C83C523B560}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D496F3D5-A04C-4A05-B623-E34B8F14362F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D496F3D5-A04C-4A05-B623-E34B8F14362F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D496F3D5-A04C-4A05-B623-E34B8F14362F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D496F3D5-A04C-4A05-B623-E34B8F14362F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{985A7DA6-8A0A-4DE5-9BC9-6EF02117EB16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{985A7DA6-8A0A-4DE5-9BC9-6EF02117EB16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{985A7DA6-8A0A-4DE5-9BC9-6EF02117EB16}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{985A7DA6-8A0A-4DE5-9BC9-6EF02117EB16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37EC39F0-9189-4B3B-9E61-35E5057072B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37EC39F0-9189-4B3B-9E61-35E5057072B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37EC39F0-9189-4B3B-9E61-35E5057072B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37EC39F0-9189-4B3B-9E61-35E5057072B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{89D62D13-A990-4FB8-9118-AF3FFD27869C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89D62D13-A990-4FB8-9118-AF3FFD27869C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89D62D13-A990-4FB8-9118-AF3FFD27869C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89D62D13-A990-4FB8-9118-AF3FFD27869C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7740A292-2F7D-4A0B-A74B-1BAD9AD3170E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7740A292-2F7D-4A0B-A74B-1BAD9AD3170E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7740A292-2F7D-4A0B-A74B-1BAD9AD3170E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7740A292-2F7D-4A0B-A74B-1BAD9AD3170E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B1BF275-4117-4C8C-8B8B-1A172B9D3E53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B1BF275-4117-4C8C-8B8B-1A172B9D3E53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B1BF275-4117-4C8C-8B8B-1A172B9D3E53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B1BF275-4117-4C8C-8B8B-1A172B9D3E53}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{8E9504A6-C398-4B17-864D-58F6254B0F7D} = {74DEC7A6-AEB4-444C-A522-11F65EAFA372}
+		{EAA93F7D-FC99-4667-84A2-22C4C7C672AD} = {74DEC7A6-AEB4-444C-A522-11F65EAFA372}
+		{A39A287C-B9B7-42A6-9A97-C839EF25818A} = {8E9504A6-C398-4B17-864D-58F6254B0F7D}
+		{D17EC53F-9014-49AF-B694-0C83C523B560} = {8E9504A6-C398-4B17-864D-58F6254B0F7D}
+		{D496F3D5-A04C-4A05-B623-E34B8F14362F} = {EAA93F7D-FC99-4667-84A2-22C4C7C672AD}
+		{985A7DA6-8A0A-4DE5-9BC9-6EF02117EB16} = {EAA93F7D-FC99-4667-84A2-22C4C7C672AD}
+		{37EC39F0-9189-4B3B-9E61-35E5057072B2} = {EAA93F7D-FC99-4667-84A2-22C4C7C672AD}
+		{89D62D13-A990-4FB8-9118-AF3FFD27869C} = {EAA93F7D-FC99-4667-84A2-22C4C7C672AD}
+		{7740A292-2F7D-4A0B-A74B-1BAD9AD3170E} = {EAA93F7D-FC99-4667-84A2-22C4C7C672AD}
+		{5B1BF275-4117-4C8C-8B8B-1A172B9D3E53} = {8E9504A6-C398-4B17-864D-58F6254B0F7D}
 	EndGlobalSection
 EndGlobal
