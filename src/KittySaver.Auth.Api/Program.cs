@@ -1,14 +1,7 @@
-using System.Net;
 using System.Reflection;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
 using KittySaver.Auth.Api.Shared.Extensions;
-using KittySaver.Auth.Api.Shared.Infrastructure.Clients;
-using KittySaver.Auth.Api.Shared.Security;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Serilog;
 
 IConfigurationRoot configuration = new ConfigurationBuilder()

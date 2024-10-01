@@ -1,49 +1,37 @@
 ﻿using FluentValidation;
 using KittySaver.Auth.Api.Shared.Domain.Entites;
-using KittySaver.Auth.Api.Shared.Exceptions;
 using KittySaver.Auth.Api.Shared.Infrastructure.ApiComponents;
-using KittySaver.Auth.Api.Shared.Infrastructure.Clients;
 using KittySaver.Auth.Api.Shared.Infrastructure.Endpoints;
 using KittySaver.Auth.Api.Shared.Persistence;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Riok.Mapperly.Abstractions;
 
 namespace KittySaver.Auth.Api.Features.ApplicationUsers;
 
 public sealed class DeleteApplicationUser : IEndpoint
 {
-    public sealed record DeleteApplicationUserCommand(
-        Guid Id) : ICommand;
+    public sealed record DeleteApplicationUserCommand(Guid Id) : ICommand;
 
     public sealed class DeleteApplicationUserCommandValidator
-        : AbstractValidator<DeleteApplicationUserCommand>, IAsyncValidator
+        : AbstractValidator<DeleteApplicationUserCommand>
     {
-        private readonly ApplicationDbContext _db;
-
-        public DeleteApplicationUserCommandValidator(ApplicationDbContext db)
+        public DeleteApplicationUserCommandValidator()
         {
-            _db = db;
-            RuleFor(x => x.Id)
-                .NotEmpty();
-            RuleFor(x => x.Id)
-                .MustAsync(async (id, ct) => await IsUserExistingInDatabase(id, ct))
-                .WithMessage("User must exist in database to delete it");
+            RuleFor(x => x.Id).NotEmpty();
         }
-        
-        private async Task<bool> IsUserExistingInDatabase(Guid id, CancellationToken ct) 
-            => await _db.ApplicationUsers.AnyAsync(x=>x.Id == id, ct);
     }
     
-    internal sealed class DeleteApplicationUserCommandHandler(ApplicationDbContext db)
+    internal sealed class DeleteApplicationUserCommandHandler(UserManager<ApplicationUser> userManager)
         : IRequestHandler<DeleteApplicationUserCommand>
     {
         public async Task Handle(DeleteApplicationUserCommand request, CancellationToken cancellationToken)
         {
-            _ = await db.ApplicationUsers
-                .Where(x => x.Id == request.Id)
-                .ExecuteDeleteAsync(cancellationToken);
+            ApplicationUser user = await userManager.Users
+                .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken)
+                ?? throw new ApplicationUser.Exceptions.ApplicationUserNotFoundException();
+            //TODO: HttpClient DELETE user
+            IdentityResult deleteResults = await userManager.DeleteAsync(user);
         }
     }
     
@@ -57,6 +45,6 @@ public sealed class DeleteApplicationUser : IEndpoint
             DeleteApplicationUserCommand command = new(id);
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
-        }).RequireAuthorization();;
+        }).RequireAuthorization();
     }
 }

@@ -1,13 +1,11 @@
 ﻿using FluentValidation;
 using KittySaver.Auth.Api.Features.ApplicationUsers.SharedContracts;
 using KittySaver.Auth.Api.Shared.Domain.Entites;
-using KittySaver.Auth.Api.Shared.Exceptions;
 using KittySaver.Auth.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Auth.Api.Shared.Infrastructure.Clients;
 using KittySaver.Auth.Api.Shared.Infrastructure.Endpoints;
 using KittySaver.Auth.Api.Shared.Persistence;
 using MediatR;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Riok.Mapperly.Abstractions;
 
@@ -29,12 +27,12 @@ public sealed class UpdateApplicationUser : IEndpoint
         string Email,
         string PhoneNumber) : ICommand;
 
-    public sealed class RegisterCommandValidator
+    public sealed class UpdateApplicationUserCommandValidator
         : AbstractValidator<UpdateApplicationUserCommand>, IAsyncValidator
     {
         private readonly ApplicationDbContext _db;
 
-        public RegisterCommandValidator(ApplicationDbContext db)
+        public UpdateApplicationUserCommandValidator(ApplicationDbContext db)
         {
             _db = db; 
             RuleFor(x => x.FirstName).NotEmpty();
@@ -51,10 +49,9 @@ public sealed class UpdateApplicationUser : IEndpoint
                 .WithMessage("Email is already used by different account in database");
         }
 
-        private async Task<bool> IsEmailAlreadyUsedBySomeoneElseInDb(UpdateApplicationUserCommand command, string email, CancellationToken ct)
-        {
-            return await _db.ApplicationUsers.AnyAsync(x => x.Email == email && x.Id != command.Id, ct);
-        } 
+        private async Task<bool> IsEmailAlreadyUsedBySomeoneElseInDb(UpdateApplicationUserCommand command, string email, CancellationToken ct) 
+            => await _db.ApplicationUsers.AnyAsync(x => x.Email == email && x.Id != command.Id, ct);
+
         private async Task<bool> IsUserExistingInDatabase(Guid id, CancellationToken ct) 
             => await _db.ApplicationUsers.AnyAsync(x=>x.Id == id, ct);
     }

@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Net;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 using KittySaver.Auth.Api.Shared.Exceptions;
 using Microsoft.AspNetCore.Mvc;

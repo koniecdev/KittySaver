@@ -1,11 +1,7 @@
-﻿using System.Security.Claims;
-using System.Text;
-using System.Text.Encodings.Web;
-using KittySaver.Auth.Api.Shared.Infrastructure.Clients;
+﻿using KittySaver.Auth.Api.Shared.Infrastructure.Clients;
 using KittySaver.Auth.Api.Shared.Infrastructure.Services;
 using KittySaver.Auth.Api.Shared.Persistence;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -14,12 +10,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 using Shared;
 using Testcontainers.MsSql;
 

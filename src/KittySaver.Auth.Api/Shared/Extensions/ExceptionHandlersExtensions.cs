@@ -1,5 +1,4 @@
-﻿using KittySaver.Auth.Api.Shared.Exceptions;
-using KittySaver.Auth.Api.Shared.Infrastructure.ExceptionHandlers;
+﻿using KittySaver.Auth.Api.Shared.Infrastructure.ExceptionHandlers;
 
 namespace KittySaver.Auth.Api.Shared.Extensions;
 

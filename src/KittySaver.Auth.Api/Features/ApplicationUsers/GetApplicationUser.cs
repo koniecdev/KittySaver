@@ -5,7 +5,6 @@ using KittySaver.Auth.Api.Shared.Infrastructure.Endpoints;
 using KittySaver.Auth.Api.Shared.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Riok.Mapperly.Abstractions;
 
 namespace KittySaver.Auth.Api.Features.ApplicationUsers;
 
