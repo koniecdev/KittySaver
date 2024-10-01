@@ -19,8 +19,9 @@ public sealed class GetApplicationUser : IEndpoint
         {
             ApplicationUserResponse applicationUser = await db.ApplicationUsers
                 .AsNoTracking()
+                .Where(x=>x.Id == request.Id)
                 .ProjectToDto()
-                .FirstOrDefaultAsync(x=>x.Id == request.Id, cancellationToken)
+                .FirstOrDefaultAsync(cancellationToken)
                 ?? throw new ApplicationUser.Exceptions.ApplicationUserNotFoundException();
             return applicationUser;
         }
