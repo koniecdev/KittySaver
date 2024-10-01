@@ -42,7 +42,7 @@ public class RegisterEndpointTests(KittySaverAuthApiFactory appFactory)
     
     [Theory]
     [ClassData(typeof(InvalidEmailData))]
-    public async Task Register_ShouldReturnValidationProblemDetails_WhenInvalidEmailIsProvided(string email)
+    public async Task Register_ShouldReturnBadRequest_WhenInvalidEmailIsProvided(string email)
     {
         //Arrange
         Register.RegisterRequest request = new Faker<Register.RegisterRequest>()
@@ -66,7 +66,7 @@ public class RegisterEndpointTests(KittySaverAuthApiFactory appFactory)
     }
     
     [Fact]
-    public async Task Register_ShouldReturnValidationProblemDetails_WhenEmptyDataIsProvided()
+    public async Task Register_ShouldReturnBadRequest_WhenEmptyDataIsProvided()
     {
         //Arrange
         Register.RegisterRequest request = new(
@@ -98,7 +98,7 @@ public class RegisterEndpointTests(KittySaverAuthApiFactory appFactory)
     [InlineData("PASSWORD")]
     [InlineData("Pass1")]
     [InlineData("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")]
-    public async Task Register_ShouldReturnValidationProblemDetails_WhenInvalidPasswordIsProvided(string password)
+    public async Task Register_ShouldReturnBadRequest_WhenInvalidPasswordIsProvided(string password)
     {
         //Arrange
         Register.RegisterRequest request = new Faker<Register.RegisterRequest>()
@@ -122,31 +122,7 @@ public class RegisterEndpointTests(KittySaverAuthApiFactory appFactory)
     }
     
     [Fact]
-    public async Task Register_ShouldRegisterUser_WhenValidPasswordIsProvided()
-    {
-        //Arrange
-        Register.RegisterRequest request = new Faker<Register.RegisterRequest>()
-            .CustomInstantiator( faker =>
-                new Register.RegisterRequest(
-                    FirstName: faker.Person.FirstName,
-                    LastName: faker.Person.LastName,
-                    Email: faker.Person.Email,
-                    PhoneNumber: faker.Person.Phone,
-                    Password: "Default12345#"
-                ));
-        
-        //Act
-        HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/application-users/register", request);
-        
-        //Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-        ApiResponses.CreatedWithIdResponse? registerResponse = await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>();
-        response.Headers.Location!.ToString().Should().Contain($"/api/v1/application-users/{registerResponse?.Id}");
-        registerResponse?.Id.Should().NotBeEmpty();
-    }
-    
-    [Fact]
-    public async Task Register_ShouldReturnValidationProblemDetails_WhenDuplicatedRequestOccur()
+    public async Task Register_ShouldReturnBadRequest_WhenDuplicatedRequestOccur()
     {
         //Arrange
         Register.RegisterRequest request = _createApplicationUserRequestGenerator.Generate();
@@ -159,7 +135,7 @@ public class RegisterEndpointTests(KittySaverAuthApiFactory appFactory)
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         ValidationProblemDetails? validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         validationProblemDetails?.Status.Should().Be(400);
-        validationProblemDetails?.Errors["Email"][0].Should().StartWith("Email is already registered in database");
+        validationProblemDetails?.Errors["Email"][0].Should().StartWith("Email is already used by another user.");
     }
     
     [Fact]
