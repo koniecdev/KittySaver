@@ -72,7 +72,7 @@ public sealed class Register : IEndpoint
             
             try
             {
-                _ = await client.CreatePerson(new IKittySaverApiClient.CreatePersonDto(
+                await client.CreatePerson(new IKittySaverApiClient.CreatePersonDto(
                     user.FirstName, user.LastName, user.Email!, user.PhoneNumber!, user.Id));
                 return user.Id;
             }

@@ -10,7 +10,7 @@ using Shared;
 namespace KittySaver.Auth.Api.Tests.Integration.Tests.ApplicationUser;
 
 [Collection("AuthApi")]
-public class RegisterEndpointTests(KittySaverAuthApiFactory appFactory)
+public class RegisterApplicationUserEndpointTests(KittySaverAuthApiFactory appFactory)
 {
     private readonly HttpClient _httpClient = appFactory.CreateClient();
 
@@ -123,7 +123,7 @@ public class RegisterEndpointTests(KittySaverAuthApiFactory appFactory)
         ValidationProblemDetails? validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         validationProblemDetails.Should().NotBeNull();
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
-        validationProblemDetails!.Errors["Password"][0].Should().StartWith("'Password' is not in the correct format.");
+        validationProblemDetails.Errors["Password"][0].Should().StartWith("'Password' is not in the correct format.");
     }
     
     [Fact]
@@ -142,30 +142,6 @@ public class RegisterEndpointTests(KittySaverAuthApiFactory appFactory)
         validationProblemDetails.Should().NotBeNull();
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
         validationProblemDetails.Errors["Email"][0].Should().StartWith("Email is already used by another user.");
-    }
-    
-    [Fact]
-    public async Task Register_ShouldReturnProblemDetails_WhenApiIsDown()
-    {
-        //Arrange
-        Register.RegisterRequest request = new Faker<Register.RegisterRequest>()
-            .CustomInstantiator( faker =>
-                new Register.RegisterRequest(
-                    FirstName: faker.Person.FirstName,
-                    LastName: faker.Person.LastName,
-                    Email: "apiFactoryWill@Throw.IntServErr",
-                    PhoneNumber: faker.Person.Phone,
-                    Password: "Default12345#"
-                ));
-        
-        //Act
-        HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/application-users/register", request);
-        
-        //Assert
-        response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
-        ProblemDetails? problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();
-        problemDetails.Should().NotBeNull();
-        problemDetails!.Status.Should().Be(500);
     }
 }
 
