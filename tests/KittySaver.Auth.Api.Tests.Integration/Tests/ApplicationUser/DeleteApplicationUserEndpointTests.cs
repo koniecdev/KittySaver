@@ -10,7 +10,7 @@ using Shared;
 namespace KittySaver.Auth.Api.Tests.Integration.Tests.ApplicationUser;
 
 [Collection("AuthApi")]
-public class DeleteEndpointTests(KittySaverAuthApiFactory appFactory)
+public class DeleteApplicationUserEndpointTests(KittySaverAuthApiFactory appFactory)
 {
     private readonly HttpClient _httpClient = appFactory.CreateClient();
 

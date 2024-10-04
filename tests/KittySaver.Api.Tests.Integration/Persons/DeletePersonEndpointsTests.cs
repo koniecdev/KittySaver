@@ -84,10 +84,10 @@ public class DeletePersonEndpointsTests(KittySaverApiFactory appFactory)
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
         validationProblemDetails.Errors.Count.Should().Be(1);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo([
-            nameof(DeletePerson.DeletePersonCommand.Id)
+            nameof(DeletePerson.DeletePersonCommand.IdOrUserIdentityId)
         ]);
         validationProblemDetails.Errors.Values.Count.Should().Be(1);
-        validationProblemDetails.Errors[nameof(DeletePerson.DeletePersonCommand.Id)][0]
-            .Should().Be("'Id' must not be empty.");
+        validationProblemDetails.Errors[nameof(DeletePerson.DeletePersonCommand.IdOrUserIdentityId)][0]
+            .Should().Be("'Id Or User Identity Id' must not be empty.");
     }
 }
