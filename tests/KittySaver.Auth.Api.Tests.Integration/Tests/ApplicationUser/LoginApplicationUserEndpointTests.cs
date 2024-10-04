@@ -10,7 +10,7 @@ using Shared;
 namespace KittySaver.Auth.Api.Tests.Integration.Tests.ApplicationUser;
 
 [Collection("AuthApi")]
-public class LoginEndpointTests(KittySaverAuthApiFactory appFactory)
+public class LoginApplicationUserEndpointTests(KittySaverAuthApiFactory appFactory)
 {
     private readonly HttpClient _httpClient = appFactory.CreateClient();
 
