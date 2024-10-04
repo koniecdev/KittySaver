@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using Bogus;
 using FluentAssertions;
 using KittySaver.Auth.Api.Features.ApplicationUsers;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
 
@@ -36,8 +37,9 @@ public class RegisterEndpointTests(KittySaverAuthApiFactory appFactory)
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         ApiResponses.CreatedWithIdResponse? registerResponse = await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>();
+        registerResponse.Should().NotBeNull();
         response.Headers.Location!.ToString().Should().Contain($"/api/v1/application-users/{registerResponse?.Id}");
-        registerResponse?.Id.Should().NotBeEmpty();
+        registerResponse!.Id.Should().NotBeEmpty();
     }
     
     [Theory]
@@ -61,8 +63,9 @@ public class RegisterEndpointTests(KittySaverAuthApiFactory appFactory)
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         ValidationProblemDetails? validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
-        validationProblemDetails?.Status.Should().Be(400);
-        validationProblemDetails?.Errors["Email"][0].Should().Be("'Email' is not in the correct format.");
+        validationProblemDetails.Should().NotBeNull();
+        validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
+        validationProblemDetails.Errors["Email"][0].Should().Be("'Email' is not in the correct format.");
     }
     
     [Fact]
@@ -83,12 +86,13 @@ public class RegisterEndpointTests(KittySaverAuthApiFactory appFactory)
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         ValidationProblemDetails? validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
-        validationProblemDetails?.Status.Should().Be(400);
-        validationProblemDetails?.Errors["FirstName"][0].Should().Be("'First Name' must not be empty.");
-        validationProblemDetails?.Errors["LastName"][0].Should().Be("'Last Name' must not be empty.");
-        validationProblemDetails?.Errors["PhoneNumber"][0].Should().Be("'Phone Number' must not be empty.");
-        validationProblemDetails?.Errors["Email"][0].Should().Be("'Email' must not be empty.");
-        validationProblemDetails?.Errors["Password"][0].Should().Be("'Password' must not be empty.");
+        validationProblemDetails.Should().NotBeNull();
+        validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
+        validationProblemDetails.Errors["FirstName"][0].Should().Be("'First Name' must not be empty.");
+        validationProblemDetails.Errors["LastName"][0].Should().Be("'Last Name' must not be empty.");
+        validationProblemDetails.Errors["PhoneNumber"][0].Should().Be("'Phone Number' must not be empty.");
+        validationProblemDetails.Errors["Email"][0].Should().Be("'Email' must not be empty.");
+        validationProblemDetails.Errors["Password"][0].Should().Be("'Password' must not be empty.");
     }
     
     [Theory]
@@ -117,8 +121,9 @@ public class RegisterEndpointTests(KittySaverAuthApiFactory appFactory)
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         ValidationProblemDetails? validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
-        validationProblemDetails?.Status.Should().Be(400);
-        validationProblemDetails?.Errors["Password"][0].Should().StartWith("'Password' is not in the correct format.");
+        validationProblemDetails.Should().NotBeNull();
+        validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
+        validationProblemDetails!.Errors["Password"][0].Should().StartWith("'Password' is not in the correct format.");
     }
     
     [Fact]
@@ -134,8 +139,9 @@ public class RegisterEndpointTests(KittySaverAuthApiFactory appFactory)
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         ValidationProblemDetails? validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
-        validationProblemDetails?.Status.Should().Be(400);
-        validationProblemDetails?.Errors["Email"][0].Should().StartWith("Email is already used by another user.");
+        validationProblemDetails.Should().NotBeNull();
+        validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
+        validationProblemDetails.Errors["Email"][0].Should().StartWith("Email is already used by another user.");
     }
     
     [Fact]
@@ -158,7 +164,8 @@ public class RegisterEndpointTests(KittySaverAuthApiFactory appFactory)
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
         ProblemDetails? problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();
-        problemDetails?.Status.Should().Be(500);
+        problemDetails.Should().NotBeNull();
+        problemDetails!.Status.Should().Be(500);
     }
 }
 
