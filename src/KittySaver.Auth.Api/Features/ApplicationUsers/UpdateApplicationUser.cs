@@ -16,44 +16,21 @@ public sealed class UpdateApplicationUser : IEndpoint
 {
     public sealed record UpdateApplicationUserRequest(
         string FirstName,
-        string LastName,
-        string Email,
-        string PhoneNumber);
+        string LastName);
     
     public sealed record UpdateApplicationUserCommand(
         Guid Id,
         string FirstName,
-        string LastName,
-        string Email,
-        string PhoneNumber) : ICommand;
+        string LastName) : ICommand;
 
     public sealed class UpdateApplicationUserCommandValidator
-        : AbstractValidator<UpdateApplicationUserCommand>, IAsyncValidator
+        : AbstractValidator<UpdateApplicationUserCommand>
     {
-        private readonly ApplicationDbContext _db;
-
-        public UpdateApplicationUserCommandValidator(ApplicationDbContext db)
+        public UpdateApplicationUserCommandValidator()
         {
-            _db = db; 
             RuleFor(x => x.FirstName).NotEmpty();
             RuleFor(x => x.LastName).NotEmpty();
-            RuleFor(x => x.PhoneNumber).NotEmpty();
-            RuleFor(x => x.Id)
-                .MustAsync(async (id, ct) => await IsUserExistingInDatabase(id, ct))
-                .WithMessage("User must exist in database to delete it");
-            RuleFor(x => x.Email)
-                .NotEmpty()
-                .Matches(ValidationPatterns.EmailPattern);
-            RuleFor(x => x.Email)
-                .MustAsync(async (command, email, ct) => !await IsEmailAlreadyUsedBySomeoneElseInDb(command, email, ct))
-                .WithMessage("Email is already used by different account in database");
         }
-
-        private async Task<bool> IsEmailAlreadyUsedBySomeoneElseInDb(UpdateApplicationUserCommand command, string email, CancellationToken ct) 
-            => await _db.ApplicationUsers.AnyAsync(x => x.Email == email && x.Id != command.Id, ct);
-
-        private async Task<bool> IsUserExistingInDatabase(Guid id, CancellationToken ct) 
-            => await _db.ApplicationUsers.AnyAsync(x=>x.Id == id, ct);
     }
     
     internal sealed class UpdateApplicationUserCommandHandler(ApplicationDbContext db, IKittySaverApiClient client)
@@ -65,6 +42,8 @@ public sealed class UpdateApplicationUser : IEndpoint
                 .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken)
                 ?? throw new ApplicationUser.Exceptions.ApplicationUserNotFoundException();
             UpdateApplicationUserMapper.UpdateEntityWithCommandData(request, user);
+            await client.UpdatePerson(user.Id, new IKittySaverApiClient.UpdatePersonDto(
+                user.FirstName, user.LastName, user.Email!, user.PhoneNumber!));
             await db.SaveChangesAsync(cancellationToken);
         }
     }
@@ -88,6 +67,8 @@ public sealed class UpdateApplicationUser : IEndpoint
 public static partial class UpdateApplicationUserMapper
 {
     public static partial UpdateApplicationUser.UpdateApplicationUserCommand ToUpdateCommand(this UpdateApplicationUser.UpdateApplicationUserRequest request, Guid id);
+    [MapperIgnoreTarget(nameof(ApplicationUser.Email))]
+    [MapperIgnoreTarget(nameof(ApplicationUser.PhoneNumber))]
     public static partial void UpdateEntityWithCommandData(UpdateApplicationUser.UpdateApplicationUserCommand source,
         ApplicationUser target);
 }

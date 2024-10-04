@@ -41,7 +41,6 @@ public sealed class Register : IEndpoint
             RuleFor(x => x.Password)
                 .NotEmpty();
             RuleFor(x => x.Password)
-                .NotEmpty().WithMessage("'Password' is not in the correct format. Your password cannot be empty")
                 .MinimumLength(8).WithMessage("'Password' is not in the correct format. Your password length must be at least 8.")
                 .Matches("[A-Z]+").WithMessage("'Password' is not in the correct format. Your password must contain at least one uppercase letter.")
                 .Matches("[a-z]+").WithMessage("'Password' is not in the correct format. Your password must contain at least one lowercase letter.")
@@ -53,14 +52,14 @@ public sealed class Register : IEndpoint
                 .NotEmpty()
                 .Matches(ValidationPatterns.EmailPattern);
             RuleFor(x => x.Email)
-                .MustAsync(async (email, ct) => !await IsEmailAlreadyRegisteredInDb(email, ct))
-                .WithMessage("Email is already registered in database");
+                .MustAsync(async (email, ct) => await IsEmailUniqueAsync(email, ct))
+                .WithMessage("Email is already used by another user.");
         }
         
-        private async Task<bool> IsEmailAlreadyRegisteredInDb(string email, CancellationToken ct)
-        {
-            return await _db.ApplicationUsers.AnyAsync(x=>x.Email == email, ct);
-        }
+        private async Task<bool> IsEmailUniqueAsync(string email, CancellationToken ct) 
+            => !await _db.ApplicationUsers
+                .AsNoTracking()
+                .AnyAsync(x=>x.Email == email, ct);
     }
     
     internal sealed class RegisterCommandHandler(UserManager<ApplicationUser> userManager, IKittySaverApiClient client)
@@ -69,21 +68,17 @@ public sealed class Register : IEndpoint
         public async Task<Guid> Handle(RegisterCommand request, CancellationToken cancellationToken)
         {
             ApplicationUser user = request.ToEntity();
-            IdentityResult identityResult = await userManager.CreateAsync(user, request.Password);
-            if (!identityResult.Succeeded)
-            {
-                throw new IdentityResultException(identityResult.Errors);
-            }
-
+            await userManager.CreateAsync(user, request.Password);
+            
             try
             {
-                _ = await client.CreatePerson(new IKittySaverApiClient.CreatePersonDto(
+                await client.CreatePerson(new IKittySaverApiClient.CreatePersonDto(
                     user.FirstName, user.LastName, user.Email!, user.PhoneNumber!, user.Id));
                 return user.Id;
             }
             catch (Exception)
             {
-                _ = await userManager.DeleteAsync(user);
+                await userManager.DeleteAsync(user);
                 throw;
             }
         }

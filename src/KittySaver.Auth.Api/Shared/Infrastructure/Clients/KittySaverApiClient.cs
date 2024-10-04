@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Net;
+using System.Text;
 using System.Text.Json;
 using KittySaver.Auth.Api.Shared.Exceptions;
 using Microsoft.AspNetCore.Mvc;
@@ -23,16 +24,18 @@ public interface IKittySaverApiClient
     public sealed record CreatePersonDto(string FirstName, string LastName, string Email, string PhoneNumber, Guid UserIdentityId);
     public sealed record UpdatePersonDto(string FirstName, string LastName, string Email, string PhoneNumber);
     Task<ICollection<PersonDto>> GetPersons();
+    Task<PersonDto> GetPerson(Guid id);
     public Task<Guid> CreatePerson(CreatePersonDto request);
-    public Task UpdatePerson(string id, UpdatePersonDto request);
+    public Task UpdatePerson(Guid id, UpdatePersonDto request);
+    public Task DeletePerson(Guid id);
 }
 
 public class KittySaverApiClient(HttpClient client) : IKittySaverApiClient
 {
     public static class Exceptions
     {
-            public sealed class DeserializationOfApiResponseException() 
-                : BadRequestException("ExternalApi.Response", "Something went wrong with deserialization of external api response");
+        public sealed class DeserializationOfApiResponseException() 
+            : BadRequestException("ExternalApi.Response", "Something went wrong with deserialization of external api response");
     }
     public async Task<ICollection<IKittySaverApiClient.PersonDto>> GetPersons()
     {
@@ -42,6 +45,14 @@ public class KittySaverApiClient(HttpClient client) : IKittySaverApiClient
         return dtos;
     }
     
+    public async Task<IKittySaverApiClient.PersonDto> GetPerson(Guid id)
+    {
+        HttpResponseMessage response = await client.GetAsync($"v1/persons/{id}");
+        IKittySaverApiClient.PersonDto dto = await response.Content.ReadFromJsonAsync<IKittySaverApiClient.PersonDto>()
+            ?? throw new Exceptions.DeserializationOfApiResponseException();
+        return dto;
+    }
+
     public async Task<Guid> CreatePerson(IKittySaverApiClient.CreatePersonDto request)
     {
         string serializedRequest = JsonSerializer.Serialize(request);
@@ -49,13 +60,16 @@ public class KittySaverApiClient(HttpClient client) : IKittySaverApiClient
         HttpResponseMessage response = await client.PostAsync("v1/persons", bodyContent);
         if (!response.IsSuccessStatusCode)
         {
-            ValidationProblemDetails? validationProblemDetails =
-                await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
-            ProblemDetails? problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();
-            if (validationProblemDetails is not null)
+            if (response.StatusCode is HttpStatusCode.BadRequest)
             {
-                throw new ApiValidationException(validationProblemDetails);
+                ValidationProblemDetails? validationProblemDetails =
+                    await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+                if (validationProblemDetails is not null)
+                {
+                    throw new ApiValidationException(validationProblemDetails);
+                }
             }
+            ProblemDetails? problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();
             if (problemDetails is not null)
             {
                 throw new ApiException(problemDetails);
@@ -68,20 +82,45 @@ public class KittySaverApiClient(HttpClient client) : IKittySaverApiClient
         return idResponse.Id;
     }
     
-    public async Task UpdatePerson(string id, IKittySaverApiClient.UpdatePersonDto request)
+    public async Task UpdatePerson(Guid id, IKittySaverApiClient.UpdatePersonDto request)
     {
         string serializedRequest = JsonSerializer.Serialize(request);
         StringContent bodyContent = new StringContent(serializedRequest, Encoding.UTF8, "application/json");
-        HttpResponseMessage response = await client.PostAsync($"v1/persons/{id}", bodyContent);
+        HttpResponseMessage response = await client.PutAsync($"v1/persons/{id}", bodyContent);
         if (!response.IsSuccessStatusCode)
         {
-            ValidationProblemDetails? validationProblemDetails =
-                await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
-            ProblemDetails? problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();
-            if (validationProblemDetails is not null)
+            if (response.StatusCode is HttpStatusCode.BadRequest)
             {
-                throw new ApiValidationException(validationProblemDetails);
+                ValidationProblemDetails? validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+                if (validationProblemDetails is not null)
+                {
+                    throw new ApiValidationException(validationProblemDetails); 
+                }
             }
+            ProblemDetails? problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+            if (problemDetails is not null)
+            {
+                throw new ApiException(problemDetails);
+            }
+            throw new Exceptions.DeserializationOfApiResponseException();
+        }
+    }
+    
+    public async Task DeletePerson(Guid id)
+    {
+        HttpResponseMessage response = await client.DeleteAsync($"v1/persons/{id}");
+        if (!response.IsSuccessStatusCode)
+        {
+            if (response.StatusCode is HttpStatusCode.BadRequest)
+            {
+                ValidationProblemDetails? validationProblemDetails =
+                    await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+                if (validationProblemDetails is not null)
+                {
+                    throw new ApiValidationException(validationProblemDetails); 
+                }
+            }
+            ProblemDetails? problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();
             if (problemDetails is not null)
             {
                 throw new ApiException(problemDetails);

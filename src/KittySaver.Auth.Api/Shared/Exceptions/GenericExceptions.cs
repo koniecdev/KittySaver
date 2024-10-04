@@ -19,8 +19,3 @@ public class BadRequestException(string applicationCode, string description) : E
     public string ApplicationCode { get; } = applicationCode;
     public string Description { get; } = description;
 }
-
-public class IdentityResultException(IEnumerable<IdentityError> identityErrors) : Exception
-{
-    public IEnumerable<IdentityError> IdentityErrors { get; } = identityErrors;
-}

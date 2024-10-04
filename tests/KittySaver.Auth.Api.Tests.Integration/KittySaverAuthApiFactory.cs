@@ -94,17 +94,6 @@ public class KittySaverAuthApiFactory : WebApplicationFactory<IApiMarker>, IAsyn
             }
             
             IKittySaverApiClient mockKittySaverApiClient = Substitute.For<IKittySaverApiClient>();
-            
-            mockKittySaverApiClient
-                .CreatePerson(Arg.Any<IKittySaverApiClient.CreatePersonDto>())
-                .Returns(callInfo => {
-                    IKittySaverApiClient.CreatePersonDto? createPersonDto = callInfo.Arg<IKittySaverApiClient.CreatePersonDto>();
-                    if (createPersonDto.Email == "apiFactoryWill@Throw.IntServErr") {
-                        throw new Exception("Internal Server Error");
-                    }
-                    return Guid.NewGuid();
-                });
-            
             services.AddSingleton(mockKittySaverApiClient);
         });
     }

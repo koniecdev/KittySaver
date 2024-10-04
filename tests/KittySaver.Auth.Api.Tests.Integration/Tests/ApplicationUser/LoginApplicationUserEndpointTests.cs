@@ -3,13 +3,14 @@ using System.Net.Http.Json;
 using Bogus;
 using FluentAssertions;
 using KittySaver.Auth.Api.Features.ApplicationUsers;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
 
 namespace KittySaver.Auth.Api.Tests.Integration.Tests.ApplicationUser;
 
 [Collection("AuthApi")]
-public class LoginEndpointTests(KittySaverAuthApiFactory appFactory)
+public class LoginApplicationUserEndpointTests(KittySaverAuthApiFactory appFactory)
 {
     private readonly HttpClient _httpClient = appFactory.CreateClient();
 
@@ -69,7 +70,8 @@ public class LoginEndpointTests(KittySaverAuthApiFactory appFactory)
         //Assert
         responseMessage.StatusCode.Should().Be(HttpStatusCode.NotFound);
         ProblemDetails? problemDetails = await responseMessage.Content.ReadFromJsonAsync<ProblemDetails>();
-        problemDetails?.Status.Should().Be(404);
+        problemDetails.Should().NotBeNull();
+        problemDetails!.Status.Should().Be(StatusCodes.Status404NotFound);
     }
     
     [Fact]
@@ -82,12 +84,11 @@ public class LoginEndpointTests(KittySaverAuthApiFactory appFactory)
         
         //Act
         HttpResponseMessage responseMessage = await _httpClient.PostAsJsonAsync("api/v1/application-users/login", request);
-
         
         //Assert
         responseMessage.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         ValidationProblemDetails? validationProblemDetails = await responseMessage.Content.ReadFromJsonAsync<ValidationProblemDetails>();
-        validationProblemDetails?.Status.Should().Be(400);
+        validationProblemDetails?.Status.Should().Be(StatusCodes.Status400BadRequest);
         validationProblemDetails?.Errors["Email"][0].Should().Be("'Email' must not be empty.");
         validationProblemDetails?.Errors["Password"][0].Should().Be("'Password' must not be empty.");
     }
@@ -107,7 +108,7 @@ public class LoginEndpointTests(KittySaverAuthApiFactory appFactory)
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         ValidationProblemDetails? validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
-        validationProblemDetails?.Status.Should().Be(400);
+        validationProblemDetails?.Status.Should().Be(StatusCodes.Status400BadRequest);
         validationProblemDetails?.Errors["Email"][0].Should().Be("'Email' is not in the correct format.");
     }
     
