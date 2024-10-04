@@ -18,7 +18,7 @@ public sealed class UpdatePerson : IEndpoint
         string PhoneNumber);
     
     public sealed record UpdatePersonCommand(
-        Guid Id,
+        Guid IdOrUserIdentityId,
         string FirstName,
         string LastName,
         string Email,
@@ -31,7 +31,7 @@ public sealed class UpdatePerson : IEndpoint
         public UpdatePersonCommandValidator(ApplicationDbContext db)
         {
             _db = db; 
-            RuleFor(x => x.Id).NotEmpty();
+            RuleFor(x => x.IdOrUserIdentityId).NotEmpty();
             RuleFor(x => x.FirstName).NotEmpty();
             RuleFor(x => x.LastName).NotEmpty();
             RuleFor(x => x.PhoneNumber).NotEmpty();
@@ -48,12 +48,14 @@ public sealed class UpdatePerson : IEndpoint
         private async Task<bool> IsEmailUniqueAsync(UpdatePersonCommand command, string email, CancellationToken ct)
             => !await _db.Persons
                 .AsNoTracking()
-                .AnyAsync(x=>x.Email == email && x.Id != command.Id, ct);
+                .AnyAsync(x=>
+                    x.Email == email && x.Id != command.IdOrUserIdentityId && x.UserIdentityId != command.IdOrUserIdentityId, ct);
         
         private async Task<bool> IsPhoneUniqueAsync(UpdatePersonCommand command, string phone, CancellationToken ct)
             => !await _db.Persons
                 .AsNoTracking()
-                .AnyAsync(x=>x.PhoneNumber == phone && x.Id != command.Id, ct);
+                .AnyAsync(x=>
+                    x.PhoneNumber == phone && x.Id != command.IdOrUserIdentityId && x.UserIdentityId != command.IdOrUserIdentityId, ct);
     }
     
     internal sealed class UpdatePersonCommandHandler(ApplicationDbContext db)
@@ -62,7 +64,7 @@ public sealed class UpdatePerson : IEndpoint
         public async Task Handle(UpdatePersonCommand request, CancellationToken cancellationToken)
         {
             int numberOfUpdatedPersons = await db.Persons
-                .Where(x => x.Id == request.Id)
+                .Where(x => x.Id == request.IdOrUserIdentityId)
                 .ExecuteUpdateAsync(s => s
                     .SetProperty(x=>x.FirstName, request.FirstName)
                     .SetProperty(x=>x.LastName, request.LastName)
@@ -71,7 +73,7 @@ public sealed class UpdatePerson : IEndpoint
                     cancellationToken);
             if (numberOfUpdatedPersons == 0)
             {
-                throw new Person.PersonNotFoundException(request.Id);
+                throw new Person.PersonNotFoundException(request.IdOrUserIdentityId);
             }
         }
     }
@@ -94,5 +96,5 @@ public sealed class UpdatePerson : IEndpoint
 [Mapper]
 public static partial class UpdatePersonMapper
 {
-    public static partial UpdatePerson.UpdatePersonCommand ToUpdateCommand(this UpdatePerson.UpdatePersonRequest request, Guid id);
+    public static partial UpdatePerson.UpdatePersonCommand ToUpdateCommand(this UpdatePerson.UpdatePersonRequest request, Guid idOrUserIdentityId);
 }
