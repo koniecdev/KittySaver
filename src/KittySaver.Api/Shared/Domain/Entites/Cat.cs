@@ -19,6 +19,12 @@ public sealed class Cat : AuditableEntity
     
     public required Guid PersonId { get; init; }
     public Person Person { get; private set; } = null!;
+
+    public double GetPriorityScore(int daysAwaiting, ICatPriorityCalculator calculator)
+    {
+        double priority = calculator.Calculate(this, daysAwaiting);
+        return priority;
+    }
 }
 
 internal class CatConfiguration : IEntityTypeConfiguration<Cat>
@@ -36,5 +42,36 @@ internal class CatConfiguration : IEntityTypeConfiguration<Cat>
         builder.Property(x => x.AgeCategory).IsRequired();
         builder.Property(x => x.Behavior).IsRequired();
         builder.Property(x => x.HealthStatus).IsRequired();
+    }
+}
+
+public interface ICatPriorityCalculator
+{
+    public double Calculate(Cat cat, int daysAwaiting);
+}
+
+internal class DefaultCatPriorityCalculator : ICatPriorityCalculator
+{
+    public double Calculate(Cat cat, int daysAwaiting)
+    {
+        const double healthWeight = 2.0;
+        const double medicalHelpUrgencyWeight = 2.0;
+        const double behaviorWeight = 1.5;
+        const double ageWeight = 1.2;
+        const double daysAwaitingWeight = 0.5;
+    
+        int healthStatusPoints = cat.HealthStatus.MaxScorePoints - cat.HealthStatus.ScorePoints;
+        int behaviourPoints = cat.Behavior.MaxScorePoints - cat.Behavior.ScorePoints;
+        int medicalHelpUrgencyPoints =  cat.MedicalHelpUrgency.MaxScorePoints - cat.MedicalHelpUrgency.ScorePoints;
+        int ageCategoryPoints = cat.AgeCategory.MaxScorePoints - cat.AgeCategory.ScorePoints;
+        
+        double priority = 
+            healthStatusPoints * healthWeight
+            + medicalHelpUrgencyPoints * medicalHelpUrgencyWeight
+            + behaviourPoints * behaviorWeight
+            + ageCategoryPoints * ageWeight
+            + daysAwaiting * daysAwaitingWeight;
+        
+        return priority;
     }
 }
