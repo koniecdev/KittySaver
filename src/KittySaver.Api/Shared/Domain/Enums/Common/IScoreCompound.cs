@@ -3,4 +3,5 @@
 public interface IScoreCompound
 {
     public int ScorePoints { get; }
+    public int MaxScorePoints { get; }
 }
