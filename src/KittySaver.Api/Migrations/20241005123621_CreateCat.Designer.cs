@@ -4,6 +4,7 @@ using KittySaver.Api.Shared.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KittySaver.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241005123621_CreateCat")]
+    partial class CreateCat
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,15 +31,6 @@ namespace KittySaver.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("AdditionalRequirements")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("AgeCategory")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Behavior")
-                        .HasColumnType("int");
-
                     b.Property<string>("CreatedBy")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -44,25 +38,11 @@ namespace KittySaver.Api.Migrations
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<int>("HealthStatus")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsCastrated")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsInNeedOfSeeingVet")
-                        .HasColumnType("bit");
-
                     b.Property<string>("LastModificationBy")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTimeOffset?>("LastModificationOn")
                         .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
 
                     b.Property<Guid>("PersonId")
                         .HasColumnType("uniqueidentifier");
@@ -71,7 +51,7 @@ namespace KittySaver.Api.Migrations
 
                     b.HasIndex("PersonId");
 
-                    b.ToTable("Cat", (string)null);
+                    b.ToTable("Cat");
                 });
 
             modelBuilder.Entity("KittySaver.Api.Shared.Domain.Entites.Person", b =>
@@ -130,7 +110,7 @@ namespace KittySaver.Api.Migrations
                     b.HasIndex("UserIdentityId")
                         .IsUnique();
 
-                    b.ToTable("Persons", (string)null);
+                    b.ToTable("Persons");
 
                     b.HasData(
                         new
