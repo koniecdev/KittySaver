@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using KittySaver.Api.Features.Persons.SharedContracts;
+using KittySaver.Api.Shared.Domain.Entites.Common;
 using KittySaver.Api.Shared.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -70,6 +71,8 @@ public sealed partial class Person : AuditableEntity
             _phoneNumber = value;
         }
     }
+
+    public ICollection<Cat> Cats { get; } = new List<Cat>();
 
     public void PromoteToShelter()
     {
