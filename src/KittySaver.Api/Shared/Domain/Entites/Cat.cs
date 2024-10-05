@@ -12,6 +12,7 @@ public sealed class Cat : AuditableEntity
     public string? AdditionalRequirements { get; set; }
     public required bool IsCastrated { get; set; }
     public required bool IsInNeedOfSeeingVet { get; set; }
+    public required MedicalHelpUrgency MedicalHelpUrgency { get; set; }
     public required AgeCategory AgeCategory { get; set; }
     public required Behavior Behavior { get; set; }
     public required HealthStatus HealthStatus { get; set; }
