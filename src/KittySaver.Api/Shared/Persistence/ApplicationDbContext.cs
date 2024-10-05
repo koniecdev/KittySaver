@@ -1,4 +1,5 @@
 ﻿using KittySaver.Api.Shared.Domain.Entites;
+using KittySaver.Api.Shared.Domain.Entites.Common;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Security;
 using Microsoft.EntityFrameworkCore;
