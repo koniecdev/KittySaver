@@ -1,5 +1,4 @@
 ﻿using KittySaver.Api.Shared.Exceptions.Handlers;
-using KittySaver.Api.Shared.Infrastructure.ExceptionHandlers;
 
 namespace KittySaver.Api.Shared.Exceptions;
 
