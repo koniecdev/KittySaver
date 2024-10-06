@@ -1,8 +1,10 @@
 ﻿using KittySaver.Api.Shared.Domain.Entites;
+using KittySaver.Api.Shared.Domain.Entites.Common;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using SmartEnum.EFCore;
 
 namespace KittySaver.Api.Shared.Persistence;
 
@@ -17,6 +19,12 @@ public sealed class ApplicationDbContext(
     {
         base.OnModelCreating(builder);
         builder.ApplyConfigurationsFromAssembly(typeof(Program).Assembly);
+    }
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder.ConfigureSmartEnum();
+        base.ConfigureConventions(configurationBuilder);
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

@@ -23,6 +23,7 @@ public class AdminConfiguration : IEntityTypeConfiguration<Person>
             LastName = "Admin",
             Email = "defaultadmin@koniec.dev",
             PhoneNumber = "XXXXXXXXX",
+            CreatedOn = new DateTimeOffset(2024, 1, 1, 0, 0, 0, TimeSpan.Zero),
             UserIdentityId = FixedIdsHelper.AdminUserIdentityId
         };
         typeof(Person).GetProperty(nameof(Person.CurrentRole))?.SetValue(admin, Person.Role.Admin, null);

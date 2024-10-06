@@ -4,6 +4,7 @@ using KittySaver.Api.Shared.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KittySaver.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241005173229_AddAdditionalCatProperties")]
+    partial class AddAdditionalCatProperties
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -71,7 +74,7 @@ namespace KittySaver.Api.Migrations
 
                     b.HasIndex("PersonId");
 
-                    b.ToTable("Cat", (string)null);
+                    b.ToTable("Cat");
                 });
 
             modelBuilder.Entity("KittySaver.Api.Shared.Domain.Entites.Person", b =>
@@ -130,7 +133,7 @@ namespace KittySaver.Api.Migrations
                     b.HasIndex("UserIdentityId")
                         .IsUnique();
 
-                    b.ToTable("Persons", (string)null);
+                    b.ToTable("Persons");
 
                     b.HasData(
                         new

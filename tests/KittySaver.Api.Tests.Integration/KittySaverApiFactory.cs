@@ -91,7 +91,6 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
     public async Task InitializeAsync()
     {
         await _msSqlContainer.StartAsync();
-        // _authApiServer.Start();
         using IServiceScope scope = Services.CreateScope();
         ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         await dbContext.Database.MigrateAsync();
