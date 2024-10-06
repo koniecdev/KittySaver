@@ -1,6 +1,7 @@
 ﻿using KittySaver.Api.Shared.Domain.Entites.Common;
 using KittySaver.Api.Shared.Domain.Enums;
 using KittySaver.Api.Shared.Domain.ValueObjects;
+using KittySaver.Api.Shared.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -19,6 +20,9 @@ public sealed class Cat : AuditableEntity
     
     public required Guid PersonId { get; init; }
     public Person Person { get; private set; } = null!;
+    
+    public const int NameMaxLength = 100;
+    public const int AdditionalRequirementsMaxLength = 1000;
 
     public double GetPriorityScore(int daysAwaiting, ICatPriorityCalculator calculator)
     {
@@ -27,15 +31,15 @@ public sealed class Cat : AuditableEntity
     }
 }
 
-internal class CatConfiguration : IEntityTypeConfiguration<Cat>
+internal sealed class CatConfiguration : IEntityTypeConfiguration<Cat>
 {
     public void Configure(EntityTypeBuilder<Cat> builder)
     {
         builder.Property(x => x.Name)
-            .HasMaxLength(100)
+            .HasMaxLength(Cat.NameMaxLength)
             .IsRequired();
         builder.Property(x => x.AdditionalRequirements)
-            .HasMaxLength(1000);
+            .HasMaxLength(Cat.AdditionalRequirementsMaxLength);
         builder.Property(x => x.IsCastrated).IsRequired();
         builder.Property(x => x.IsInNeedOfSeeingVet).IsRequired();
         builder.Property(x => x.PersonId).IsRequired();
