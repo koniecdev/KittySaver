@@ -83,15 +83,7 @@ public sealed partial class Person : AuditableEntity
         CurrentRole = Role.Shelter;
     }
     
-    public sealed class PersonNotFoundException : NotFoundException
-    {
-        public PersonNotFoundException(Guid id) : base("Person.NotFound", id.ToString())
-        {
-        }
-        public PersonNotFoundException(string identifier) : base("Person.NotFound", identifier)
-        {
-        }
-    }
+    public sealed class PersonNotFoundException(Guid id) : NotFoundException("Person.NotFound", id.ToString());
     public static class DomainExceptions
     {
         public static class Email
