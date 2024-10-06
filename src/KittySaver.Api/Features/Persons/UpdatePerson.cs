@@ -64,7 +64,10 @@ public sealed class UpdatePerson : IEndpoint
         public async Task Handle(UpdatePersonCommand request, CancellationToken cancellationToken)
         {
             int numberOfUpdatedPersons = await db.Persons
-                .Where(x => x.Id == request.IdOrUserIdentityId)
+                .Where(x => 
+                    x.Id == request.IdOrUserIdentityId
+                    || x.UserIdentityId == request.IdOrUserIdentityId
+                )
                 .ExecuteUpdateAsync(s => s
                     .SetProperty(x=>x.FirstName, request.FirstName)
                     .SetProperty(x=>x.LastName, request.LastName)
