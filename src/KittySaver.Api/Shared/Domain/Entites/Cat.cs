@@ -29,6 +29,8 @@ public sealed class Cat : AuditableEntity
         double priority = calculator.Calculate(this, daysAwaiting);
         return priority;
     }
+    
+    public sealed class CatNotFoundException(Guid id) : NotFoundException("Cat.NotFound", id.ToString());
 }
 
 internal sealed class CatConfiguration : IEntityTypeConfiguration<Cat>
