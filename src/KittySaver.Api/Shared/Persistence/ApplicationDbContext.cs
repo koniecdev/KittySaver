@@ -38,10 +38,13 @@ public sealed class ApplicationDbContext(
                     entity.Entity.CreatedOn = dateTimeProvider.Now;
                     entity.Entity.CreatedBy = currentUserService.UserId;
                     break;
+                case EntityState.Modified:
+                    entity.Entity.LastModificationOn = dateTimeProvider.Now;
+                    entity.Entity.LastModificationBy = currentUserService.UserId;
+                    break;
                 case EntityState.Detached:
                 case EntityState.Unchanged:
                 case EntityState.Deleted:
-                case EntityState.Modified:
                 default:
                     break;
             }
