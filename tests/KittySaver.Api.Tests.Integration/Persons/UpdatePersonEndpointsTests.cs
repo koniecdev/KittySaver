@@ -60,6 +60,36 @@ public class UpdatePersonEndpointsTests(KittySaverApiFactory appFactory)
     }
     
     [Fact]
+    public async Task UpdatePerson_ShouldReturnSuccess_WhenValidDataIsProvidedWithUserIdentityId()
+    {
+        //Arrange
+        CreatePerson.CreatePersonRequest createRequest = _createPersonRequestGenerator.Generate();
+        HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/persons", createRequest);
+        ApiResponses.CreatedWithIdResponse? registeredPersonResponse = await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>();
+        PersonResponse person = await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{registeredPersonResponse!.Id}") 
+                                ?? throw new Exception("could not deserialize get person request");
+        //Act
+        UpdatePerson.UpdatePersonRequest request = new Faker<UpdatePerson.UpdatePersonRequest>()
+            .CustomInstantiator(faker =>
+                new UpdatePerson.UpdatePersonRequest(
+                    FirstName: person.FirstName,
+                    LastName: faker.Person.LastName,
+                    Email: person.Email,
+                    PhoneNumber: person.PhoneNumber
+                ));
+        
+        HttpResponseMessage updateResponse = await _httpClient.PutAsJsonAsync($"api/v1/persons/{person.UserIdentityId}", request);
+        
+        //Assert
+        updateResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        
+        PersonResponse personAfterUpdate = await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{registeredPersonResponse.Id}") 
+                                           ?? throw new JsonException();
+        personAfterUpdate.Should().NotBeEquivalentTo(person);
+        personAfterUpdate.LastName.Should().Be(request.LastName);
+    }
+    
+    [Fact]
     public async Task UpdatePerson_ShouldReturnNotFound_WhenNonRegisteredUserIdProvided()
     {
         //Arrange

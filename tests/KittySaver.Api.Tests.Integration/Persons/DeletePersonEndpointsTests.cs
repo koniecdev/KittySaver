@@ -54,6 +54,33 @@ public class DeletePersonEndpointsTests(KittySaverApiFactory appFactory)
     }
     
     [Fact]
+    public async Task DeletePerson_ShouldReturnSuccess_WhenValidDataIsProvidedWithUserIdentityId()
+    {
+        //Arrange
+        CreatePerson.CreatePersonRequest createRequest = _createPersonRequestGenerator.Generate();
+        HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/persons", createRequest);
+        ApiResponses.CreatedWithIdResponse registeredPersonResponse = 
+            await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
+            ?? throw new JsonException();
+        PersonResponse person = await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{registeredPersonResponse.Id}")
+                                 ?? throw new JsonException();
+        
+        //Act
+        HttpResponseMessage deleteResponse = await _httpClient.DeleteAsync($"api/v1/persons/{person.UserIdentityId}");
+        
+        //Assert
+        deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        HttpResponseMessage userNotFoundProblemDetailsMessage = 
+            await _httpClient.GetAsync($"api/v1/persons/{registeredPersonResponse.Id}");
+        userNotFoundProblemDetailsMessage.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        ProblemDetails? notFoundProblemDetails =
+            await userNotFoundProblemDetailsMessage.Content.ReadFromJsonAsync<ProblemDetails>();
+        notFoundProblemDetails.Should().NotBeNull();
+        notFoundProblemDetails!.Status.Should().Be(StatusCodes.Status404NotFound);
+    }
+    
+    [Fact]
     public async Task DeletePerson_ShouldReturnNotFound_WhenNonRegisteredUserIdProvided()
     {
         //Arrange
