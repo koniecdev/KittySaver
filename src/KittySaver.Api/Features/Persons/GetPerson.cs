@@ -9,7 +9,7 @@ namespace KittySaver.Api.Features.Persons;
 
 public class GetPerson : IEndpoint
 {
-    public sealed record GetPersonQuery(Guid Id) : IQuery<PersonResponse>;
+    public sealed record GetPersonQuery(Guid IdOrUserIdentityId) : IQuery<PersonResponse>;
 
     internal sealed class GetPersonQueryHandler(ApplicationDbContext db)
         : IRequestHandler<GetPersonQuery, PersonResponse>
@@ -18,10 +18,10 @@ public class GetPerson : IEndpoint
         {
             PersonResponse person = await db.Persons
                 .AsNoTracking()
-                .Where(x=>x.Id == request.Id)
+                .Where(x=>x.Id == request.IdOrUserIdentityId || x.UserIdentityId == request.IdOrUserIdentityId)
                 .ProjectToDto()
                 .FirstOrDefaultAsync(cancellationToken)
-                ?? throw new Person.PersonNotFoundException(request.Id);
+                ?? throw new Person.PersonNotFoundException(request.IdOrUserIdentityId);
             return person;
         }
     }
