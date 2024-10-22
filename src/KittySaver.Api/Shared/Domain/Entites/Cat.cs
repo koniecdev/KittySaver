@@ -13,6 +13,7 @@ public sealed class Cat : AuditableEntity
 {
     private string _name = null!;
     private string? _additionalRequirements;
+    private readonly Guid _personId;
 
     [SetsRequiredMembers]
     private Cat(
@@ -98,8 +99,20 @@ public sealed class Cat : AuditableEntity
     public required AgeCategory AgeCategory { get; set; }
     public required Behavior Behavior { get; set; }
     public required HealthStatus HealthStatus { get; set; }
-    
-    public Guid PersonId { get; private init; }
+
+    public Guid PersonId
+    {
+        get => _personId;
+        private init
+        {
+            if (value == Guid.Empty)
+            {
+                throw new ArgumentException("Provided person id is empty", nameof(PersonId));
+            }
+            _personId = value;
+        }
+    }
+
     public Person Person { get; private set; } = null!;
 
 
