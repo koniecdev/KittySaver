@@ -14,6 +14,8 @@ public sealed class UpdatePerson : IEndpoint
     public sealed record UpdatePersonRequest(
         string FirstName,
         string LastName,
+        string Email,
+        string PhoneNumber,
         string AddressCountry,
         string AddressZipCode,
         string AddressCity,
@@ -25,6 +27,8 @@ public sealed class UpdatePerson : IEndpoint
         Guid IdOrUserIdentityId,
         string FirstName,
         string LastName,
+        string Email,
+        string PhoneNumber,
         string AddressCountry,
         string AddressZipCode,
         string AddressCity,
@@ -33,13 +37,35 @@ public sealed class UpdatePerson : IEndpoint
         string? AddressState = null) : ICommand;
 
     public sealed class UpdatePersonCommandValidator
-        : AbstractValidator<UpdatePersonCommand>
+        : AbstractValidator<UpdatePersonCommand>, IAsyncValidator
     {
-        public UpdatePersonCommandValidator()
+        private readonly ApplicationDbContext _db;
+
+        public UpdatePersonCommandValidator(ApplicationDbContext db)
         {
+            _db = db;
             RuleFor(x => x.IdOrUserIdentityId).NotEmpty();
-            RuleFor(x => x.FirstName).NotEmpty();
-            RuleFor(x => x.LastName).NotEmpty();
+            
+            RuleFor(x => x.FirstName)
+                .NotEmpty()
+                .MaximumLength(Person.Constraints.FirstNameMaxLength);
+            
+            RuleFor(x => x.LastName)
+                .NotEmpty()
+                .MaximumLength(Person.Constraints.LastNameMaxLength);
+            
+            RuleFor(x => x.Email)
+                .NotEmpty()
+                .MaximumLength(Person.Constraints.EmailMaxLength)
+                .Matches(Person.Constraints.EmailPattern)
+                .MustAsync(async (command, email, ct) => await IsEmailUniqueAsync(command, email, ct))
+                .WithMessage("'Email' is already used by another user.");
+            
+            RuleFor(x => x.PhoneNumber)
+                .NotEmpty()
+                .MaximumLength(Person.Constraints.PhoneNumberMaxLength)
+                .MustAsync(async (command, phoneNumber, ct) => await IsPhoneNumberUniqueAsync(command, phoneNumber, ct))
+                .WithMessage("'Phone Number' is already used by another user.");
             
             RuleFor(x => x.AddressCountry)
                 .NotEmpty()
@@ -64,6 +90,16 @@ public sealed class UpdatePerson : IEndpoint
                 .NotEmpty()
                 .MaximumLength(Address.Constraints.BuildingNumberMaxLength);
         }
+        
+        private async Task<bool> IsPhoneNumberUniqueAsync(UpdatePersonCommand command, string phone, CancellationToken ct) 
+            => !await _db.Persons
+                .AsNoTracking()
+                .AnyAsync(x=>x.PhoneNumber == phone && x.Id != command.IdOrUserIdentityId && x.UserIdentityId != command.IdOrUserIdentityId, ct);
+        
+        private async Task<bool> IsEmailUniqueAsync(UpdatePersonCommand command, string email, CancellationToken ct) 
+            => !await _db.Persons
+                .AsNoTracking()
+                .AnyAsync(x=> x.Email == email && x.Id != command.IdOrUserIdentityId && x.UserIdentityId != command.IdOrUserIdentityId, ct);
     }
 
     internal sealed class UpdatePersonCommandHandler(ApplicationDbContext db)
@@ -91,6 +127,8 @@ public sealed class UpdatePerson : IEndpoint
             
             person.FirstName = request.FirstName;
             person.LastName = request.LastName;
+            person.Email = request.Email;
+            person.PhoneNumber = request.PhoneNumber;
             person.Address = address;
             await db.SaveChangesAsync(cancellationToken);
         }
