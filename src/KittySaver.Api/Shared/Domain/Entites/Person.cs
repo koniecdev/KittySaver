@@ -119,7 +119,7 @@ public sealed partial class Person : AuditableEntity
     }
     public void RemoveCat(Cat cat)
     {
-        _cats.Add(cat);
+        _cats.Remove(cat);
     }
     public void PromoteToShelter()
     {
