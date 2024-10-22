@@ -5,17 +5,24 @@ using Bogus;
 using FluentAssertions;
 using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Features.Persons.SharedContracts;
-using KittySaver.Api.Shared.Persistence;
-using KittySaver.Auth.Api.Shared.Persistence;
+using KittySaver.Api.Tests.Integration.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
 
-namespace KittySaver.Api.Tests.Integration.Persons;
+namespace KittySaver.Api.Tests.Integration.Tests.Persons;
 
 [Collection("Api")]
-public class GetPersonEndpointsTests(KittySaverApiFactory appFactory)
+public class GetPersonEndpointsTests : IAsyncLifetime
 {
+    private readonly HttpClient _httpClient;
+    private readonly CleanupHelper _cleanup;
+    public GetPersonEndpointsTests(KittySaverApiFactory appFactory)
+    {
+        _httpClient = appFactory.CreateClient();
+        _cleanup = new CleanupHelper(_httpClient);
+    }
+    
     private readonly Faker<CreatePerson.CreatePersonRequest> _createPersonRequestGenerator =
         new Faker<CreatePerson.CreatePersonRequest>()
             .CustomInstantiator( faker =>
@@ -32,16 +39,16 @@ public class GetPersonEndpointsTests(KittySaverApiFactory appFactory)
                     AddressBuildingNumber: faker.Address.BuildingNumber(),
                     AddressState: faker.Address.State()
                 ));
-    private readonly HttpClient _httpClient = appFactory.CreateClient();
 
     [Fact]
-    public async Task GetPerson_ShouldReturnDefaultAdmin_WhenEndpointIsCalled()
+    public async Task GetPerson_ShouldReturnPerson_WhenPersonExist()
     {
         //Arrange
         CreatePerson.CreatePersonRequest request = _createPersonRequestGenerator.Generate();
         HttpResponseMessage registerResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/persons", request);
         ApiResponses.CreatedWithIdResponse registerResponse =
-            await registerResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>() ?? throw new JsonException();
+            await registerResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
+            ?? throw new JsonException();
         //Act
         HttpResponseMessage response = await _httpClient.GetAsync($"api/v1/persons/{registerResponse.Id}");
         //Assert
@@ -51,16 +58,33 @@ public class GetPersonEndpointsTests(KittySaverApiFactory appFactory)
         person.Email.Should().Be(request.Email);
         person.FullName.Should().Be($"{request.FirstName} {request.LastName}");
         person.PhoneNumber.Should().Be(request.PhoneNumber);
+        person.AddressCountry.Should().Be(request.AddressCountry);
+        person.AddressState.Should().Be(request.AddressState);
+        person.AddressZipCode.Should().Be(request.AddressZipCode);
+        person.AddressCity.Should().Be(request.AddressCity);
+        person.AddressStreet.Should().Be(request.AddressStreet);
+        person.AddressBuildingNumber.Should().Be(request.AddressBuildingNumber);
     }
     
     [Fact]
-    public async Task GetPerson_ShouldReturnNotFound_WhenEndpointIsCalledWithNonExistingId()
+    public async Task GetPerson_ShouldReturnNotFound_WhenNoPersonExist()
     {
         //Act
         HttpResponseMessage response = await _httpClient.GetAsync($"api/v1/persons/{Guid.NewGuid()}");
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         ProblemDetails? problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();
-        problemDetails?.Status.Should().Be(StatusCodes.Status404NotFound);
+        problemDetails.Should().NotBeNull();
+        problemDetails!.Status.Should().Be(StatusCodes.Status404NotFound);
+    }
+
+    public Task InitializeAsync()
+    {
+        return Task.CompletedTask;
+    }
+
+    public async Task DisposeAsync()
+    {
+        await _cleanup.Cleanup();
     }
 }
