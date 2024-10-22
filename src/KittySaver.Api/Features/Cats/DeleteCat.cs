@@ -9,7 +9,7 @@ namespace KittySaver.Api.Features.Cats;
 
 public sealed class DeleteCat : IEndpoint
 {
-    public sealed record DeleteCatCommand(Guid Id) : ICommand;
+    public sealed record DeleteCatCommand(Guid PersonId, Guid Id) : ICommand;
 
     public sealed class DeleteCatCommandValidator
         : AbstractValidator<DeleteCatCommand>
@@ -25,25 +25,29 @@ public sealed class DeleteCat : IEndpoint
     {
         public async Task Handle(DeleteCatCommand request, CancellationToken cancellationToken)
         {
-            int numberOfDeletedCats = await db.Cats
-                .Where(x => 
-                    x.Id == request.Id)
+            //for now, there are no invariants in domain that would suggest choosing approach with fetching whole aggregate
+            int numberOfDeletedCats = await db.Persons
+                .Where(x => x.Id == request.PersonId)
+                .SelectMany(x => x.Cats)
+                .Where(x => x.Id == request.Id)
                 .ExecuteDeleteAsync(cancellationToken);
+            
             if (numberOfDeletedCats == 0)
             {
-                throw new Cat.CatNotFoundException(request.Id);
+                throw new NotFoundExceptions.CatNotFoundException(request.Id);
             }
         }
     }
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapDelete("cats/{id:guid}", async (
+        endpointRouteBuilder.MapDelete("/persons/{personId:guid}/cats/{id:guid}", async (
+            Guid personId,
             Guid id,
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            DeleteCatCommand command = new(id);
+            DeleteCatCommand command = new(personId, id);
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
         }).RequireAuthorization();
