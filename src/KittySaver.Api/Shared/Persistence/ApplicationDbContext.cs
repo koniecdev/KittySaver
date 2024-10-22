@@ -15,7 +15,6 @@ public sealed class ApplicationDbContext(
     : DbContext(options)
 {
     public DbSet<Person> Persons => Set<Person>();
-    public DbSet<Cat> Cats => Set<Cat>();
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
