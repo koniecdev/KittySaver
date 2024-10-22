@@ -5,17 +5,23 @@ using Bogus;
 using FluentAssertions;
 using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Features.Persons.SharedContracts;
+using KittySaver.Api.Tests.Integration.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using NSubstitute.Extensions;
 using Shared;
 
-namespace KittySaver.Api.Tests.Integration.Persons;
+namespace KittySaver.Api.Tests.Integration.Tests.Persons;
 
 [Collection("Api")]
-public class DeletePersonEndpointsTests(KittySaverApiFactory appFactory)
+public class DeletePersonEndpointsTests : IAsyncLifetime
 {
-    private readonly HttpClient _httpClient = appFactory.CreateClient();
+    private readonly HttpClient _httpClient;
+    private readonly CleanupHelper _cleanup;
+    public DeletePersonEndpointsTests(KittySaverApiFactory appFactory)
+    {
+        _httpClient = appFactory.CreateClient();
+        _cleanup = new CleanupHelper(_httpClient);
+    }
 
     private readonly Faker<CreatePerson.CreatePersonRequest> _createPersonRequestGenerator =
         new Faker<CreatePerson.CreatePersonRequest>()
@@ -122,5 +128,15 @@ public class DeletePersonEndpointsTests(KittySaverApiFactory appFactory)
         validationProblemDetails.Errors.Values.Count.Should().Be(1);
         validationProblemDetails.Errors[nameof(DeletePerson.DeletePersonCommand.IdOrUserIdentityId)][0]
             .Should().Be("'Id Or User Identity Id' must not be empty.");
+    }
+    
+    public Task InitializeAsync()
+    {
+        return Task.CompletedTask;
+    }
+
+    public async Task DisposeAsync()
+    {
+        await _cleanup.Cleanup();
     }
 }
