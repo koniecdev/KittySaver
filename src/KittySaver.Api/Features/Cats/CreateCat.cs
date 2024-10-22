@@ -4,6 +4,7 @@ using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Shared.Domain.Entites;
 using KittySaver.Api.Shared.Domain.Enums;
 using KittySaver.Api.Shared.Domain.Enums.Common;
+using KittySaver.Api.Shared.Domain.Services;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
 using MediatR;
@@ -15,7 +16,6 @@ namespace KittySaver.Api.Features.Cats;
 public class CreateCat : IEndpoint
 {
     public sealed record CreateCatRequest(
-        Guid PersonId,
         string Name,
         bool IsCastrated,
         bool IsInNeedOfSeeingVet,
@@ -36,24 +36,40 @@ public class CreateCat : IEndpoint
         HealthStatus HealthStatus,
         string? AdditionalRequirements = null) : ICommand<Guid>;
 
-    public sealed class CreateCatCommandValidator 
-        : AbstractValidator<CreateCatCommand>
+    public sealed class CreateCatCommandValidator : AbstractValidator<CreateCatCommand>
     {
         public CreateCatCommandValidator()
         {
             RuleFor(x => x.PersonId).NotEmpty();
             RuleFor(x => x.Name).NotEmpty();
-            RuleFor(x => x.Name).MaximumLength(Cat.NameMaxLength);
-            RuleFor(x => x.AdditionalRequirements).MaximumLength(Cat.AdditionalRequirementsMaxLength);
+            RuleFor(x => x.Name).MaximumLength(Cat.Constraints.NameMaxLength);
+            RuleFor(x => x.AdditionalRequirements).MaximumLength(Cat.Constraints.AdditionalRequirementsMaxLength);
         }
     }
     
-    internal sealed class CreateCatCommandHandler(ApplicationDbContext db) : IRequestHandler<CreateCatCommand, Guid>
+    internal sealed class CreateCatCommandHandler(ApplicationDbContext db, ICatPriorityCalculator calculator) : IRequestHandler<CreateCatCommand, Guid>
     {
         public async Task<Guid> Handle(CreateCatCommand request, CancellationToken cancellationToken)
         {
-            Cat entity = request.ToEntity();
-            db.Cats.Add(entity);
+            Person root = await db.Persons
+                              .Include(x => x.Cats)
+                              .Include(x => x.Address)
+                              .FirstOrDefaultAsync(x => x.Id == request.PersonId, cancellationToken)
+                          ?? throw new NotFoundExceptions.PersonNotFoundException(request.PersonId);
+            
+            Cat entity = Cat.Create(
+                calculator: calculator,
+                personId: request.PersonId,
+                name: request.Name,
+                medicalHelpUrgency: request.MedicalHelpUrgency,
+                ageCategory: request.AgeCategory,
+                behavior: request.Behavior,
+                healthStatus: request.HealthStatus,
+                isCastrated: request.IsCastrated,
+                isInNeedOfSeeingVet: request.IsInNeedOfSeeingVet,
+                additionalRequirements: request.AdditionalRequirements);
+            
+            root.AddCat(entity);
             await db.SaveChangesAsync(cancellationToken);
             return entity.Id;
         }
@@ -61,8 +77,9 @@ public class CreateCat : IEndpoint
     
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapPost("cats", async 
-            (CreateCatRequest request,
+        endpointRouteBuilder.MapPost("persons/{personId:guid}/cats", async 
+            (Guid personId,
+            CreateCatRequest request,
             ISender sender,
             CancellationToken cancellationToken) =>
         {
@@ -72,12 +89,14 @@ public class CreateCat : IEndpoint
                 out Behavior behavior,
                 out HealthStatus healthStatus);
 
-            CreateCatCommand command = request.ToCreateCatCommand(medicalHelpUrgency,
+            CreateCatCommand command = request.ToCreateCatCommand(
+                personId,
+                medicalHelpUrgency,
                 ageCategory,
                 behavior,
                 healthStatus);
-            Guid personId = await sender.Send(command, cancellationToken);
-            return Results.Created($"/api/v1/persons/{personId}", new { Id = personId });
+            Guid catId = await sender.Send(command, cancellationToken);
+            return Results.Created($"/api/v1/cats/{catId}", new { Id = catId });
         }).RequireAuthorization();
     }
 }
@@ -87,10 +106,9 @@ public static partial class CreateCatMapper
 {
     public static partial CreateCat.CreateCatCommand ToCreateCatCommand(
         this CreateCat.CreateCatRequest request,
+        Guid personId,
         MedicalHelpUrgency medicalHelpUrgency,
         AgeCategory ageCategory,
         Behavior behavior,
         HealthStatus healthStatus);
-    
-    public static partial Cat ToEntity(this CreateCat.CreateCatCommand command);
 }
