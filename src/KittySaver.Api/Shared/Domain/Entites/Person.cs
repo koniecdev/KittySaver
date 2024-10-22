@@ -78,7 +78,7 @@ public sealed partial class Person : AuditableEntity
     public required string Email
     {
         get => _email;
-        init
+        set
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(Email));
             if (value.Length > Constraints.EmailMaxLength)
@@ -97,7 +97,7 @@ public sealed partial class Person : AuditableEntity
     public required string PhoneNumber
     {
         get => _phoneNumber;
-        init
+        set
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(PhoneNumber));
             if (value.Length > Constraints.PhoneNumberMaxLength)
