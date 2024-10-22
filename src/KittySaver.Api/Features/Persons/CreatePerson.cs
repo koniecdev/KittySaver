@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
-using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Shared.Domain.Entites;
+using KittySaver.Api.Shared.Domain.ValueObjects;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
 using MediatR;
@@ -16,14 +16,26 @@ public class CreatePerson : IEndpoint
         string LastName,
         string Email,
         string PhoneNumber,
-        Guid UserIdentityId);
+        Guid UserIdentityId,
+        string AddressCountry,
+        string AddressZipCode,
+        string AddressCity,
+        string AddressStreet,
+        string AddressBuildingNumber,
+        string? AddressState = null);
     
     public sealed record CreatePersonCommand(
         string FirstName,
         string LastName,
         string Email,
         string PhoneNumber,
-        Guid UserIdentityId) : ICommand<Guid>;
+        Guid UserIdentityId,
+        string AddressCountry,
+        string AddressZipCode,
+        string AddressCity,
+        string AddressStreet,
+        string AddressBuildingNumber,
+        string? AddressState = null) : ICommand<Guid>;
 
     public sealed class CreatePersonCommandValidator 
         : AbstractValidator<CreatePersonCommand>, IAsyncValidator
@@ -48,10 +60,33 @@ public class CreatePerson : IEndpoint
             
             RuleFor(x => x.Email)
                 .NotEmpty()
-                .Matches(ValidationPatterns.EmailPattern);
+                .Matches(Person.Constraints.EmailPattern);
             RuleFor(x => x.Email)
                 .MustAsync(async (email, ct) => await IsEmailUniqueAsync(email, ct))
                 .WithMessage("'Email' is already used by another user.");
+            
+            RuleFor(x => x.AddressCountry)
+                .NotEmpty()
+                .MaximumLength(Address.Constraints.CountryMaxLength);
+            
+            RuleFor(x => x.AddressState)
+                .MaximumLength(Address.Constraints.StateMaxLength);
+            
+            RuleFor(x => x.AddressZipCode)
+                .NotEmpty()
+                .MaximumLength(Address.Constraints.ZipCodeMaxLength);
+            
+            RuleFor(x => x.AddressCity)
+                .NotEmpty()
+                .MaximumLength(Address.Constraints.CityMaxLength);
+            
+            RuleFor(x => x.AddressStreet)
+                .NotEmpty()
+                .MaximumLength(Address.Constraints.StreetMaxLength);
+            
+            RuleFor(x => x.AddressBuildingNumber)
+                .NotEmpty()
+                .MaximumLength(Address.Constraints.BuildingNumberMaxLength);
         }
         private async Task<bool> IsPhoneNumberUniqueAsync(string phone, CancellationToken ct) 
             => !await _db.Persons
@@ -72,7 +107,17 @@ public class CreatePerson : IEndpoint
     {
         public async Task<Guid> Handle(CreatePersonCommand request, CancellationToken cancellationToken)
         {
-            Person person = request.ToEntity();
+            Address address = new()
+            {
+                Country = request.AddressCountry,
+                State = request.AddressState,
+                ZipCode = request.AddressZipCode,
+                City = request.AddressCity,
+                Street = request.AddressStreet,
+                BuildingNumber = request.AddressBuildingNumber
+            };
+            
+            Person person = request.ToEntity(address);
             db.Persons.Add(person);
             await db.SaveChangesAsync(cancellationToken);
             return person.Id;
@@ -97,5 +142,6 @@ public class CreatePerson : IEndpoint
 public static partial class CreatePersonMapper
 {
     public static partial CreatePerson.CreatePersonCommand ToCreatePersonCommand(this CreatePerson.CreatePersonRequest request);
-    public static partial Person ToEntity(this CreatePerson.CreatePersonCommand command);
+    
+    public static partial Person ToEntity(this CreatePerson.CreatePersonCommand command, Address address);
 }
