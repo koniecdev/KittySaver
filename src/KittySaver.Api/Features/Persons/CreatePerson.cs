@@ -148,7 +148,17 @@ public class CreatePerson : IEndpoint
 [Mapper]
 public static partial class CreatePersonMapper
 {
-    public static partial CreatePerson.CreatePersonCommand ToCreatePersonCommand(this CreatePerson.CreatePersonRequest request);
+    [UserMapping(Default = true)]
+    public static CreatePerson.CreatePersonCommand ToCreatePersonCommand(this CreatePerson.CreatePersonRequest request)
+    {
+        if (request.AddressState is not null && string.IsNullOrWhiteSpace(request.AddressState))
+        {
+            request = request with { AddressState = null };
+        }
+        CreatePerson.CreatePersonCommand dto = MapToCreatePersonCommand(request);
+        return dto;
+    }
+    private static partial CreatePerson.CreatePersonCommand MapToCreatePersonCommand(this CreatePerson.CreatePersonRequest request);
     
     public static partial Person ToEntity(this CreatePerson.CreatePersonCommand command, Address address);
 }
