@@ -25,7 +25,13 @@ public class DeletePersonEndpointsTests(KittySaverApiFactory appFactory)
                     LastName: faker.Person.LastName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
-                    UserIdentityId: Guid.NewGuid()
+                    UserIdentityId: Guid.NewGuid(),
+                    AddressCountry: faker.Address.Country(),
+                    AddressZipCode: faker.Address.ZipCode(),
+                    AddressCity: faker.Address.City(),
+                    AddressStreet: faker.Address.StreetName(),
+                    AddressBuildingNumber: faker.Address.BuildingNumber(),
+                    AddressState: faker.Address.State()
                 ));
     
     [Fact]

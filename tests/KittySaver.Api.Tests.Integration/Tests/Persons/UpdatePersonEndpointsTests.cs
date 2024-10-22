@@ -26,7 +26,13 @@ public class UpdatePersonEndpointsTests(KittySaverApiFactory appFactory)
                     LastName: faker.Person.LastName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
-                    UserIdentityId: Guid.NewGuid()
+                    UserIdentityId: Guid.NewGuid(),
+                    AddressCountry: faker.Address.Country(),
+                    AddressZipCode: faker.Address.ZipCode(),
+                    AddressCity: faker.Address.City(),
+                    AddressStreet: faker.Address.StreetName(),
+                    AddressBuildingNumber: faker.Address.BuildingNumber(),
+                    AddressState: faker.Address.State()
                 ));
     
     [Fact]
@@ -45,7 +51,13 @@ public class UpdatePersonEndpointsTests(KittySaverApiFactory appFactory)
                     FirstName: person.FirstName,
                     LastName: faker.Person.LastName,
                     Email: person.Email,
-                    PhoneNumber: person.PhoneNumber
+                    PhoneNumber: person.PhoneNumber,
+                    AddressCountry: person.AddressCountry,
+                    AddressZipCode: person.AddressZipCode,
+                    AddressCity: person.AddressCity,
+                    AddressStreet: person.AddressStreet,
+                    AddressBuildingNumber: person.AddressBuildingNumber,
+                    AddressState: person.AddressState
                 ));
         
         HttpResponseMessage updateResponse = await _httpClient.PutAsJsonAsync($"api/v1/persons/{registeredPersonResponse.Id}", request);
@@ -75,7 +87,13 @@ public class UpdatePersonEndpointsTests(KittySaverApiFactory appFactory)
                     FirstName: person.FirstName,
                     LastName: faker.Person.LastName,
                     Email: person.Email,
-                    PhoneNumber: person.PhoneNumber
+                    PhoneNumber: person.PhoneNumber,
+                    AddressCountry: person.AddressCountry,
+                    AddressZipCode: person.AddressZipCode,
+                    AddressCity: person.AddressCity,
+                    AddressStreet: person.AddressStreet,
+                    AddressBuildingNumber: person.AddressBuildingNumber,
+                    AddressState: person.AddressState
                 ));
         
         HttpResponseMessage updateResponse = await _httpClient.PutAsJsonAsync($"api/v1/persons/{person.UserIdentityId}", request);
@@ -94,6 +112,7 @@ public class UpdatePersonEndpointsTests(KittySaverApiFactory appFactory)
     {
         //Arrange
         Guid randomId = Guid.NewGuid();
+        
         //Act
         UpdatePerson.UpdatePersonRequest request = new Faker<UpdatePerson.UpdatePersonRequest>()
             .CustomInstantiator(faker =>
@@ -101,7 +120,13 @@ public class UpdatePersonEndpointsTests(KittySaverApiFactory appFactory)
                     FirstName: faker.Person.FirstName,
                     LastName: faker.Person.LastName,
                     Email: faker.Person.Email,
-                    PhoneNumber: faker.Person.Phone
+                    PhoneNumber: faker.Person.Phone,
+                    AddressCountry: faker.Address.Country(),
+                    AddressZipCode: faker.Address.ZipCode(),
+                    AddressCity: faker.Address.City(),
+                    AddressStreet: faker.Address.StreetName(),
+                    AddressBuildingNumber: faker.Address.BuildingNumber(),
+                    AddressState: faker.Address.State()
                 ));
         
         HttpResponseMessage updateResponse = await _httpClient.PutAsJsonAsync($"api/v1/persons/{randomId}", request);
@@ -121,9 +146,11 @@ public class UpdatePersonEndpointsTests(KittySaverApiFactory appFactory)
         HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/persons", firstUserCreateRequest);
         ApiResponses.CreatedWithIdResponse firstUserIdResponse = await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        UpdatePerson.UpdatePersonRequest request = new("", "", "", "");
         
         //Act
+        UpdatePerson.UpdatePersonRequest request = 
+            new("", "", "", "", "",
+                "", "", "", "", "");
         HttpResponseMessage updateResponse = await _httpClient.PutAsJsonAsync($"api/v1/persons/{firstUserIdResponse.Id}", request);
         
         //Assert
@@ -167,7 +194,13 @@ public class UpdatePersonEndpointsTests(KittySaverApiFactory appFactory)
             FirstName: person.FirstName,
             LastName: person.LastName,
             Email: email,
-            PhoneNumber: person.PhoneNumber
+            PhoneNumber: person.PhoneNumber,
+            AddressCountry: person.AddressCountry,
+            AddressZipCode: person.AddressZipCode,
+            AddressCity: person.AddressCity,
+            AddressStreet: person.AddressStreet,
+            AddressBuildingNumber: person.AddressBuildingNumber,
+            AddressState: person.AddressState
         );
         
         //Act
@@ -208,10 +241,16 @@ public class UpdatePersonEndpointsTests(KittySaverApiFactory appFactory)
         
         //Act
         UpdatePerson.UpdatePersonRequest firstUserUpdateRequest = new(
-            firstUser.FirstName,
-            firstUser.LastName,
-            secondUserCreateRequest.Email,
-            secondUserCreateRequest.PhoneNumber
+            FirstName: firstUser.FirstName,
+            LastName: firstUser.LastName,
+            Email: secondUserCreateRequest.Email,
+            PhoneNumber: secondUserCreateRequest.PhoneNumber,
+            AddressCountry: firstUser.AddressCountry,
+            AddressZipCode: firstUser.AddressZipCode,
+            AddressCity: firstUser.AddressCity,
+            AddressStreet: firstUser.AddressStreet,
+            AddressBuildingNumber: firstUser.AddressBuildingNumber,
+            AddressState: firstUser.AddressState
         );
         
         HttpResponseMessage updateResponse = await _httpClient.PutAsJsonAsync($"api/v1/persons/{firstUserIdResponse.Id}", firstUserUpdateRequest);
