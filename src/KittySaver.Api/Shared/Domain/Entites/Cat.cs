@@ -15,7 +15,7 @@ public sealed class Cat : AuditableEntity
     private string? _additionalRequirements;
 
     [SetsRequiredMembers]
-    public Cat(
+    private Cat(
         Guid personId,
         string name,
         MedicalHelpUrgency medicalHelpUrgency,
