@@ -1,5 +1,4 @@
 ﻿using KittySaver.Api.Features.Persons.SharedContracts;
-using KittySaver.Api.Shared.Domain.Entites;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
 using MediatR;
@@ -21,7 +20,7 @@ public class GetPerson : IEndpoint
                 .Where(x=>x.Id == request.IdOrUserIdentityId || x.UserIdentityId == request.IdOrUserIdentityId)
                 .ProjectToDto()
                 .FirstOrDefaultAsync(cancellationToken)
-                ?? throw new Person.PersonNotFoundException(request.IdOrUserIdentityId);
+                ?? throw new NotFoundExceptions.PersonNotFoundException(request.IdOrUserIdentityId);
             return person;
         }
     }
