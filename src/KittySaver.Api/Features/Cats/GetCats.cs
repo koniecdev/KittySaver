@@ -8,10 +8,9 @@ namespace KittySaver.Api.Features.Cats;
 
 public sealed class GetCats : IEndpoint
 {
-    public sealed class GetCatsQuery : IQuery<ICollection<CatResponse>>
+    public sealed class GetCatsQuery(Guid personId) : IQuery<ICollection<CatResponse>>
     {
-        public List<ApiFilter>? Filters { get; init; } = [];
-        public List<ApiSort>? Sorts { get; init; } = [];
+        public Guid PersonId { get; } = personId;
     }
 
     internal sealed class GetCatsQueryHandler(ApplicationDbContext db)
@@ -19,8 +18,10 @@ public sealed class GetCats : IEndpoint
     {
         public async Task<ICollection<CatResponse>> Handle(GetCatsQuery request, CancellationToken cancellationToken)
         {
-            List<CatResponse> cats = await db.Cats
+            List<CatResponse> cats = await db.Persons
                 .AsNoTracking()
+                .Where(x=>x.Id == request.PersonId)
+                .SelectMany(x=>x.Cats)
                 .ProjectToDto()
                 .ToListAsync(cancellationToken);
             return cats;
@@ -29,13 +30,12 @@ public sealed class GetCats : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapGet("cats", async
-            (string? filterBy,
-            string? sortBy,
+        endpointRouteBuilder.MapGet("persons/{personId:guid}/cats", async (
+            Guid personId,
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            GetCatsQuery query = new();
+            GetCatsQuery query = new(personId);
             ICollection<CatResponse> cats = await sender.Send(query, cancellationToken);
             return Results.Ok(cats);
         });
