@@ -45,23 +45,29 @@ public class CreatePerson : IEndpoint
         public CreatePersonCommandValidator(ApplicationDbContext db)
         {
             _db = db;
-            RuleFor(x => x.FirstName).NotEmpty();
-            RuleFor(x => x.LastName).NotEmpty();
+            RuleFor(x => x.FirstName)
+                .NotEmpty()
+                .MaximumLength(Person.Constraints.FirstNameMaxLength);
             
-            RuleFor(x => x.PhoneNumber).NotEmpty();
+            RuleFor(x => x.LastName)
+                .NotEmpty()
+                .MaximumLength(Person.Constraints.LastNameMaxLength);
+            
             RuleFor(x => x.PhoneNumber)
+                .NotEmpty()
+                .MaximumLength(Person.Constraints.PhoneNumberMaxLength)
                 .MustAsync(async (phoneNumber, ct) => await IsPhoneNumberUniqueAsync(phoneNumber, ct))
                 .WithMessage("'Phone Number' is already used by another user.");
             
-            RuleFor(x => x.UserIdentityId).NotEmpty();
             RuleFor(x => x.UserIdentityId)
+                .NotEmpty()
                 .MustAsync(async (userIdentityId, ct) => await IsUserIdentityIdUniqueAsync(userIdentityId, ct))
                 .WithMessage("'User Identity Id' is already used by another user.");
             
             RuleFor(x => x.Email)
                 .NotEmpty()
-                .Matches(Person.Constraints.EmailPattern);
-            RuleFor(x => x.Email)
+                .MaximumLength(Person.Constraints.EmailMaxLength)
+                .Matches(Person.Constraints.EmailPattern)
                 .MustAsync(async (email, ct) => await IsEmailUniqueAsync(email, ct))
                 .WithMessage("'Email' is already used by another user.");
             
@@ -92,6 +98,7 @@ public class CreatePerson : IEndpoint
             => !await _db.Persons
                 .AsNoTracking()
                 .AnyAsync(x=>x.PhoneNumber == phone, ct);
+        
         private async Task<bool> IsEmailUniqueAsync(string email, CancellationToken ct) 
             => !await _db.Persons
                 .AsNoTracking()
