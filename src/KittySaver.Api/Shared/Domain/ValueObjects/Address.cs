@@ -25,7 +25,13 @@ public sealed class Address : ValueObject
             {
                 return;
             }
-            ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(State));
+
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                _state = null;
+                return;
+            }
+            
             if (value.Length > Constraints.StateMaxLength)
             {
                 throw new ArgumentOutOfRangeException(nameof(State), value,
