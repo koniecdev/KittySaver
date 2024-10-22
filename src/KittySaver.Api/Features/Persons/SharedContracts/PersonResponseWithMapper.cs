@@ -12,6 +12,12 @@ public sealed class PersonResponse
     public required string FullName { get; init; }
     public required string Email { get; init; }
     public required string PhoneNumber { get; init; }
+    public required string AddressCountry { get; init; }
+    public required string? AddressState { get; init; }
+    public required string AddressCity { get; init; }
+    public required string AddressStreet { get; init; }
+    public required string AddressBuildingNumber { get; init; }
+    public required string AddressZipCode { get; init; }
 }
 
 [Mapper]
