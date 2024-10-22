@@ -9,31 +9,34 @@ namespace KittySaver.Api.Features.Cats;
 
 public class GetCat : IEndpoint
 {
-    public sealed record GetCatQuery(Guid Id) : IQuery<CatResponse>;
+    public sealed record GetCatQuery(Guid PersonId, Guid Id) : IQuery<CatResponse>;
 
     internal sealed class GetCatQueryHandler(ApplicationDbContext db)
         : IRequestHandler<GetCatQuery, CatResponse>
     {
         public async Task<CatResponse> Handle(GetCatQuery request, CancellationToken cancellationToken)
         {
-            CatResponse cat = await db.Cats
-                .AsNoTracking()
-                .Where(x=>x.Id == request.Id)
-                .ProjectToDto()
-                .FirstOrDefaultAsync(cancellationToken)
-                ?? throw new Cat.CatNotFoundException(request.Id);
+            CatResponse cat = await db.Persons
+                                  .AsNoTracking()
+                                  .Where(x=>x.Id == request.PersonId)
+                                  .SelectMany(x=>x.Cats)
+                                  .Where(x=>x.Id == request.Id)
+                                  .ProjectToDto()
+                                  .FirstOrDefaultAsync(cancellationToken)
+                              ?? throw new NotFoundExceptions.CatNotFoundException(request.Id);;
             return cat;
         }
     }
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapGet("cats/{id:guid}", async (
+        endpointRouteBuilder.MapGet("/persons/{personId:guid}/cats/{id:guid}", async (
+            Guid personId,
             Guid id,
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            GetCatQuery query = new(id);
+            GetCatQuery query = new(personId, id);
             CatResponse cat = await sender.Send(query, cancellationToken);
             return Results.Ok(cat);
         });
