@@ -2,6 +2,7 @@
 using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Shared.Domain.Entites;
 using KittySaver.Api.Shared.Domain.Enums;
+using KittySaver.Api.Shared.Domain.Services;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
 using MediatR;
@@ -23,6 +24,7 @@ public sealed class UpdateCat : IEndpoint
         string? AdditionalRequirements = null) : ICatSmartEnumsRequest;
     
     public sealed record UpdateCatCommand(
+        Guid PersonId,
         Guid Id,
         string Name,
         bool IsCastrated,
@@ -40,39 +42,35 @@ public sealed class UpdateCat : IEndpoint
         {
             RuleFor(x => x.Id).NotEmpty();
             RuleFor(x => x.Name).NotEmpty();
-            RuleFor(x => x.Name).MaximumLength(Cat.NameMaxLength);
-            RuleFor(x => x.AdditionalRequirements).MaximumLength(Cat.AdditionalRequirementsMaxLength);
+            RuleFor(x => x.Name).MaximumLength(Cat.Constraints.NameMaxLength);
+            RuleFor(x => x.AdditionalRequirements).MaximumLength(Cat.Constraints.AdditionalRequirementsMaxLength);
         }
     }
     
-    internal sealed class UpdateCatCommandHandler(ApplicationDbContext db)
+    internal sealed class UpdateCatCommandHandler(ApplicationDbContext db, ICatPriorityCalculator calculator)
         : IRequestHandler<UpdateCatCommand>
     {
         public async Task Handle(UpdateCatCommand request, CancellationToken cancellationToken)
         {
-            int numberOfUpdatedCats = await db.Cats
-                .Where(x => x.Id == request.Id)
-                .ExecuteUpdateAsync(s => s
-                    .SetProperty(x=>x.Name, request.Name)
-                    .SetProperty(x=>x.IsCastrated, request.IsCastrated)
-                    .SetProperty(x=>x.IsInNeedOfSeeingVet, request.IsInNeedOfSeeingVet)
-                    .SetProperty(x=>x.AdditionalRequirements, request.AdditionalRequirements)
-                    .SetProperty(x=>x.MedicalHelpUrgency, request.MedicalHelpUrgency)
-                    .SetProperty(x=>x.AgeCategory, request.AgeCategory)
-                    .SetProperty(x=>x.Behavior, request.Behavior)
-                    .SetProperty(x=>x.HealthStatus, request.HealthStatus),
-                    cancellationToken);
-            if (numberOfUpdatedCats == 0)
-            {
-                throw new Cat.CatNotFoundException(request.Id);
-            }
+            Person catOwner = await db.Persons
+                                  .Where(x => x.Id == request.PersonId)
+                                  .Include(x => x.Cats)
+                                  .Include(x => x.Address)
+                                  .FirstOrDefaultAsync(cancellationToken)
+                              ?? throw new NotFoundExceptions.PersonNotFoundException(request.PersonId);
+            Cat catToUpdate = catOwner.Cats.FirstOrDefault(x => x.Id == request.Id)
+                              ?? throw new NotFoundExceptions.CatNotFoundException(request.Id);
+            
+            UpdateCatMapper.MapUpdateCatCommandPropertiesToExistingCat((request, catToUpdate), calculator);
+            await db.SaveChangesAsync(cancellationToken);
         }
     }
     
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapPut("cats/{id:guid}", async
-            (Guid id, 
+        endpointRouteBuilder.MapPut("/persons/{personId:guid}/cats/{id:guid}", async(
+            Guid personId,
+            Guid id,
             UpdateCatRequest request,
             ISender sender,
             CancellationToken cancellationToken) =>
@@ -84,6 +82,7 @@ public sealed class UpdateCat : IEndpoint
                 out HealthStatus healthStatus);
             
             UpdateCatCommand command = request.ToUpdateCommand(
+                personId,
                 id,
                 medicalHelpUrgency,
                 ageCategory,
@@ -100,9 +99,22 @@ public static partial class UpdateCatMapper
 {
     public static partial UpdateCat.UpdateCatCommand ToUpdateCommand(
         this UpdateCat.UpdateCatRequest request,
+        Guid personId,
         Guid id,
         MedicalHelpUrgency medicalHelpUrgency,
         AgeCategory ageCategory,
         Behavior behavior,
         HealthStatus healthStatus);
+
+    private static partial void UpdateCatCommandPropertiesToExistingCat(
+        UpdateCat.UpdateCatCommand command,
+        Cat entity);
+    
+    [UserMapping(Default = true)]
+    public static void MapUpdateCatCommandPropertiesToExistingCat((UpdateCat.UpdateCatCommand command,
+        Cat entity) requestAndEntity, ICatPriorityCalculator calculator)
+    {
+        UpdateCatCommandPropertiesToExistingCat(requestAndEntity.command, requestAndEntity.entity);
+        requestAndEntity.entity.ReCalculatePriorityScore(calculator);
+    }
 }
