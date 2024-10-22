@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
-using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Shared.Domain.Entites;
+using KittySaver.Api.Shared.Domain.ValueObjects;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
 using MediatR;
@@ -14,82 +14,97 @@ public sealed class UpdatePerson : IEndpoint
     public sealed record UpdatePersonRequest(
         string FirstName,
         string LastName,
-        string Email,
-        string PhoneNumber);
-    
+        string AddressCountry,
+        string AddressZipCode,
+        string AddressCity,
+        string AddressStreet,
+        string AddressBuildingNumber,
+        string? AddressState = null);
+
     public sealed record UpdatePersonCommand(
         Guid IdOrUserIdentityId,
         string FirstName,
         string LastName,
-        string Email,
-        string PhoneNumber) : ICommand;
+        string AddressCountry,
+        string AddressZipCode,
+        string AddressCity,
+        string AddressStreet,
+        string AddressBuildingNumber,
+        string? AddressState = null) : ICommand;
 
     public sealed class UpdatePersonCommandValidator
-        : AbstractValidator<UpdatePersonCommand>, IAsyncValidator
+        : AbstractValidator<UpdatePersonCommand>
     {
-        private readonly ApplicationDbContext _db;
-        public UpdatePersonCommandValidator(ApplicationDbContext db)
+        public UpdatePersonCommandValidator()
         {
-            _db = db; 
             RuleFor(x => x.IdOrUserIdentityId).NotEmpty();
             RuleFor(x => x.FirstName).NotEmpty();
             RuleFor(x => x.LastName).NotEmpty();
-            RuleFor(x => x.PhoneNumber).NotEmpty();
-            RuleFor(x => x.PhoneNumber)
-                .MustAsync(async (command, email, ct) => await IsPhoneUniqueAsync(command, email, ct))
-                .WithMessage("'Phone Number' is already used by another user.");
-            RuleFor(x => x.Email)
+            
+            RuleFor(x => x.AddressCountry)
                 .NotEmpty()
-                .Matches(ValidationPatterns.EmailPattern);
-            RuleFor(x => x.Email)
-                .MustAsync(async (command, email, ct) => await IsEmailUniqueAsync(command, email, ct))
-                .WithMessage("'Email' is already used by another user.");
+                .MaximumLength(Address.Constraints.CountryMaxLength);
+            
+            RuleFor(x => x.AddressState)
+                .MaximumLength(Address.Constraints.StateMaxLength);
+            
+            RuleFor(x => x.AddressZipCode)
+                .NotEmpty()
+                .MaximumLength(Address.Constraints.ZipCodeMaxLength);
+            
+            RuleFor(x => x.AddressCity)
+                .NotEmpty()
+                .MaximumLength(Address.Constraints.CityMaxLength);
+            
+            RuleFor(x => x.AddressStreet)
+                .NotEmpty()
+                .MaximumLength(Address.Constraints.StreetMaxLength);
+            
+            RuleFor(x => x.AddressBuildingNumber)
+                .NotEmpty()
+                .MaximumLength(Address.Constraints.BuildingNumberMaxLength);
         }
-        private async Task<bool> IsEmailUniqueAsync(UpdatePersonCommand command, string email, CancellationToken ct)
-            => !await _db.Persons
-                .AsNoTracking()
-                .AnyAsync(x=>
-                    x.Email == email && x.Id != command.IdOrUserIdentityId && x.UserIdentityId != command.IdOrUserIdentityId, ct);
-        
-        private async Task<bool> IsPhoneUniqueAsync(UpdatePersonCommand command, string phone, CancellationToken ct)
-            => !await _db.Persons
-                .AsNoTracking()
-                .AnyAsync(x=>
-                    x.PhoneNumber == phone && x.Id != command.IdOrUserIdentityId && x.UserIdentityId != command.IdOrUserIdentityId, ct);
     }
-    
+
     internal sealed class UpdatePersonCommandHandler(ApplicationDbContext db)
         : IRequestHandler<UpdatePersonCommand>
     {
         public async Task Handle(UpdatePersonCommand request, CancellationToken cancellationToken)
         {
-            int numberOfUpdatedPersons = await db.Persons
-                .Where(x => 
-                    x.Id == request.IdOrUserIdentityId
-                    || x.UserIdentityId == request.IdOrUserIdentityId
-                )
-                .ExecuteUpdateAsync(s => s
-                    .SetProperty(x=>x.FirstName, request.FirstName)
-                    .SetProperty(x=>x.LastName, request.LastName)
-                    .SetProperty(x=>x.Email, request.Email)
-                    .SetProperty(x=>x.PhoneNumber, request.PhoneNumber),
-                    cancellationToken);
-            if (numberOfUpdatedPersons == 0)
+            Person person = await db.Persons
+                                .Where(x => 
+                                    x.Id == request.IdOrUserIdentityId
+                                    || x.UserIdentityId == request.IdOrUserIdentityId)
+                                .Include(x => x.Cats)
+                                .FirstOrDefaultAsync(cancellationToken)
+                            ?? throw new NotFoundExceptions.PersonNotFoundException(request.IdOrUserIdentityId);
+            
+            Address address = new()
             {
-                throw new Person.PersonNotFoundException(request.IdOrUserIdentityId);
-            }
+                Country = request.AddressCountry,
+                State = request.AddressState,
+                ZipCode = request.AddressZipCode,
+                City = request.AddressCity,
+                Street = request.AddressStreet,
+                BuildingNumber = request.AddressBuildingNumber
+            };
+            
+            person.FirstName = request.FirstName;
+            person.LastName = request.LastName;
+            person.Address = address;
+            await db.SaveChangesAsync(cancellationToken);
         }
     }
-    
+
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapPut("persons/{id:guid}", async
-            (Guid id, 
+        endpointRouteBuilder.MapPut("persons/{id:guid}", async (
+            Guid id,
             UpdatePersonRequest request,
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            UpdatePersonCommand command = request.ToUpdateCommand(id);
+            UpdatePersonCommand command = request.ToUpdatePersonCommand(id);
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
         });
@@ -99,5 +114,7 @@ public sealed class UpdatePerson : IEndpoint
 [Mapper]
 public static partial class UpdatePersonMapper
 {
-    public static partial UpdatePerson.UpdatePersonCommand ToUpdateCommand(this UpdatePerson.UpdatePersonRequest request, Guid idOrUserIdentityId);
+    public static partial UpdatePerson.UpdatePersonCommand ToUpdatePersonCommand(
+        this UpdatePerson.UpdatePersonRequest request,
+        Guid idOrUserIdentityId);
 }
