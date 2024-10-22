@@ -15,6 +15,7 @@ public sealed class CatResponse
     public required string AgeCategoryName { get; init; }
     public required string BehaviorName { get; init; }
     public required string HealthStatusName { get; init; }
+    public required double PriorityScore { get; init; }
 }
 
 [Mapper]
