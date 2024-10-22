@@ -14,12 +14,15 @@ internal sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> log
         ProblemDetails problemDetails = new()
         {
             Status = StatusCodes.Status500InternalServerError,
+            Type = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500",
             Title = "Sorry, an internal server error has occurred, there is nothing You can do."
         };
 
         logger.LogError(
-            exception, "Exception occurred: {type} | {message}",
+            exception,
+            "Following errors occurred: {type} | {code} | {message}",
             problemDetails.Status.Value,
+            exception.GetType().Name,
             exception.Message);
 
         httpContext.Response.StatusCode = problemDetails.Status.Value;

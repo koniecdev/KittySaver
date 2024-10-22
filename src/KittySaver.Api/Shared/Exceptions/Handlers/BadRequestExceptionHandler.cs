@@ -10,37 +10,25 @@ internal sealed class DomainExceptionHandler(ILogger<DomainExceptionHandler> log
         Exception exception,
         CancellationToken cancellationToken)
     {
-        if (exception is not DomainException domainException)
+        if (exception is not ArgumentException or ArgumentOutOfRangeException or FormatException)
         {
             return false;
         }
 
-        ProblemDetails problemDetails = new()
+        var problemDetails = new ProblemDetails
         {
             Status = StatusCodes.Status400BadRequest,
             Type = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400",
-            Title = "One or more request processing validation errors occurred",
-            Extensions = new Dictionary<string, object?>
-            {
-                {
-                    "errors",
-                    new Dictionary<string, string[]>
-                    {
-                        {
-                            domainException.ApplicationCode,
-                            [domainException.Message]
-                        }
-                    }
-                }
-            }
+            Title = "Validation error occurred",
+            Detail = exception.Message
         };
 
         logger.LogError(
-            domainException,
+            exception,
             "Following errors occurred: {type} | {code} | {message}",
             problemDetails.Status.Value,
-            domainException.ApplicationCode,
-            domainException.Message);
+            exception.GetType().Name,
+            exception.Message);
 
         httpContext.Response.StatusCode = problemDetails.Status.Value;
 

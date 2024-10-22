@@ -1,9 +1,9 @@
 ﻿// ReSharper disable ConvertToPrimaryConstructor
 namespace KittySaver.Api.Shared.Exceptions;
 
-public interface IApplicationException
+public abstract class NotFoundException : Exception
 {
-    public string ApplicationCode { get; }
-    public string Message { get; }
+    protected NotFoundException(string entity, string identifier) : base($"'{entity}' with identifier '{identifier}' was not found.")
+    {
+    }
 }
-

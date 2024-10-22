@@ -27,8 +27,8 @@ internal sealed class NotFoundExceptionHandler(ILogger<NotFoundExceptionHandler>
             notFoundException,
             "Following errors occurred: {type} | {code} | {message}",
             problemDetails.Status.Value,
-            notFoundException.ApplicationCode,
-            notFoundException.Message);
+            exception.GetType().Name,
+            exception.Message);
 
         httpContext.Response.StatusCode = problemDetails.Status.Value;
 
