@@ -5,6 +5,7 @@ using KittySaver.Api.Shared.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -12,9 +13,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KittySaver.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241015133111_RemovedSeed")]
+    partial class RemovedSeed
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -72,14 +75,11 @@ namespace KittySaver.Api.Migrations
                     b.Property<Guid>("PersonId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("PriorityScore")
-                        .HasColumnType("float");
-
                     b.HasKey("Id");
 
                     b.HasIndex("PersonId");
 
-                    b.ToTable("Cats", (string)null);
+                    b.ToTable("Cats");
                 });
 
             modelBuilder.Entity("KittySaver.Api.Shared.Domain.Entites.Person", b =>
@@ -166,41 +166,7 @@ namespace KittySaver.Api.Migrations
                     b.HasIndex("UserIdentityId")
                         .IsUnique();
 
-                    b.ToTable("Persons", (string)null);
-                });
-
-            modelBuilder.Entity("KittySaver.Api.Shared.Domain.ValueObjects.Address", b =>
-                {
-                    b.Property<string>("BuildingNumber")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Country")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("State")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Street")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("ZipCode")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.ToTable("Address");
+                    b.ToTable("Persons");
                 });
 
             modelBuilder.Entity("KittySaver.Api.Shared.Domain.Entites.Cat", b =>
