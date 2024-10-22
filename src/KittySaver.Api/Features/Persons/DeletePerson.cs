@@ -1,5 +1,4 @@
 ﻿using FluentValidation;
-using KittySaver.Api.Shared.Domain.Entites;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
 using MediatR;
@@ -26,13 +25,13 @@ public sealed class DeletePerson : IEndpoint
         public async Task Handle(DeletePersonCommand request, CancellationToken cancellationToken)
         {
             int numberOfDeletedPersons = await db.Persons
-                .Where(x => 
+                .Where(x =>
                     x.Id == request.IdOrUserIdentityId
                     || x.UserIdentityId == request.IdOrUserIdentityId)
                 .ExecuteDeleteAsync(cancellationToken);
             if (numberOfDeletedPersons == 0)
             {
-                throw new Person.PersonNotFoundException(request.IdOrUserIdentityId);
+                throw new NotFoundExceptions.PersonNotFoundException(request.IdOrUserIdentityId);
             }
         }
     }
