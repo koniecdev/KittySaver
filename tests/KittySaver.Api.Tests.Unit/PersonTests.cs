@@ -1,11 +1,9 @@
 using Bogus;
 using FluentAssertions;
-using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Shared.Domain.Entites;
 using KittySaver.Api.Shared.Domain.Enums;
 using KittySaver.Api.Shared.Domain.Services;
 using KittySaver.Api.Shared.Domain.ValueObjects;
-using KittySaver.Api.Shared.Infrastructure.Extensions;
 using NSubstitute;
 using Shared;
 using Person = KittySaver.Api.Shared.Domain.Entites.Person;

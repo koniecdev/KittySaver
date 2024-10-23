@@ -1,9 +1,7 @@
 ﻿using FluentValidation;
-using FluentValidation.Results;
 using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Shared.Domain.Entites;
 using KittySaver.Api.Shared.Domain.Enums;
-using KittySaver.Api.Shared.Domain.Enums.Common;
 using KittySaver.Api.Shared.Domain.Services;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;

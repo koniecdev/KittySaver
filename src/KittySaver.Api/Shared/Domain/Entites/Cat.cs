@@ -2,8 +2,6 @@
 using KittySaver.Api.Shared.Domain.Entites.Common;
 using KittySaver.Api.Shared.Domain.Enums;
 using KittySaver.Api.Shared.Domain.Services;
-using KittySaver.Api.Shared.Domain.ValueObjects;
-using KittySaver.Api.Shared.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

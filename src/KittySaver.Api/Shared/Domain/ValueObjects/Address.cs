@@ -1,9 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using KittySaver.Api.Shared.Domain.Entites;
-using KittySaver.Api.Shared.Domain.ValueObjects.Common;
+﻿using KittySaver.Api.Shared.Domain.ValueObjects.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Riok.Mapperly.Abstractions;
 
 namespace KittySaver.Api.Shared.Domain.ValueObjects;
 

@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
 using KittySaver.Auth.Api.Features.ApplicationUsers.SharedContracts;
 using KittySaver.Auth.Api.Shared.Domain.Entites;
-using KittySaver.Auth.Api.Shared.Exceptions;
 using KittySaver.Auth.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Auth.Api.Shared.Infrastructure.Clients;
 using KittySaver.Auth.Api.Shared.Infrastructure.Endpoints;

@@ -1,9 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Text.RegularExpressions;
-using KittySaver.Api.Features.Persons.SharedContracts;
+﻿using System.Text.RegularExpressions;
 using KittySaver.Api.Shared.Domain.Entites.Common;
 using KittySaver.Api.Shared.Domain.ValueObjects;
-using KittySaver.Api.Shared.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
