@@ -142,7 +142,7 @@ public sealed class UpdatePerson : IEndpoint
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            UpdatePersonCommand command = request.ToUpdatePersonCommand(id);
+            UpdatePersonCommand command = request.MapToUpdatePersonCommand(id);
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
         });
@@ -152,7 +152,7 @@ public sealed class UpdatePerson : IEndpoint
 [Mapper]
 public static partial class UpdatePersonMapper
 {
-    public static partial UpdatePerson.UpdatePersonCommand ToUpdatePersonCommand(
+    public static partial UpdatePerson.UpdatePersonCommand MapToUpdatePersonCommand(
         this UpdatePerson.UpdatePersonRequest request,
         Guid idOrUserIdentityId);
 }
