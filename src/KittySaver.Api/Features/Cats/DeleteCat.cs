@@ -16,6 +16,7 @@ public sealed class DeleteCat : IEndpoint
         public DeleteCatCommandValidator()
         {
             RuleFor(x => x.Id).NotEmpty();
+            RuleFor(x => x.PersonId).NotEmpty();
         }
     }
 
