@@ -55,13 +55,12 @@ public sealed class UpdateCat : IEndpoint
             Person catOwner = await db.Persons
                                   .Where(x => x.Id == request.PersonId)
                                   .Include(x => x.Cats)
-                                  .Include(x => x.Address)
                                   .FirstOrDefaultAsync(cancellationToken)
                               ?? throw new NotFoundExceptions.PersonNotFoundException(request.PersonId);
             Cat catToUpdate = catOwner.Cats.FirstOrDefault(x => x.Id == request.Id)
                               ?? throw new NotFoundExceptions.CatNotFoundException(request.Id);
             
-            UpdateCatMapper.MapUpdateCatCommandPropertiesToExistingCat((request, catToUpdate), calculator);
+            UpdateCatMapper.MapUpdateCatCommandPropertiesToExistingCat(request, catToUpdate, calculator);
             await db.SaveChangesAsync(cancellationToken);
         }
     }
@@ -81,13 +80,14 @@ public sealed class UpdateCat : IEndpoint
                 out Behavior behavior,
                 out HealthStatus healthStatus);
             
-            UpdateCatCommand command = request.ToUpdateCommand(
+            UpdateCatCommand command = request.MapToUpdateCatCommand(
                 personId,
                 id,
                 medicalHelpUrgency,
                 ageCategory,
                 behavior,
                 healthStatus);
+            
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
         });
@@ -97,7 +97,23 @@ public sealed class UpdateCat : IEndpoint
 [Mapper]
 public static partial class UpdateCatMapper
 {
-    public static partial UpdateCat.UpdateCatCommand ToUpdateCommand(
+    public static UpdateCat.UpdateCatCommand MapToUpdateCatCommand(this UpdateCat.UpdateCatRequest request,
+        Guid personId,
+        Guid id,
+        MedicalHelpUrgency medicalHelpUrgency,
+        AgeCategory ageCategory,
+        Behavior behavior,
+        HealthStatus healthStatus)
+    {
+        if (request.AdditionalRequirements is not null && string.IsNullOrWhiteSpace(request.AdditionalRequirements))
+        {
+            request = request with { AdditionalRequirements = null };
+        }
+        UpdateCat.UpdateCatCommand dto = request.ToUpdateCatCommand(personId, id, medicalHelpUrgency, ageCategory, behavior, healthStatus);
+        return dto;
+    }
+    
+    private static partial UpdateCat.UpdateCatCommand ToUpdateCatCommand(
         this UpdateCat.UpdateCatRequest request,
         Guid personId,
         Guid id,
@@ -106,15 +122,14 @@ public static partial class UpdateCatMapper
         Behavior behavior,
         HealthStatus healthStatus);
 
+    public static void MapUpdateCatCommandPropertiesToExistingCat(UpdateCat.UpdateCatCommand command,
+        Cat entity, ICatPriorityCalculator calculator)
+    {
+        UpdateCatCommandPropertiesToExistingCat(command, entity);
+        entity.ReCalculatePriorityScore(calculator);
+    }
+    
     private static partial void UpdateCatCommandPropertiesToExistingCat(
         UpdateCat.UpdateCatCommand command,
         Cat entity);
-    
-    [UserMapping(Default = true)]
-    public static void MapUpdateCatCommandPropertiesToExistingCat((UpdateCat.UpdateCatCommand command,
-        Cat entity) requestAndEntity, ICatPriorityCalculator calculator)
-    {
-        UpdateCatCommandPropertiesToExistingCat(requestAndEntity.command, requestAndEntity.entity);
-        requestAndEntity.entity.ReCalculatePriorityScore(calculator);
-    }
 }
