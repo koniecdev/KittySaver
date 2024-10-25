@@ -48,10 +48,10 @@ public class DeleteCatEndpointsTests : IAsyncLifetime
                     Name: faker.Name.FirstName(),
                     IsCastrated: true,
                     IsInNeedOfSeeingVet: false,
-                    MedicalHelpUrgencyName: MedicalHelpUrgency.NoNeed.Name,
-                    BehaviorName: Behavior.Friendly.Name,
-                    HealthStatusName: HealthStatus.Good.Name,
-                    AgeCategoryName: AgeCategory.Adult.Name,
+                    MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
+                    Behavior: Behavior.Friendly.Name,
+                    HealthStatus: HealthStatus.Good.Name,
+                    AgeCategory: AgeCategory.Adult.Name,
                     AdditionalRequirements: "Lorem ipsum"
                 )).Generate();
     

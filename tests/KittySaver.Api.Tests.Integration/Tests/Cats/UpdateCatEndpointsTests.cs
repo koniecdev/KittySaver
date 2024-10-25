@@ -51,10 +51,10 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                     Name: faker.Name.FirstName(),
                     IsCastrated: true,
                     IsInNeedOfSeeingVet: true,
-                    MedicalHelpUrgencyName: MedicalHelpUrgency.NoNeed.Name,
-                    BehaviorName: Behavior.Friendly.Name,
-                    HealthStatusName: HealthStatus.Good.Name,
-                    AgeCategoryName: AgeCategory.Baby.Name,
+                    MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
+                    Behavior: Behavior.Friendly.Name,
+                    HealthStatus: HealthStatus.Good.Name,
+                    AgeCategory: AgeCategory.Baby.Name,
                     AdditionalRequirements: "Lorem ipsum"
                 )).Generate();
     
@@ -84,10 +84,10 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                     Name: faker.Name.FirstName(),
                     IsCastrated: false,
                     IsInNeedOfSeeingVet: false,
-                    MedicalHelpUrgencyName: MedicalHelpUrgency.ShouldSeeVet.Name,
-                    BehaviorName: Behavior.Unfriendly.Name,
-                    HealthStatusName: HealthStatus.Critical.Name,
-                    AgeCategoryName: AgeCategory.Senior.Name,
+                    MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
+                    Behavior: Behavior.Unfriendly.Name,
+                    HealthStatus: HealthStatus.Critical.Name,
+                    AgeCategory: AgeCategory.Senior.Name,
                     AdditionalRequirements: "Lorem ipsum dolor sit"
                 )).Generate();
         
@@ -103,10 +103,10 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
         catBeforeUpdate.Should().NotBeEquivalentTo(catAfterUpdate);
         catAfterUpdate.Name.Should().Be(request.Name);
         catAfterUpdate.AdditionalRequirements.Should().Be(request.AdditionalRequirements);
-        catAfterUpdate.BehaviorName.Should().Be(request.BehaviorName);
-        catAfterUpdate.HealthStatusName.Should().Be(request.HealthStatusName);
-        catAfterUpdate.AgeCategoryName.Should().Be(request.AgeCategoryName);
-        catAfterUpdate.MedicalHelpUrgencyName.Should().Be(request.MedicalHelpUrgencyName);
+        catAfterUpdate.Behavior.Should().Be(request.Behavior);
+        catAfterUpdate.HealthStatus.Should().Be(request.HealthStatus);
+        catAfterUpdate.AgeCategory.Should().Be(request.AgeCategory);
+        catAfterUpdate.MedicalHelpUrgency.Should().Be(request.MedicalHelpUrgency);
         catAfterUpdate.IsCastrated.Should().Be(request.IsCastrated);
         catAfterUpdate.IsInNeedOfSeeingVet.Should().Be(request.IsInNeedOfSeeingVet);
     }
@@ -136,10 +136,10 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                     Name: faker.Name.FirstName(),
                     IsCastrated: false,
                     IsInNeedOfSeeingVet: false,
-                    MedicalHelpUrgencyName: MedicalHelpUrgency.ShouldSeeVet.Name,
-                    BehaviorName: Behavior.Unfriendly.Name,
-                    HealthStatusName: HealthStatus.Critical.Name,
-                    AgeCategoryName: AgeCategory.Senior.Name,
+                    MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
+                    Behavior: Behavior.Unfriendly.Name,
+                    HealthStatus: HealthStatus.Critical.Name,
+                    AgeCategory: AgeCategory.Senior.Name,
                     AdditionalRequirements: null
                 )).Generate();
         
@@ -155,10 +155,10 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
         catBeforeUpdate.Should().NotBeEquivalentTo(catAfterUpdate);
         catAfterUpdate.AdditionalRequirements.Should().BeNull();
         catAfterUpdate.Name.Should().Be(request.Name);
-        catAfterUpdate.BehaviorName.Should().Be(request.BehaviorName);
-        catAfterUpdate.HealthStatusName.Should().Be(request.HealthStatusName);
-        catAfterUpdate.AgeCategoryName.Should().Be(request.AgeCategoryName);
-        catAfterUpdate.MedicalHelpUrgencyName.Should().Be(request.MedicalHelpUrgencyName);
+        catAfterUpdate.Behavior.Should().Be(request.Behavior);
+        catAfterUpdate.HealthStatus.Should().Be(request.HealthStatus);
+        catAfterUpdate.AgeCategory.Should().Be(request.AgeCategory);
+        catAfterUpdate.MedicalHelpUrgency.Should().Be(request.MedicalHelpUrgency);
         catAfterUpdate.IsCastrated.Should().Be(request.IsCastrated);
         catAfterUpdate.IsInNeedOfSeeingVet.Should().Be(request.IsInNeedOfSeeingVet);
     }
@@ -188,10 +188,10 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                     Name: faker.Name.FirstName(),
                     IsCastrated: false,
                     IsInNeedOfSeeingVet: false,
-                    MedicalHelpUrgencyName: MedicalHelpUrgency.ShouldSeeVet.Name,
-                    BehaviorName: Behavior.Unfriendly.Name,
-                    HealthStatusName: HealthStatus.Critical.Name,
-                    AgeCategoryName: AgeCategory.Senior.Name,
+                    MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
+                    Behavior: Behavior.Unfriendly.Name,
+                    HealthStatus: HealthStatus.Critical.Name,
+                    AgeCategory: AgeCategory.Senior.Name,
                     AdditionalRequirements: " "
                 )).Generate();
         
@@ -207,10 +207,10 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
         catBeforeUpdate.Should().NotBeEquivalentTo(catAfterUpdate);
         catAfterUpdate.AdditionalRequirements.Should().BeNull();
         catAfterUpdate.Name.Should().Be(request.Name);
-        catAfterUpdate.BehaviorName.Should().Be(request.BehaviorName);
-        catAfterUpdate.HealthStatusName.Should().Be(request.HealthStatusName);
-        catAfterUpdate.AgeCategoryName.Should().Be(request.AgeCategoryName);
-        catAfterUpdate.MedicalHelpUrgencyName.Should().Be(request.MedicalHelpUrgencyName);
+        catAfterUpdate.Behavior.Should().Be(request.Behavior);
+        catAfterUpdate.HealthStatus.Should().Be(request.HealthStatus);
+        catAfterUpdate.AgeCategory.Should().Be(request.AgeCategory);
+        catAfterUpdate.MedicalHelpUrgency.Should().Be(request.MedicalHelpUrgency);
         catAfterUpdate.IsCastrated.Should().Be(request.IsCastrated);
         catAfterUpdate.IsInNeedOfSeeingVet.Should().Be(request.IsInNeedOfSeeingVet);
     }
@@ -233,10 +233,10 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                     Name: faker.Name.FirstName(),
                     IsCastrated: false,
                     IsInNeedOfSeeingVet: false,
-                    MedicalHelpUrgencyName: MedicalHelpUrgency.ShouldSeeVet.Name,
-                    BehaviorName: Behavior.Unfriendly.Name,
-                    HealthStatusName: HealthStatus.Critical.Name,
-                    AgeCategoryName: AgeCategory.Senior.Name,
+                    MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
+                    Behavior: Behavior.Unfriendly.Name,
+                    HealthStatus: HealthStatus.Critical.Name,
+                    AgeCategory: AgeCategory.Senior.Name,
                     AdditionalRequirements: "Lorem ipsum dolor sit"
                 )).Generate();
         
@@ -274,10 +274,10 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                     Name: faker.Name.FirstName(),
                     IsCastrated: false,
                     IsInNeedOfSeeingVet: false,
-                    MedicalHelpUrgencyName: MedicalHelpUrgency.ShouldSeeVet.Name,
-                    BehaviorName: Behavior.Unfriendly.Name,
-                    HealthStatusName: HealthStatus.Critical.Name,
-                    AgeCategoryName: AgeCategory.Senior.Name,
+                    MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
+                    Behavior: Behavior.Unfriendly.Name,
+                    HealthStatus: HealthStatus.Critical.Name,
+                    AgeCategory: AgeCategory.Senior.Name,
                     AdditionalRequirements: "Lorem ipsum dolor sit"
                 )).Generate();
         
@@ -292,68 +292,8 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
     }
     
     [Fact]
-    public async Task UpdatePerson_ShouldReturnBadRequest_WhenEmptySmartEnumsAreProvided()
+    public async Task UpdatePerson_ShouldReturnBadRequest_WhenEmptyDataAreProvided()
     {    
-        //Arrange
-        HttpResponseMessage personRegisterResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
-        ApiResponses.CreatedWithIdResponse personRegisterResponse = 
-            await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
-        
-        HttpResponseMessage catCreateResponseMessage = 
-            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", _createCatRequest);
-        ApiResponses.CreatedWithIdResponse catCreateResponse = 
-            await catCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
-        
-        //Act
-        UpdateCat.UpdateCatRequest request =
-            new UpdateCat.UpdateCatRequest(
-                Name: "Whiskers",
-                IsCastrated: false,
-                IsInNeedOfSeeingVet: false,
-                MedicalHelpUrgencyName: "",
-                BehaviorName: "",
-                HealthStatusName: "",
-                AgeCategoryName: ""
-            );
-        HttpResponseMessage response = 
-            await _httpClient.PutAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}", request);
-        
-        //Assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        ValidationProblemDetails? validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
-        validationProblemDetails.Should().NotBeNull();
-        validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
-        validationProblemDetails.Errors.Count.Should().Be(4);
-        validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(
-            nameof(CreateCat.CreateCatRequest.MedicalHelpUrgencyName),
-            nameof(CreateCat.CreateCatRequest.BehaviorName),
-            nameof(CreateCat.CreateCatRequest.AgeCategoryName),
-            nameof(CreateCat.CreateCatRequest.HealthStatusName)
-        );
-        validationProblemDetails.Errors.Values.Count.Should().Be(4);
-        
-        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.MedicalHelpUrgencyName)][0]
-            .Should()
-            .Be($"Provided invalid '{nameof(CreateCat.CreateCatRequest.MedicalHelpUrgencyName)}' value.");
-        
-        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.BehaviorName)][0]
-            .Should()
-            .Be($"Provided invalid '{nameof(CreateCat.CreateCatRequest.BehaviorName)}' value.");
-        
-        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.AgeCategoryName)][0]
-            .Should()
-            .Be($"Provided invalid '{nameof(CreateCat.CreateCatRequest.AgeCategoryName)}' value.");
-        
-        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.HealthStatusName)][0]
-            .Should()
-            .Be($"Provided invalid '{nameof(CreateCat.CreateCatRequest.HealthStatusName)}' value.");
-    }
-    
-    [Fact]
-    public async Task UpdateCat_ShouldReturnBadRequest_WhenEmptyNameIsProvided()
-    {
         //Arrange
         HttpResponseMessage personRegisterResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
         ApiResponses.CreatedWithIdResponse personRegisterResponse = 
@@ -372,29 +312,47 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                 Name: "",
                 IsCastrated: false,
                 IsInNeedOfSeeingVet: false,
-                MedicalHelpUrgencyName: MedicalHelpUrgency.ShouldSeeVet.Name,
-                BehaviorName: Behavior.Unfriendly.Name,
-                HealthStatusName: HealthStatus.Critical.Name,
-                AgeCategoryName: AgeCategory.Senior.Name
+                MedicalHelpUrgency: "",
+                Behavior: "",
+                HealthStatus: "",
+                AgeCategory: ""
             );
-        HttpResponseMessage response =
+        HttpResponseMessage response = 
             await _httpClient.PutAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}", request);
         
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        
         ValidationProblemDetails? validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         validationProblemDetails.Should().NotBeNull();
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
-        validationProblemDetails.Errors.Count.Should().Be(1);
+        validationProblemDetails.Errors.Count.Should().Be(5);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(
-            nameof(CreateCat.CreateCatRequest.Name)
+            nameof(UpdateCat.UpdateCatRequest.Name),
+            nameof(UpdateCat.UpdateCatRequest.MedicalHelpUrgency),
+            nameof(UpdateCat.UpdateCatRequest.Behavior),
+            nameof(UpdateCat.UpdateCatRequest.AgeCategory),
+            nameof(UpdateCat.UpdateCatRequest.HealthStatus)
         );
-        validationProblemDetails.Errors.Values.Count.Should().Be(1);
-        
+        validationProblemDetails.Errors.Values.Count.Should().Be(5);
         validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.Name)][0]
             .Should()
             .Be("'Name' must not be empty.");
+        
+        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.MedicalHelpUrgency)][0]
+            .Should()
+            .Be("Provided empty or invalid Medical Help Urgency.");
+        
+        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.Behavior)][0]
+            .Should()
+            .Be("Provided empty or invalid Behavior.");
+        
+        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.AgeCategory)][0]
+            .Should()
+            .Be("Provided empty or invalid Age Category.");
+        
+        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.HealthStatus)][0]
+            .Should()
+            .Be("Provided empty or invalid Health Status.");
     }
     
     [Fact]
@@ -419,10 +377,10 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                     Name: faker.Person.FirstName.ClampLength(Cat.Constraints.NameMaxLength + 1),
                     IsCastrated: true,
                     IsInNeedOfSeeingVet: false,
-                    MedicalHelpUrgencyName: MedicalHelpUrgency.ShouldSeeVet.Name,
-                    BehaviorName: Behavior.Unfriendly.Name,
-                    HealthStatusName: HealthStatus.Poor.Name,
-                    AgeCategoryName: AgeCategory.Baby.Name,
+                    MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
+                    Behavior: Behavior.Unfriendly.Name,
+                    HealthStatus: HealthStatus.Poor.Name,
+                    AgeCategory: AgeCategory.Baby.Name,
                     AdditionalRequirements: faker.Address.State().ClampLength(Cat.Constraints.AdditionalRequirementsMaxLength + 1)
                 )).Generate();
         

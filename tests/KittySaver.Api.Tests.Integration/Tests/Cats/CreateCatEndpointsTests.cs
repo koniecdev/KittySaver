@@ -50,10 +50,10 @@ public class CreateCatEndpointsTests : IAsyncLifetime
                     Name: faker.Name.FirstName(),
                     IsCastrated: true,
                     IsInNeedOfSeeingVet: false,
-                    MedicalHelpUrgencyName: MedicalHelpUrgency.NoNeed.Name,
-                    BehaviorName: Behavior.Friendly.Name,
-                    HealthStatusName: HealthStatus.Good.Name,
-                    AgeCategoryName: AgeCategory.Adult.Name,
+                    MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
+                    Behavior: Behavior.Friendly.Name,
+                    HealthStatus: HealthStatus.Good.Name,
+                    AgeCategory: AgeCategory.Adult.Name,
                     AdditionalRequirements: "Lorem ipsum"
                 ));
     
@@ -90,10 +90,10 @@ public class CreateCatEndpointsTests : IAsyncLifetime
             Name: "Whiskers",
             IsCastrated: true,
             IsInNeedOfSeeingVet: false,
-            MedicalHelpUrgencyName: MedicalHelpUrgency.NoNeed.Name,
-            BehaviorName: Behavior.Friendly.Name,
-            HealthStatusName: HealthStatus.Good.Name,
-            AgeCategoryName: AgeCategory.Adult.Name
+            MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
+            Behavior: Behavior.Friendly.Name,
+            HealthStatus: HealthStatus.Good.Name,
+            AgeCategory: AgeCategory.Adult.Name
         );
         
         //Act
@@ -119,10 +119,10 @@ public class CreateCatEndpointsTests : IAsyncLifetime
             Name: "Whiskers",
             IsCastrated: true,
             IsInNeedOfSeeingVet: false,
-            MedicalHelpUrgencyName: MedicalHelpUrgency.NoNeed.Name,
-            BehaviorName: Behavior.Friendly.Name,
-            HealthStatusName: HealthStatus.Good.Name,
-            AgeCategoryName: AgeCategory.Adult.Name,
+            MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
+            Behavior: Behavior.Friendly.Name,
+            HealthStatus: HealthStatus.Good.Name,
+            AgeCategory: AgeCategory.Adult.Name,
             AdditionalRequirements: " "
         );
         
@@ -155,10 +155,10 @@ public class CreateCatEndpointsTests : IAsyncLifetime
                     Name: faker.Person.FirstName.ClampLength(Cat.Constraints.NameMaxLength + 1),
                     IsCastrated: true,
                     IsInNeedOfSeeingVet: false,
-                    MedicalHelpUrgencyName: MedicalHelpUrgency.ShouldSeeVet.Name,
-                    BehaviorName: Behavior.Unfriendly.Name,
-                    HealthStatusName: HealthStatus.Poor.Name,
-                    AgeCategoryName: AgeCategory.Baby.Name,
+                    MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
+                    Behavior: Behavior.Unfriendly.Name,
+                    HealthStatus: HealthStatus.Poor.Name,
+                    AgeCategory: AgeCategory.Baby.Name,
                     AdditionalRequirements: faker.Address.State().ClampLength(Cat.Constraints.AdditionalRequirementsMaxLength + 1)
                 )).Generate();
         
@@ -187,7 +187,7 @@ public class CreateCatEndpointsTests : IAsyncLifetime
     }
     
     [Fact]
-    public async Task CreateCat_ShouldReturnBadRequest_WhenEmptySmartEnumsAreProvided()
+    public async Task CreateCat_ShouldReturnBadRequest_WhenEmptyDataAreProvided()
     {
         //Arrange
         HttpResponseMessage personRegisterResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
@@ -198,10 +198,10 @@ public class CreateCatEndpointsTests : IAsyncLifetime
             Name: "",
             IsCastrated: false,
             IsInNeedOfSeeingVet: false,
-            MedicalHelpUrgencyName: "",
-            BehaviorName: "",
-            HealthStatusName: "",
-            AgeCategoryName: ""
+            MedicalHelpUrgency: "",
+            Behavior: "",
+            HealthStatus: "",
+            AgeCategory: ""
         );
         
         //Act
@@ -212,63 +212,32 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         ValidationProblemDetails? validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         validationProblemDetails.Should().NotBeNull();
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
-        validationProblemDetails.Errors.Count.Should().Be(4);
+        
+        validationProblemDetails.Errors.Count.Should().Be(5);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(
-            nameof(CreateCat.CreateCatRequest.MedicalHelpUrgencyName),
-            nameof(CreateCat.CreateCatRequest.BehaviorName),
-            nameof(CreateCat.CreateCatRequest.AgeCategoryName),
-            nameof(CreateCat.CreateCatRequest.HealthStatusName)
+            nameof(CreateCat.CreateCatRequest.Name),
+            nameof(CreateCat.CreateCatRequest.MedicalHelpUrgency),
+            nameof(CreateCat.CreateCatRequest.Behavior),
+            nameof(CreateCat.CreateCatRequest.AgeCategory),
+            nameof(CreateCat.CreateCatRequest.HealthStatus)
         );
-        validationProblemDetails.Errors.Values.Count.Should().Be(4);
+        validationProblemDetails.Errors.Values.Count.Should().Be(5);
         
-        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.MedicalHelpUrgencyName)][0]
+        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.MedicalHelpUrgency)][0]
             .Should()
-            .Be($"Provided invalid '{nameof(CreateCat.CreateCatRequest.MedicalHelpUrgencyName)}' value.");
+            .Be("Provided empty or invalid Medical Help Urgency.");
         
-        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.BehaviorName)][0]
+        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.Behavior)][0]
             .Should()
-            .Be($"Provided invalid '{nameof(CreateCat.CreateCatRequest.BehaviorName)}' value.");
+            .Be("Provided empty or invalid Behavior.");
         
-        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.AgeCategoryName)][0]
+        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.AgeCategory)][0]
             .Should()
-            .Be($"Provided invalid '{nameof(CreateCat.CreateCatRequest.AgeCategoryName)}' value.");
+            .Be("Provided empty or invalid Age Category.");
         
-        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.HealthStatusName)][0]
+        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.HealthStatus)][0]
             .Should()
-            .Be($"Provided invalid '{nameof(CreateCat.CreateCatRequest.HealthStatusName)}' value.");
-    }
-    
-    [Fact]
-    public async Task CreateCat_ShouldReturnBadRequest_WhenEmptyNameIsProvided()
-    {
-        //Arrange
-        HttpResponseMessage personRegisterResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
-        ApiResponses.CreatedWithIdResponse personRegisterResponse = 
-            await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
-        CreateCat.CreateCatRequest request = new(
-            Name: "",
-            IsCastrated: false,
-            IsInNeedOfSeeingVet: false,
-            MedicalHelpUrgencyName: MedicalHelpUrgency.NoNeed.Name,
-            BehaviorName: Behavior.Friendly.Name,
-            HealthStatusName: HealthStatus.Good.Name,
-            AgeCategoryName: AgeCategory.Adult.Name
-        );
-        
-        //Act
-        HttpResponseMessage response = await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", request);
-        
-        //Assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        ValidationProblemDetails? validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
-        validationProblemDetails.Should().NotBeNull();
-        validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
-        validationProblemDetails.Errors.Count.Should().Be(1);
-        validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(
-            nameof(CreateCat.CreateCatRequest.Name)
-        );
-        validationProblemDetails.Errors.Values.Count.Should().Be(1);
+            .Be("Provided empty or invalid Health Status.");
         
         validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.Name)][0]
             .Should()

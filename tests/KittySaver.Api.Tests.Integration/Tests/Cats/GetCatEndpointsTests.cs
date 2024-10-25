@@ -49,10 +49,10 @@ public class GetCatEndpointsTests : IAsyncLifetime
                     Name: faker.Name.FirstName(),
                     IsCastrated: true,
                     IsInNeedOfSeeingVet: false,
-                    MedicalHelpUrgencyName: MedicalHelpUrgency.NoNeed.Name,
-                    BehaviorName: Behavior.Friendly.Name,
-                    HealthStatusName: HealthStatus.Good.Name,
-                    AgeCategoryName: AgeCategory.Adult.Name,
+                    MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
+                    Behavior: Behavior.Friendly.Name,
+                    HealthStatus: HealthStatus.Good.Name,
+                    AgeCategory: AgeCategory.Adult.Name,
                     AdditionalRequirements: "Lorem ipsum"
                 )).Generate();
 
@@ -81,10 +81,10 @@ public class GetCatEndpointsTests : IAsyncLifetime
         cat.PersonId.Should().Be(personRegisterResponse.Id);
         cat.Name.Should().Be(_createCatRequest.Name);
         cat.AdditionalRequirements.Should().Be(_createCatRequest.AdditionalRequirements);
-        cat.BehaviorName.Should().Be(_createCatRequest.BehaviorName);
-        cat.AgeCategoryName.Should().Be(_createCatRequest.AgeCategoryName);
-        cat.MedicalHelpUrgencyName.Should().Be(_createCatRequest.MedicalHelpUrgencyName);
-        cat.HealthStatusName.Should().Be(_createCatRequest.HealthStatusName);
+        cat.Behavior.Should().Be(_createCatRequest.Behavior);
+        cat.AgeCategory.Should().Be(_createCatRequest.AgeCategory);
+        cat.MedicalHelpUrgency.Should().Be(_createCatRequest.MedicalHelpUrgency);
+        cat.HealthStatus.Should().Be(_createCatRequest.HealthStatus);
         cat.IsCastrated.Should().Be(_createCatRequest.IsCastrated);
         cat.IsInNeedOfSeeingVet.Should().Be(_createCatRequest.IsInNeedOfSeeingVet);
         cat.PriorityScore.Should().BeGreaterThan(0);
