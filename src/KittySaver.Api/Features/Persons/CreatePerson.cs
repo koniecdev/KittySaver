@@ -124,7 +124,7 @@ public class CreatePerson : IEndpoint
                 BuildingNumber = request.AddressBuildingNumber
             };
             
-            Person person = request.ToEntity(address);
+            Person person = request.MapToEntity(address);
             db.Persons.Add(person);
             await db.SaveChangesAsync(cancellationToken);
             return person.Id;
@@ -138,7 +138,7 @@ public class CreatePerson : IEndpoint
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            CreatePersonCommand command = request.ToCreatePersonCommand();
+            CreatePersonCommand command = request.MapToCreatePersonCommand();
             Guid personId = await sender.Send(command, cancellationToken);
             return Results.Created($"/api/v1/persons/{personId}", new { Id = personId });
         }).RequireAuthorization();
@@ -149,16 +149,16 @@ public class CreatePerson : IEndpoint
 public static partial class CreatePersonMapper
 {
     [UserMapping(Default = true)]
-    public static CreatePerson.CreatePersonCommand ToCreatePersonCommand(this CreatePerson.CreatePersonRequest request)
+    public static CreatePerson.CreatePersonCommand MapToCreatePersonCommand(this CreatePerson.CreatePersonRequest request)
     {
         if (request.AddressState is not null && string.IsNullOrWhiteSpace(request.AddressState))
         {
             request = request with { AddressState = null };
         }
-        CreatePerson.CreatePersonCommand dto = MapToCreatePersonCommand(request);
+        CreatePerson.CreatePersonCommand dto = ToCreatePersonCommand(request);
         return dto;
     }
-    private static partial CreatePerson.CreatePersonCommand MapToCreatePersonCommand(this CreatePerson.CreatePersonRequest request);
+    private static partial CreatePerson.CreatePersonCommand ToCreatePersonCommand(this CreatePerson.CreatePersonRequest request);
     
-    public static partial Person ToEntity(this CreatePerson.CreatePersonCommand command, Address address);
+    public static partial Person MapToEntity(this CreatePerson.CreatePersonCommand command, Address address);
 }
