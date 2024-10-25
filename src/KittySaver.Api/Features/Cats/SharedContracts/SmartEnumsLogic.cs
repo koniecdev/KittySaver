@@ -5,49 +5,43 @@ namespace KittySaver.Api.Features.Cats.SharedContracts;
 
 public interface ICatSmartEnumsRequest
 {
-    public string MedicalHelpUrgencyName { get; }
-    public string AgeCategoryName { get; }
-    public string BehaviorName { get; }
-    public string HealthStatusName { get; }
+    public string MedicalHelpUrgency { get; }
+    public string AgeCategory { get; }
+    public string Behavior { get; }
+    public string HealthStatus { get; }
 }
 
-public static class CatSmartEnumsHelper
+public static class CatSmartEnumsRequestExtensions
 {
-    public static void ValidateAndRetrieve(
+    public static void RetrieveSmartEnumsFromNames(
         this ICatSmartEnumsRequest request,
-        out MedicalHelpUrgency medicalHelpUrgency,
-        out AgeCategory ageCategory,
-        out Behavior behavior,
-        out HealthStatus healthStatus)
+        out (bool mappedSuccessfully, MedicalHelpUrgency value) medicalHelpUrgencyResults,
+        out (bool mappedSuccessfully, AgeCategory value) ageCategoryResults,
+        out (bool mappedSuccessfully, Behavior value) behaviorResults,
+        out (bool mappedSuccessfully, HealthStatus value) healthStatusResults)
     {
-        List<(string propertyName, string attemptedValue)> smartEnumsFailures = [];
-        if (!MedicalHelpUrgency.TryFromName(request.MedicalHelpUrgencyName, true,
-                out medicalHelpUrgency))
-        {
-            smartEnumsFailures.Add((nameof(request.MedicalHelpUrgencyName), request.MedicalHelpUrgencyName));
-        }
+        medicalHelpUrgencyResults =
+            MedicalHelpUrgency.TryFromName(request.MedicalHelpUrgency, true,
+                out MedicalHelpUrgency medicalHelpUrgency)
+                ? (true, medicalHelpUrgency)
+                : (false, null!);
+        
+        ageCategoryResults =
+            AgeCategory.TryFromName(request.AgeCategory, true,
+                out AgeCategory ageCategory)
+                ? (true, ageCategory)
+                : (false, null!);
 
-        if (!AgeCategory.TryFromName(request.AgeCategoryName, true,
-                out ageCategory))
-        {
-            smartEnumsFailures.Add((nameof(request.AgeCategoryName), request.AgeCategoryName));
-        }
+        behaviorResults =
+            Behavior.TryFromName(request.Behavior, true,
+                out Behavior behavior)
+                ? (true, behavior)
+                : (false, null!);
 
-        if (!Behavior.TryFromName(request.BehaviorName, true,
-                out behavior))
-        {
-            smartEnumsFailures.Add((nameof(request.BehaviorName), request.BehaviorName));
-        }
-
-        if (!HealthStatus.TryFromName(request.HealthStatusName, true,
-                out healthStatus))
-        {
-            smartEnumsFailures.Add((nameof(request.HealthStatusName), request.HealthStatusName));
-        }
-
-        if (smartEnumsFailures.Count > 0)
-        {
-            throw new SmartEnumsExceptions.InvalidValueException(smartEnumsFailures);
-        }
+        healthStatusResults =
+            HealthStatus.TryFromName(request.HealthStatus, true,
+                out HealthStatus healthStatus)
+                ? (true, healthStatus)
+                : (false, null!);
     }
 }
