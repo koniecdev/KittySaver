@@ -17,10 +17,10 @@ public sealed class UpdateCat : IEndpoint
         string Name,
         bool IsCastrated,
         bool IsInNeedOfSeeingVet,
-        string MedicalHelpUrgencyName,
-        string AgeCategoryName,
-        string BehaviorName,
-        string HealthStatusName,
+        string MedicalHelpUrgency,
+        string AgeCategory,
+        string Behavior,
+        string HealthStatus,
         string? AdditionalRequirements = null) : ICatSmartEnumsRequest;
     
     public sealed record UpdateCatCommand(
@@ -29,10 +29,10 @@ public sealed class UpdateCat : IEndpoint
         string Name,
         bool IsCastrated,
         bool IsInNeedOfSeeingVet,
-        MedicalHelpUrgency MedicalHelpUrgency,
-        AgeCategory AgeCategory,
-        Behavior Behavior,
-        HealthStatus HealthStatus,
+        MedicalHelpUrgency? MedicalHelpUrgency,
+        AgeCategory? AgeCategory,
+        Behavior? Behavior,
+        HealthStatus? HealthStatus,
         string? AdditionalRequirements = null) : ICommand;
 
     public sealed class UpdateCatCommandValidator
@@ -41,9 +41,28 @@ public sealed class UpdateCat : IEndpoint
         public UpdateCatCommandValidator()
         {
             RuleFor(x => x.Id).NotEmpty();
+            
             RuleFor(x => x.Name).NotEmpty();
+            
             RuleFor(x => x.Name).MaximumLength(Cat.Constraints.NameMaxLength);
+            
             RuleFor(x => x.AdditionalRequirements).MaximumLength(Cat.Constraints.AdditionalRequirementsMaxLength);
+            
+            RuleFor(x => x.HealthStatus)
+                .NotNull()
+                .WithMessage("Provided empty or invalid Health Status.");
+            
+            RuleFor(x => x.AgeCategory)
+                .NotNull()
+                .WithMessage("Provided empty or invalid Age Category.");
+            
+            RuleFor(x => x.Behavior)
+                .NotNull()
+                .WithMessage("Provided empty or invalid Behavior.");
+            
+            RuleFor(x => x.MedicalHelpUrgency)
+                .NotNull()
+                .WithMessage("Provided empty or invalid Medical Help Urgency.");
         }
     }
     
@@ -52,6 +71,11 @@ public sealed class UpdateCat : IEndpoint
     {
         public async Task Handle(UpdateCatCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request.HealthStatus);
+            ArgumentNullException.ThrowIfNull(request.Behavior);
+            ArgumentNullException.ThrowIfNull(request.AgeCategory);
+            ArgumentNullException.ThrowIfNull(request.MedicalHelpUrgency);
+            
             Person catOwner = await db.Persons
                                   .Where(x => x.Id == request.PersonId)
                                   .Include(x => x.Cats)
@@ -74,20 +98,7 @@ public sealed class UpdateCat : IEndpoint
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            request.ValidateAndRetrieve(
-                out MedicalHelpUrgency medicalHelpUrgency,
-                out AgeCategory ageCategory,
-                out Behavior behavior,
-                out HealthStatus healthStatus);
-            
-            UpdateCatCommand command = request.MapToUpdateCatCommand(
-                personId,
-                id,
-                medicalHelpUrgency,
-                ageCategory,
-                behavior,
-                healthStatus);
-            
+            UpdateCatCommand command = request.MapToUpdateCatCommand(personId, id);
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
         });
@@ -97,19 +108,26 @@ public sealed class UpdateCat : IEndpoint
 [Mapper]
 public static partial class UpdateCatMapper
 {
-    public static UpdateCat.UpdateCatCommand MapToUpdateCatCommand(this UpdateCat.UpdateCatRequest request,
-        Guid personId,
-        Guid id,
-        MedicalHelpUrgency medicalHelpUrgency,
-        AgeCategory ageCategory,
-        Behavior behavior,
-        HealthStatus healthStatus)
+    public static UpdateCat.UpdateCatCommand MapToUpdateCatCommand(this UpdateCat.UpdateCatRequest request, Guid personId, Guid id)
     {
         if (request.AdditionalRequirements is not null && string.IsNullOrWhiteSpace(request.AdditionalRequirements))
         {
             request = request with { AdditionalRequirements = null };
         }
-        UpdateCat.UpdateCatCommand dto = request.ToUpdateCatCommand(personId, id, medicalHelpUrgency, ageCategory, behavior, healthStatus);
+        
+        request.RetrieveSmartEnumsFromNames(
+            out (bool mappedSuccessfully, MedicalHelpUrgency value) medicalHelpUrgencyResults,
+            out (bool mappedSuccessfully, AgeCategory value) ageCategoryResults,
+            out (bool mappedSuccessfully, Behavior value) behaviorResults,
+            out (bool mappedSuccessfully, HealthStatus value) healthStatusResults);
+
+        UpdateCat.UpdateCatCommand dto = request.ToUpdateCatCommand(
+            personId,
+            id,
+            medicalHelpUrgencyResults.mappedSuccessfully ? medicalHelpUrgencyResults.value : null,
+            ageCategoryResults.mappedSuccessfully ? ageCategoryResults.value : null,
+            behaviorResults.mappedSuccessfully ? behaviorResults.value : null,
+            healthStatusResults.mappedSuccessfully ? healthStatusResults.value : null);
         return dto;
     }
     
@@ -117,10 +135,10 @@ public static partial class UpdateCatMapper
         this UpdateCat.UpdateCatRequest request,
         Guid personId,
         Guid id,
-        MedicalHelpUrgency medicalHelpUrgency,
-        AgeCategory ageCategory,
-        Behavior behavior,
-        HealthStatus healthStatus);
+        MedicalHelpUrgency? medicalHelpUrgency,
+        AgeCategory? ageCategory,
+        Behavior? behavior,
+        HealthStatus? healthStatus);
 
     public static void MapUpdateCatCommandPropertiesToExistingCat(UpdateCat.UpdateCatCommand command,
         Cat entity, ICatPriorityCalculator calculator)

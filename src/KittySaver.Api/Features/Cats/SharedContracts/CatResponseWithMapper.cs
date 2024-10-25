@@ -11,10 +11,10 @@ public sealed class CatResponse
     public required string? AdditionalRequirements { get; init; }
     public required bool IsCastrated { get; init; }
     public required bool IsInNeedOfSeeingVet { get; init; }
-    public required string MedicalHelpUrgencyName { get; init; }
-    public required string AgeCategoryName { get; init; }
-    public required string BehaviorName { get; init; }
-    public required string HealthStatusName { get; init; }
+    public required string MedicalHelpUrgency { get; init; }
+    public required string AgeCategory { get; init; }
+    public required string Behavior { get; init; }
+    public required string HealthStatus { get; init; }
     public required double PriorityScore { get; init; }
 }
 

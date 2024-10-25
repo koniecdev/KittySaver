@@ -113,7 +113,6 @@ public sealed class Cat : AuditableEntity
 
     public Person Person { get; private set; } = null!;
 
-
     public double PriorityScore { get; private set; }
     private double CalculatePriorityScore(ICatPriorityCalculator calculator)
     {
