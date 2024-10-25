@@ -7,5 +7,5 @@ public static class SmartEnumsExceptions
 {
     public class InvalidValueException(IEnumerable<(string propertyName, string attemptedValue)> validationExceptions)
         : ValidationException(validationExceptions.Select(x =>
-            new ValidationFailure(x.propertyName, "Provided invalid value.", x.attemptedValue)));
+            new ValidationFailure(x.propertyName, $"Provided invalid '{x.propertyName}' value.", x.attemptedValue)));
 }
