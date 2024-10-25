@@ -51,7 +51,6 @@ public class CreateCat : IEndpoint
         {
             Person root = await db.Persons
                               .Include(x => x.Cats)
-                              .Include(x => x.Address)
                               .FirstOrDefaultAsync(x => x.Id == request.PersonId, cancellationToken)
                           ?? throw new NotFoundExceptions.PersonNotFoundException(request.PersonId);
             
@@ -87,14 +86,15 @@ public class CreateCat : IEndpoint
                 out Behavior behavior,
                 out HealthStatus healthStatus);
 
-            CreateCatCommand command = request.ToCreateCatCommand(
+            CreateCatCommand command = request.MapToCreateCatCommand(
                 personId,
                 medicalHelpUrgency,
                 ageCategory,
                 behavior,
                 healthStatus);
+            
             Guid catId = await sender.Send(command, cancellationToken);
-            return Results.Created($"/api/v1/cats/{catId}", new { Id = catId });
+            return Results.Created($"/api/v1/persons/{personId}/cats/{catId}", new { Id = catId });
         }).RequireAuthorization();
     }
 }
@@ -102,7 +102,22 @@ public class CreateCat : IEndpoint
 [Mapper]
 public static partial class CreateCatMapper
 {
-    public static partial CreateCat.CreateCatCommand ToCreateCatCommand(
+    public static CreateCat.CreateCatCommand MapToCreateCatCommand(this CreateCat.CreateCatRequest request,
+        Guid personId,
+        MedicalHelpUrgency medicalHelpUrgency,
+        AgeCategory ageCategory,
+        Behavior behavior,
+        HealthStatus healthStatus)
+    {
+        if (request.AdditionalRequirements is not null && string.IsNullOrWhiteSpace(request.AdditionalRequirements))
+        {
+            request = request with { AdditionalRequirements = null };
+        }
+        CreateCat.CreateCatCommand dto = request.ToCreateCatCommand(personId, medicalHelpUrgency, ageCategory, behavior, healthStatus);
+        return dto;
+    }
+    
+    private static partial CreateCat.CreateCatCommand ToCreateCatCommand(
         this CreateCat.CreateCatRequest request,
         Guid personId,
         MedicalHelpUrgency medicalHelpUrgency,
