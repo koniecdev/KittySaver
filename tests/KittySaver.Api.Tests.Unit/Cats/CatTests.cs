@@ -214,4 +214,46 @@ public class CatTests
         cat.Should().BeNull();
         createCat.Should().Throw<ArgumentException>();
     }
+    
+    [Fact]
+    public void Priority_ShouldReturnExpectedResult_WhenFirstCombinationIsGiven()
+    {
+        // Arrange && Act
+        Cat catThatDontNeedThatMuchHelp = Cat.Create(
+            new DefaultCatPriorityCalculator(),
+            Person.Id,
+            "Whiskers",
+            MedicalHelpUrgency.NoNeed,
+            AgeCategory.Baby, 
+            Behavior.Friendly,
+            HealthStatus.Good
+        );
+        typeof(Cat).GetProperty(nameof(Cat.Person))?.SetValue(catThatDontNeedThatMuchHelp, Person, null);
+        
+        Cat catThatNeedLittleMoreHelp = Cat.Create(
+            new DefaultCatPriorityCalculator(),
+            Person.Id,
+            "Cutie",
+            MedicalHelpUrgency.NoNeed,
+            AgeCategory.Senior, 
+            Behavior.Friendly,
+            HealthStatus.Good
+        );
+        typeof(Cat).GetProperty(nameof(Cat.Person))?.SetValue(catThatNeedLittleMoreHelp, Person, null);
+        
+        Cat catThatNeedMuchHelp = Cat.Create(
+            new DefaultCatPriorityCalculator(),
+            Person.Id,
+            "Kitty",
+            MedicalHelpUrgency.HaveToSeeVet,
+            AgeCategory.Senior, 
+            Behavior.Unfriendly,
+            HealthStatus.Critical
+        );
+        typeof(Cat).GetProperty(nameof(Cat.Person))?.SetValue(catThatNeedMuchHelp, Person, null);
+
+        // Assert
+        catThatNeedLittleMoreHelp.PriorityScore.Should().BeGreaterThan(catThatDontNeedThatMuchHelp.PriorityScore);
+        catThatNeedMuchHelp.PriorityScore.Should().BeGreaterThan(catThatNeedLittleMoreHelp.PriorityScore);
+    }
 }
