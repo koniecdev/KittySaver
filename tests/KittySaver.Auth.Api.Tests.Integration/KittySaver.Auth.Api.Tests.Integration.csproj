@@ -30,7 +30,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\KittySaver.Api\KittySaver.Api.csproj" />
+<!--      <ProjectReference Include="..\..\src\KittySaver.Api\KittySaver.Api.csproj" />-->
       <ProjectReference Include="..\..\src\KittySaver.Auth.Api\KittySaver.Auth.Api.csproj" />
       <ProjectReference Include="..\Shared\Shared.csproj" />
     </ItemGroup>

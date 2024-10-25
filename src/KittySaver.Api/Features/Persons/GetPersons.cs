@@ -8,11 +8,7 @@ namespace KittySaver.Api.Features.Persons;
 
 public sealed class GetPersons : IEndpoint
 {
-    public sealed class GetPersonsQuery : IQuery<ICollection<PersonResponse>>
-    {
-        public List<ApiFilter>? Filters { get; init; } = [];
-        public List<ApiSort>? Sorts { get; init; } = [];
-    }
+    public sealed class GetPersonsQuery : IQuery<ICollection<PersonResponse>>;
 
     internal sealed class GetPersonsQueryHandler(ApplicationDbContext db)
         : IRequestHandler<GetPersonsQuery, ICollection<PersonResponse>>
@@ -29,9 +25,7 @@ public sealed class GetPersons : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapGet("persons", async
-            (string? filterBy,
-            string? sortBy,
+        endpointRouteBuilder.MapGet("persons", async (
             ISender sender,
             CancellationToken cancellationToken) =>
         {

@@ -1,6 +1,5 @@
 ﻿using System.Security.Claims;
 using System.Text.Encodings.Web;
-using KittySaver.Api.Shared.Persistence;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Options;
 
@@ -16,7 +15,7 @@ public class TestAuthHandler(
     {
         // Here we set up the claims that your application needs
         Claim[] claims = [
-            new Claim(ClaimTypes.NameIdentifier, FixedIdsHelper.AdminId.ToString()),
+            new Claim(ClaimTypes.NameIdentifier, Guid.Parse("a4018ea1-525a-48eb-a701-a96c1a261e72").ToString()),
             new Claim(ClaimTypes.Role, "Administrator"),
             new Claim(ClaimTypes.Email, "defaultadmin@koniec.dev")
         ];

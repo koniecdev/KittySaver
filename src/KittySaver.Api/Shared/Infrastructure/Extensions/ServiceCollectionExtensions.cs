@@ -2,6 +2,7 @@
 using System.Text;
 using FluentValidation;
 using KittySaver.Api.Shared.Behaviours;
+using KittySaver.Api.Shared.Domain.Services;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Api.Shared.Security;
@@ -11,7 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
-namespace KittySaver.Api.Shared.Extensions;
+namespace KittySaver.Api.Shared.Infrastructure.Extensions;
 
 public static class ServiceCollectionExtensions
 {
@@ -22,6 +23,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICurrentEnvironmentService, CurrentEnvironmentService>();
         services.AddScoped<IDateTimeService, DefaultDateTimeService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<ICatPriorityCalculator, DefaultCatPriorityCalculator>();
         services.AddValidatorsFromAssembly(assembly);
         services.AddMediatR(cfg =>
         {
@@ -31,6 +33,7 @@ public static class ServiceCollectionExtensions
         AddAuth();
 
         return services;
+        
         void AddAuth()
         {
             if (environment.IsDevelopment())

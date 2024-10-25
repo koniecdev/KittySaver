@@ -1,7 +1,6 @@
 ﻿using System.Text.RegularExpressions;
-using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Shared.Domain.Entites.Common;
-using KittySaver.Api.Shared.Exceptions;
+using KittySaver.Api.Shared.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -19,31 +18,56 @@ public sealed partial class Person : AuditableEntity
     private string _email = null!;
     private string _firstName = null!;
     private string _lastName = null!;
+    private readonly List<Cat> _cats = [];
+    private readonly Guid _userIdentityId;
 
     public Role CurrentRole { get; private set; } = Role.Regular;
-    public required Guid UserIdentityId { get; init; }
+
+    public required Guid UserIdentityId
+    {
+        get => _userIdentityId;
+        init
+        {
+            if (value == Guid.Empty)
+            {
+                throw new ArgumentException("Provided empty guid.", nameof(UserIdentityId));
+            }
+            _userIdentityId = value;   
+        }
+    }
+
     public required string FirstName
     {
         get => _firstName;
-        init
+        set
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(FirstName));
+            if (value.Length > Constraints.FirstNameMaxLength)
+            {
+                throw new ArgumentOutOfRangeException(nameof(FirstName), value,
+                    $"Maximum allowed length is: {Constraints.FirstNameMaxLength}");
+            }
             string firstChar = value[0].ToString().ToUpper();
             string rest = value[1..].ToLower();
             _firstName = $"{firstChar}{rest}";
-        } 
+        }
     }
 
     public required string LastName
     {
         get => _lastName;
-        init
+        set
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(LastName));
+            if (value.Length > Constraints.LastNameMaxLength)
+            {
+                throw new ArgumentOutOfRangeException(nameof(LastName), value,
+                    $"Maximum allowed length is: {Constraints.LastNameMaxLength}");
+            }
             string firstChar = value[0].ToString().ToUpper();
             string rest = value[1..];
             _lastName = $"{firstChar}{rest}";
-        } 
+        }
     }
 
     public string FullName => $"{FirstName} {LastName}";
@@ -51,12 +75,17 @@ public sealed partial class Person : AuditableEntity
     public required string Email
     {
         get => _email;
-        init
+        set
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(Email));
+            if (value.Length > Constraints.EmailMaxLength)
+            {
+                throw new ArgumentOutOfRangeException(nameof(Email), value,
+                    $"Maximum allowed length is: {Constraints.EmailMaxLength}");
+            }
             if (!EmailRegex().IsMatch(value))
             {
-                throw new DomainExceptions.Email.InvalidFormatException();
+                throw new FormatException("Provided email is not in correct format.");
             }
             _email = value;
         }
@@ -65,15 +94,30 @@ public sealed partial class Person : AuditableEntity
     public required string PhoneNumber
     {
         get => _phoneNumber;
-        init
+        set
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(PhoneNumber));
+            if (value.Length > Constraints.PhoneNumberMaxLength)
+            {
+                throw new ArgumentOutOfRangeException(nameof(PhoneNumber), value,
+                    $"Maximum allowed length is: {Constraints.PhoneNumberMaxLength}");
+            }
             _phoneNumber = value;
         }
     }
 
-    public ICollection<Cat> Cats { get; } = new List<Cat>();
+    public required Address Address { get; set; }
+    
+    public IReadOnlyList<Cat> Cats => _cats.ToList();
 
+    public void AddCat(Cat cat)
+    {
+        _cats.Add(cat);
+    }
+    public void RemoveCat(Cat cat)
+    {
+        _cats.Remove(cat);
+    }
     public void PromoteToShelter()
     {
         if (CurrentRole is Role.Admin)
@@ -83,47 +127,42 @@ public sealed partial class Person : AuditableEntity
         CurrentRole = Role.Shelter;
     }
     
-    public sealed class PersonNotFoundException : NotFoundException
+    public static class Constraints
     {
-        public PersonNotFoundException(Guid id) : base("Person.NotFound", id.ToString())
-        {
-        }
-        public PersonNotFoundException(string identifier) : base("Person.NotFound", identifier)
-        {
-        }
-    }
-    public static class DomainExceptions
-    {
-        public static class Email
-        {
-            public sealed class InvalidFormatException() 
-                : DomainException("Person.Email.InvalidFormat", "Email format is invalid");
-        }
+        public const int FirstNameMaxLength = 50;
+        public const int LastNameMaxLength = 50;
+        public const int EmailMaxLength = 254;
+        public const int PhoneNumberMaxLength = 31;
+        public const string EmailPattern = @"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$";
     }
 
-    [GeneratedRegex(ValidationPatterns.EmailPattern)]
+    [GeneratedRegex(Constraints.EmailPattern)]
     private static partial Regex EmailRegex();
 }
 
-internal class PersonConfiguration : IEntityTypeConfiguration<Person>
+internal sealed class PersonConfiguration : IEntityTypeConfiguration<Person>
 {
     public void Configure(EntityTypeBuilder<Person> builder)
     {
+        builder.ToTable("Persons");
+        builder
+            .ComplexProperty(x => x.Address)
+            .IsRequired();
         builder
             .Property(m=>m.FirstName)
-            .HasMaxLength(50)
+            .HasMaxLength(Person.Constraints.FirstNameMaxLength)
             .IsRequired();
         builder
             .Property(m=>m.LastName)
-            .HasMaxLength(50)
+            .HasMaxLength(Person.Constraints.LastNameMaxLength)
             .IsRequired();
         builder
             .Property(m=>m.Email)
-            .HasMaxLength(254)
+            .HasMaxLength(Person.Constraints.EmailMaxLength)
             .IsRequired();
         builder
             .Property(m=>m.PhoneNumber)
-            .HasMaxLength(31)
+            .HasMaxLength(Person.Constraints.PhoneNumberMaxLength)
             .IsRequired();
         builder
             .Property(x=>x.UserIdentityId)

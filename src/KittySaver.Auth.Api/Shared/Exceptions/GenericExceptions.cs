@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-
-namespace KittySaver.Auth.Api.Shared.Exceptions;
+﻿namespace KittySaver.Auth.Api.Shared.Exceptions;
 
 public interface IApplicationError
 {

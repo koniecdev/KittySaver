@@ -2,8 +2,8 @@
 using System.Net.Http.Json;
 using Bogus;
 using FluentAssertions;
-using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Auth.Api.Features.ApplicationUsers;
+using KittySaver.Auth.Api.Features.ApplicationUsers.SharedContracts;
 using Newtonsoft.Json;
 using Shared;
 
@@ -38,15 +38,15 @@ public class GetApplicationUsersEndpointTests(KittySaverAuthApiFactory appFactor
         
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        ICollection<PersonResponse>? persons = await response.Content.ReadFromJsonAsync<ICollection<PersonResponse>>();
-        persons.Should().NotBeNull();
+        ICollection<ApplicationUserResponse>? applicationUsers = await response.Content.ReadFromJsonAsync<ICollection<ApplicationUserResponse>>();
+        applicationUsers.Should().NotBeNull();
         const int defaultAdminPlusRecentlyRegisteredPersonCount = 2;
-        persons!.Count.Should().BeGreaterOrEqualTo(defaultAdminPlusRecentlyRegisteredPersonCount);
-        PersonResponse person = persons.First(x => x.Id == registerResponse.Id);
-        person.FirstName.Should().Be(registerRequest.FirstName);
-        person.LastName.Should().Be(registerRequest.LastName);
-        person.Email.Should().Be(registerRequest.Email);
-        person.PhoneNumber.Should().Be(registerRequest.PhoneNumber);
-        person.FullName.Should().Be($"{registerRequest.FirstName} {registerRequest.LastName}");
+        applicationUsers!.Count.Should().BeGreaterOrEqualTo(defaultAdminPlusRecentlyRegisteredPersonCount);
+        ApplicationUserResponse applicationUser = applicationUsers.First(x => x.Id == registerResponse.Id);
+        applicationUser.FirstName.Should().Be(registerRequest.FirstName);
+        applicationUser.LastName.Should().Be(registerRequest.LastName);
+        applicationUser.Email.Should().Be(registerRequest.Email);
+        applicationUser.PhoneNumber.Should().Be(registerRequest.PhoneNumber);
+        applicationUser.FullName.Should().Be($"{registerRequest.FirstName} {registerRequest.LastName}");
     }
 }

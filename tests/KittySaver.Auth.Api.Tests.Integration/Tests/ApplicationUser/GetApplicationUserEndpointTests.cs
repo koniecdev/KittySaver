@@ -3,8 +3,8 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Bogus;
 using FluentAssertions;
-using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Auth.Api.Features.ApplicationUsers;
+using KittySaver.Auth.Api.Features.ApplicationUsers.SharedContracts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
@@ -41,14 +41,14 @@ public class GetApplicationUserEndpointTests(KittySaverAuthApiFactory appFactory
         
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        PersonResponse? person = await response.Content.ReadFromJsonAsync<PersonResponse>();
-        person.Should().NotBeNull();
-        person!.Id.Should().Be(registerResponse.Id);
-        person.FirstName.Should().Be(registerRequest.FirstName);
-        person.LastName.Should().Be(registerRequest.LastName);
-        person.Email.Should().Be(registerRequest.Email);
-        person.PhoneNumber.Should().Be(registerRequest.PhoneNumber);
-        person.FullName.Should().Be($"{registerRequest.FirstName} {registerRequest.LastName}");
+        ApplicationUserResponse? applicationUser = await response.Content.ReadFromJsonAsync<ApplicationUserResponse>();
+        applicationUser.Should().NotBeNull();
+        applicationUser!.Id.Should().Be(registerResponse.Id);
+        applicationUser.FirstName.Should().Be(registerRequest.FirstName);
+        applicationUser.LastName.Should().Be(registerRequest.LastName);
+        applicationUser.Email.Should().Be(registerRequest.Email);
+        applicationUser.PhoneNumber.Should().Be(registerRequest.PhoneNumber);
+        applicationUser.FullName.Should().Be($"{registerRequest.FirstName} {registerRequest.LastName}");
     }
     
     [Fact]
