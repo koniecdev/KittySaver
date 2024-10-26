@@ -12,6 +12,7 @@ public sealed class Cat : AuditableEntity
     private string _name = null!;
     private string? _additionalRequirements;
     private readonly Guid _personId;
+    private Guid? _advertisementId;
 
     [SetsRequiredMembers]
     private Cat(
@@ -112,17 +113,35 @@ public sealed class Cat : AuditableEntity
     }
 
     public Person Person { get; private set; } = null!;
+    
+    public Guid? AdvertisementId
+    {
+        get => _advertisementId;
+        private set
+        {
+            if (value == Guid.Empty)
+            {
+                throw new ArgumentException("Provided advertisement id is empty", nameof(AdvertisementId));
+            }
+            _advertisementId = value;
+        }
+    }
+
+    public Advertisement? Advertisement { get; private set; }
 
     public double PriorityScore { get; private set; }
+    
     private double CalculatePriorityScore(ICatPriorityCalculator calculator)
     {
         double priority = calculator.Calculate(this);
         return priority;
     }
+    
     public void ReCalculatePriorityScore(ICatPriorityCalculator calculator)
     {
         PriorityScore = CalculatePriorityScore(calculator);
     }
+    
     public static class Constraints
     {
         public const int NameMaxLength = 100;
@@ -135,15 +154,34 @@ internal sealed class CatConfiguration : IEntityTypeConfiguration<Cat>
     public void Configure(EntityTypeBuilder<Cat> builder)
     {
         builder.ToTable("Cats");
-        builder.Property(x => x.PersonId).IsRequired();
-        builder.Property(x => x.Name)
+        
+        builder
+            .Property(x => x.PersonId)
+            .IsRequired();
+        
+        builder
+            .Property(x => x.Name)
             .HasMaxLength(Cat.Constraints.NameMaxLength)
             .IsRequired();
-        builder.Property(x => x.AdditionalRequirements)
+        
+        builder
+            .Property(x => x.AdditionalRequirements)
             .HasMaxLength(Cat.Constraints.AdditionalRequirementsMaxLength);
-        builder.Property(x => x.AgeCategory).IsRequired();
-        builder.Property(x => x.Behavior).IsRequired();
-        builder.Property(x => x.HealthStatus).IsRequired();
-        builder.Property(x => x.PriorityScore).IsRequired();
+        
+        builder
+            .Property(x => x.AgeCategory)
+            .IsRequired();
+        
+        builder
+            .Property(x => x.Behavior)
+            .IsRequired();
+        
+        builder
+            .Property(x => x.HealthStatus)
+            .IsRequired();
+        
+        builder
+            .Property(x => x.PriorityScore)
+            .IsRequired();
     }
 }
