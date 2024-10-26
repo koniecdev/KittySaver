@@ -19,8 +19,9 @@ public sealed partial class Person : AuditableEntity, IContact
     private string _email = null!;
     private string _firstName = null!;
     private string _lastName = null!;
-    private readonly List<Cat> _cats = [];
     private readonly Guid _userIdentityId;
+    private readonly List<Cat> _cats = [];
+    private readonly List<Advertisement> _advertisements = [];
 
     public Role CurrentRole { get; private set; } = Role.Regular;
 
