@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using KittySaver.Api.Shared.Domain.Common.Interfaces;
 using KittySaver.Api.Shared.Domain.Entites.Common;
 using KittySaver.Api.Shared.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
@@ -6,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace KittySaver.Api.Shared.Domain.Entites;
 
-public sealed partial class Person : AuditableEntity
+public sealed partial class Person : AuditableEntity, IContact
 {
     public enum Role
     {
@@ -78,10 +79,10 @@ public sealed partial class Person : AuditableEntity
         set
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(Email));
-            if (value.Length > Constraints.EmailMaxLength)
+            if (value.Length > IContact.Constraints.EmailMaxLength)
             {
                 throw new ArgumentOutOfRangeException(nameof(Email), value,
-                    $"Maximum allowed length is: {Constraints.EmailMaxLength}");
+                    $"Maximum allowed length is: {IContact.Constraints.EmailMaxLength}");
             }
             if (!EmailRegex().IsMatch(value))
             {
@@ -97,46 +98,39 @@ public sealed partial class Person : AuditableEntity
         set
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(PhoneNumber));
-            if (value.Length > Constraints.PhoneNumberMaxLength)
+            if (value.Length > IContact.Constraints.PhoneNumberMaxLength)
             {
                 throw new ArgumentOutOfRangeException(nameof(PhoneNumber), value,
-                    $"Maximum allowed length is: {Constraints.PhoneNumberMaxLength}");
+                    $"Maximum allowed length is: {IContact.Constraints.PhoneNumberMaxLength}");
             }
             _phoneNumber = value;
         }
     }
 
     public required Address Address { get; set; }
+    public required PickupAddress DefaultPickupAddress { get; set; }
+    public required ContactInfo DefaultContactInfo { get; set; }
     
     public IReadOnlyList<Cat> Cats => _cats.ToList();
+    public IReadOnlyList<Advertisement> Advertisements => _advertisements.ToList();
 
     public void AddCat(Cat cat)
     {
         _cats.Add(cat);
     }
+    
     public void RemoveCat(Cat cat)
     {
         _cats.Remove(cat);
     }
-    public void PromoteToShelter()
-    {
-        if (CurrentRole is Role.Admin)
-        {
-            return;
-        }
-        CurrentRole = Role.Shelter;
-    }
-    
+
     public static class Constraints
     {
         public const int FirstNameMaxLength = 50;
         public const int LastNameMaxLength = 50;
-        public const int EmailMaxLength = 254;
-        public const int PhoneNumberMaxLength = 31;
-        public const string EmailPattern = @"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$";
     }
 
-    [GeneratedRegex(Constraints.EmailPattern)]
+    [GeneratedRegex(IContact.Constraints.EmailPattern)]
     private static partial Regex EmailRegex();
 }
 
@@ -145,34 +139,51 @@ internal sealed class PersonConfiguration : IEntityTypeConfiguration<Person>
     public void Configure(EntityTypeBuilder<Person> builder)
     {
         builder.ToTable("Persons");
+        
         builder
             .ComplexProperty(x => x.Address)
             .IsRequired();
+        
+        builder
+            .ComplexProperty(x => x.DefaultContactInfo)
+            .IsRequired();
+        
+        builder
+            .ComplexProperty(x => x.DefaultPickupAddress)
+            .IsRequired();
+        
         builder
             .Property(m=>m.FirstName)
             .HasMaxLength(Person.Constraints.FirstNameMaxLength)
             .IsRequired();
+        
         builder
             .Property(m=>m.LastName)
             .HasMaxLength(Person.Constraints.LastNameMaxLength)
             .IsRequired();
+        
         builder
             .Property(m=>m.Email)
-            .HasMaxLength(Person.Constraints.EmailMaxLength)
+            .HasMaxLength(IContact.Constraints.EmailMaxLength)
             .IsRequired();
+        
         builder
             .Property(m=>m.PhoneNumber)
-            .HasMaxLength(Person.Constraints.PhoneNumberMaxLength)
+            .HasMaxLength(IContact.Constraints.PhoneNumberMaxLength)
             .IsRequired();
+        
         builder
             .Property(x=>x.UserIdentityId)
             .IsRequired();
+        
         builder
             .HasIndex(m => m.UserIdentityId)
             .IsUnique();
+        
         builder
             .HasIndex(m => m.Email)
             .IsUnique();
+        
         builder
             .HasIndex(m => m.PhoneNumber)
             .IsUnique();
