@@ -9,6 +9,13 @@ namespace KittySaver.Api.Shared.Domain.ValueObjects;
 
 public partial class ContactInfo : ValueObject, IContact
 {
+    [SetsRequiredMembers]
+    public ContactInfo(string email, string phoneNumber)
+    {
+        Email = email;
+        PhoneNumber = phoneNumber;
+    }
+    
     private readonly string _email = null!;
     private readonly string _phoneNumber = null!;
 
