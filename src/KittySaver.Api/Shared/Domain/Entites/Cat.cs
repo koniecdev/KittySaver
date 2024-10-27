@@ -9,34 +9,6 @@ namespace KittySaver.Api.Shared.Domain.Entites;
 
 public sealed class Cat : AuditableEntity
 {
-    private string _name = null!;
-    private string? _additionalRequirements;
-    private readonly Guid _personId;
-    private Guid? _advertisementId;
-
-    [SetsRequiredMembers]
-    private Cat(
-        Guid personId,
-        string name,
-        MedicalHelpUrgency medicalHelpUrgency,
-        AgeCategory ageCategory,
-        Behavior behavior,
-        HealthStatus healthStatus,
-        bool isCastrated,
-        bool isInNeedOfSeeingVet,
-        string? additionalRequirements)
-    {
-        PersonId = personId;
-        Name = name;
-        MedicalHelpUrgency = medicalHelpUrgency;
-        AgeCategory = ageCategory;
-        Behavior = behavior;
-        HealthStatus = healthStatus;
-        IsCastrated = isCastrated;
-        IsInNeedOfSeeingVet = isInNeedOfSeeingVet;
-        AdditionalRequirements = additionalRequirements;
-    }
-
     public static Cat Create(
         ICatPriorityCalculator calculator,
         Guid personId,
@@ -62,6 +34,34 @@ public sealed class Cat : AuditableEntity
         cat.PriorityScore = cat.CalculatePriorityScore(calculator);
         return cat;
     }
+    
+    [SetsRequiredMembers]
+    private Cat(
+        Guid personId,
+        string name,
+        MedicalHelpUrgency medicalHelpUrgency,
+        AgeCategory ageCategory,
+        Behavior behavior,
+        HealthStatus healthStatus,
+        bool isCastrated,
+        bool isInNeedOfSeeingVet,
+        string? additionalRequirements)
+    {
+        PersonId = personId;
+        Name = name;
+        MedicalHelpUrgency = medicalHelpUrgency;
+        AgeCategory = ageCategory;
+        Behavior = behavior;
+        HealthStatus = healthStatus;
+        IsCastrated = isCastrated;
+        IsInNeedOfSeeingVet = isInNeedOfSeeingVet;
+        AdditionalRequirements = additionalRequirements;
+    }
+    
+    private string _name = null!;
+    private string? _additionalRequirements;
+    private readonly Guid _personId;
+    private Guid? _advertisementId;
     
     public required string Name
     {
