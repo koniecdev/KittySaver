@@ -14,7 +14,7 @@ public sealed class Address : ValueObject, IAddress
     private readonly string _street = null!;
     private readonly string _buildingNumber = null!;
 
-    public required string? State
+    public string? State
     {
         get => _state;
         init
