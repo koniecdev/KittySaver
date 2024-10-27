@@ -92,6 +92,7 @@ public sealed class Cat : AuditableEntity
         }
     }
 
+    public bool IsAdopted { get; private set; }
     public required bool IsCastrated { get; set; }
     public required bool IsInNeedOfSeeingVet { get; set; }
     public required MedicalHelpUrgency MedicalHelpUrgency { get; set; }
@@ -140,6 +141,11 @@ public sealed class Cat : AuditableEntity
     public void ReCalculatePriorityScore(ICatPriorityCalculator calculator)
     {
         PriorityScore = CalculatePriorityScore(calculator);
+    }
+
+    public void MarkAsAdopted()
+    {
+        IsAdopted = true;
     }
     
     public static class Constraints
