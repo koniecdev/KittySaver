@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.RegularExpressions;
 using KittySaver.Api.Shared.Domain.Common.Interfaces;
 using KittySaver.Api.Shared.Domain.Entites.Common;
 using KittySaver.Api.Shared.Domain.ValueObjects;
@@ -9,12 +10,50 @@ namespace KittySaver.Api.Shared.Domain.Entites;
 
 public sealed partial class Person : AuditableEntity, IContact
 {
-    public enum Role
+    public static Person Create(
+        Guid userIdentityId,
+        string firstName,
+        string lastName,
+        string email,
+        string phoneNumber,
+        Address address,
+        PickupAddress advertisementDefaultPickupAddress,
+        ContactInfo advertisementDefaultContactInfo)
     {
-        Regular,
-        Shelter,
-        Admin
+        Person person = new(
+            userIdentityId: userIdentityId,
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            phoneNumber: phoneNumber,
+            address: address,
+            advertisementDefaultPickupAddress: advertisementDefaultPickupAddress,
+            advertisementDefaultContactInfo: advertisementDefaultContactInfo
+        );
+        return person;
     }
+    
+    [SetsRequiredMembers]
+    private Person(
+        Guid userIdentityId,
+        string firstName,
+        string lastName,
+        string email,
+        string phoneNumber,
+        Address address,
+        PickupAddress advertisementDefaultPickupAddress,
+        ContactInfo advertisementDefaultContactInfo)
+    {
+        UserIdentityId = _userIdentityId;
+        FirstName = firstName;
+        LastName = lastName;
+        Email = email;
+        PhoneNumber = phoneNumber;
+        Address = address;
+        DefaultAdvertisementsPickupAddress = advertisementDefaultPickupAddress;
+        DefaultAdvertisementsContactInfo = advertisementDefaultContactInfo;
+    }
+    
     private string _phoneNumber = null!;
     private string _email = null!;
     private string _firstName = null!;
@@ -109,8 +148,8 @@ public sealed partial class Person : AuditableEntity, IContact
     }
 
     public required Address Address { get; set; }
-    public required PickupAddress DefaultPickupAddress { get; set; }
-    public required ContactInfo DefaultContactInfo { get; set; }
+    public required PickupAddress DefaultAdvertisementsPickupAddress { get; set; }
+    public required ContactInfo DefaultAdvertisementsContactInfo { get; set; }
     
     public IReadOnlyList<Cat> Cats => _cats.ToList();
     public IReadOnlyList<Advertisement> Advertisements => _advertisements.ToList();
@@ -130,6 +169,13 @@ public sealed partial class Person : AuditableEntity, IContact
         public const int FirstNameMaxLength = 50;
         public const int LastNameMaxLength = 50;
     }
+    
+    public enum Role
+    {
+        Regular,
+        Shelter,
+        Admin
+    }
 
     [GeneratedRegex(IContact.Constraints.EmailPattern)]
     private static partial Regex EmailRegex();
@@ -146,11 +192,11 @@ internal sealed class PersonConfiguration : IEntityTypeConfiguration<Person>
             .IsRequired();
         
         builder
-            .ComplexProperty(x => x.DefaultContactInfo)
+            .ComplexProperty(x => x.DefaultAdvertisementsPickupAddress)
             .IsRequired();
         
         builder
-            .ComplexProperty(x => x.DefaultPickupAddress)
+            .ComplexProperty(x => x.DefaultAdvertisementsContactInfo)
             .IsRequired();
         
         builder
