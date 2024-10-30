@@ -2,9 +2,9 @@
 using KittySaver.Api.Shared.Domain.ValueObjects.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+// ReSharper disable EntityFramework.ModelValidation.UnlimitedStringLength - String Length properties limits are always set in entity that contains value object. 
 
 namespace KittySaver.Api.Shared.Domain.ValueObjects;
-
 
 public sealed class PickupAddress : ValueObject, IAddress
 {
@@ -94,6 +94,13 @@ public sealed class PickupAddress : ValueObject, IAddress
             {
                 return;
             }
+
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                _street = null;
+                return;
+            }
+            
             if (value.Length > IAddress.Constraints.StreetMaxLength)
             {
                 throw new ArgumentOutOfRangeException(nameof(Street), value,
@@ -112,6 +119,13 @@ public sealed class PickupAddress : ValueObject, IAddress
             {
                 return;
             }
+
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                _buildingNumber = null;
+                return;
+            }
+            
             if (value.Length > IAddress.Constraints.BuildingNumberMaxLength)
             {
                 throw new ArgumentOutOfRangeException(nameof(BuildingNumber), value,
@@ -129,34 +143,5 @@ public sealed class PickupAddress : ValueObject, IAddress
         yield return City;
         yield return Street ?? "";
         yield return BuildingNumber ?? "";
-    }
-}
-
-internal sealed class PickupAddressConfiguration : IEntityTypeConfiguration<PickupAddress>
-{
-    public void Configure(EntityTypeBuilder<PickupAddress> builder)
-    {
-        builder.HasNoKey();
-        builder
-            .Property(x => x.Country)
-            .HasMaxLength(IAddress.Constraints.CountryMaxLength)
-            .IsRequired();
-        builder
-            .Property(x => x.State)
-            .HasMaxLength(IAddress.Constraints.StateMaxLength);
-        builder
-            .Property(x => x.ZipCode)
-            .HasMaxLength(IAddress.Constraints.ZipCodeMaxLength)
-            .IsRequired();
-        builder
-            .Property(x => x.City)
-            .HasMaxLength(IAddress.Constraints.CityMaxLength)
-            .IsRequired();
-        builder
-            .Property(x => x.Street)
-            .HasMaxLength(IAddress.Constraints.StreetMaxLength);
-        builder
-            .Property(x => x.BuildingNumber)
-            .HasMaxLength(IAddress.Constraints.BuildingNumberMaxLength);
     }
 }
