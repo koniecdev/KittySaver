@@ -17,8 +17,8 @@ public sealed partial class Person : AuditableEntity, IContact
         string email,
         string phoneNumber,
         Address address,
-        PickupAddress advertisementDefaultPickupAddress,
-        ContactInfo advertisementDefaultContactInfo)
+        PickupAddress defaultAdvertisementPickupAddress,
+        ContactInfo defaultAdvertisementContactInfo)
     {
         Person person = new(
             userIdentityId: userIdentityId,
@@ -27,12 +27,19 @@ public sealed partial class Person : AuditableEntity, IContact
             email: email,
             phoneNumber: phoneNumber,
             address: address,
-            advertisementDefaultPickupAddress: advertisementDefaultPickupAddress,
-            advertisementDefaultContactInfo: advertisementDefaultContactInfo
+            defaultAdvertisementPickupAddress: defaultAdvertisementPickupAddress,
+            defaultAdvertisementContactInfo: defaultAdvertisementContactInfo
         );
         return person;
     }
-    
+
+    /// <remarks>
+    /// Required by EF Core, and should never be used by programmer as it bypasses business rules.
+    /// </remarks>
+    private Person()
+    {
+    }
+
     [SetsRequiredMembers]
     private Person(
         Guid userIdentityId,
@@ -41,19 +48,19 @@ public sealed partial class Person : AuditableEntity, IContact
         string email,
         string phoneNumber,
         Address address,
-        PickupAddress advertisementDefaultPickupAddress,
-        ContactInfo advertisementDefaultContactInfo)
+        PickupAddress defaultAdvertisementPickupAddress,
+        ContactInfo defaultAdvertisementContactInfo)
     {
-        UserIdentityId = _userIdentityId;
+        UserIdentityId = userIdentityId;
         FirstName = firstName;
         LastName = lastName;
         Email = email;
         PhoneNumber = phoneNumber;
         Address = address;
-        DefaultAdvertisementsPickupAddress = advertisementDefaultPickupAddress;
-        DefaultAdvertisementsContactInfo = advertisementDefaultContactInfo;
+        DefaultAdvertisementsPickupAddress = defaultAdvertisementPickupAddress;
+        DefaultAdvertisementsContactInfo = defaultAdvertisementContactInfo;
     }
-    
+
     private string _phoneNumber = null!;
     private string _email = null!;
     private string _firstName = null!;
@@ -73,7 +80,8 @@ public sealed partial class Person : AuditableEntity, IContact
             {
                 throw new ArgumentException("Provided empty guid.", nameof(UserIdentityId));
             }
-            _userIdentityId = value;   
+
+            _userIdentityId = value;
         }
     }
 
@@ -88,6 +96,7 @@ public sealed partial class Person : AuditableEntity, IContact
                 throw new ArgumentOutOfRangeException(nameof(FirstName), value,
                     $"Maximum allowed length is: {Constraints.FirstNameMaxLength}");
             }
+
             string firstChar = value[0].ToString().ToUpper();
             string rest = value[1..].ToLower();
             _firstName = $"{firstChar}{rest}";
@@ -105,6 +114,7 @@ public sealed partial class Person : AuditableEntity, IContact
                 throw new ArgumentOutOfRangeException(nameof(LastName), value,
                     $"Maximum allowed length is: {Constraints.LastNameMaxLength}");
             }
+
             string firstChar = value[0].ToString().ToUpper();
             string rest = value[1..];
             _lastName = $"{firstChar}{rest}";
@@ -124,10 +134,12 @@ public sealed partial class Person : AuditableEntity, IContact
                 throw new ArgumentOutOfRangeException(nameof(Email), value,
                     $"Maximum allowed length is: {IContact.Constraints.EmailMaxLength}");
             }
+
             if (!EmailRegex().IsMatch(value))
             {
                 throw new FormatException("Provided email is not in correct format.");
             }
+
             _email = value;
         }
     }
@@ -143,6 +155,7 @@ public sealed partial class Person : AuditableEntity, IContact
                 throw new ArgumentOutOfRangeException(nameof(PhoneNumber), value,
                     $"Maximum allowed length is: {IContact.Constraints.PhoneNumberMaxLength}");
             }
+
             _phoneNumber = value;
         }
     }
@@ -150,7 +163,7 @@ public sealed partial class Person : AuditableEntity, IContact
     public required Address Address { get; set; }
     public required PickupAddress DefaultAdvertisementsPickupAddress { get; set; }
     public required ContactInfo DefaultAdvertisementsContactInfo { get; set; }
-    
+
     public IReadOnlyList<Cat> Cats => _cats.ToList();
     public IReadOnlyList<Advertisement> Advertisements => _advertisements.ToList();
 
@@ -158,7 +171,7 @@ public sealed partial class Person : AuditableEntity, IContact
     {
         _cats.Add(cat);
     }
-    
+
     public void RemoveCat(Cat cat)
     {
         _cats.Remove(cat);
@@ -169,7 +182,7 @@ public sealed partial class Person : AuditableEntity, IContact
         public const int FirstNameMaxLength = 50;
         public const int LastNameMaxLength = 50;
     }
-    
+
     public enum Role
     {
         Regular,
@@ -187,52 +200,115 @@ internal sealed class PersonConfiguration : IEntityTypeConfiguration<Person>
     {
         builder.ToTable("Persons");
         
-        builder
-            .ComplexProperty(x => x.Address)
-            .IsRequired();
+        builder.Property(x => x.Id).ValueGeneratedNever();
         
-        builder
-            .ComplexProperty(x => x.DefaultAdvertisementsPickupAddress)
-            .IsRequired();
-        
-        builder
-            .ComplexProperty(x => x.DefaultAdvertisementsContactInfo)
-            .IsRequired();
-        
-        builder
-            .Property(m=>m.FirstName)
+        builder.HasKey(x => x.Id);
+
+        builder.ComplexProperty(x => x.Address, complexPropertyBuilder =>
+        {
+            complexPropertyBuilder.IsRequired();
+            
+            complexPropertyBuilder.Property(x => x.Country)
+                .HasMaxLength(IAddress.Constraints.CountryMaxLength)
+                .IsRequired();
+            
+            complexPropertyBuilder
+                .Property(x => x.State)
+                .HasMaxLength(IAddress.Constraints.StateMaxLength);
+            
+            complexPropertyBuilder
+                .Property(x => x.ZipCode)
+                .HasMaxLength(IAddress.Constraints.ZipCodeMaxLength)
+                .IsRequired();
+            
+            complexPropertyBuilder
+                .Property(x => x.City)
+                .HasMaxLength(IAddress.Constraints.CityMaxLength)
+                .IsRequired();
+            
+            complexPropertyBuilder
+                .Property(x => x.Street)
+                .HasMaxLength(IAddress.Constraints.StreetMaxLength)
+                .IsRequired();
+            
+            complexPropertyBuilder
+                .Property(x => x.BuildingNumber)
+                .HasMaxLength(IAddress.Constraints.BuildingNumberMaxLength)
+                .IsRequired();
+        });
+
+        builder.ComplexProperty(x => x.DefaultAdvertisementsPickupAddress, complexPropertyBuilder =>
+        {
+            complexPropertyBuilder.IsRequired();
+            
+            complexPropertyBuilder
+                .Property(x => x.Country)
+                .HasMaxLength(IAddress.Constraints.CountryMaxLength)
+                .IsRequired();
+            
+            complexPropertyBuilder
+                .Property(x => x.State)
+                .HasMaxLength(IAddress.Constraints.StateMaxLength);
+            
+            complexPropertyBuilder
+                .Property(x => x.ZipCode)
+                .HasMaxLength(IAddress.Constraints.ZipCodeMaxLength)
+                .IsRequired();
+            
+            complexPropertyBuilder
+                .Property(x => x.City)
+                .HasMaxLength(IAddress.Constraints.CityMaxLength)
+                .IsRequired();
+            
+            complexPropertyBuilder
+                .Property(x => x.Street)
+                .HasMaxLength(IAddress.Constraints.StreetMaxLength);
+            
+            complexPropertyBuilder
+                .Property(x => x.BuildingNumber)
+                .HasMaxLength(IAddress.Constraints.BuildingNumberMaxLength);
+        });
+
+        builder.ComplexProperty(x => x.DefaultAdvertisementsContactInfo, complexPropertyBuilder =>
+        {
+            complexPropertyBuilder.IsRequired();
+            
+            complexPropertyBuilder
+                .Property(x => x.Email)
+                .HasMaxLength(IContact.Constraints.EmailMaxLength)
+                .IsRequired();
+            
+            complexPropertyBuilder
+                .Property(x => x.PhoneNumber)
+                .HasMaxLength(IContact.Constraints.PhoneNumberMaxLength);
+        });
+
+        builder.Property(m => m.FirstName)
             .HasMaxLength(Person.Constraints.FirstNameMaxLength)
             .IsRequired();
-        
-        builder
-            .Property(m=>m.LastName)
+
+        builder.Property(m => m.LastName)
             .HasMaxLength(Person.Constraints.LastNameMaxLength)
             .IsRequired();
-        
-        builder
-            .Property(m=>m.Email)
+
+        builder.Property(m => m.Email)
             .HasMaxLength(IContact.Constraints.EmailMaxLength)
             .IsRequired();
-        
-        builder
-            .Property(m=>m.PhoneNumber)
+
+        builder.Property(m => m.PhoneNumber)
             .HasMaxLength(IContact.Constraints.PhoneNumberMaxLength)
             .IsRequired();
-        
-        builder
-            .Property(x=>x.UserIdentityId)
+
+        builder.Property(x => x.UserIdentityId)
             .IsRequired();
-        
-        builder
-            .HasIndex(m => m.UserIdentityId)
+
+        builder.HasIndex(m => m.UserIdentityId)
             .IsUnique();
-        
-        builder
-            .HasIndex(m => m.Email)
+
+        builder.HasIndex(m => m.Email)
             .IsUnique();
-        
-        builder
-            .HasIndex(m => m.PhoneNumber)
+
+        builder.HasIndex(m => m.PhoneNumber)
             .IsUnique();
     }
 }
