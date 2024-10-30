@@ -7,7 +7,7 @@ using KittySaver.Api.Shared.Domain.ValueObjects;
 using NSubstitute;
 using Person = KittySaver.Api.Shared.Domain.Entites.Person;
 
-namespace KittySaver.Api.Tests.Unit;
+namespace KittySaver.Api.Tests.Unit.Cats;
 
 public class CatTests
 {
@@ -22,23 +22,44 @@ public class CatTests
                 Street = faker.Address.StreetName(),
                 BuildingNumber = faker.Address.BuildingNumber()
             }).Generate();
+    
+    private static readonly PickupAddress PickupAddress = new Faker<PickupAddress>()
+        .CustomInstantiator(faker =>
+            new PickupAddress
+            {
+                Country = faker.Address.Country(),
+                State = faker.Address.State(),
+                ZipCode = faker.Address.ZipCode(),
+                City = faker.Address.City(),
+                Street = faker.Address.StreetName(),
+                BuildingNumber = faker.Address.BuildingNumber()
+            }).Generate();
+    
+    private static readonly ContactInfo ContactInfo = new Faker<ContactInfo>()
+        .CustomInstantiator(faker =>
+            new ContactInfo
+            {
+                Email = faker.Person.Email,
+                PhoneNumber = faker.Person.Phone
+            }).Generate();
+    
     private static readonly Person Person = new Faker<Person>()
         .CustomInstantiator(faker =>
-            new Person
-            {
-                Id = Guid.NewGuid(),
-                Address = Address,
-                FirstName = faker.Person.FirstName,
-                LastName = faker.Person.LastName,
-                Email = faker.Person.Email,
-                PhoneNumber = faker.Person.Phone,
-                UserIdentityId = Guid.NewGuid()
-            }).Generate();
+            Person.Create(
+                userIdentityId: Guid.NewGuid(),
+                firstName: faker.Person.FirstName,
+                lastName: faker.Person.LastName,
+                email: faker.Person.Email,
+                phoneNumber: faker.Person.Phone,
+                address: Address,
+                defaultAdvertisementPickupAddress: PickupAddress,
+                defaultAdvertisementContactInfo: ContactInfo
+            )).Generate();
     
     [Fact]
     public void CreateCat_ShouldReturnProperCat_WhenValidDataIsProvided()
     {
-        // Arrange
+        //Arrange
         ICatPriorityCalculator? calculator = Substitute.For<ICatPriorityCalculator>();
         calculator.Calculate(Arg.Any<Cat>()).Returns(420);
         const string name = "Whiskers";
@@ -49,23 +70,25 @@ public class CatTests
         const bool isCastrated = true;
         const bool isInNeedOfSeeingVet = true;
         const string additionalRequirements = "Lorem ipsum";
-        // Act
+        
+        //Act
         Cat cat = Cat.Create(
-            calculator,
-            Person.Id,
-            name,
-            medicalHelpUrgency,
-            ageCategory,
-            behavior,
-            healthStatus,
-            isCastrated,
-            isInNeedOfSeeingVet,
-            additionalRequirements
+            calculator: calculator,
+            personId: Person.Id,
+            name: name,
+            medicalHelpUrgency: medicalHelpUrgency,
+            ageCategory: ageCategory,
+            behavior: behavior,
+            healthStatus: healthStatus,
+            isCastrated: isCastrated,
+            isInNeedOfSeeingVet: isInNeedOfSeeingVet,
+            additionalRequirements: additionalRequirements
         );
         typeof(Cat).GetProperty(nameof(Cat.Person))?.SetValue(cat, Person, null);
 
-        // Assert
+        //Assert
         cat.Should().NotBeNull();
+        cat.Id.Should().NotBeEmpty();
         cat.Name.Should().Be(name);
         cat.PersonId.Should().Be(Person.Id);
         cat.MedicalHelpUrgency.Should().Be(medicalHelpUrgency);
@@ -82,14 +105,13 @@ public class CatTests
     [Fact]
     public void NameSet_ShouldThrowArgumentOutOfRangeException_WhenNameExceedsMaxLength()
     {
-        // Arrange
-        Cat? cat = null;
+        //Arrange
         string longName = new('C', Cat.Constraints.NameMaxLength + 1);
 
-        // Act
+        //Act
         Action createCat = () =>
         {
-            cat = Cat.Create(
+            Cat cat = Cat.Create(
                 Substitute.For<ICatPriorityCalculator>(),
                 Person.Id,
                 longName,
@@ -101,8 +123,7 @@ public class CatTests
             typeof(Cat).GetProperty(nameof(Cat.Person))?.SetValue(cat, Person, null);
         };
 
-        // Assert
-        cat.Should().BeNull();
+        //Assert
         createCat.Should().Throw<ArgumentOutOfRangeException>();
     }
     
@@ -111,13 +132,10 @@ public class CatTests
     [InlineData(" ")]
     public void NameSet_ShouldThrowArgumentException_WhenNameIsNullOrWhitespace(string invalidName)
     {
-        // Arrange
-        Cat? cat = null;
-
-        // Act
+        //Act
         Action createCat = () =>
         {
-            cat = Cat.Create(
+            Cat cat = Cat.Create(
                 Substitute.For<ICatPriorityCalculator>(),
                 Person.Id,
                 invalidName,
@@ -129,22 +147,20 @@ public class CatTests
             typeof(Cat).GetProperty(nameof(Cat.Person))?.SetValue(cat, Person, null);
         };
 
-        // Assert
-        cat.Should().BeNull();
+        //Assert
         createCat.Should().Throw<ArgumentException>();
     }
 
     [Fact]
     public void AdditionalRequirementsSet_ShouldThrowArgumentOutOfRangeException_WhenExceedsMaxLength()
     {
-        // Arrange
-        Cat? cat = null;
+        //Arrange
         string longRequirements = new string('R', Cat.Constraints.AdditionalRequirementsMaxLength + 1);
 
-        // Act
+        //Act
         Action createCat = () =>
         {
-            cat = Cat.Create(
+            Cat cat = Cat.Create(
                 Substitute.For<ICatPriorityCalculator>(),
                 Person.Id,
                 "Whiskers",
@@ -157,15 +173,14 @@ public class CatTests
             typeof(Cat).GetProperty(nameof(Cat.Person))?.SetValue(cat, Person, null);
         };
         
-        // Assert
-        cat.Should().BeNull();
+        //Assert
         createCat.Should().Throw<ArgumentOutOfRangeException>();
     }
     
     [Fact]
     public void ReCalculatePriorityScore_ShouldUpdatePriorityScore_WhenCalculatorIsProvided()
     {
-        // Arrange
+        //Arrange
         const int score = 420;
         ICatPriorityCalculator? calculator = Substitute.For<ICatPriorityCalculator>();
         calculator.Calculate(Arg.Any<Cat>()).Returns(score);
@@ -181,44 +196,44 @@ public class CatTests
         );
         typeof(Cat).GetProperty(nameof(Cat.Person))?.SetValue(cat, Person, null);
         
-        // Act
+        //Act
         cat.ReCalculatePriorityScore(calculator);
 
-        // Assert
+        //Assert
         cat.PriorityScore.Should().Be(score);
     }
     
     [Fact]
     public void Create_ShouldThrowArgumentException_WhenPersonIdIsEmpty()
     {
-        // Arrange
-        Cat? cat = null;
+        //Arrange
         Guid emptyPersonId = Guid.Empty;
-        ICatPriorityCalculator? calculator = Substitute.For<ICatPriorityCalculator>();
+        ICatPriorityCalculator calculator = Substitute.For<ICatPriorityCalculator>();
         
-        // Act
+        //Act
         Action createCat = () =>
         {
-            cat = Cat.Create(
-                calculator,
-                emptyPersonId,
-                "Whiskers",
-                MedicalHelpUrgency.HaveToSeeVet,
-                AgeCategory.Senior,
-                Behavior.Friendly,
-                HealthStatus.Critical
+            Cat cat = Cat.Create(
+                calculator: calculator,
+                personId: emptyPersonId,
+                name: "Whiskers",
+                medicalHelpUrgency: MedicalHelpUrgency.HaveToSeeVet,
+                ageCategory: AgeCategory.Senior,
+                behavior: Behavior.Friendly,
+                healthStatus: HealthStatus.Critical
             );
+            typeof(Cat).GetProperty(nameof(Cat.Person))?.SetValue(cat, Person, null);
+
         };
 
-        // Assert
-        cat.Should().BeNull();
+        //Assert
         createCat.Should().Throw<ArgumentException>();
     }
     
     [Fact]
     public void Priority_ShouldReturnExpectedResult_WhenFirstCombinationIsGiven()
     {
-        // Arrange && Act
+        //Act
         Cat catThatDontNeedThatMuchHelp = Cat.Create(
             new DefaultCatPriorityCalculator(),
             Person.Id,
@@ -252,7 +267,7 @@ public class CatTests
         );
         typeof(Cat).GetProperty(nameof(Cat.Person))?.SetValue(catThatNeedMuchHelp, Person, null);
 
-        // Assert
+        //Assert
         catThatNeedLittleMoreHelp.PriorityScore.Should().BeGreaterThan(catThatDontNeedThatMuchHelp.PriorityScore);
         catThatNeedMuchHelp.PriorityScore.Should().BeGreaterThan(catThatNeedLittleMoreHelp.PriorityScore);
     }

@@ -33,7 +33,15 @@ public class GetPersonsEndpointsTests : IAsyncLifetime
                     AddressCity: faker.Address.City(),
                     AddressStreet: faker.Address.StreetName(),
                     AddressBuildingNumber: faker.Address.BuildingNumber(),
-                    AddressState: faker.Address.State()
+                    AddressState: faker.Address.State(),
+                    DefaultAdvertisementPickupAddressCountry: faker.Address.Country(),
+                    DefaultAdvertisementPickupAddressState: faker.Address.State(),
+                    DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
+                    DefaultAdvertisementPickupAddressCity: faker.Address.City(),
+                    DefaultAdvertisementPickupAddressStreet: faker.Address.StreetName(),
+                    DefaultAdvertisementPickupAddressBuildingNumber: faker.Address.BuildingNumber(),
+                    DefaultAdvertisementContactInfoEmail: faker.Person.Email,
+                    DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 ));
     
     [Fact]
@@ -56,12 +64,12 @@ public class GetPersonsEndpointsTests : IAsyncLifetime
         registeredPerson.FullName.Should().Be($"{createRequest.FirstName} {createRequest.LastName}");
         registeredPerson.Email.Should().Be(createRequest.Email);
         registeredPerson.PhoneNumber.Should().Be(createRequest.PhoneNumber);
-        registeredPerson.AddressCountry.Should().Be(createRequest.AddressCountry);
-        registeredPerson.AddressState.Should().Be(createRequest.AddressState);
-        registeredPerson.AddressZipCode.Should().Be(createRequest.AddressZipCode);
-        registeredPerson.AddressCity.Should().Be(createRequest.AddressCity);
-        registeredPerson.AddressStreet.Should().Be(createRequest.AddressStreet);
-        registeredPerson.AddressBuildingNumber.Should().Be(createRequest.AddressBuildingNumber);
+        registeredPerson.Address.Country.Should().Be(createRequest.AddressCountry);
+        registeredPerson.Address.State.Should().Be(createRequest.AddressState);
+        registeredPerson.Address.ZipCode.Should().Be(createRequest.AddressZipCode);
+        registeredPerson.Address.City.Should().Be(createRequest.AddressCity);
+        registeredPerson.Address.Street.Should().Be(createRequest.AddressStreet);
+        registeredPerson.Address.BuildingNumber.Should().Be(createRequest.AddressBuildingNumber);
     }
     
     [Fact]

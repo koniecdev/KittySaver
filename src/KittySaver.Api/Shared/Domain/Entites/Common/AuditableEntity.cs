@@ -2,7 +2,7 @@
 
 public abstract class AuditableEntity
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; } = Guid.NewGuid();
     public string CreatedBy { get; set; } = "";
     public DateTimeOffset CreatedOn { get; set; }
     public string? LastModificationBy { get; set; }

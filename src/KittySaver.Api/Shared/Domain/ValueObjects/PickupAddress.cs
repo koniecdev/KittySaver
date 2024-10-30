@@ -6,14 +6,14 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace KittySaver.Api.Shared.Domain.ValueObjects;
 
-public sealed class Address : ValueObject, IAddress
+public sealed class PickupAddress : ValueObject, IAddress
 {
     private readonly string? _state;
     private readonly string _country = null!;
     private readonly string _zipCode = null!;
     private readonly string _city = null!;
-    private readonly string _street = null!;
-    private readonly string _buildingNumber = null!;
+    private readonly string? _street;
+    private readonly string? _buildingNumber;
 
     public string? State
     {
@@ -85,12 +85,22 @@ public sealed class Address : ValueObject, IAddress
         }
     }
 
-    public required string Street
+    public string? Street
     {
         get => _street;
         init
         {
-            ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(Street));
+            if (value is null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                _street = null;
+                return;
+            }
+            
             if (value.Length > IAddress.Constraints.StreetMaxLength)
             {
                 throw new ArgumentOutOfRangeException(nameof(Street), value,
@@ -100,12 +110,22 @@ public sealed class Address : ValueObject, IAddress
         }
     }
 
-    public required string BuildingNumber
+    public string? BuildingNumber
     {
         get => _buildingNumber;
         init
         {
-            ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(BuildingNumber));
+            if (value is null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                _buildingNumber = null;
+                return;
+            }
+            
             if (value.Length > IAddress.Constraints.BuildingNumberMaxLength)
             {
                 throw new ArgumentOutOfRangeException(nameof(BuildingNumber), value,
@@ -121,7 +141,7 @@ public sealed class Address : ValueObject, IAddress
         yield return State ?? "";
         yield return ZipCode;
         yield return City;
-        yield return Street;
-        yield return BuildingNumber;
+        yield return Street ?? "";
+        yield return BuildingNumber ?? "";
     }
 }

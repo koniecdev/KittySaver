@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using KittySaver.Api.Shared.Domain.Common.Interfaces;
 using KittySaver.Api.Shared.Domain.Entites;
 using KittySaver.Api.Shared.Domain.ValueObjects;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
@@ -18,11 +19,19 @@ public class CreatePerson : IEndpoint
         string PhoneNumber,
         Guid UserIdentityId,
         string AddressCountry,
+        string? AddressState,
         string AddressZipCode,
         string AddressCity,
         string AddressStreet,
         string AddressBuildingNumber,
-        string? AddressState = null);
+        string DefaultAdvertisementPickupAddressCountry,
+        string? DefaultAdvertisementPickupAddressState,
+        string DefaultAdvertisementPickupAddressZipCode,
+        string DefaultAdvertisementPickupAddressCity,
+        string? DefaultAdvertisementPickupAddressStreet,
+        string? DefaultAdvertisementPickupAddressBuildingNumber,
+        string DefaultAdvertisementContactInfoEmail,
+        string DefaultAdvertisementContactInfoPhoneNumber);
     
     public sealed record CreatePersonCommand(
         string FirstName,
@@ -31,11 +40,19 @@ public class CreatePerson : IEndpoint
         string PhoneNumber,
         Guid UserIdentityId,
         string AddressCountry,
+        string? AddressState,
         string AddressZipCode,
         string AddressCity,
         string AddressStreet,
         string AddressBuildingNumber,
-        string? AddressState = null) : ICommand<Guid>;
+        string DefaultAdvertisementPickupAddressCountry,
+        string? DefaultAdvertisementPickupAddressState,
+        string DefaultAdvertisementPickupAddressZipCode,
+        string DefaultAdvertisementPickupAddressCity,
+        string? DefaultAdvertisementPickupAddressStreet,
+        string? DefaultAdvertisementPickupAddressBuildingNumber,
+        string DefaultAdvertisementContactInfoEmail,
+        string DefaultAdvertisementContactInfoPhoneNumber) : ICommand<Guid>;
 
     public sealed class CreatePersonCommandValidator 
         : AbstractValidator<CreatePersonCommand>, IAsyncValidator
@@ -45,6 +62,12 @@ public class CreatePerson : IEndpoint
         public CreatePersonCommandValidator(ApplicationDbContext db)
         {
             _db = db;
+            
+            RuleFor(x => x.UserIdentityId)
+                .NotEmpty()
+                .MustAsync(async (userIdentityId, ct) => await IsUserIdentityIdUniqueAsync(userIdentityId, ct))
+                .WithMessage("'User Identity Id' is already used by another user.");
+            
             RuleFor(x => x.FirstName)
                 .NotEmpty()
                 .MaximumLength(Person.Constraints.FirstNameMaxLength);
@@ -55,44 +78,69 @@ public class CreatePerson : IEndpoint
             
             RuleFor(x => x.PhoneNumber)
                 .NotEmpty()
-                .MaximumLength(Person.Constraints.PhoneNumberMaxLength)
+                .MaximumLength(IContact.Constraints.PhoneNumberMaxLength)
                 .MustAsync(async (phoneNumber, ct) => await IsPhoneNumberUniqueAsync(phoneNumber, ct))
                 .WithMessage("'Phone Number' is already used by another user.");
             
-            RuleFor(x => x.UserIdentityId)
-                .NotEmpty()
-                .MustAsync(async (userIdentityId, ct) => await IsUserIdentityIdUniqueAsync(userIdentityId, ct))
-                .WithMessage("'User Identity Id' is already used by another user.");
-            
             RuleFor(x => x.Email)
                 .NotEmpty()
-                .MaximumLength(Person.Constraints.EmailMaxLength)
-                .Matches(Person.Constraints.EmailPattern)
+                .MaximumLength(IContact.Constraints.EmailMaxLength)
+                .Matches(IContact.Constraints.EmailPattern)
                 .MustAsync(async (email, ct) => await IsEmailUniqueAsync(email, ct))
                 .WithMessage("'Email' is already used by another user.");
             
+            RuleFor(x => x.DefaultAdvertisementContactInfoPhoneNumber)
+                .NotEmpty()
+                .MaximumLength(IContact.Constraints.PhoneNumberMaxLength);
+
+            RuleFor(x => x.DefaultAdvertisementContactInfoEmail)
+                .NotEmpty()
+                .MaximumLength(IContact.Constraints.EmailMaxLength)
+                .Matches(IContact.Constraints.EmailPattern);
+            
             RuleFor(x => x.AddressCountry)
                 .NotEmpty()
-                .MaximumLength(Address.Constraints.CountryMaxLength);
+                .MaximumLength(IAddress.Constraints.CountryMaxLength);
             
             RuleFor(x => x.AddressState)
-                .MaximumLength(Address.Constraints.StateMaxLength);
+                .MaximumLength(IAddress.Constraints.StateMaxLength);
             
             RuleFor(x => x.AddressZipCode)
                 .NotEmpty()
-                .MaximumLength(Address.Constraints.ZipCodeMaxLength);
+                .MaximumLength(IAddress.Constraints.ZipCodeMaxLength);
             
             RuleFor(x => x.AddressCity)
                 .NotEmpty()
-                .MaximumLength(Address.Constraints.CityMaxLength);
+                .MaximumLength(IAddress.Constraints.CityMaxLength);
             
             RuleFor(x => x.AddressStreet)
                 .NotEmpty()
-                .MaximumLength(Address.Constraints.StreetMaxLength);
+                .MaximumLength(IAddress.Constraints.StreetMaxLength);
             
             RuleFor(x => x.AddressBuildingNumber)
                 .NotEmpty()
-                .MaximumLength(Address.Constraints.BuildingNumberMaxLength);
+                .MaximumLength(IAddress.Constraints.BuildingNumberMaxLength);
+            
+            RuleFor(x => x.DefaultAdvertisementPickupAddressCountry)
+                .NotEmpty()
+                .MaximumLength(IAddress.Constraints.CountryMaxLength);
+            
+            RuleFor(x => x.DefaultAdvertisementPickupAddressState)
+                .MaximumLength(IAddress.Constraints.StateMaxLength);
+            
+            RuleFor(x => x.DefaultAdvertisementPickupAddressZipCode)
+                .NotEmpty()
+                .MaximumLength(IAddress.Constraints.ZipCodeMaxLength);
+            
+            RuleFor(x => x.DefaultAdvertisementPickupAddressCity)
+                .NotEmpty()
+                .MaximumLength(IAddress.Constraints.CityMaxLength);
+            
+            RuleFor(x => x.DefaultAdvertisementPickupAddressStreet)
+                .MaximumLength(IAddress.Constraints.StreetMaxLength);
+            
+            RuleFor(x => x.DefaultAdvertisementPickupAddressBuildingNumber)
+                .MaximumLength(IAddress.Constraints.BuildingNumberMaxLength);
         }
         private async Task<bool> IsPhoneNumberUniqueAsync(string phone, CancellationToken ct) 
             => !await _db.Persons
@@ -114,7 +162,7 @@ public class CreatePerson : IEndpoint
     {
         public async Task<Guid> Handle(CreatePersonCommand request, CancellationToken cancellationToken)
         {
-            Address address = new()
+            Address personalAddress = new()
             {
                 Country = request.AddressCountry,
                 State = request.AddressState,
@@ -124,7 +172,23 @@ public class CreatePerson : IEndpoint
                 BuildingNumber = request.AddressBuildingNumber
             };
             
-            Person person = request.MapToEntity(address);
+            PickupAddress defaultAdvertisementPickupAddress = new()
+            {
+                Country = request.DefaultAdvertisementPickupAddressCountry,
+                State = request.DefaultAdvertisementPickupAddressState,
+                ZipCode = request.DefaultAdvertisementPickupAddressZipCode,
+                City = request.DefaultAdvertisementPickupAddressCity,
+                Street = request.DefaultAdvertisementPickupAddressStreet,
+                BuildingNumber = request.DefaultAdvertisementPickupAddressBuildingNumber
+            };
+
+            ContactInfo defaultAdvertisementContactInfo = new()
+            {
+                Email = request.DefaultAdvertisementContactInfoEmail,
+                PhoneNumber = request.DefaultAdvertisementContactInfoPhoneNumber
+            };
+            
+            Person person = request.MapToPersonEntity(personalAddress, defaultAdvertisementPickupAddress, defaultAdvertisementContactInfo);
             db.Persons.Add(person);
             await db.SaveChangesAsync(cancellationToken);
             return person.Id;
@@ -149,16 +213,37 @@ public class CreatePerson : IEndpoint
 public static partial class CreatePersonMapper
 {
     [UserMapping(Default = true)]
-    public static CreatePerson.CreatePersonCommand MapToCreatePersonCommand(this CreatePerson.CreatePersonRequest request)
+    public static CreatePerson.CreatePersonCommand MapToCreatePersonCommand(
+        this CreatePerson.CreatePersonRequest request)
     {
         if (request.AddressState is not null && string.IsNullOrWhiteSpace(request.AddressState))
         {
             request = request with { AddressState = null };
         }
-        CreatePerson.CreatePersonCommand dto = ToCreatePersonCommand(request);
+
+        CreatePerson.CreatePersonCommand dto = request.ToCreatePersonCommand();
         return dto;
     }
-    private static partial CreatePerson.CreatePersonCommand ToCreatePersonCommand(this CreatePerson.CreatePersonRequest request);
-    
-    public static partial Person MapToEntity(this CreatePerson.CreatePersonCommand command, Address address);
+
+    private static partial CreatePerson.CreatePersonCommand ToCreatePersonCommand(
+        this CreatePerson.CreatePersonRequest request);
+
+    public static Person MapToPersonEntity(
+        this CreatePerson.CreatePersonCommand command,
+        Address personalAddress,
+        PickupAddress defaultAdvertisementPickupAddress,
+        ContactInfo defaultAdvertisementPickupContactInfo)
+    {
+        Person person = Person.Create(
+            userIdentityId: command.UserIdentityId,
+            firstName: command.FirstName,
+            lastName: command.LastName,
+            email: command.Email,
+            phoneNumber: command.PhoneNumber,
+            address: personalAddress,
+            defaultAdvertisementPickupAddress: defaultAdvertisementPickupAddress,
+            defaultAdvertisementContactInfo: defaultAdvertisementPickupContactInfo);
+        return person;
+    }
 }
+    
