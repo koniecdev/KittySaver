@@ -34,7 +34,14 @@ public sealed class Cat : AuditableEntity
         cat.PriorityScore = cat.CalculatePriorityScore(calculator);
         return cat;
     }
-    
+
+    /// <remarks>
+    /// Required by EF Core, and should never be used by programmer as it bypasses business rules.
+    /// </remarks>
+    private Cat()
+    {
+    }
+
     [SetsRequiredMembers]
     private Cat(
         Guid personId,
@@ -57,12 +64,12 @@ public sealed class Cat : AuditableEntity
         IsInNeedOfSeeingVet = isInNeedOfSeeingVet;
         AdditionalRequirements = additionalRequirements;
     }
-    
+
     private string _name = null!;
     private string? _additionalRequirements;
     private readonly Guid _personId;
     private Guid? _advertisementId;
-    
+
     public required string Name
     {
         get => _name;
@@ -71,10 +78,11 @@ public sealed class Cat : AuditableEntity
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(Name));
             if (value.Length > Constraints.NameMaxLength)
             {
-                throw new ArgumentOutOfRangeException(nameof(Name), 
+                throw new ArgumentOutOfRangeException(nameof(Name),
                     $"Cat Name cannot be longer than {Constraints.NameMaxLength} characters.");
             }
-            _name = value;   
+
+            _name = value;
         }
     }
 
@@ -85,9 +93,10 @@ public sealed class Cat : AuditableEntity
         {
             if (value?.Length > Constraints.AdditionalRequirementsMaxLength)
             {
-                throw new ArgumentOutOfRangeException(nameof(AdditionalRequirements), 
+                throw new ArgumentOutOfRangeException(nameof(AdditionalRequirements),
                     $"Cat Additional requirements cannot be longer than {Constraints.AdditionalRequirementsMaxLength} characters.");
             }
+
             _additionalRequirements = value;
         }
     }
@@ -109,12 +118,13 @@ public sealed class Cat : AuditableEntity
             {
                 throw new ArgumentException("Provided person id is empty", nameof(PersonId));
             }
+
             _personId = value;
         }
     }
 
     public Person Person { get; private set; } = null!;
-    
+
     public Guid? AdvertisementId
     {
         get => _advertisementId;
@@ -124,6 +134,7 @@ public sealed class Cat : AuditableEntity
             {
                 throw new ArgumentException("Provided advertisement id is empty", nameof(AdvertisementId));
             }
+
             _advertisementId = value;
         }
     }
@@ -131,13 +142,13 @@ public sealed class Cat : AuditableEntity
     public Advertisement? Advertisement { get; private set; }
 
     public double PriorityScore { get; private set; }
-    
+
     private double CalculatePriorityScore(ICatPriorityCalculator calculator)
     {
         double priority = calculator.Calculate(this);
         return priority;
     }
-    
+
     public void ReCalculatePriorityScore(ICatPriorityCalculator calculator)
     {
         PriorityScore = CalculatePriorityScore(calculator);
@@ -147,7 +158,7 @@ public sealed class Cat : AuditableEntity
     {
         IsAdopted = true;
     }
-    
+
     public static class Constraints
     {
         public const int NameMaxLength = 100;
@@ -161,33 +172,30 @@ internal sealed class CatConfiguration : IEntityTypeConfiguration<Cat>
     {
         builder.ToTable("Cats");
         
-        builder
-            .Property(x => x.PersonId)
-            .IsRequired();
+        builder.Property(x => x.Id).ValueGeneratedNever();
         
-        builder
-            .Property(x => x.Name)
+        builder.HasKey(x => x.Id);
+
+        builder.Property(x => x.PersonId)
+            .IsRequired();
+
+        builder.Property(x => x.Name)
             .HasMaxLength(Cat.Constraints.NameMaxLength)
             .IsRequired();
-        
-        builder
-            .Property(x => x.AdditionalRequirements)
+
+        builder.Property(x => x.AdditionalRequirements)
             .HasMaxLength(Cat.Constraints.AdditionalRequirementsMaxLength);
-        
-        builder
-            .Property(x => x.AgeCategory)
+
+        builder.Property(x => x.AgeCategory)
             .IsRequired();
-        
-        builder
-            .Property(x => x.Behavior)
+
+        builder.Property(x => x.Behavior)
             .IsRequired();
-        
-        builder
-            .Property(x => x.HealthStatus)
+
+        builder.Property(x => x.HealthStatus)
             .IsRequired();
-        
-        builder
-            .Property(x => x.PriorityScore)
+
+        builder.Property(x => x.PriorityScore)
             .IsRequired();
     }
 }
