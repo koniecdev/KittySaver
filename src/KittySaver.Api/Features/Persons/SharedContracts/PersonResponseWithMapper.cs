@@ -12,12 +12,34 @@ public sealed class PersonResponse
     public required string FullName { get; init; }
     public required string Email { get; init; }
     public required string PhoneNumber { get; init; }
-    public required string AddressCountry { get; init; }
-    public required string? AddressState { get; init; }
-    public required string AddressCity { get; init; }
-    public required string AddressStreet { get; init; }
-    public required string AddressBuildingNumber { get; init; }
-    public required string AddressZipCode { get; init; }
+    public required AddressDto Address { get; init; }
+    public required PickupAddressDto DefaultAdvertisementsPickupAddress { get; init; }
+    public required ContactInfoDto DefaultAdvertisementsContactInfo { get; init; }
+
+    public sealed class AddressDto
+    {
+        public required string Country { get; init; }
+        public required string? State { get; init; }
+        public required string ZipCode { get; init; }
+        public required string City { get; init; }
+        public required string Street { get; init; }
+        public required string BuildingNumber { get; init; }
+    }
+    public sealed class PickupAddressDto
+    {
+        public required string Country { get; init; }
+        public required string? State { get; init; }
+        public required string ZipCode { get; init; }
+        public required string City { get; init; }
+        public required string? Street { get; init; }
+        public required string? BuildingNumber { get; init; }
+    }
+
+    public sealed class ContactInfoDto
+    {
+        public required string Email { get; init; }
+        public required string PhoneNumber { get; init; }
+    }
 }
 
 [Mapper]
