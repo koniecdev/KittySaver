@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using KittySaver.Api.Shared.Domain.Common.Interfaces;
 using KittySaver.Api.Shared.Domain.Entites;
 using KittySaver.Api.Shared.Domain.ValueObjects;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
@@ -17,11 +18,19 @@ public sealed class UpdatePerson : IEndpoint
         string Email,
         string PhoneNumber,
         string AddressCountry,
+        string? AddressState,
         string AddressZipCode,
         string AddressCity,
         string AddressStreet,
         string AddressBuildingNumber,
-        string? AddressState = null);
+        string DefaultAdvertisementPickupAddressCountry,
+        string? DefaultAdvertisementPickupAddressState,
+        string DefaultAdvertisementPickupAddressZipCode,
+        string DefaultAdvertisementPickupAddressCity,
+        string? DefaultAdvertisementPickupAddressStreet,
+        string? DefaultAdvertisementPickupAddressBuildingNumber,
+        string DefaultAdvertisementContactInfoEmail,
+        string DefaultAdvertisementContactInfoPhoneNumber);
 
     public sealed record UpdatePersonCommand(
         Guid IdOrUserIdentityId,
@@ -30,11 +39,19 @@ public sealed class UpdatePerson : IEndpoint
         string Email,
         string PhoneNumber,
         string AddressCountry,
+        string? AddressState,
         string AddressZipCode,
         string AddressCity,
         string AddressStreet,
         string AddressBuildingNumber,
-        string? AddressState = null) : ICommand;
+        string DefaultAdvertisementPickupAddressCountry,
+        string? DefaultAdvertisementPickupAddressState,
+        string DefaultAdvertisementPickupAddressZipCode,
+        string DefaultAdvertisementPickupAddressCity,
+        string? DefaultAdvertisementPickupAddressStreet,
+        string? DefaultAdvertisementPickupAddressBuildingNumber,
+        string DefaultAdvertisementContactInfoEmail,
+        string DefaultAdvertisementContactInfoPhoneNumber) : ICommand;
 
     public sealed class UpdatePersonCommandValidator
         : AbstractValidator<UpdatePersonCommand>, IAsyncValidator
@@ -56,39 +73,69 @@ public sealed class UpdatePerson : IEndpoint
             
             RuleFor(x => x.Email)
                 .NotEmpty()
-                .MaximumLength(Person.Constraints.EmailMaxLength)
-                .Matches(Person.Constraints.EmailPattern)
+                .MaximumLength(IContact.Constraints.EmailMaxLength)
+                .Matches(IContact.Constraints.EmailPattern)
                 .MustAsync(async (command, email, ct) => await IsEmailUniqueAsync(command, email, ct))
                 .WithMessage("'Email' is already used by another user.");
             
             RuleFor(x => x.PhoneNumber)
                 .NotEmpty()
-                .MaximumLength(Person.Constraints.PhoneNumberMaxLength)
+                .MaximumLength(IContact.Constraints.PhoneNumberMaxLength)
                 .MustAsync(async (command, phoneNumber, ct) => await IsPhoneNumberUniqueAsync(command, phoneNumber, ct))
                 .WithMessage("'Phone Number' is already used by another user.");
             
+            RuleFor(x => x.DefaultAdvertisementContactInfoPhoneNumber)
+                .NotEmpty()
+                .MaximumLength(IContact.Constraints.PhoneNumberMaxLength);
+
+            RuleFor(x => x.DefaultAdvertisementContactInfoEmail)
+                .NotEmpty()
+                .MaximumLength(IContact.Constraints.EmailMaxLength)
+                .Matches(IContact.Constraints.EmailPattern);
+            
             RuleFor(x => x.AddressCountry)
                 .NotEmpty()
-                .MaximumLength(Address.Constraints.CountryMaxLength);
+                .MaximumLength(IAddress.Constraints.CountryMaxLength);
             
             RuleFor(x => x.AddressState)
-                .MaximumLength(Address.Constraints.StateMaxLength);
+                .MaximumLength(IAddress.Constraints.StateMaxLength);
             
             RuleFor(x => x.AddressZipCode)
                 .NotEmpty()
-                .MaximumLength(Address.Constraints.ZipCodeMaxLength);
+                .MaximumLength(IAddress.Constraints.ZipCodeMaxLength);
             
             RuleFor(x => x.AddressCity)
                 .NotEmpty()
-                .MaximumLength(Address.Constraints.CityMaxLength);
+                .MaximumLength(IAddress.Constraints.CityMaxLength);
             
             RuleFor(x => x.AddressStreet)
                 .NotEmpty()
-                .MaximumLength(Address.Constraints.StreetMaxLength);
+                .MaximumLength(IAddress.Constraints.StreetMaxLength);
             
             RuleFor(x => x.AddressBuildingNumber)
                 .NotEmpty()
-                .MaximumLength(Address.Constraints.BuildingNumberMaxLength);
+                .MaximumLength(IAddress.Constraints.BuildingNumberMaxLength);
+            
+            RuleFor(x => x.DefaultAdvertisementPickupAddressCountry)
+                .NotEmpty()
+                .MaximumLength(IAddress.Constraints.CountryMaxLength);
+            
+            RuleFor(x => x.DefaultAdvertisementPickupAddressState)
+                .MaximumLength(IAddress.Constraints.StateMaxLength);
+            
+            RuleFor(x => x.DefaultAdvertisementPickupAddressZipCode)
+                .NotEmpty()
+                .MaximumLength(IAddress.Constraints.ZipCodeMaxLength);
+            
+            RuleFor(x => x.DefaultAdvertisementPickupAddressCity)
+                .NotEmpty()
+                .MaximumLength(IAddress.Constraints.CityMaxLength);
+            
+            RuleFor(x => x.DefaultAdvertisementPickupAddressStreet)
+                .MaximumLength(IAddress.Constraints.StreetMaxLength);
+            
+            RuleFor(x => x.DefaultAdvertisementPickupAddressBuildingNumber)
+                .MaximumLength(IAddress.Constraints.BuildingNumberMaxLength);
         }
         
         private async Task<bool> IsPhoneNumberUniqueAsync(UpdatePersonCommand command, string phone, CancellationToken ct) 
@@ -125,11 +172,30 @@ public sealed class UpdatePerson : IEndpoint
                 BuildingNumber = request.AddressBuildingNumber
             };
             
+            PickupAddress defaultAdvertisementPickupAddress = new()
+            {
+                Country = request.DefaultAdvertisementPickupAddressCountry,
+                State = request.DefaultAdvertisementPickupAddressState,
+                ZipCode = request.DefaultAdvertisementPickupAddressZipCode,
+                City = request.DefaultAdvertisementPickupAddressCity,
+                Street = request.DefaultAdvertisementPickupAddressStreet,
+                BuildingNumber = request.DefaultAdvertisementPickupAddressBuildingNumber
+            };
+
+            ContactInfo defaultAdvertisementContactInfo = new()
+            {
+                Email = request.DefaultAdvertisementContactInfoEmail,
+                PhoneNumber = request.DefaultAdvertisementContactInfoPhoneNumber
+            };
+            
             person.FirstName = request.FirstName;
             person.LastName = request.LastName;
             person.Email = request.Email;
             person.PhoneNumber = request.PhoneNumber;
             person.Address = address;
+            person.DefaultAdvertisementsPickupAddress = defaultAdvertisementPickupAddress;
+            person.DefaultAdvertisementsContactInfo = defaultAdvertisementContactInfo;
+            
             await db.SaveChangesAsync(cancellationToken);
         }
     }
