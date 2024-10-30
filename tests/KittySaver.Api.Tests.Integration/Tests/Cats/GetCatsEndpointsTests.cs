@@ -37,7 +37,15 @@ public class GetCatsEndpointsTests : IAsyncLifetime
                     AddressCity: faker.Address.City(),
                     AddressStreet: faker.Address.StreetName(),
                     AddressBuildingNumber: faker.Address.BuildingNumber(),
-                    AddressState: faker.Address.State()
+                    AddressState: faker.Address.State(),
+                    DefaultAdvertisementPickupAddressCountry: faker.Address.Country(),
+                    DefaultAdvertisementPickupAddressState: faker.Address.State(),
+                    DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
+                    DefaultAdvertisementPickupAddressCity: faker.Address.City(),
+                    DefaultAdvertisementPickupAddressStreet: faker.Address.StreetName(),
+                    DefaultAdvertisementPickupAddressBuildingNumber: faker.Address.BuildingNumber(),
+                    DefaultAdvertisementContactInfoEmail: faker.Person.Email,
+                    DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 )).Generate();
     
     private readonly CreateCat.CreateCatRequest _createCatRequest =
