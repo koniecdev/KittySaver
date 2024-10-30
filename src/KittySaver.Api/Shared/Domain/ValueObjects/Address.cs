@@ -2,6 +2,7 @@
 using KittySaver.Api.Shared.Domain.ValueObjects.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+// ReSharper disable EntityFramework.ModelValidation.UnlimitedStringLength - String Length properties limits are always set in entity that contains value object. 
 
 namespace KittySaver.Api.Shared.Domain.ValueObjects;
 
@@ -122,36 +123,5 @@ public sealed class Address : ValueObject, IAddress
         yield return City;
         yield return Street;
         yield return BuildingNumber;
-    }
-}
-
-internal sealed class AddressConfiguration : IEntityTypeConfiguration<Address>
-{
-    public void Configure(EntityTypeBuilder<Address> builder)
-    {
-        builder.HasNoKey();
-        builder
-            .Property(x => x.Country)
-            .HasMaxLength(IAddress.Constraints.CountryMaxLength)
-            .IsRequired();
-        builder
-            .Property(x => x.State)
-            .HasMaxLength(IAddress.Constraints.StateMaxLength);
-        builder
-            .Property(x => x.ZipCode)
-            .HasMaxLength(IAddress.Constraints.ZipCodeMaxLength)
-            .IsRequired();
-        builder
-            .Property(x => x.City)
-            .HasMaxLength(IAddress.Constraints.CityMaxLength)
-            .IsRequired();
-        builder
-            .Property(x => x.Street)
-            .HasMaxLength(IAddress.Constraints.StreetMaxLength)
-            .IsRequired();
-        builder
-            .Property(x => x.BuildingNumber)
-            .HasMaxLength(IAddress.Constraints.BuildingNumberMaxLength)
-            .IsRequired();
     }
 }
