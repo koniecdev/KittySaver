@@ -4,6 +4,7 @@ using KittySaver.Api.Shared.Domain.Common.Interfaces;
 using KittySaver.Api.Shared.Domain.ValueObjects.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+// ReSharper disable EntityFramework.ModelValidation.UnlimitedStringLength - String Length properties limits are always set in entity that contains value object. 
 
 namespace KittySaver.Api.Shared.Domain.ValueObjects;
 
@@ -54,19 +55,4 @@ public partial class ContactInfo : ValueObject, IContact
     
     [GeneratedRegex(IContact.Constraints.EmailPattern)]
     private static partial Regex EmailRegex();
-}
-
-internal sealed class ContactInfoConfiguration : IEntityTypeConfiguration<ContactInfo>
-{
-    public void Configure(EntityTypeBuilder<ContactInfo> builder)
-    {
-        builder.HasNoKey();
-        builder
-            .Property(x => x.Email)
-            .HasMaxLength(IContact.Constraints.EmailMaxLength)
-            .IsRequired();
-        builder
-            .Property(x => x.PhoneNumber)
-            .HasMaxLength(IContact.Constraints.PhoneNumberMaxLength);
-    }
 }
