@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using KittySaver.Api.Shared.Domain.Common.Interfaces;
 using KittySaver.Api.Shared.Domain.Entites.Common;
 using KittySaver.Api.Shared.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
@@ -20,8 +21,8 @@ public sealed class Advertisement : AuditableEntity
 
         DateTimeOffset expiresOn = currentDate.AddDays(30);
 
-        double catsMaximumPriorityScore = catsToAssign.Max(cat => cat.PriorityScore);
-        
+        double catsHighestPriorityScore = catsToAssign.Max(cat => cat.PriorityScore);
+
         Advertisement advertisement = new(
             personId: person.Id,
             cats: catsToAssign,
@@ -29,42 +30,50 @@ public sealed class Advertisement : AuditableEntity
             contactInfo: contactInfo,
             description: description,
             expiresOn: expiresOn,
-            priorityScore: catsMaximumPriorityScore);
-        
+            priorityScore: catsHighestPriorityScore);
+
         return advertisement;
+    }
+
+    /// <remarks>
+    /// Required by EF Core, and should never be used by programmer as it bypasses business rules.
+    /// </remarks>
+    private Advertisement()
+    {
     }
 
     [SetsRequiredMembers]
     private Advertisement(
         Guid personId,
-        IEnumerable<Cat> cats,
+        List<Cat> cats,
         PickupAddress pickupAddress,
         ContactInfo contactInfo,
         string? description,
         DateTimeOffset expiresOn,
         double priorityScore)
     {
-        _cats = cats.ToList();
+        _cats = cats;
         PersonId = personId;
         PickupAddress = pickupAddress;
         ContactInfo = contactInfo;
         Description = description;
         ExpiresOn = expiresOn;
     }
-    
+
     private readonly Guid _personId;
-    
-    private List<Cat> _cats;
-    
+
+    private List<Cat> _cats = [];
+
     public DateTimeOffset? ClosedOn { get; private set; }
+
     public DateTimeOffset ExpiresOn { get; private set; }
-    
+
     public AdvertisementStatus Status { get; private set; } = AdvertisementStatus.Active;
 
     public double PriorityScore { get; private set; }
-    
+
     public string? Description { get; set; }
-    
+
     public required Guid PersonId
     {
         get => _personId;
@@ -74,13 +83,15 @@ public sealed class Advertisement : AuditableEntity
             {
                 throw new ArgumentException("Provided person id is empty", nameof(PersonId));
             }
+
             _personId = value;
         }
     }
-    
+
     public Person Person { get; private set; } = null!;
 
     public IReadOnlyList<Cat> Cats => _cats.ToList();
+
     private static List<Cat> SetCats(Person person, IEnumerable<Cat> cats)
     {
         List<Cat> catsToAssign = cats.ToList();
@@ -88,28 +99,29 @@ public sealed class Advertisement : AuditableEntity
         {
             throw new ArgumentException("Advertisement cats list must not be empty.", nameof(cats));
         }
-        
+
         if (!catsToAssign.All(cat => person.Cats.Contains(cat)))
         {
-            throw new ArgumentException("All provided cats for advertisement must be owned by single person.", nameof(cats));
+            throw new ArgumentException("All provided cats for advertisement must be owned by single person.",
+                nameof(cats));
         }
 
         if (!catsToAssign.Any(cat => cat.AdvertisementId is not null))
         {
             return catsToAssign;
         }
-        
+
         List<Cat> catsThatAreAlreadyAssigned = catsToAssign
             .Where(cat => cat.AdvertisementId is not null)
             .ToList();
-        
+
         throw new ArgumentException(
-            $"Cats: {string.Join(",", catsThatAreAlreadyAssigned.Select(x=>x.Id))} are already assigned to another advertisement",
+            $"Cats: {string.Join(",", catsThatAreAlreadyAssigned.Select(x => x.Id))} are already assigned to another advertisement",
             nameof(cats));
     }
-    
+
     public required PickupAddress PickupAddress { get; set; }
-    
+
     public required ContactInfo ContactInfo { get; set; }
 
     public void Close(DateTimeOffset currentDate)
@@ -127,7 +139,7 @@ public sealed class Advertisement : AuditableEntity
         ClosedOn = currentDate;
         Status = AdvertisementStatus.Closed;
     }
-    
+
     public void Expire(DateTimeOffset currentDate)
     {
         if (Status is not AdvertisementStatus.Active)
@@ -156,12 +168,12 @@ public sealed class Advertisement : AuditableEntity
         double catsMaximumPriorityScore = _cats.Max(x => x.PriorityScore);
         PriorityScore = catsMaximumPriorityScore;
     }
-    
+
     public static class Constraints
     {
         public const int DescriptionMaxLength = 2000;
     }
-    
+
     public enum AdvertisementStatus
     {
         Active,
@@ -175,9 +187,51 @@ internal sealed class AdvertisementConfiguration : IEntityTypeConfiguration<Adve
     public void Configure(EntityTypeBuilder<Advertisement> builder)
     {
         builder.ToTable("Advertisements");
+
+        builder.Property(x => x.Id).ValueGeneratedNever();
+
+        builder.HasKey(x => x.Id);
+
         builder.Property(x => x.PersonId).IsRequired();
-        builder.ComplexProperty(x => x.ContactInfo).IsRequired();
-        builder.ComplexProperty(x => x.PickupAddress).IsRequired();
+
         builder.Property(x => x.Description).HasMaxLength(Advertisement.Constraints.DescriptionMaxLength);
+
+        builder.ComplexProperty(x => x.PickupAddress, complexPropertyBuilder =>
+        {
+            complexPropertyBuilder.IsRequired();
+
+            complexPropertyBuilder.Property(x => x.Country)
+                .HasMaxLength(IAddress.Constraints.CountryMaxLength)
+                .IsRequired();
+
+            complexPropertyBuilder.Property(x => x.State)
+                .HasMaxLength(IAddress.Constraints.StateMaxLength);
+
+            complexPropertyBuilder.Property(x => x.ZipCode)
+                .HasMaxLength(IAddress.Constraints.ZipCodeMaxLength)
+                .IsRequired();
+
+            complexPropertyBuilder.Property(x => x.City)
+                .HasMaxLength(IAddress.Constraints.CityMaxLength)
+                .IsRequired();
+
+            complexPropertyBuilder.Property(x => x.Street)
+                .HasMaxLength(IAddress.Constraints.StreetMaxLength);
+
+            complexPropertyBuilder.Property(x => x.BuildingNumber)
+                .HasMaxLength(IAddress.Constraints.BuildingNumberMaxLength);
+        });
+
+        builder.ComplexProperty(x => x.ContactInfo, complexPropertyBuilder =>
+        {
+            complexPropertyBuilder.IsRequired();
+
+            complexPropertyBuilder.Property(x => x.Email)
+                .HasMaxLength(IContact.Constraints.EmailMaxLength)
+                .IsRequired();
+
+            complexPropertyBuilder.Property(x => x.PhoneNumber)
+                .HasMaxLength(IContact.Constraints.PhoneNumberMaxLength);
+        });
     }
 }
