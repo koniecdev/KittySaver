@@ -4,6 +4,7 @@ using Bogus;
 using Bogus.Extensions;
 using FluentAssertions;
 using KittySaver.Api.Features.Persons;
+using KittySaver.Api.Shared.Domain.Common.Interfaces;
 using KittySaver.Api.Shared.Domain.ValueObjects;
 using KittySaver.Api.Tests.Integration.Helpers;
 using Microsoft.AspNetCore.Http;
@@ -23,7 +24,7 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
         _httpClient = appFactory.CreateClient();
         _cleanup = new CleanupHelper(_httpClient);
     }
-
+    
     private readonly Faker<CreatePerson.CreatePersonRequest> _createPersonRequestGenerator =
         new Faker<CreatePerson.CreatePersonRequest>()
             .CustomInstantiator( faker =>
@@ -34,11 +35,19 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
                     PhoneNumber: faker.Person.Phone,
                     UserIdentityId: Guid.NewGuid(),
                     AddressCountry: faker.Address.Country(),
+                    AddressState: faker.Address.State(),
                     AddressZipCode: faker.Address.ZipCode(),
                     AddressCity: faker.Address.City(),
                     AddressStreet: faker.Address.StreetName(),
                     AddressBuildingNumber: faker.Address.BuildingNumber(),
-                    AddressState: faker.Address.State()
+                    DefaultAdvertisementPickupAddressCountry: faker.Address.Country(),
+                    DefaultAdvertisementPickupAddressState: faker.Address.State(),
+                    DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
+                    DefaultAdvertisementPickupAddressCity: faker.Address.City(),
+                    DefaultAdvertisementPickupAddressStreet: faker.Address.StreetName(),
+                    DefaultAdvertisementPickupAddressBuildingNumber: faker.Address.BuildingNumber(),
+                    DefaultAdvertisementContactInfoEmail: faker.Person.Email,
+                    DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 ));
     
     [Fact]
@@ -78,7 +87,15 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
                     AddressCity: faker.Address.City(),
                     AddressStreet: faker.Address.StreetName(),
                     AddressBuildingNumber: faker.Address.BuildingNumber(),
-                    AddressState: state
+                    AddressState: state,
+                    DefaultAdvertisementPickupAddressCountry: faker.Address.Country(),
+                    DefaultAdvertisementPickupAddressState: faker.Address.State(),
+                    DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
+                    DefaultAdvertisementPickupAddressCity: faker.Address.City(),
+                    DefaultAdvertisementPickupAddressStreet: faker.Address.StreetName(),
+                    DefaultAdvertisementPickupAddressBuildingNumber: faker.Address.BuildingNumber(),
+                    DefaultAdvertisementContactInfoEmail: faker.Person.Email,
+                    DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 ));
         
         //Act
@@ -101,15 +118,23 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
                 new CreatePerson.CreatePersonRequest(
                     FirstName: faker.Person.FirstName.ClampLength(Person.Constraints.FirstNameMaxLength + 1),
                     LastName: faker.Person.LastName.ClampLength(Person.Constraints.LastNameMaxLength + 1),
-                    Email: faker.Person.Email.ClampLength(Person.Constraints.EmailMaxLength + 1),
-                    PhoneNumber: faker.Person.Phone.ClampLength(Person.Constraints.PhoneNumberMaxLength + 1),
+                    Email: faker.Person.Email.ClampLength(IContact.Constraints.EmailMaxLength + 1),
+                    PhoneNumber: faker.Person.Phone.ClampLength(IContact.Constraints.PhoneNumberMaxLength + 1),
                     UserIdentityId: Guid.NewGuid(),
-                    AddressCountry: faker.Address.Country().ClampLength(Address.Constraints.CountryMaxLength + 1),
-                    AddressZipCode: faker.Address.ZipCode().ClampLength(Address.Constraints.ZipCodeMaxLength + 1),
-                    AddressCity: faker.Address.City().ClampLength(Address.Constraints.CityMaxLength + 1),
-                    AddressStreet: faker.Address.StreetName().ClampLength(Address.Constraints.StreetMaxLength + 1),
-                    AddressBuildingNumber: faker.Address.BuildingNumber().ClampLength(Address.Constraints.BuildingNumberMaxLength + 1),
-                    AddressState: faker.Address.State().ClampLength(Address.Constraints.StateMaxLength + 1)
+                    AddressCountry: faker.Address.Country().ClampLength(IAddress.Constraints.CountryMaxLength + 1),
+                    AddressZipCode: faker.Address.ZipCode().ClampLength(IAddress.Constraints.ZipCodeMaxLength + 1),
+                    AddressCity: faker.Address.City().ClampLength(IAddress.Constraints.CityMaxLength + 1),
+                    AddressStreet: faker.Address.StreetName().ClampLength(IAddress.Constraints.StreetMaxLength + 1),
+                    AddressBuildingNumber: faker.Address.BuildingNumber().ClampLength(IAddress.Constraints.BuildingNumberMaxLength + 1),
+                    AddressState: faker.Address.State().ClampLength(IAddress.Constraints.StateMaxLength + 1),
+                    DefaultAdvertisementPickupAddressCountry: faker.Address.Country().ClampLength(IAddress.Constraints.CountryMaxLength + 1),
+                    DefaultAdvertisementPickupAddressState: faker.Address.ZipCode().ClampLength(IAddress.Constraints.StateMaxLength + 1),
+                    DefaultAdvertisementPickupAddressZipCode: faker.Address.City().ClampLength(IAddress.Constraints.ZipCodeMaxLength + 1),
+                    DefaultAdvertisementPickupAddressCity: faker.Address.StreetName().ClampLength(IAddress.Constraints.CityMaxLength + 1),
+                    DefaultAdvertisementPickupAddressStreet: faker.Address.BuildingNumber().ClampLength(IAddress.Constraints.StreetMaxLength + 1),
+                    DefaultAdvertisementPickupAddressBuildingNumber: faker.Address.State().ClampLength(IAddress.Constraints.BuildingNumberMaxLength + 1),
+                    DefaultAdvertisementContactInfoEmail:faker.Person.Email.ClampLength(IContact.Constraints.EmailMaxLength + 1),
+                    DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone.ClampLength(IContact.Constraints.PhoneNumberMaxLength + 1)
                 ));
         
         //Act
@@ -120,7 +145,7 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
         ValidationProblemDetails? validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         validationProblemDetails.Should().NotBeNull();
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
-        validationProblemDetails.Errors.Count.Should().Be(10);
+        validationProblemDetails.Errors.Count.Should().Be(18);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(
             nameof(CreatePerson.CreatePersonRequest.FirstName),
             nameof(CreatePerson.CreatePersonRequest.LastName),
@@ -131,9 +156,17 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
             nameof(CreatePerson.CreatePersonRequest.AddressZipCode),
             nameof(CreatePerson.CreatePersonRequest.AddressCity),
             nameof(CreatePerson.CreatePersonRequest.AddressStreet),
-            nameof(CreatePerson.CreatePersonRequest.AddressBuildingNumber)
+            nameof(CreatePerson.CreatePersonRequest.AddressBuildingNumber),
+            nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressCountry),
+            nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressState),
+            nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressZipCode),
+            nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressCity),
+            nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressStreet),
+            nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressBuildingNumber),
+            nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoEmail),
+            nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoPhoneNumber)
         );
-        validationProblemDetails.Errors.Values.Count.Should().Be(10);
+        validationProblemDetails.Errors.Values.Count.Should().Be(18);
         
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.FirstName)][0]
             .Should()
@@ -145,35 +178,68 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
 
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.PhoneNumber)][0]
             .Should()
-            .StartWith($"The length of 'Phone Number' must be {Person.Constraints.PhoneNumberMaxLength} characters or fewer. You entered");
+            .StartWith($"The length of 'Phone Number' must be {IContact.Constraints.PhoneNumberMaxLength} characters or fewer. You entered");
 
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.Email)][0]
             .Should()
-            .StartWith($"The length of 'Email' must be {Person.Constraints.EmailMaxLength} characters or fewer. You entered");
+            .StartWith($"The length of 'Email' must be {IContact.Constraints.EmailMaxLength} characters or fewer. You entered");
+        
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoPhoneNumber)][0]
+            .Should()
+            .StartWith($"The length of 'Default Advertisement Contact Info Phone Number' must be {IContact.Constraints.PhoneNumberMaxLength} characters or fewer. You entered");
+
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoEmail)][0]
+            .Should()
+            .StartWith($"The length of 'Default Advertisement Contact Info Email' must be {IContact.Constraints.EmailMaxLength} characters or fewer. You entered");
         
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.AddressCountry)][0]
             .Should()
-            .StartWith($"The length of 'Address Country' must be {Address.Constraints.CountryMaxLength} characters or fewer. You entered");
+            .StartWith($"The length of 'Address Country' must be {IAddress.Constraints.CountryMaxLength} characters or fewer. You entered");
         
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.AddressState)][0]
             .Should()
-            .StartWith($"The length of 'Address State' must be {Address.Constraints.StateMaxLength} characters or fewer. You entered");
+            .StartWith($"The length of 'Address State' must be {IAddress.Constraints.StateMaxLength} characters or fewer. You entered");
 
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.AddressZipCode)][0]
             .Should()
-            .StartWith($"The length of 'Address Zip Code' must be {Address.Constraints.ZipCodeMaxLength} characters or fewer. You entered");
+            .StartWith($"The length of 'Address Zip Code' must be {IAddress.Constraints.ZipCodeMaxLength} characters or fewer. You entered");
 
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.AddressCity)][0]
             .Should()
-            .StartWith($"The length of 'Address City' must be {Address.Constraints.CityMaxLength} characters or fewer. You entered");
+            .StartWith($"The length of 'Address City' must be {IAddress.Constraints.CityMaxLength} characters or fewer. You entered");
 
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.AddressStreet)][0]
             .Should()
-            .StartWith($"The length of 'Address Street' must be {Address.Constraints.StreetMaxLength} characters or fewer. You entered");
+            .StartWith($"The length of 'Address Street' must be {IAddress.Constraints.StreetMaxLength} characters or fewer. You entered");
 
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.AddressBuildingNumber)][0]
             .Should()
-            .StartWith($"The length of 'Address Building Number' must be {Address.Constraints.BuildingNumberMaxLength} characters or fewer. You entered");
+            .StartWith($"The length of 'Address Building Number' must be {IAddress.Constraints.BuildingNumberMaxLength} characters or fewer. You entered");
+        
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressCountry)][0]
+            .Should()
+            .StartWith($"The length of 'Default Advertisement Pickup Address Country' must be {IAddress.Constraints.CountryMaxLength} characters or fewer. You entered");
+        
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressState)][0]
+            .Should()
+            .StartWith($"The length of 'Default Advertisement Pickup Address State' must be {IAddress.Constraints.StateMaxLength} characters or fewer. You entered");
+
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressZipCode)][0]
+            .Should()
+            .StartWith($"The length of 'Default Advertisement Pickup Address Zip Code' must be {IAddress.Constraints.ZipCodeMaxLength} characters or fewer. You entered");
+
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressCity)][0]
+            .Should()
+            .StartWith($"The length of 'Default Advertisement Pickup Address City' must be {IAddress.Constraints.CityMaxLength} characters or fewer. You entered");
+
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressStreet)][0]
+            .Should()
+            .StartWith($"The length of 'Default Advertisement Pickup Address Street' must be {IAddress.Constraints.StreetMaxLength} characters or fewer. You entered");
+
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressBuildingNumber)][0]
+            .Should()
+            .StartWith($"The length of 'Default Advertisement Pickup Address Building Number' must be {IAddress.Constraints.BuildingNumberMaxLength} characters or fewer. You entered");
+
     }
     
     [Fact]
@@ -191,7 +257,15 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
             AddressCity: "",
             AddressStreet: "",
             AddressBuildingNumber: "",
-            AddressState: ""
+            AddressState: "",
+            DefaultAdvertisementPickupAddressCountry: "", 
+            DefaultAdvertisementPickupAddressState: "", 
+            DefaultAdvertisementPickupAddressZipCode: "", 
+            DefaultAdvertisementPickupAddressCity: "", 
+            DefaultAdvertisementPickupAddressStreet: "", 
+            DefaultAdvertisementPickupAddressBuildingNumber: "", 
+            DefaultAdvertisementContactInfoEmail: "",
+            DefaultAdvertisementContactInfoPhoneNumber: "" 
         );
         
         //Act
@@ -202,20 +276,25 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
         ValidationProblemDetails? validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         validationProblemDetails.Should().NotBeNull();
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
-        validationProblemDetails.Errors.Count.Should().Be(10);
+        validationProblemDetails.Errors.Count.Should().Be(15);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(
             nameof(CreatePerson.CreatePersonRequest.FirstName),
             nameof(CreatePerson.CreatePersonRequest.LastName),
             nameof(CreatePerson.CreatePersonRequest.Email),
             nameof(CreatePerson.CreatePersonRequest.PhoneNumber),
+            nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoEmail),
+            nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoPhoneNumber),
             nameof(CreatePerson.CreatePersonRequest.UserIdentityId),
             nameof(CreatePerson.CreatePersonRequest.AddressCountry),
             nameof(CreatePerson.CreatePersonRequest.AddressZipCode),
             nameof(CreatePerson.CreatePersonRequest.AddressCity),
             nameof(CreatePerson.CreatePersonRequest.AddressStreet),
-            nameof(CreatePerson.CreatePersonRequest.AddressBuildingNumber)
+            nameof(CreatePerson.CreatePersonRequest.AddressBuildingNumber),
+            nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressCountry),
+            nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressZipCode),
+            nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressCity)
         );
-        validationProblemDetails.Errors.Values.Count.Should().Be(10);
+        validationProblemDetails.Errors.Values.Count.Should().Be(15);
         
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.FirstName)][0]
             .Should()
@@ -225,13 +304,21 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
             .Should()
             .Be("'Last Name' must not be empty.");
         
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.Email)][0]
+            .Should()
+            .Be("'Email' must not be empty.");
+        
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.PhoneNumber)][0]
             .Should()
             .Be("'Phone Number' must not be empty.");
         
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.Email)][0]
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoEmail)][0]
             .Should()
-            .Be("'Email' must not be empty.");
+            .Be("'Default Advertisement Contact Info Email' must not be empty.");
+        
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoPhoneNumber)][0]
+            .Should()
+            .Be("'Default Advertisement Contact Info Phone Number' must not be empty.");
         
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.UserIdentityId)][0]
             .Should()
@@ -256,6 +343,18 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.AddressBuildingNumber)][0]
             .Should()
             .Be("'Address Building Number' must not be empty.");
+        
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressCountry)][0]
+            .Should()
+            .Be("'Default Advertisement Pickup Address Country' must not be empty.");
+        
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressZipCode)][0]
+            .Should()
+            .Be("'Default Advertisement Pickup Address Zip Code' must not be empty.");
+        
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressCity)][0]
+            .Should()
+            .Be("'Default Advertisement Pickup Address City' must not be empty.");
     }
     
     [Theory]
@@ -276,7 +375,15 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
                     AddressCity: faker.Address.City(),
                     AddressStreet: faker.Address.StreetName(),
                     AddressBuildingNumber: faker.Address.BuildingNumber(),
-                    AddressState: faker.Address.State()
+                    AddressState: faker.Address.State(),
+                    DefaultAdvertisementPickupAddressCountry: faker.Address.Country(),
+                    DefaultAdvertisementPickupAddressState: faker.Address.State(),
+                    DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
+                    DefaultAdvertisementPickupAddressCity: faker.Address.City(),
+                    DefaultAdvertisementPickupAddressStreet: faker.Address.StreetName(),
+                    DefaultAdvertisementPickupAddressBuildingNumber: faker.Address.BuildingNumber(),
+                    DefaultAdvertisementContactInfoEmail: faker.Person.Email,
+                    DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 ));
         
         //Act
