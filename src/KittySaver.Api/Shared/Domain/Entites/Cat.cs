@@ -11,7 +11,7 @@ public sealed class Cat : AuditableEntity
 {
     public static Cat Create(
         ICatPriorityCalculator calculator,
-        Guid personId,
+        Person person,
         string name,
         MedicalHelpUrgency medicalHelpUrgency,
         AgeCategory ageCategory,
@@ -22,7 +22,7 @@ public sealed class Cat : AuditableEntity
         string? additionalRequirements = null)
     {
         Cat cat = new(
-            personId: personId,
+            person: person,
             name: name,
             medicalHelpUrgency: medicalHelpUrgency,
             ageCategory: ageCategory,
@@ -32,6 +32,7 @@ public sealed class Cat : AuditableEntity
             isInNeedOfSeeingVet: isInNeedOfSeeingVet,
             additionalRequirements: additionalRequirements);
         cat.PriorityScore = cat.CalculatePriorityScore(calculator);
+        person.AddCat(cat);
         return cat;
     }
 
@@ -40,11 +41,12 @@ public sealed class Cat : AuditableEntity
     /// </remarks>
     private Cat()
     {
+        Person = null!;
     }
 
     [SetsRequiredMembers]
     private Cat(
-        Guid personId,
+        Person person,
         string name,
         MedicalHelpUrgency medicalHelpUrgency,
         AgeCategory ageCategory,
@@ -54,7 +56,8 @@ public sealed class Cat : AuditableEntity
         bool isInNeedOfSeeingVet,
         string? additionalRequirements)
     {
-        PersonId = personId;
+        PersonId = person.Id;
+        Person = person;
         Name = name;
         MedicalHelpUrgency = medicalHelpUrgency;
         AgeCategory = ageCategory;
@@ -123,7 +126,7 @@ public sealed class Cat : AuditableEntity
         }
     }
 
-    public Person Person { get; private set; } = null!;
+    public Person Person { get; private init; }
 
     public Guid? AdvertisementId
     {
@@ -141,6 +144,12 @@ public sealed class Cat : AuditableEntity
 
     public Advertisement? Advertisement { get; private set; }
 
+    public void AssignAdvertisement(Advertisement advertisement)
+    {
+        AdvertisementId = advertisement.Id;
+        Advertisement = advertisement;
+    }
+    
     public double PriorityScore { get; private set; }
 
     private double CalculatePriorityScore(ICatPriorityCalculator calculator)
