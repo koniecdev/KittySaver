@@ -9,7 +9,7 @@ namespace KittySaver.Api.Shared.Domain.Entites;
 
 public sealed class Advertisement : AuditableEntity
 {
-    public Advertisement Create(
+    public static Advertisement Create(
         DateTimeOffset currentDate,
         Person person,
         IEnumerable<Cat> cats,
@@ -17,14 +17,15 @@ public sealed class Advertisement : AuditableEntity
         ContactInfo contactInfo,
         string? description = null)
     {
-        List<Cat> catsToAssign = SetCats(person, cats);
+        List<Cat> catsToAssign = cats.ToList();
+        ValidateCats(person, catsToAssign);
 
         DateTimeOffset expiresOn = currentDate.AddDays(30);
 
         double catsHighestPriorityScore = catsToAssign.Max(cat => cat.PriorityScore);
 
         Advertisement advertisement = new(
-            personId: person.Id,
+            person: person,
             cats: catsToAssign,
             pickupAddress: pickupAddress,
             contactInfo: contactInfo,
@@ -32,7 +33,41 @@ public sealed class Advertisement : AuditableEntity
             expiresOn: expiresOn,
             priorityScore: catsHighestPriorityScore);
 
+        foreach (Cat cat in advertisement.Cats)
+        {
+            cat.AssignAdvertisement(advertisement);
+        }
+        
+        person.AddAdvertisement(advertisement);
+
         return advertisement;
+        
+        static void ValidateCats(Person person, IEnumerable<Cat> cats)
+        {
+            List<Cat> catsToValidate = cats.ToList();
+            if (catsToValidate.Count == 0)
+            {
+                throw new ArgumentException("Advertisement cats list must not be empty.", nameof(cats));
+            }
+
+            if (!catsToValidate.All(cat => person.Cats.Contains(cat)))
+            {
+                throw new ArgumentException("All provided cats for advertisement must be owned by single person.",
+                    nameof(cats));
+            }
+
+            if (!catsToValidate.Any(cat => cat.AdvertisementId is not null || cat.Advertisement is not null))
+            {
+                return;
+            }
+
+            List<Cat> catsThatAreAlreadyAssigned = catsToValidate
+                .Where(cat => cat.AdvertisementId is not null && cat.Advertisement is not null)
+                .ToList();
+
+            throw new InvalidOperationException(
+                $"Cats: {string.Join(",", catsThatAreAlreadyAssigned.Select(x => x.Id))} are already assigned to another advertisement");
+        }
     }
 
     /// <remarks>
@@ -40,11 +75,12 @@ public sealed class Advertisement : AuditableEntity
     /// </remarks>
     private Advertisement()
     {
+        Person = null!;
     }
 
     [SetsRequiredMembers]
     private Advertisement(
-        Guid personId,
+        Person person,
         List<Cat> cats,
         PickupAddress pickupAddress,
         ContactInfo contactInfo,
@@ -53,11 +89,13 @@ public sealed class Advertisement : AuditableEntity
         double priorityScore)
     {
         _cats = cats;
-        PersonId = personId;
+        PersonId = person.Id;
+        Person = person;
         PickupAddress = pickupAddress;
         ContactInfo = contactInfo;
         Description = description;
         ExpiresOn = expiresOn;
+        PriorityScore = priorityScore;
     }
 
     private readonly Guid _personId;
@@ -88,37 +126,9 @@ public sealed class Advertisement : AuditableEntity
         }
     }
 
-    public Person Person { get; private set; } = null!;
+    public Person Person { get; private init; }
 
     public IReadOnlyList<Cat> Cats => _cats.ToList();
-
-    private static List<Cat> SetCats(Person person, IEnumerable<Cat> cats)
-    {
-        List<Cat> catsToAssign = cats.ToList();
-        if (catsToAssign.Count == 0)
-        {
-            throw new ArgumentException("Advertisement cats list must not be empty.", nameof(cats));
-        }
-
-        if (!catsToAssign.All(cat => person.Cats.Contains(cat)))
-        {
-            throw new ArgumentException("All provided cats for advertisement must be owned by single person.",
-                nameof(cats));
-        }
-
-        if (!catsToAssign.Any(cat => cat.AdvertisementId is not null))
-        {
-            return catsToAssign;
-        }
-
-        List<Cat> catsThatAreAlreadyAssigned = catsToAssign
-            .Where(cat => cat.AdvertisementId is not null)
-            .ToList();
-
-        throw new ArgumentException(
-            $"Cats: {string.Join(",", catsThatAreAlreadyAssigned.Select(x => x.Id))} are already assigned to another advertisement",
-            nameof(cats));
-    }
 
     public required PickupAddress PickupAddress { get; set; }
 
