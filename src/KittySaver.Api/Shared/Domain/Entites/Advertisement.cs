@@ -52,7 +52,7 @@ public sealed class Advertisement : AuditableEntity
 
             if (!catsToValidate.All(cat => person.Cats.Contains(cat)))
             {
-                throw new ArgumentException("All provided cats for advertisement must be owned by single person.",
+                throw new ArgumentException("One or more provided cats do not belong to provided person.",
                     nameof(cats));
             }
 
@@ -173,7 +173,34 @@ public sealed class Advertisement : AuditableEntity
         ExpiresOn = currentDate.AddDays(30);
     }
 
-    public void ReCalculatePriorityScore()
+    public void AddCat(Cat cat)
+    {
+        if (PersonId != cat.PersonId)
+        {
+            throw new InvalidOperationException("Provided cat that do not belong to creator of advertisement.");
+        }
+
+        cat.AssignAdvertisement(this);
+        ReCalculatePriorityScore();
+    }
+
+    public void RemoveCat(Cat cat)
+    {
+        if (PersonId != cat.PersonId)
+        {
+            throw new InvalidOperationException("Provided cat that do not belong to creator of advertisement.");
+        }
+
+        if (cat.AdvertisementId != Id)
+        {
+            throw new InvalidOperationException("Provided cat have none, or complety different advertisement assigned.");
+        }
+        
+        cat.UnassignAdvertisement();
+        ReCalculatePriorityScore();
+    }
+    
+    private void ReCalculatePriorityScore()
     {
         double catsMaximumPriorityScore = _cats.Max(x => x.PriorityScore);
         PriorityScore = catsMaximumPriorityScore;
