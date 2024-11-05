@@ -146,8 +146,18 @@ public sealed class Cat : AuditableEntity
 
     public void AssignAdvertisement(Advertisement advertisement)
     {
+        if (AdvertisementId is not null || Advertisement is not null)
+        {
+            throw new InvalidOperationException("You can not assign advertisement to cat, that is already assigned to some other advertisement.");
+        }
         AdvertisementId = advertisement.Id;
         Advertisement = advertisement;
+    }
+    
+    public void UnassignAdvertisement()
+    {
+        AdvertisementId = null;
+        Advertisement = null;
     }
     
     public double PriorityScore { get; private set; }
