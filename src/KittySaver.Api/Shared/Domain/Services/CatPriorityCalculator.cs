@@ -25,7 +25,8 @@ public class DefaultCatPriorityCalculator : ICatPriorityCalculator
             healthStatusPoints * healthWeight
             + medicalHelpUrgencyPoints * medicalHelpUrgencyWeight
             + behaviourPoints * behaviorWeight
-            + ageCategoryPoints * ageWeight;
+            + ageCategoryPoints * ageWeight
+            + 0.1;
         
         return priority;
     }

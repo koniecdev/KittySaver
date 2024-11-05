@@ -69,7 +69,7 @@ public sealed partial class Person : AuditableEntity, IContact
     private readonly List<Cat> _cats = [];
     private readonly List<Advertisement> _advertisements = [];
 
-    public Role CurrentRole { get; private set; } = Role.Regular;
+    public Role CurrentRole { get; private init; } = Role.Regular;
 
     public required Guid UserIdentityId
     {
@@ -169,14 +169,48 @@ public sealed partial class Person : AuditableEntity, IContact
 
     public void AddCat(Cat cat)
     {
+        if (_cats.Count > 0 && _cats.Any(c => c.Id == cat.Id))
+        {
+            return;
+        }
         _cats.Add(cat);
     }
 
     public void RemoveCat(Cat cat)
     {
-        _cats.Remove(cat);
+        switch (_cats.Count)
+        {
+            case 0:
+            case > 0 when _cats.All(c => c.Id != cat.Id):
+                return;
+            default:
+                _cats.Remove(cat);
+                break;
+        }
     }
 
+    public void AddAdvertisement(Advertisement advertisement)
+    {
+        if (_advertisements.Count > 0 && _advertisements.Any(ad => ad.Id == advertisement.Id))
+        {
+            return;
+        }
+        _advertisements.Add(advertisement);
+    }
+
+    public void RemoveAdvertisement(Advertisement advertisement)
+    {
+        switch (_advertisements.Count)
+        {
+            case 0:
+            case > 0 when _advertisements.All(ad => ad.Id != advertisement.Id):
+                return;
+            default:
+                _advertisements.Remove(advertisement);
+                break;
+        }
+    }
+    
     public static class Constraints
     {
         public const int FirstNameMaxLength = 50;
@@ -186,7 +220,6 @@ public sealed partial class Person : AuditableEntity, IContact
     public enum Role
     {
         Regular,
-        Shelter,
         Admin
     }
 

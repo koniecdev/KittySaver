@@ -1,4 +1,5 @@
 using Bogus;
+using Bogus.Extensions;
 using FluentAssertions;
 using KittySaver.Api.Shared.Domain.Common.Interfaces;
 using KittySaver.Api.Shared.Domain.Entites;
@@ -283,6 +284,27 @@ public class PersonTests
         //Assert
         creation.Should().Throw<ArgumentException>();
     }
+    
+    [Fact]
+    public void EmailSet_ShouldThrowArgumentOutOfRangeException_WhenTooLongEmailIsProvided()
+    {
+        //Act
+        Action creation = () => new Faker<Person>()
+            .CustomInstantiator(faker =>
+                Person.Create(
+                    userIdentityId: _userIdentityId,
+                    firstName: DefaultProperFirstName,
+                    lastName: DefaultProperLastName,
+                    email: faker.Person.Email.ClampLength(IContact.Constraints.EmailMaxLength + 1),
+                    phoneNumber: DefaultProperPhone,
+                    address: Address,
+                    defaultAdvertisementPickupAddress: PickupAddress,
+                    defaultAdvertisementContactInfo: ContactInfo
+                )).Generate();
+
+        //Assert
+        creation.Should().Throw<ArgumentOutOfRangeException>();
+    }
 
     [Theory]
     [ClassData(typeof(InvalidEmailData))]
@@ -352,18 +374,6 @@ public class PersonTests
     public void AddCat_ShouldAddCatToList_WhenValidCatIsProvided()
     {
         //Arrange
-        Cat cat = new Faker<Cat>()
-            .CustomInstantiator( faker =>
-                Cat.Create(
-                    calculator: Substitute.For<ICatPriorityCalculator>(),
-                    personId: _userIdentityId,
-                    name: faker.Person.FirstName,
-                    medicalHelpUrgency: MedicalHelpUrgency.NoNeed,
-                    ageCategory: AgeCategory.Baby,
-                    behavior: Behavior.Friendly, 
-                    healthStatus: HealthStatus.Good
-                )).Generate();
-
         Person sut = Person.Create(
             userIdentityId: _userIdentityId,
             firstName: DefaultProperFirstName,
@@ -374,10 +384,20 @@ public class PersonTests
             defaultAdvertisementPickupAddress: PickupAddress,
             defaultAdvertisementContactInfo: ContactInfo
         );
-
+        
         //Act
-        sut.AddCat(cat);
-
+        Cat cat = new Faker<Cat>()
+            .CustomInstantiator( faker =>
+                Cat.Create(
+                    calculator: Substitute.For<ICatPriorityCalculator>(),
+                    person: sut,
+                    name: faker.Person.FirstName,
+                    medicalHelpUrgency: MedicalHelpUrgency.NoNeed,
+                    ageCategory: AgeCategory.Baby,
+                    behavior: Behavior.Friendly, 
+                    healthStatus: HealthStatus.Good
+                )).Generate();
+        
         //Assert
         sut.Cats.Should().Contain(cat);
     }
@@ -386,18 +406,6 @@ public class PersonTests
     public void RemoveCat_ShouldRemoveCatFromList_WhenValidCatIsProvided()
     {
         //Arrange
-        Cat cat = new Faker<Cat>()
-            .CustomInstantiator( faker =>
-                Cat.Create(
-                    calculator: Substitute.For<ICatPriorityCalculator>(),
-                    personId: _userIdentityId,
-                    name: faker.Person.FirstName,
-                    medicalHelpUrgency: MedicalHelpUrgency.NoNeed,
-                    ageCategory: AgeCategory.Baby,
-                    behavior: Behavior.Friendly, 
-                    healthStatus: HealthStatus.Good
-                )).Generate();
-        
         Person sut = Person.Create(
             userIdentityId: _userIdentityId,
             firstName: DefaultProperFirstName,
@@ -408,7 +416,17 @@ public class PersonTests
             defaultAdvertisementPickupAddress: PickupAddress,
             defaultAdvertisementContactInfo: ContactInfo
         );
-        sut.AddCat(cat);
+        Cat cat = new Faker<Cat>()
+            .CustomInstantiator( faker =>
+                Cat.Create(
+                    calculator: Substitute.For<ICatPriorityCalculator>(),
+                    person: sut,
+                    name: faker.Person.FirstName,
+                    medicalHelpUrgency: MedicalHelpUrgency.NoNeed,
+                    ageCategory: AgeCategory.Baby,
+                    behavior: Behavior.Friendly, 
+                    healthStatus: HealthStatus.Good
+                )).Generate();
 
         //Act
         sut.RemoveCat(cat);
@@ -438,5 +456,238 @@ public class PersonTests
         //Assert
         creation.Should().Throw<ArgumentException>()
             .WithMessage("Provided empty guid. (Parameter 'UserIdentityId')");
+    }
+    
+    [Fact]
+    public void AddAdvertisement_ShouldAddAdvertisementToList_WhenValidAdvertisementIsProvided()
+    {
+        //Arrange
+        Person sut = Person.Create(
+            _userIdentityId,
+            DefaultProperFirstName,
+            DefaultProperLastName,
+            DefaultProperEmail,
+            DefaultProperPhone,
+            Address,
+            PickupAddress,
+            ContactInfo
+        );
+        
+        Cat cat = new Faker<Cat>()
+            .CustomInstantiator( faker =>
+                Cat.Create(
+                    Substitute.For<ICatPriorityCalculator>(),
+                    sut,
+                    faker.Person.FirstName,
+                    MedicalHelpUrgency.NoNeed,
+                    AgeCategory.Baby,
+                    Behavior.Friendly, 
+                    HealthStatus.Good
+                )).Generate();
+        
+        //Act
+        Advertisement advertisement = Advertisement.Create(
+            currentDate: new DateTimeOffset(2024, 10, 31, 11, 0, 0, TimeSpan.Zero),
+            person: sut, 
+            cats: new List<Cat> { cat },
+            pickupAddress: PickupAddress,
+            contactInfo: ContactInfo);
+        
+        //Assert
+        sut.Advertisements.Should().Contain(advertisement);
+        advertisement.Person.Should().Be(sut);
+    }
+    
+    [Fact]
+    public void RemoveAdvertisement_ShouldRemoveAdvertisementFromList_WhenValidAdvertisementIsProvided()
+    {
+        //Arrange
+        Person sut = Person.Create(
+            _userIdentityId,
+            DefaultProperFirstName,
+            DefaultProperLastName,
+            DefaultProperEmail,
+            DefaultProperPhone,
+            Address,
+            PickupAddress,
+            ContactInfo
+        );
+        
+        Cat cat = new Faker<Cat>()
+            .CustomInstantiator( faker =>
+                Cat.Create(
+                    Substitute.For<ICatPriorityCalculator>(),
+                    sut,
+                    faker.Person.FirstName,
+                    MedicalHelpUrgency.NoNeed,
+                    AgeCategory.Baby,
+                    Behavior.Friendly, 
+                    HealthStatus.Good
+                )).Generate();
+        
+        Advertisement advertisement = Advertisement.Create(
+            currentDate: new DateTimeOffset(2024, 10, 31, 11, 0, 0, TimeSpan.Zero),
+            person: sut, 
+            cats: new List<Cat> { cat },
+            pickupAddress: PickupAddress,
+            contactInfo: ContactInfo);
+
+        //Act
+        sut.RemoveAdvertisement(advertisement);
+
+        //Assert
+        sut.Advertisements.Should().NotContain(advertisement);
+    }
+
+    [Fact]
+    public void AddCat_ShouldNotAddUpDuplicatedCatToList_WhenValidCatIsProvided()
+    {
+        //Arrange
+        Person sut = Person.Create(
+            _userIdentityId,
+            DefaultProperFirstName,
+            DefaultProperLastName,
+            DefaultProperEmail,
+            DefaultProperPhone,
+            Address,
+            PickupAddress,
+            ContactInfo
+        );
+        
+        Cat cat = new Faker<Cat>()
+            .CustomInstantiator( faker =>
+                Cat.Create(
+                    Substitute.For<ICatPriorityCalculator>(),
+                    sut,
+                    faker.Person.FirstName,
+                    MedicalHelpUrgency.NoNeed,
+                    AgeCategory.Baby,
+                    Behavior.Friendly, 
+                    HealthStatus.Good
+                )).Generate();
+        
+        //Act
+        sut.AddCat(cat);
+        
+        //Assert
+        sut.Cats.Count.Should().Be(1);
+    }
+    
+    [Fact]
+    public void AddAdvertisement_ShouldNotAddUpDuplicatedAdvertisementToList_WhenValidAdvertisementIsProvided()
+    {
+        //Arrange
+        Person sut = Person.Create(
+            _userIdentityId,
+            DefaultProperFirstName,
+            DefaultProperLastName,
+            DefaultProperEmail,
+            DefaultProperPhone,
+            Address,
+            PickupAddress,
+            ContactInfo
+        );
+        
+        Cat cat = new Faker<Cat>()
+            .CustomInstantiator( faker =>
+                Cat.Create(
+                    Substitute.For<ICatPriorityCalculator>(),
+                    sut,
+                    faker.Person.FirstName,
+                    MedicalHelpUrgency.NoNeed,
+                    AgeCategory.Baby,
+                    Behavior.Friendly, 
+                    HealthStatus.Good
+                )).Generate();
+        
+        Advertisement advertisement = Advertisement.Create(
+            currentDate: new DateTimeOffset(2024, 10, 31, 11, 0, 0, TimeSpan.Zero),
+            person: sut, 
+            cats: new List<Cat> { cat },
+            pickupAddress: PickupAddress,
+            contactInfo: ContactInfo);
+        
+        //Act
+        sut.AddAdvertisement(advertisement);
+        
+        //Assert
+        sut.Advertisements.Count.Should().Be(1);
+    }
+    
+    [Fact]
+    public void RemoveCat_ShouldNotDoAnythingUnexpectedToList_WhenValidCatIsProvided()
+    {
+        //Arrange
+        Person sut = Person.Create(
+            _userIdentityId,
+            DefaultProperFirstName,
+            DefaultProperLastName,
+            DefaultProperEmail,
+            DefaultProperPhone,
+            Address,
+            PickupAddress,
+            ContactInfo
+        );
+        
+        Cat cat = new Faker<Cat>()
+            .CustomInstantiator( faker =>
+                Cat.Create(
+                    Substitute.For<ICatPriorityCalculator>(),
+                    sut,
+                    faker.Person.FirstName,
+                    MedicalHelpUrgency.NoNeed,
+                    AgeCategory.Baby,
+                    Behavior.Friendly, 
+                    HealthStatus.Good
+                )).Generate();
+        sut.RemoveCat(cat);
+        
+        //Act
+        sut.RemoveCat(cat);
+        
+        //Assert
+        sut.Cats.Count.Should().Be(0);
+    }
+    
+    [Fact]
+    public void RemoveAdvertisement_ShouldNotAddUpDuplicatedAdvertisementToList_WhenValidAdvertisementIsProvided()
+    {
+        //Arrange
+        Person sut = Person.Create(
+            _userIdentityId,
+            DefaultProperFirstName,
+            DefaultProperLastName,
+            DefaultProperEmail,
+            DefaultProperPhone,
+            Address,
+            PickupAddress,
+            ContactInfo
+        );
+        
+        Cat cat = new Faker<Cat>()
+            .CustomInstantiator( faker =>
+                Cat.Create(
+                    Substitute.For<ICatPriorityCalculator>(),
+                    sut,
+                    faker.Person.FirstName,
+                    MedicalHelpUrgency.NoNeed,
+                    AgeCategory.Baby,
+                    Behavior.Friendly, 
+                    HealthStatus.Good
+                )).Generate();
+        
+        Advertisement advertisement = Advertisement.Create(
+            currentDate: new DateTimeOffset(2024, 10, 31, 11, 0, 0, TimeSpan.Zero),
+            person: sut, 
+            cats: new List<Cat> { cat },
+            pickupAddress: PickupAddress,
+            contactInfo: ContactInfo);
+        sut.RemoveAdvertisement(advertisement);
+        
+        //Act
+        sut.RemoveAdvertisement(advertisement);
+
+        //Assert
+        sut.Advertisements.Count.Should().Be(0);
     }
 }

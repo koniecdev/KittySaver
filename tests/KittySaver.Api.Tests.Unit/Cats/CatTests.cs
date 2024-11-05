@@ -1,3 +1,4 @@
+using System.Reflection;
 using Bogus;
 using FluentAssertions;
 using KittySaver.Api.Shared.Domain.Entites;
@@ -74,7 +75,7 @@ public class CatTests
         //Act
         Cat cat = Cat.Create(
             calculator: calculator,
-            personId: Person.Id,
+            person: Person,
             name: name,
             medicalHelpUrgency: medicalHelpUrgency,
             ageCategory: ageCategory,
@@ -84,13 +85,11 @@ public class CatTests
             isInNeedOfSeeingVet: isInNeedOfSeeingVet,
             additionalRequirements: additionalRequirements
         );
-        typeof(Cat).GetProperty(nameof(Cat.Person))?.SetValue(cat, Person, null);
 
         //Assert
         cat.Should().NotBeNull();
         cat.Id.Should().NotBeEmpty();
         cat.Name.Should().Be(name);
-        cat.PersonId.Should().Be(Person.Id);
         cat.MedicalHelpUrgency.Should().Be(medicalHelpUrgency);
         cat.AgeCategory.Should().Be(ageCategory);
         cat.Behavior.Should().Be(behavior);
@@ -99,7 +98,11 @@ public class CatTests
         cat.IsCastrated.Should().Be(isCastrated);
         cat.IsInNeedOfSeeingVet.Should().Be(isInNeedOfSeeingVet);
         cat.AdditionalRequirements.Should().Be(additionalRequirements);
+        cat.IsAdopted.Should().BeFalse();
+        
+        cat.PersonId.Should().Be(Person.Id);
         cat.Person.Should().BeEquivalentTo(Person);
+        cat.Person.Cats.Should().Contain(cat);
     }
     
     [Fact]
@@ -111,16 +114,15 @@ public class CatTests
         //Act
         Action createCat = () =>
         {
-            Cat cat = Cat.Create(
-                Substitute.For<ICatPriorityCalculator>(),
-                Person.Id,
-                longName,
-                MedicalHelpUrgency.NoNeed,
-                AgeCategory.Adult,
-                Behavior.Unfriendly,
-                HealthStatus.Poor
+            Cat.Create(
+                calculator: Substitute.For<ICatPriorityCalculator>(),
+                person: Person,
+                name: longName,
+                medicalHelpUrgency: MedicalHelpUrgency.NoNeed,
+                ageCategory: AgeCategory.Adult,
+                behavior: Behavior.Unfriendly,
+                healthStatus: HealthStatus.Poor
             );
-            typeof(Cat).GetProperty(nameof(Cat.Person))?.SetValue(cat, Person, null);
         };
 
         //Assert
@@ -135,16 +137,15 @@ public class CatTests
         //Act
         Action createCat = () =>
         {
-            Cat cat = Cat.Create(
-                Substitute.For<ICatPriorityCalculator>(),
-                Person.Id,
-                invalidName,
-                MedicalHelpUrgency.HaveToSeeVet,
-                AgeCategory.Senior,
-                Behavior.Friendly,
-                HealthStatus.Critical
+            Cat.Create(
+                calculator: Substitute.For<ICatPriorityCalculator>(),
+                person: Person,
+                name: invalidName,
+                medicalHelpUrgency: MedicalHelpUrgency.HaveToSeeVet,
+                ageCategory: AgeCategory.Senior,
+                behavior: Behavior.Friendly,
+                healthStatus: HealthStatus.Critical
             );
-            typeof(Cat).GetProperty(nameof(Cat.Person))?.SetValue(cat, Person, null);
         };
 
         //Assert
@@ -160,21 +161,55 @@ public class CatTests
         //Act
         Action createCat = () =>
         {
-            Cat cat = Cat.Create(
-                Substitute.For<ICatPriorityCalculator>(),
-                Person.Id,
-                "Whiskers",
-                MedicalHelpUrgency.HaveToSeeVet,
-                AgeCategory.Senior,
-                Behavior.Friendly,
-                HealthStatus.Critical,
+            Cat.Create(
+                calculator: Substitute.For<ICatPriorityCalculator>(),
+                person: Person,
+                name: "Whiskers",
+                medicalHelpUrgency: MedicalHelpUrgency.HaveToSeeVet,
+                ageCategory: AgeCategory.Senior,
+                behavior: Behavior.Friendly,
+                healthStatus: HealthStatus.Critical,
                 additionalRequirements: longRequirements
             );
-            typeof(Cat).GetProperty(nameof(Cat.Person))?.SetValue(cat, Person, null);
         };
         
         //Assert
         createCat.Should().Throw<ArgumentOutOfRangeException>();
+    }
+
+    [Fact]
+    public void PersonId_ShouldThrowArgumentException_WhenProvidedEmptyValue()
+    {
+        Person person = new Faker<Person>()
+            .CustomInstantiator(faker =>
+                Person.Create(
+                    userIdentityId: Guid.NewGuid(),
+                    firstName: faker.Person.FirstName,
+                    lastName: faker.Person.LastName,
+                    email: faker.Person.Email,
+                    phoneNumber: faker.Person.Phone,
+                    address: Address,
+                    defaultAdvertisementPickupAddress: PickupAddress,
+                    defaultAdvertisementContactInfo: ContactInfo
+                )).Generate();
+        SharedHelper.SetBackingField(person, nameof(Person.Id), Guid.Empty);
+        
+        //Act
+        Action createCat = () =>
+        {
+            Cat.Create(
+                calculator: Substitute.For<ICatPriorityCalculator>(),
+                person: person,
+                name: "Whiskers",
+                medicalHelpUrgency: MedicalHelpUrgency.HaveToSeeVet,
+                ageCategory: AgeCategory.Senior,
+                behavior: Behavior.Friendly,
+                healthStatus: HealthStatus.Critical
+            );
+        };
+        
+        //Assert
+        createCat.Should().Throw<ArgumentException>();
     }
     
     [Fact]
@@ -186,15 +221,14 @@ public class CatTests
         calculator.Calculate(Arg.Any<Cat>()).Returns(score);
     
         Cat cat = Cat.Create(
-            calculator,
-            Person.Id,
-            "Whiskers",
-            MedicalHelpUrgency.HaveToSeeVet,
-            AgeCategory.Senior,
-            Behavior.Friendly,
-            HealthStatus.Critical
+            calculator: calculator,
+            person: Person,
+            name: "Whiskers",
+            medicalHelpUrgency: MedicalHelpUrgency.HaveToSeeVet,
+            ageCategory: AgeCategory.Senior,
+            behavior: Behavior.Friendly,
+            healthStatus: HealthStatus.Critical
         );
-        typeof(Cat).GetProperty(nameof(Cat.Person))?.SetValue(cat, Person, null);
         
         //Act
         cat.ReCalculatePriorityScore(calculator);
@@ -204,71 +238,103 @@ public class CatTests
     }
     
     [Fact]
-    public void Create_ShouldThrowArgumentException_WhenPersonIdIsEmpty()
-    {
-        //Arrange
-        Guid emptyPersonId = Guid.Empty;
-        ICatPriorityCalculator calculator = Substitute.For<ICatPriorityCalculator>();
-        
-        //Act
-        Action createCat = () =>
-        {
-            Cat cat = Cat.Create(
-                calculator: calculator,
-                personId: emptyPersonId,
-                name: "Whiskers",
-                medicalHelpUrgency: MedicalHelpUrgency.HaveToSeeVet,
-                ageCategory: AgeCategory.Senior,
-                behavior: Behavior.Friendly,
-                healthStatus: HealthStatus.Critical
-            );
-            typeof(Cat).GetProperty(nameof(Cat.Person))?.SetValue(cat, Person, null);
-
-        };
-
-        //Assert
-        createCat.Should().Throw<ArgumentException>();
-    }
-    
-    [Fact]
     public void Priority_ShouldReturnExpectedResult_WhenFirstCombinationIsGiven()
     {
         //Act
         Cat catThatDontNeedThatMuchHelp = Cat.Create(
-            new DefaultCatPriorityCalculator(),
-            Person.Id,
-            "Whiskers",
-            MedicalHelpUrgency.NoNeed,
-            AgeCategory.Baby, 
-            Behavior.Friendly,
-            HealthStatus.Good
+            calculator: new DefaultCatPriorityCalculator(),
+            person: Person,
+            name: "Whiskers",
+            medicalHelpUrgency: MedicalHelpUrgency.NoNeed,
+            ageCategory: AgeCategory.Baby, 
+            behavior: Behavior.Friendly,
+            healthStatus: HealthStatus.Good
         );
-        typeof(Cat).GetProperty(nameof(Cat.Person))?.SetValue(catThatDontNeedThatMuchHelp, Person, null);
         
         Cat catThatNeedLittleMoreHelp = Cat.Create(
-            new DefaultCatPriorityCalculator(),
-            Person.Id,
-            "Cutie",
-            MedicalHelpUrgency.NoNeed,
-            AgeCategory.Senior, 
-            Behavior.Friendly,
-            HealthStatus.Good
+            calculator: new DefaultCatPriorityCalculator(),
+            person: Person,
+            name: "Cutie",
+            medicalHelpUrgency: MedicalHelpUrgency.NoNeed,
+            ageCategory: AgeCategory.Senior, 
+            behavior: Behavior.Friendly,
+            healthStatus: HealthStatus.Good
         );
-        typeof(Cat).GetProperty(nameof(Cat.Person))?.SetValue(catThatNeedLittleMoreHelp, Person, null);
         
         Cat catThatNeedMuchHelp = Cat.Create(
-            new DefaultCatPriorityCalculator(),
-            Person.Id,
-            "Kitty",
-            MedicalHelpUrgency.HaveToSeeVet,
-            AgeCategory.Senior, 
-            Behavior.Unfriendly,
-            HealthStatus.Critical
+            calculator: new DefaultCatPriorityCalculator(),
+            person: Person,
+            name: "Kitty",
+            medicalHelpUrgency: MedicalHelpUrgency.HaveToSeeVet,
+            ageCategory: AgeCategory.Senior, 
+            behavior: Behavior.Unfriendly,
+            healthStatus: HealthStatus.Critical
         );
-        typeof(Cat).GetProperty(nameof(Cat.Person))?.SetValue(catThatNeedMuchHelp, Person, null);
 
         //Assert
         catThatNeedLittleMoreHelp.PriorityScore.Should().BeGreaterThan(catThatDontNeedThatMuchHelp.PriorityScore);
         catThatNeedMuchHelp.PriorityScore.Should().BeGreaterThan(catThatNeedLittleMoreHelp.PriorityScore);
+    }
+    
+    [Fact]
+    public void AssignAdvertisement_ShouldThrowArgumentException_WhenThereIsAlreadyAdvertisementAssigned()
+    {
+        //Arrange
+        Person person = new Faker<Person>()
+            .CustomInstantiator(faker =>
+                Person.Create(
+                    userIdentityId: Guid.NewGuid(),
+                    firstName: faker.Person.FirstName,
+                    lastName: faker.Person.LastName,
+                    email: faker.Person.Email,
+                    phoneNumber: faker.Person.Phone,
+                    address: Address,
+                    defaultAdvertisementPickupAddress: PickupAddress,
+                    defaultAdvertisementContactInfo: ContactInfo
+                )).Generate();
+        Cat cat = Cat.Create(
+            calculator: Substitute.For<ICatPriorityCalculator>(),
+            person: person,
+            name: "Whiskers",
+            medicalHelpUrgency: MedicalHelpUrgency.HaveToSeeVet,
+            ageCategory: AgeCategory.Senior,
+            behavior: Behavior.Friendly,
+            healthStatus: HealthStatus.Critical
+        );
+        Advertisement advertisement = Advertisement.Create(
+            currentDate: new DateTimeOffset(2024, 10, 31, 11, 0, 0, TimeSpan.Zero),
+            person: person,
+            cats: [cat],
+            pickupAddress: PickupAddress,
+            contactInfo: ContactInfo,
+            description: "lorem ipsum");
+
+        //Act
+        SharedHelper.SetBackingField(advertisement, nameof(Advertisement.Id), Guid.Empty);
+        Action assignment = () => cat.AssignAdvertisement(advertisement);
+        
+        //Assert
+        assignment.Should().Throw<InvalidOperationException>();
+    }
+
+    [Fact]
+    public void MarkAsAdopted_ShouldSuccess_WhenProvidedValidData()
+    {
+        //Arrange
+        Cat cat = Cat.Create(
+            calculator: Substitute.For<ICatPriorityCalculator>(),
+            person: Person,
+            name: "Whiskers",
+            medicalHelpUrgency: MedicalHelpUrgency.HaveToSeeVet,
+            ageCategory: AgeCategory.Senior,
+            behavior: Behavior.Friendly,
+            healthStatus: HealthStatus.Critical
+        );
+        
+        //Act
+        cat.MarkAsAdopted();
+        
+        //Assert
+        cat.IsAdopted.Should().BeTrue();
     }
 }
