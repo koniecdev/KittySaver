@@ -80,7 +80,7 @@ public class CreateCat : IEndpoint
             
             Cat entity = Cat.Create(
                 calculator: calculator,
-                personId: request.PersonId,
+                person: root,
                 name: request.Name,
                 medicalHelpUrgency: request.MedicalHelpUrgency,
                 ageCategory: request.AgeCategory,
