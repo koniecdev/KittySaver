@@ -169,7 +169,7 @@ public sealed partial class Person : AuditableEntity, IContact
     {
         if (_cats.Count > 0 && _cats.Any(c => c.Id == cat.Id))
         {
-            return;
+            return; //yikes - exception?
         }
         _cats.Add(cat);
     }
@@ -180,10 +180,47 @@ public sealed partial class Person : AuditableEntity, IContact
         {
             case 0:
             case > 0 when _cats.All(c => c.Id != cat.Id):
-                return;
+                return; //yikes - exception?
             default:
                 _cats.Remove(cat);
                 break;
+        }
+    }
+
+    private void EnsureProvidedCatsBelongsToPerson(IEnumerable<Guid> catsIds)
+    {
+        HashSet<Guid> catIdsFromPersonCats = Cats.Select(cat => cat.Id).ToHashSet();
+        if (!catsIds.All(catId => catIdsFromPersonCats.Contains(catId)))
+        {
+            throw new ArgumentException("One or more provided cats do not belong to provided person.", nameof(catsIds));
+        }
+    }
+    
+    public double GetHighestPriorityScoreFromGivenCats(IEnumerable<Guid> catsIds)
+    {
+        List<Guid> catsIdsList = catsIds.ToList();
+        EnsureProvidedCatsBelongsToPerson(catsIdsList);
+
+        double highestPriorityScore = Cats
+            .Where(cat => catsIdsList.Contains(cat.Id))
+            .Max(cat => cat.PriorityScore);
+        
+        return highestPriorityScore;
+    }
+
+
+    public void AssignGivenCatsToAdvertisement(Guid advertisementId, IEnumerable<Guid> catsIds)
+    {
+        List<Guid> catsIdsList = catsIds.ToList();
+        EnsureProvidedCatsBelongsToPerson(catsIdsList);
+        
+        List<Cat> catsToAssignToAdvertisement = Cats
+            .Where(cat => catsIdsList.Contains(cat.Id))
+            .ToList();
+        
+        foreach (Cat cat in catsToAssignToAdvertisement)
+        {
+            cat.AssignAdvertisement(advertisementId);
         }
     }
     
