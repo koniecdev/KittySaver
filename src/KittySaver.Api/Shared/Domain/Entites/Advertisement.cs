@@ -12,62 +12,30 @@ public sealed class Advertisement : AuditableEntity
     public static Advertisement Create(
         DateTimeOffset currentDate,
         Person person,
-        IEnumerable<Cat> cats,
+        IEnumerable<Guid> catsIds,
         PickupAddress pickupAddress,
         ContactInfo contactInfo,
         string? description = null)
     {
-        List<Cat> catsToAssign = cats.ToList();
-        ValidateCats(person, catsToAssign);
-
-        DateTimeOffset expiresOn = currentDate.AddDays(30);
-
-        double catsHighestPriorityScore = catsToAssign.Max(cat => cat.PriorityScore);
-
+        DateTimeOffset expiresOn = currentDate + ExpiringPeriodInDays;
+        
+        List<Guid> catsIdsToAssignToAdvertisements = catsIds.ToList();
+        if (catsIdsToAssignToAdvertisements.Count == 0)
+        {
+            throw new ArgumentException("Advertisement cats list must not be empty.", nameof(catsIds));
+        }
+        
+        double catsHighestPriorityScore = person.GetHighestPriorityScoreFromGivenCats(catsIdsToAssignToAdvertisements);
+        
         Advertisement advertisement = new(
-            person: person,
-            cats: catsToAssign,
+            personId: person.Id,
             pickupAddress: pickupAddress,
             contactInfo: contactInfo,
             description: description,
             expiresOn: expiresOn,
             priorityScore: catsHighestPriorityScore);
-
-        foreach (Cat cat in advertisement.Cats)
-        {
-            cat.AssignAdvertisement(advertisement);
-        }
-        
-        person.AddAdvertisement(advertisement);
-
+        person.AssignGivenCatsToAdvertisement(advertisement.Id, catsIdsToAssignToAdvertisements);
         return advertisement;
-        
-        static void ValidateCats(Person person, IEnumerable<Cat> cats)
-        {
-            List<Cat> catsToValidate = cats.ToList();
-            if (catsToValidate.Count == 0)
-            {
-                throw new ArgumentException("Advertisement cats list must not be empty.", nameof(cats));
-            }
-
-            if (!catsToValidate.All(cat => person.Cats.Contains(cat)))
-            {
-                throw new ArgumentException("One or more provided cats do not belong to provided person.",
-                    nameof(cats));
-            }
-
-            if (!catsToValidate.Any(cat => cat.AdvertisementId is not null || cat.Advertisement is not null))
-            {
-                return;
-            }
-
-            List<Cat> catsThatAreAlreadyAssigned = catsToValidate
-                .Where(cat => cat.AdvertisementId is not null && cat.Advertisement is not null)
-                .ToList();
-
-            throw new InvalidOperationException(
-                $"Cats: {string.Join(",", catsThatAreAlreadyAssigned.Select(x => x.Id))} are already assigned to another advertisement");
-        }
     }
 
     /// <remarks>
@@ -75,22 +43,18 @@ public sealed class Advertisement : AuditableEntity
     /// </remarks>
     private Advertisement()
     {
-        Person = null!;
     }
 
     [SetsRequiredMembers]
     private Advertisement(
-        Person person,
-        List<Cat> cats,
+        Guid personId,
         PickupAddress pickupAddress,
         ContactInfo contactInfo,
         string? description,
         DateTimeOffset expiresOn,
         double priorityScore)
     {
-        _cats = cats;
-        PersonId = person.Id;
-        Person = person;
+        PersonId = personId;
         PickupAddress = pickupAddress;
         ContactInfo = contactInfo;
         Description = description;
@@ -98,9 +62,9 @@ public sealed class Advertisement : AuditableEntity
         PriorityScore = priorityScore;
     }
 
+    private static readonly TimeSpan ExpiringPeriodInDays = new(days: 30, hours: 0, minutes: 0, seconds: 0);
     private readonly Guid _personId;
-
-    private List<Cat> _cats = [];
+    private double _priorityScore;
 
     public DateTimeOffset? ClosedOn { get; private set; }
 
@@ -108,7 +72,18 @@ public sealed class Advertisement : AuditableEntity
 
     public AdvertisementStatus Status { get; private set; } = AdvertisementStatus.Active;
 
-    public double PriorityScore { get; private set; }
+    public double PriorityScore
+    {
+        get => _priorityScore;
+        private set
+        {
+            if (value == 0)
+            {
+                throw new Exception(); //yikes - specific exception
+            }
+            _priorityScore = value;
+        }
+    }
 
     public string? Description { get; set; }
 
@@ -125,11 +100,7 @@ public sealed class Advertisement : AuditableEntity
             _personId = value;
         }
     }
-
-    public Person Person { get; private init; }
-
-    public IReadOnlyList<Cat> Cats => _cats.ToList();
-
+    
     public required PickupAddress PickupAddress { get; set; }
 
     public required ContactInfo ContactInfo { get; set; }
@@ -141,10 +112,11 @@ public sealed class Advertisement : AuditableEntity
             throw new InvalidOperationException("You can not close advertisement that is not active");
         }
 
-        foreach (Cat cat in _cats)
-        {
-            cat.MarkAsAdopted();
-        }
+        //TODO: Marking cats as adopted should be handled by Domain Event
+        // foreach (Cat cat in _cats)
+        // {
+        //     cat.MarkAsAdopted();
+        // }
 
         ClosedOn = currentDate;
         Status = AdvertisementStatus.Closed;
@@ -170,42 +142,14 @@ public sealed class Advertisement : AuditableEntity
             throw new InvalidOperationException("You can not refresh advertisement that is not active/expired");
         }
 
-        ExpiresOn = currentDate.AddDays(30);
+        ExpiresOn = currentDate + ExpiringPeriodInDays;
     }
 
-    public void AddCat(Cat cat)
+    private void ReCalculatePriorityScore()//this do not belongs here, probably DomainService
     {
-        if (PersonId != cat.PersonId)
-        {
-            throw new InvalidOperationException("Provided cat that do not belong to creator of advertisement.");
-        }
-
-        cat.AssignAdvertisement(this);
-        ReCalculatePriorityScore();
+        // double catsMaximumPriorityScore = _cats.Max(x => x.PriorityScore);
+        // PriorityScore = catsMaximumPriorityScore;
     }
-
-    public void RemoveCat(Cat cat)
-    {
-        if (PersonId != cat.PersonId)
-        {
-            throw new InvalidOperationException("Provided cat that do not belong to creator of advertisement.");
-        }
-
-        if (cat.AdvertisementId != Id)
-        {
-            throw new InvalidOperationException("Provided cat have none, or complety different advertisement assigned.");
-        }
-        
-        cat.UnassignAdvertisement();
-        ReCalculatePriorityScore();
-    }
-    
-    private void ReCalculatePriorityScore()
-    {
-        double catsMaximumPriorityScore = _cats.Max(x => x.PriorityScore);
-        PriorityScore = catsMaximumPriorityScore;
-    }
-
     public static class Constraints
     {
         public const int DescriptionMaxLength = 2000;
@@ -228,6 +172,11 @@ internal sealed class AdvertisementConfiguration : IEntityTypeConfiguration<Adve
         builder.Property(x => x.Id).ValueGeneratedNever();
 
         builder.HasKey(x => x.Id);
+        
+        builder.HasMany<Cat>()
+            .WithOne()
+            .HasForeignKey(cat => cat.AdvertisementId)
+            .IsRequired(false);
 
         builder.Property(x => x.PersonId).IsRequired();
 

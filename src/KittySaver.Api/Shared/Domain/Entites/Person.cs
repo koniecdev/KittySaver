@@ -67,7 +67,6 @@ public sealed partial class Person : AuditableEntity, IContact
     private string _lastName = null!;
     private readonly Guid _userIdentityId;
     private readonly List<Cat> _cats = [];
-    private readonly List<Advertisement> _advertisements = [];
 
     public Role CurrentRole { get; private init; } = Role.Regular;
 
@@ -165,13 +164,12 @@ public sealed partial class Person : AuditableEntity, IContact
     public required ContactInfo DefaultAdvertisementsContactInfo { get; set; }
 
     public IReadOnlyList<Cat> Cats => _cats.ToList();
-    public IReadOnlyList<Advertisement> Advertisements => _advertisements.ToList();
 
     public void AddCat(Cat cat)
     {
         if (_cats.Count > 0 && _cats.Any(c => c.Id == cat.Id))
         {
-            return;
+            return; //yikes - exception?
         }
         _cats.Add(cat);
     }
@@ -182,32 +180,47 @@ public sealed partial class Person : AuditableEntity, IContact
         {
             case 0:
             case > 0 when _cats.All(c => c.Id != cat.Id):
-                return;
+                return; //yikes - exception?
             default:
                 _cats.Remove(cat);
                 break;
         }
     }
 
-    public void AddAdvertisement(Advertisement advertisement)
+    private void EnsureProvidedCatsBelongsToPerson(IEnumerable<Guid> catsIds)
     {
-        if (_advertisements.Count > 0 && _advertisements.Any(ad => ad.Id == advertisement.Id))
+        HashSet<Guid> catIdsFromPersonCats = Cats.Select(cat => cat.Id).ToHashSet();
+        if (!catsIds.All(catId => catIdsFromPersonCats.Contains(catId)))
         {
-            return;
+            throw new ArgumentException("One or more provided cats do not belong to provided person.", nameof(catsIds));
         }
-        _advertisements.Add(advertisement);
+    }
+    
+    public double GetHighestPriorityScoreFromGivenCats(IEnumerable<Guid> catsIds)
+    {
+        List<Guid> catsIdsList = catsIds.ToList();
+        EnsureProvidedCatsBelongsToPerson(catsIdsList);
+
+        double highestPriorityScore = Cats
+            .Where(cat => catsIdsList.Contains(cat.Id))
+            .Max(cat => cat.PriorityScore);
+        
+        return highestPriorityScore;
     }
 
-    public void RemoveAdvertisement(Advertisement advertisement)
+
+    public void AssignGivenCatsToAdvertisement(Guid advertisementId, IEnumerable<Guid> catsIds)
     {
-        switch (_advertisements.Count)
+        List<Guid> catsIdsList = catsIds.ToList();
+        EnsureProvidedCatsBelongsToPerson(catsIdsList);
+        
+        List<Cat> catsToAssignToAdvertisement = Cats
+            .Where(cat => catsIdsList.Contains(cat.Id))
+            .ToList();
+        
+        foreach (Cat cat in catsToAssignToAdvertisement)
         {
-            case 0:
-            case > 0 when _advertisements.All(ad => ad.Id != advertisement.Id):
-                return;
-            default:
-                _advertisements.Remove(advertisement);
-                break;
+            cat.AssignAdvertisement(advertisementId);
         }
     }
     
@@ -233,9 +246,21 @@ internal sealed class PersonConfiguration : IEntityTypeConfiguration<Person>
     {
         builder.ToTable("Persons");
         
-        builder.Property(x => x.Id).ValueGeneratedNever();
+        builder.Property(person => person.Id).ValueGeneratedNever();
         
-        builder.HasKey(x => x.Id);
+        builder.HasKey(person => person.Id);
+
+        builder.HasMany(person => person.Cats)
+            .WithOne()
+            .HasForeignKey(cat => cat.PersonId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .IsRequired();
+        
+        builder.HasMany<Advertisement>()
+            .WithOne()
+            .HasForeignKey(advertisement => advertisement.PersonId)
+            .OnDelete(DeleteBehavior.Cascade) //TODO: Should be refactored to Domain Events
+            .IsRequired();
 
         builder.ComplexProperty(x => x.Address, complexPropertyBuilder =>
         {
