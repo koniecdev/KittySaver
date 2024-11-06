@@ -209,9 +209,21 @@ internal sealed class PersonConfiguration : IEntityTypeConfiguration<Person>
     {
         builder.ToTable("Persons");
         
-        builder.Property(x => x.Id).ValueGeneratedNever();
+        builder.Property(person => person.Id).ValueGeneratedNever();
         
-        builder.HasKey(x => x.Id);
+        builder.HasKey(person => person.Id);
+
+        builder.HasMany(person => person.Cats)
+            .WithOne()
+            .HasForeignKey(cat => cat.PersonId)
+            .OnDelete(DeleteBehavior.Cascade)
+            .IsRequired();
+        
+        builder.HasMany<Advertisement>()
+            .WithOne()
+            .HasForeignKey(advertisement => advertisement.PersonId)
+            .OnDelete(DeleteBehavior.Cascade) //TODO: Should be refactored to Domain Events
+            .IsRequired();
 
         builder.ComplexProperty(x => x.Address, complexPropertyBuilder =>
         {
