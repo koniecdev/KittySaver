@@ -22,7 +22,7 @@ public sealed class Cat : AuditableEntity
         string? additionalRequirements = null)
     {
         Cat cat = new(
-            person: person,
+            personId: person.Id,
             name: name,
             medicalHelpUrgency: medicalHelpUrgency,
             ageCategory: ageCategory,
@@ -41,12 +41,11 @@ public sealed class Cat : AuditableEntity
     /// </remarks>
     private Cat()
     {
-        Person = null!;
     }
 
     [SetsRequiredMembers]
     private Cat(
-        Person person,
+        Guid personId,
         string name,
         MedicalHelpUrgency medicalHelpUrgency,
         AgeCategory ageCategory,
@@ -56,8 +55,7 @@ public sealed class Cat : AuditableEntity
         bool isInNeedOfSeeingVet,
         string? additionalRequirements)
     {
-        PersonId = person.Id;
-        Person = person;
+        PersonId = personId;
         Name = name;
         MedicalHelpUrgency = medicalHelpUrgency;
         AgeCategory = ageCategory;
@@ -140,20 +138,18 @@ public sealed class Cat : AuditableEntity
         }
     }
     
-    public void AssignAdvertisement(Advertisement advertisement)
+    public void AssignAdvertisement(Guid advertisementId)
     {
-        if (AdvertisementId is not null || Advertisement is not null)
+        if (AdvertisementId is not null)
         {
             throw new InvalidOperationException("You can not assign advertisement to cat, that is already assigned to some other advertisement.");
         }
-        AdvertisementId = advertisement.Id;
-        Advertisement = advertisement;
+        AdvertisementId = advertisementId;
     }
     
     public void UnassignAdvertisement()
     {
         AdvertisementId = null;
-        Advertisement = null;
     }
     
     public double PriorityScore { get; private set; }
