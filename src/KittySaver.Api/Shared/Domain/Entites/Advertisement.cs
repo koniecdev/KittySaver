@@ -126,8 +126,6 @@ public sealed class Advertisement : AuditableEntity
         }
     }
 
-    public Person Person { get; private init; }
-
     public IReadOnlyList<Cat> Cats => _cats.ToList();
 
     public required PickupAddress PickupAddress { get; set; }
@@ -228,6 +226,11 @@ internal sealed class AdvertisementConfiguration : IEntityTypeConfiguration<Adve
         builder.Property(x => x.Id).ValueGeneratedNever();
 
         builder.HasKey(x => x.Id);
+        
+        builder.HasMany<Cat>()
+            .WithOne()
+            .HasForeignKey(cat => cat.AdvertisementId)
+            .IsRequired(false);
 
         builder.Property(x => x.PersonId).IsRequired();
 
