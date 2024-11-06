@@ -126,8 +126,6 @@ public sealed class Cat : AuditableEntity
         }
     }
 
-    public Person Person { get; private init; }
-
     public Guid? AdvertisementId
     {
         get => _advertisementId;
@@ -141,9 +139,7 @@ public sealed class Cat : AuditableEntity
             _advertisementId = value;
         }
     }
-
-    public Advertisement? Advertisement { get; private set; }
-
+    
     public void AssignAdvertisement(Advertisement advertisement)
     {
         if (AdvertisementId is not null || Advertisement is not null)
