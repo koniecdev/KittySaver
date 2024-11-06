@@ -101,8 +101,6 @@ public class CatTests
         cat.IsAdopted.Should().BeFalse();
         
         cat.PersonId.Should().Be(Person.Id);
-        cat.Person.Should().BeEquivalentTo(Person);
-        cat.Person.Cats.Should().Contain(cat);
     }
     
     [Fact]
@@ -292,8 +290,11 @@ public class CatTests
                     defaultAdvertisementPickupAddress: PickupAddress,
                     defaultAdvertisementContactInfo: ContactInfo
                 )).Generate();
+
+        ICatPriorityCalculator calculator = Substitute.For<ICatPriorityCalculator>();
+        calculator.Calculate(Arg.Any<Cat>()).Returns(420);
         Cat cat = Cat.Create(
-            calculator: Substitute.For<ICatPriorityCalculator>(),
+            calculator: calculator,
             person: person,
             name: "Whiskers",
             medicalHelpUrgency: MedicalHelpUrgency.HaveToSeeVet,
@@ -301,17 +302,18 @@ public class CatTests
             behavior: Behavior.Friendly,
             healthStatus: HealthStatus.Critical
         );
+        
         Advertisement advertisement = Advertisement.Create(
             currentDate: new DateTimeOffset(2024, 10, 31, 11, 0, 0, TimeSpan.Zero),
             person: person,
-            cats: [cat],
+            catsIds: [cat.Id],
             pickupAddress: PickupAddress,
             contactInfo: ContactInfo,
             description: "lorem ipsum");
 
         //Act
         SharedHelper.SetBackingField(advertisement, nameof(Advertisement.Id), Guid.Empty);
-        Action assignment = () => cat.AssignAdvertisement(advertisement);
+        Action assignment = () => cat.AssignAdvertisement(advertisement.Id);
         
         //Assert
         assignment.Should().Throw<InvalidOperationException>();

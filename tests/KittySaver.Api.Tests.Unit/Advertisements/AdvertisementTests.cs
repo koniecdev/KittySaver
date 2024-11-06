@@ -87,7 +87,7 @@ public class AdvertisementTests
         Advertisement advertisement = Advertisement.Create(
             currentDate: Date,
             person: Person,
-            cats: cats,
+            catsIds: cats.Select(x=>x.Id),
             pickupAddress: pickupAddress,
             contactInfo: contactInfo,
             description: "lorem ipsum");
@@ -103,12 +103,6 @@ public class AdvertisementTests
         advertisement.Status.Should().Be(Advertisement.AdvertisementStatus.Active);
 
         advertisement.PersonId.Should().Be(Person.Id);
-        advertisement.Person.Should().BeEquivalentTo(Person);
-        advertisement.Person.Advertisements.Should().Contain(advertisement);
-
-        advertisement.Cats.Should().BeEquivalentTo(cats);
-        advertisement.Cats.All(x => x.AdvertisementId == advertisement.Id).Should().BeTrue();
-        advertisement.Cats.All(x => x.Advertisement == advertisement).Should().BeTrue();
     }
 
     [Fact]
@@ -120,7 +114,7 @@ public class AdvertisementTests
             Advertisement.Create(
                 currentDate: Date,
                 person: Person,
-                cats: [],
+                catsIds: [],
                 pickupAddress: PickupAddress,
                 contactInfo: ContactInfo);
         };
@@ -128,7 +122,7 @@ public class AdvertisementTests
         //Assert
         creation.Should()
             .ThrowExactly<ArgumentException>()
-            .WithMessage("Advertisement cats list must not be empty. (Parameter 'cats')");
+            .WithMessage("Advertisement cats list must not be empty. (Parameter 'catsIds')");
     }
 
     [Fact]
@@ -157,7 +151,7 @@ public class AdvertisementTests
             Advertisement.Create(
                 currentDate: Date,
                 person: invalidPerson,
-                cats: cats,
+                catsIds: cats.Select(x=>x.Id),
                 pickupAddress: pickupAddress,
                 contactInfo: contactInfo);
         };
@@ -165,7 +159,7 @@ public class AdvertisementTests
         //Assert
         creation.Should()
             .ThrowExactly<ArgumentException>()
-            .WithMessage("One or more provided cats do not belong to provided person. (Parameter 'cats')");
+            .WithMessage("One or more provided cats do not belong to provided person. (Parameter 'catsIds')");
     }
 
     [Fact]
@@ -212,7 +206,7 @@ public class AdvertisementTests
             Advertisement.Create(
                 currentDate: Date,
                 person: invalidPerson,
-                cats: cats,
+                catsIds: cats.Select(x=>x.Id),
                 pickupAddress: pickupAddress,
                 contactInfo: contactInfo);
         };
@@ -220,7 +214,7 @@ public class AdvertisementTests
         //Assert
         creation.Should()
             .ThrowExactly<ArgumentException>()
-            .WithMessage("One or more provided cats do not belong to provided person. (Parameter 'cats')");
+            .WithMessage("One or more provided cats do not belong to provided person. (Parameter 'catsIds')");
     }
 
     [Fact]
@@ -234,7 +228,7 @@ public class AdvertisementTests
         Advertisement.Create(
             currentDate: Date,
             person: Person,
-            cats: cats,
+            catsIds: cats.Select(x=>x.Id),
             pickupAddress: pickupAddress,
             contactInfo: contactInfo);
 
@@ -244,7 +238,7 @@ public class AdvertisementTests
             Advertisement.Create(
                 currentDate: Date,
                 person: Person,
-                cats: cats,
+                catsIds: cats.Select(x=>x.Id),
                 pickupAddress: pickupAddress,
                 contactInfo: contactInfo);
         };
@@ -286,7 +280,7 @@ public class AdvertisementTests
             Advertisement.Create(
                 currentDate: Date,
                 person: person,
-                cats: [cat],
+                catsIds: [cat.Id],
                 pickupAddress: PickupAddress,
                 contactInfo: ContactInfo);
         };
@@ -301,7 +295,7 @@ public class AdvertisementTests
         Advertisement advertisement = Advertisement.Create(
                 currentDate: Date,
                 person: Person,
-                cats: [CatGenerator.Generate()],
+                catsIds: [CatGenerator.Generate().Id],
                 pickupAddress: PickupAddress,
                 contactInfo: ContactInfo);
         
@@ -312,11 +306,10 @@ public class AdvertisementTests
         //Assert
         advertisement.Status.Should().Be(Advertisement.AdvertisementStatus.Closed);
         advertisement.ClosedOn.Should().Be(closureDate);
-        advertisement.Cats.Select(x => x.IsAdopted).All(x => x).Should().BeTrue();
     }
     
     [Fact]
-    public void Expire_ShouldCloseSuccessfully_WhenValidDataAreProvided()
+    public void Expire_ShouldExpireSuccessfully_WhenValidDataAreProvided()
     {
         //Arrange
         Cat cat = CatGenerator.Generate();
@@ -324,7 +317,7 @@ public class AdvertisementTests
         Advertisement advertisement = Advertisement.Create(
             currentDate: Date,
             person: Person,
-            cats: [cat],
+            catsIds: [cat.Id],
             pickupAddress: PickupAddress,
             contactInfo: ContactInfo);
         
