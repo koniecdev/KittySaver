@@ -67,7 +67,6 @@ public sealed partial class Person : AuditableEntity, IContact
     private string _lastName = null!;
     private readonly Guid _userIdentityId;
     private readonly List<Cat> _cats = [];
-    private readonly List<Advertisement> _advertisements = [];
 
     public Role CurrentRole { get; private init; } = Role.Regular;
 
@@ -165,7 +164,6 @@ public sealed partial class Person : AuditableEntity, IContact
     public required ContactInfo DefaultAdvertisementsContactInfo { get; set; }
 
     public IReadOnlyList<Cat> Cats => _cats.ToList();
-    public IReadOnlyList<Advertisement> Advertisements => _advertisements.ToList();
 
     public void AddCat(Cat cat)
     {
@@ -185,28 +183,6 @@ public sealed partial class Person : AuditableEntity, IContact
                 return;
             default:
                 _cats.Remove(cat);
-                break;
-        }
-    }
-
-    public void AddAdvertisement(Advertisement advertisement)
-    {
-        if (_advertisements.Count > 0 && _advertisements.Any(ad => ad.Id == advertisement.Id))
-        {
-            return;
-        }
-        _advertisements.Add(advertisement);
-    }
-
-    public void RemoveAdvertisement(Advertisement advertisement)
-    {
-        switch (_advertisements.Count)
-        {
-            case 0:
-            case > 0 when _advertisements.All(ad => ad.Id != advertisement.Id):
-                return;
-            default:
-                _advertisements.Remove(advertisement);
                 break;
         }
     }
