@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KittySaver.Api.Features.Cats;
 
-public class GetCat : IEndpoint
+public sealed class GetCat : IEndpoint
 {
     public sealed record GetCatQuery(Guid PersonId, Guid Id) : IQuery<CatResponse>;
 

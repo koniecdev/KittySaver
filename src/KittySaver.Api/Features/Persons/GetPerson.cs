@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KittySaver.Api.Features.Persons;
 
-public class GetPerson : IEndpoint
+public sealed class GetPerson : IEndpoint
 {
     public sealed record GetPersonQuery(Guid IdOrUserIdentityId) : IQuery<PersonResponse>;
 
@@ -16,9 +16,9 @@ public class GetPerson : IEndpoint
         public async Task<PersonResponse> Handle(GetPersonQuery request, CancellationToken cancellationToken)
         {
             PersonResponse person = await db.Persons
-                .AsNoTracking()
-                .Where(x=>x.Id == request.IdOrUserIdentityId || x.UserIdentityId == request.IdOrUserIdentityId)
-                .ProjectToDto()
+                                        .AsNoTracking()
+                                        .Where(x => x.Id == request.IdOrUserIdentityId || x.UserIdentityId == request.IdOrUserIdentityId)
+                                        .ProjectToDto()
                 .FirstOrDefaultAsync(cancellationToken)
                 ?? throw new NotFoundExceptions.PersonNotFoundException(request.IdOrUserIdentityId);
             return person;
@@ -27,7 +27,8 @@ public class GetPerson : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapGet("persons/{id:guid}", async (Guid id,
+        endpointRouteBuilder.MapGet("persons/{id:guid}", async (
+            Guid id,
             ISender sender,
             CancellationToken cancellationToken) =>
         {

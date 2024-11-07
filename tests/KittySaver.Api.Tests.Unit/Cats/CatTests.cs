@@ -306,7 +306,7 @@ public class CatTests
         Advertisement advertisement = Advertisement.Create(
             currentDate: new DateTimeOffset(2024, 10, 31, 11, 0, 0, TimeSpan.Zero),
             person: person,
-            catsIds: [cat.Id],
+            catsIdsToAssign: [cat.Id],
             pickupAddress: PickupAddress,
             contactInfo: ContactInfo,
             description: "lorem ipsum");

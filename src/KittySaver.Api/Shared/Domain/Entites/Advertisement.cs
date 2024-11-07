@@ -12,17 +12,17 @@ public sealed class Advertisement : AuditableEntity
     public static Advertisement Create(
         DateTimeOffset currentDate,
         Person person,
-        IEnumerable<Guid> catsIds,
+        IEnumerable<Guid> catsIdsToAssign,
         PickupAddress pickupAddress,
         ContactInfo contactInfo,
         string? description = null)
     {
         DateTimeOffset expiresOn = currentDate + ExpiringPeriodInDays;
         
-        List<Guid> catsIdsToAssignToAdvertisements = catsIds.ToList();
+        List<Guid> catsIdsToAssignToAdvertisements = catsIdsToAssign.ToList();
         if (catsIdsToAssignToAdvertisements.Count == 0)
         {
-            throw new ArgumentException("Advertisement cats list must not be empty.", nameof(catsIds));
+            throw new ArgumentException("Advertisement cats list must not be empty.", nameof(catsIdsToAssign));
         }
         
         double catsHighestPriorityScore = person.GetHighestPriorityScoreFromGivenCats(catsIdsToAssignToAdvertisements);
@@ -34,6 +34,7 @@ public sealed class Advertisement : AuditableEntity
             description: description,
             expiresOn: expiresOn,
             priorityScore: catsHighestPriorityScore);
+        
         person.AssignGivenCatsToAdvertisement(advertisement.Id, catsIdsToAssignToAdvertisements);
         return advertisement;
     }
@@ -75,7 +76,7 @@ public sealed class Advertisement : AuditableEntity
     public double PriorityScore
     {
         get => _priorityScore;
-        private set
+        set
         {
             if (value == 0)
             {
@@ -144,12 +145,7 @@ public sealed class Advertisement : AuditableEntity
 
         ExpiresOn = currentDate + ExpiringPeriodInDays;
     }
-
-    private void ReCalculatePriorityScore()//this do not belongs here, probably DomainService
-    {
-        // double catsMaximumPriorityScore = _cats.Max(x => x.PriorityScore);
-        // PriorityScore = catsMaximumPriorityScore;
-    }
+    
     public static class Constraints
     {
         public const int DescriptionMaxLength = 2000;

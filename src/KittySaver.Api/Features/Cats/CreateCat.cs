@@ -11,7 +11,7 @@ using Riok.Mapperly.Abstractions;
 
 namespace KittySaver.Api.Features.Cats;
 
-public class CreateCat : IEndpoint
+public sealed class CreateCat : IEndpoint
 {
     public sealed record CreateCatRequest(
         string Name,
