@@ -10,7 +10,7 @@ using Riok.Mapperly.Abstractions;
 
 namespace KittySaver.Api.Features.Persons;
 
-public class CreatePerson : IEndpoint
+public sealed class CreatePerson : IEndpoint
 {
     public sealed record CreatePersonRequest(
         string FirstName,
