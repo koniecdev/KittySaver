@@ -87,7 +87,7 @@ public class AdvertisementTests
         Advertisement advertisement = Advertisement.Create(
             currentDate: Date,
             person: Person,
-            catsIds: cats.Select(x=>x.Id),
+            catsIdsToAssign: cats.Select(x=>x.Id),
             pickupAddress: pickupAddress,
             contactInfo: contactInfo,
             description: "lorem ipsum");
@@ -114,7 +114,7 @@ public class AdvertisementTests
             Advertisement.Create(
                 currentDate: Date,
                 person: Person,
-                catsIds: [],
+                catsIdsToAssign: [],
                 pickupAddress: PickupAddress,
                 contactInfo: ContactInfo);
         };
@@ -151,7 +151,7 @@ public class AdvertisementTests
             Advertisement.Create(
                 currentDate: Date,
                 person: invalidPerson,
-                catsIds: cats.Select(x=>x.Id),
+                catsIdsToAssign: cats.Select(x=>x.Id),
                 pickupAddress: pickupAddress,
                 contactInfo: contactInfo);
         };
@@ -206,7 +206,7 @@ public class AdvertisementTests
             Advertisement.Create(
                 currentDate: Date,
                 person: invalidPerson,
-                catsIds: cats.Select(x=>x.Id),
+                catsIdsToAssign: cats.Select(x=>x.Id),
                 pickupAddress: pickupAddress,
                 contactInfo: contactInfo);
         };
@@ -228,7 +228,7 @@ public class AdvertisementTests
         Advertisement.Create(
             currentDate: Date,
             person: Person,
-            catsIds: cats.Select(x=>x.Id),
+            catsIdsToAssign: cats.Select(x=>x.Id),
             pickupAddress: pickupAddress,
             contactInfo: contactInfo);
 
@@ -238,7 +238,7 @@ public class AdvertisementTests
             Advertisement.Create(
                 currentDate: Date,
                 person: Person,
-                catsIds: cats.Select(x=>x.Id),
+                catsIdsToAssign: cats.Select(x=>x.Id),
                 pickupAddress: pickupAddress,
                 contactInfo: contactInfo);
         };
@@ -280,7 +280,7 @@ public class AdvertisementTests
             Advertisement.Create(
                 currentDate: Date,
                 person: person,
-                catsIds: [cat.Id],
+                catsIdsToAssign: [cat.Id],
                 pickupAddress: PickupAddress,
                 contactInfo: ContactInfo);
         };
@@ -295,7 +295,7 @@ public class AdvertisementTests
         Advertisement advertisement = Advertisement.Create(
                 currentDate: Date,
                 person: Person,
-                catsIds: [CatGenerator.Generate().Id],
+                catsIdsToAssign: [CatGenerator.Generate().Id],
                 pickupAddress: PickupAddress,
                 contactInfo: ContactInfo);
         
@@ -317,7 +317,7 @@ public class AdvertisementTests
         Advertisement advertisement = Advertisement.Create(
             currentDate: Date,
             person: Person,
-            catsIds: [cat.Id],
+            catsIdsToAssign: [cat.Id],
             pickupAddress: PickupAddress,
             contactInfo: ContactInfo);
         
