@@ -1,0 +1,49 @@
+﻿using FluentValidation;
+using KittySaver.Api.Shared.Infrastructure.ApiComponents;
+using KittySaver.Api.Shared.Persistence;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+
+namespace KittySaver.Api.Features.Advertisements;
+
+public sealed class DeleteAdvertisement : IEndpoint
+{
+    public sealed record DeleteAdvertisementCommand(Guid Id) : ICommand;
+
+    public sealed class DeleteAdvertisementCommandValidator
+        : AbstractValidator<DeleteAdvertisementCommand>
+    {
+        public DeleteAdvertisementCommandValidator()
+        {
+            RuleFor(x => x.Id).NotEmpty();
+        }
+    }
+
+    internal sealed class DeleteAdvertisementCommandHandler(ApplicationDbContext db)
+        : IRequestHandler<DeleteAdvertisementCommand>
+    {
+        public async Task Handle(DeleteAdvertisementCommand request, CancellationToken cancellationToken)
+        {
+            int numberOfDeletedAdvertisements = await db.Advertisements
+                .Where(x =>
+                    x.Id == request.Id)
+                .ExecuteDeleteAsync(cancellationToken);
+            if (numberOfDeletedAdvertisements == 0)
+            {
+                throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);
+            }
+        }
+    }
+
+    public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
+    {
+        endpointRouteBuilder.MapDelete("advertisements/{id:guid}", async (Guid id,
+            ISender sender,
+            CancellationToken cancellationToken) =>
+        {
+            DeleteAdvertisementCommand command = new(id);
+            await sender.Send(command, cancellationToken);
+            return Results.NoContent();
+        }).RequireAuthorization();
+    }
+}
