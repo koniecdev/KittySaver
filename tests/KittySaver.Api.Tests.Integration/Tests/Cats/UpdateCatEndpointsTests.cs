@@ -6,8 +6,9 @@ using FluentAssertions;
 using KittySaver.Api.Features.Cats;
 using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Features.Persons;
-using KittySaver.Api.Shared.Domain.Entites;
-using KittySaver.Api.Shared.Domain.Enums;
+using KittySaver.Api.Shared.Domain.Common.Primitives.Enums;
+using KittySaver.Api.Shared.Domain.Persons;
+using KittySaver.Api.Shared.Domain.ValueObjects;
 using KittySaver.Api.Tests.Integration.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -58,7 +59,6 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                 new CreateCat.CreateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: true,
-                    IsInNeedOfSeeingVet: true,
                     MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
                     Behavior: Behavior.Friendly.Name,
                     HealthStatus: HealthStatus.Good.Name,
@@ -91,7 +91,6 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                 new UpdateCat.UpdateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: false,
-                    IsInNeedOfSeeingVet: false,
                     MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
                     Behavior: Behavior.Unfriendly.Name,
                     HealthStatus: HealthStatus.Critical.Name,
@@ -116,7 +115,6 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
         catAfterUpdate.AgeCategory.Should().Be(request.AgeCategory);
         catAfterUpdate.MedicalHelpUrgency.Should().Be(request.MedicalHelpUrgency);
         catAfterUpdate.IsCastrated.Should().Be(request.IsCastrated);
-        catAfterUpdate.IsInNeedOfSeeingVet.Should().Be(request.IsInNeedOfSeeingVet);
     }
     
     [Fact]
@@ -143,7 +141,6 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                 new UpdateCat.UpdateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: false,
-                    IsInNeedOfSeeingVet: false,
                     MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
                     Behavior: Behavior.Unfriendly.Name,
                     HealthStatus: HealthStatus.Critical.Name,
@@ -161,14 +158,13 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
             await _httpClient.GetFromJsonAsync<CatResponse>($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}") 
             ?? throw new JsonException();
         catBeforeUpdate.Should().NotBeEquivalentTo(catAfterUpdate);
-        catAfterUpdate.AdditionalRequirements.Should().BeNull();
+        catAfterUpdate.AdditionalRequirements.Should().Be(string.Empty);
         catAfterUpdate.Name.Should().Be(request.Name);
         catAfterUpdate.Behavior.Should().Be(request.Behavior);
         catAfterUpdate.HealthStatus.Should().Be(request.HealthStatus);
         catAfterUpdate.AgeCategory.Should().Be(request.AgeCategory);
         catAfterUpdate.MedicalHelpUrgency.Should().Be(request.MedicalHelpUrgency);
         catAfterUpdate.IsCastrated.Should().Be(request.IsCastrated);
-        catAfterUpdate.IsInNeedOfSeeingVet.Should().Be(request.IsInNeedOfSeeingVet);
     }
     
     [Fact]
@@ -195,7 +191,6 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                 new UpdateCat.UpdateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: false,
-                    IsInNeedOfSeeingVet: false,
                     MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
                     Behavior: Behavior.Unfriendly.Name,
                     HealthStatus: HealthStatus.Critical.Name,
@@ -213,14 +208,13 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
             await _httpClient.GetFromJsonAsync<CatResponse>($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}") 
             ?? throw new JsonException();
         catBeforeUpdate.Should().NotBeEquivalentTo(catAfterUpdate);
-        catAfterUpdate.AdditionalRequirements.Should().BeNull();
+        catAfterUpdate.AdditionalRequirements.Should().Be(string.Empty);
         catAfterUpdate.Name.Should().Be(request.Name);
         catAfterUpdate.Behavior.Should().Be(request.Behavior);
         catAfterUpdate.HealthStatus.Should().Be(request.HealthStatus);
         catAfterUpdate.AgeCategory.Should().Be(request.AgeCategory);
         catAfterUpdate.MedicalHelpUrgency.Should().Be(request.MedicalHelpUrgency);
         catAfterUpdate.IsCastrated.Should().Be(request.IsCastrated);
-        catAfterUpdate.IsInNeedOfSeeingVet.Should().Be(request.IsInNeedOfSeeingVet);
     }
     
     [Fact]
@@ -240,7 +234,6 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                 new UpdateCat.UpdateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: false,
-                    IsInNeedOfSeeingVet: false,
                     MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
                     Behavior: Behavior.Unfriendly.Name,
                     HealthStatus: HealthStatus.Critical.Name,
@@ -281,7 +274,6 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                 new UpdateCat.UpdateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: false,
-                    IsInNeedOfSeeingVet: false,
                     MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
                     Behavior: Behavior.Unfriendly.Name,
                     HealthStatus: HealthStatus.Critical.Name,
@@ -319,7 +311,6 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
             new UpdateCat.UpdateCatRequest(
                 Name: "",
                 IsCastrated: false,
-                IsInNeedOfSeeingVet: false,
                 MedicalHelpUrgency: "",
                 Behavior: "",
                 HealthStatus: "",
@@ -382,14 +373,13 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
         UpdateCat.UpdateCatRequest request = new Faker<UpdateCat.UpdateCatRequest>()
             .CustomInstantiator( faker =>
                 new UpdateCat.UpdateCatRequest(
-                    Name: faker.Person.FirstName.ClampLength(Cat.Constraints.NameMaxLength + 1),
+                    Name: faker.Person.FirstName.ClampLength(CatName.MaxLength + 1),
                     IsCastrated: true,
-                    IsInNeedOfSeeingVet: false,
                     MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
                     Behavior: Behavior.Unfriendly.Name,
                     HealthStatus: HealthStatus.Poor.Name,
                     AgeCategory: AgeCategory.Baby.Name,
-                    AdditionalRequirements: faker.Address.State().ClampLength(Cat.Constraints.AdditionalRequirementsMaxLength + 1)
+                    AdditionalRequirements: faker.Address.State().ClampLength(Description.MaxLength + 1)
                 )).Generate();
         
         HttpResponseMessage response = 
@@ -409,11 +399,11 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
         
         validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.Name)][0]
             .Should()
-            .StartWith($"The length of 'Name' must be {Cat.Constraints.NameMaxLength} characters or fewer. You entered");
+            .StartWith($"The length of 'Name' must be {CatName.MaxLength} characters or fewer. You entered");
         
         validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.AdditionalRequirements)][0]
             .Should()
-            .StartWith($"The length of 'Additional Requirements' must be {Cat.Constraints.AdditionalRequirementsMaxLength} characters or fewer. You entered");
+            .StartWith($"The length of 'Additional Requirements' must be {Description.MaxLength} characters or fewer. You entered");
     }
     
     public Task InitializeAsync()

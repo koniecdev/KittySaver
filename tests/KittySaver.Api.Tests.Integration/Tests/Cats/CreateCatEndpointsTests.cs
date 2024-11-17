@@ -6,8 +6,9 @@ using Bogus.Extensions;
 using FluentAssertions;
 using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Features.Persons;
-using KittySaver.Api.Shared.Domain.Entites;
-using KittySaver.Api.Shared.Domain.Enums;
+using KittySaver.Api.Shared.Domain.Common.Primitives.Enums;
+using KittySaver.Api.Shared.Domain.Persons;
+using KittySaver.Api.Shared.Domain.ValueObjects;
 using KittySaver.Api.Tests.Integration.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -57,7 +58,6 @@ public class CreateCatEndpointsTests : IAsyncLifetime
                 new CreateCat.CreateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: true,
-                    IsInNeedOfSeeingVet: false,
                     MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
                     Behavior: Behavior.Friendly.Name,
                     HealthStatus: HealthStatus.Good.Name,
@@ -97,7 +97,6 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         CreateCat.CreateCatRequest request = new CreateCat.CreateCatRequest(
             Name: "Whiskers",
             IsCastrated: true,
-            IsInNeedOfSeeingVet: false,
             MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
             Behavior: Behavior.Friendly.Name,
             HealthStatus: HealthStatus.Good.Name,
@@ -126,7 +125,6 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         CreateCat.CreateCatRequest request = new CreateCat.CreateCatRequest(
             Name: "Whiskers",
             IsCastrated: true,
-            IsInNeedOfSeeingVet: false,
             MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
             Behavior: Behavior.Friendly.Name,
             HealthStatus: HealthStatus.Good.Name,
@@ -146,7 +144,7 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         CatResponse catAfterUpdate = 
             await _httpClient.GetFromJsonAsync<CatResponse>($"api/v1/persons/{personRegisterResponse.Id}/cats/{registerResponse.Id}") 
             ?? throw new JsonException();
-        catAfterUpdate.AdditionalRequirements.Should().BeNull();
+        catAfterUpdate.AdditionalRequirements.Should().Be(string.Empty);
     }
     
     [Fact]
@@ -160,14 +158,13 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         CreateCat.CreateCatRequest request = new Faker<CreateCat.CreateCatRequest>()
             .CustomInstantiator( faker =>
                 new CreateCat.CreateCatRequest(
-                    Name: faker.Person.FirstName.ClampLength(Cat.Constraints.NameMaxLength + 1),
+                    Name: faker.Person.FirstName.ClampLength(CatName.MaxLength + 1),
                     IsCastrated: true,
-                    IsInNeedOfSeeingVet: false,
                     MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
                     Behavior: Behavior.Unfriendly.Name,
                     HealthStatus: HealthStatus.Poor.Name,
                     AgeCategory: AgeCategory.Baby.Name,
-                    AdditionalRequirements: faker.Address.State().ClampLength(Cat.Constraints.AdditionalRequirementsMaxLength + 1)
+                    AdditionalRequirements: faker.Address.State().ClampLength(Description.MaxLength + 1)
                 )).Generate();
         
         //Act
@@ -187,11 +184,11 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         
         validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.Name)][0]
             .Should()
-            .StartWith($"The length of 'Name' must be {Cat.Constraints.NameMaxLength} characters or fewer. You entered");
+            .StartWith($"The length of 'Name' must be {CatName.MaxLength} characters or fewer. You entered");
         
         validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.AdditionalRequirements)][0]
             .Should()
-            .StartWith($"The length of 'Additional Requirements' must be {Cat.Constraints.AdditionalRequirementsMaxLength} characters or fewer. You entered");
+            .StartWith($"The length of 'Additional Requirements' must be {Description.MaxLength} characters or fewer. You entered");
     }
     
     [Fact]
@@ -205,7 +202,6 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         CreateCat.CreateCatRequest request = new(
             Name: "",
             IsCastrated: false,
-            IsInNeedOfSeeingVet: false,
             MedicalHelpUrgency: "",
             Behavior: "",
             HealthStatus: "",

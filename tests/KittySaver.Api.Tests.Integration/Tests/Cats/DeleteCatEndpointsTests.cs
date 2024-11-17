@@ -5,7 +5,7 @@ using Bogus;
 using FluentAssertions;
 using KittySaver.Api.Features.Cats;
 using KittySaver.Api.Features.Persons;
-using KittySaver.Api.Shared.Domain.Enums;
+using KittySaver.Api.Shared.Domain.Common.Primitives.Enums;
 using KittySaver.Api.Tests.Integration.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -55,7 +55,6 @@ public class DeleteCatEndpointsTests : IAsyncLifetime
                 new CreateCat.CreateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: true,
-                    IsInNeedOfSeeingVet: false,
                     MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
                     Behavior: Behavior.Friendly.Name,
                     HealthStatus: HealthStatus.Good.Name,
