@@ -1,4 +1,5 @@
 ﻿using KittySaver.Api.Features.Advertisements.SharedContracts;
+using KittySaver.Api.Shared.Domain.Persons;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
 using MediatR;
@@ -8,43 +9,51 @@ namespace KittySaver.Api.Features.Advertisements;
 
 public sealed class GetAdvertisements : IEndpoint
 {
-    public sealed class GetAdvertisementsQuery : IQuery<ICollection<GetAdvertisementsQuery.Response>>
-    {
-        public sealed class Response
-        {
-            public required Guid Id { get; init; }
-            public required Guid PersonId { get; init; }
-            public required string PersonName { get; init; }
-            public required string Title { get; init; }
-            public required double PriorityScore { get; init; }
-            public required string? Description { get; init; }
-            public required PickupAddressDto PickupAddress { get; init; }
-            public required ContactInfoDto ContactInfo { get; init; }
-    
-            public sealed class PickupAddressDto
-            {
-                public required string Country { get; init; }
-                public required string? State { get; init; }
-                public required string ZipCode { get; init; }
-                public required string City { get; init; }
-                public required string? Street { get; init; }
-                public required string? BuildingNumber { get; init; }
-            }
-
-            public sealed class ContactInfoDto
-            {
-                public required string Email { get; init; }
-                public required string PhoneNumber { get; init; }
-            }
-        }
-    }
+    public sealed record GetAdvertisementsQuery : IQuery<ICollection<AdvertisementResponse>>;
 
     internal sealed class GetAdvertisementsQueryHandler(ApplicationDbContext db)
-        : IRequestHandler<GetAdvertisementsQuery, ICollection<GetAdvertisementsQuery.Response>>
+        : IRequestHandler<GetAdvertisementsQuery, ICollection<AdvertisementResponse>>
     {
-        public async Task<ICollection<GetAdvertisementsQuery.Response>> Handle(GetAdvertisementsQuery request, CancellationToken cancellationToken)
+        public async Task<ICollection<AdvertisementResponse>> Handle(GetAdvertisementsQuery request, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            List<AdvertisementResponse> advertisements = await db.Advertisements
+                .AsNoTracking()
+                .Select(x => new AdvertisementResponse
+                {
+                    Id = x.Id,
+                    ContactInfoEmail = x.ContactInfoEmail,
+                    ContactInfoPhoneNumber = x.ContactInfoPhoneNumber,
+                    PriorityScore = x.PriorityScore,
+                    Description = x.Description,
+                    PersonId = x.PersonId,
+                    PickupAddress = new AdvertisementResponse.PickupAddressDto()
+                    {
+                        BuildingNumber = x.PickupAddress.BuildingNumber,
+                        City = x.PickupAddress.City,
+                        Country = x.PickupAddress.Country,
+                        State = x.PickupAddress.State,
+                        Street = x.PickupAddress.Street,
+                        ZipCode = x.PickupAddress.ZipCode
+                    }
+                }).ToListAsync(cancellationToken);
+            
+            foreach (AdvertisementResponse advertisement in advertisements)
+            {
+                Person person = await db.Persons
+                    .AsNoTracking()
+                    .Where(x => x.Id == advertisement.PersonId)
+                    .Include(x => x.Cats.Where(c => c.AdvertisementId == advertisement.Id))
+                    .FirstAsync(cancellationToken);
+                List<Cat> cats = person.Cats.ToList();
+                advertisement.PersonName = person.FirstName;
+                advertisement.Cats = cats.Select(x=> new AdvertisementResponse.CatDto
+                {
+                    Id = x.Id,
+                    Name = x.Name
+                }).ToList();
+            }
+
+            return advertisements;
         }
     }
 
@@ -55,7 +64,7 @@ public sealed class GetAdvertisements : IEndpoint
             CancellationToken cancellationToken) =>
         {
             GetAdvertisementsQuery query = new();
-            ICollection<GetAdvertisementsQuery.Response> advertisements = await sender.Send(query, cancellationToken);
+            ICollection<AdvertisementResponse> advertisements = await sender.Send(query, cancellationToken);
             return Results.Ok(advertisements);
         });
     }

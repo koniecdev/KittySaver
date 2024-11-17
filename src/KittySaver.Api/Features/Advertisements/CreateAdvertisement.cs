@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
-using KittySaver.Api.Shared.Domain.Common.Interfaces;
-using KittySaver.Api.Shared.Domain.Entites;
+using KittySaver.Api.Shared.Domain.Advertisement;
+using KittySaver.Api.Shared.Domain.Persons;
 using KittySaver.Api.Shared.Domain.ValueObjects;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Infrastructure.Services;
@@ -21,12 +21,12 @@ public class CreateAdvertisement : IEndpoint
         string? PickupAddressState,
         string PickupAddressZipCode,
         string PickupAddressCity,
-        string? PickupAddressStreet,
-        string? PickupAddressBuildingNumber,
+        string PickupAddressStreet,
+        string PickupAddressBuildingNumber,
         string ContactInfoEmail,
         string ContactInfoPhoneNumber
     );
-    
+
     public sealed record CreateAdvertisementCommand(
         Guid PersonId,
         IEnumerable<Guid> CatsIdsToAssign,
@@ -35,12 +35,12 @@ public class CreateAdvertisement : IEndpoint
         string? PickupAddressState,
         string PickupAddressZipCode,
         string PickupAddressCity,
-        string? PickupAddressStreet,
-        string? PickupAddressBuildingNumber,
+        string PickupAddressStreet,
+        string PickupAddressBuildingNumber,
         string ContactInfoEmail,
         string ContactInfoPhoneNumber) : ICommand<Guid>;
 
-    public sealed class CreateAdvertisementCommandValidator 
+    public sealed class CreateAdvertisementCommandValidator
         : AbstractValidator<CreateAdvertisementCommand>
     {
         public CreateAdvertisementCommandValidator()
@@ -48,47 +48,56 @@ public class CreateAdvertisement : IEndpoint
             RuleFor(x => x.PersonId).NotEmpty();
 
             RuleFor(x => x.CatsIdsToAssign).NotEmpty();
-            
-            RuleFor(x => x.Description).MaximumLength(Advertisement.Constraints.DescriptionMaxLength);
-            
+
+            RuleFor(x => x.Description).MaximumLength(Description.MaxLength);
+
             RuleFor(x => x.ContactInfoPhoneNumber)
                 .NotEmpty()
-                .MaximumLength(IContact.Constraints.PhoneNumberMaxLength);
+                .MaximumLength(PhoneNumber.MaxLength);
 
             RuleFor(x => x.ContactInfoEmail)
                 .NotEmpty()
-                .MaximumLength(IContact.Constraints.EmailMaxLength)
-                .Matches(IContact.Constraints.EmailPattern);
-            
+                .MaximumLength(Email.MaxLength)
+                .Matches(Email.RegexPattern);
+
             RuleFor(x => x.PickupAddressCountry)
                 .NotEmpty()
-                .MaximumLength(IAddress.Constraints.CountryMaxLength);
-            
+                .MaximumLength(Address.CountryMaxLength);
+
             RuleFor(x => x.PickupAddressState)
-                .MaximumLength(IAddress.Constraints.StateMaxLength);
-            
+                .MaximumLength(Address.StateMaxLength);
+
             RuleFor(x => x.PickupAddressZipCode)
                 .NotEmpty()
-                .MaximumLength(IAddress.Constraints.ZipCodeMaxLength);
-            
+                .MaximumLength(Address.ZipCodeMaxLength);
+
             RuleFor(x => x.PickupAddressCity)
                 .NotEmpty()
-                .MaximumLength(IAddress.Constraints.CityMaxLength);
-            
+                .MaximumLength(Address.CityMaxLength);
+
             RuleFor(x => x.PickupAddressStreet)
-                .MaximumLength(IAddress.Constraints.StreetMaxLength);
-            
+                .NotEmpty()
+                .MaximumLength(Address.StreetMaxLength);
+
             RuleFor(x => x.PickupAddressBuildingNumber)
-                .MaximumLength(IAddress.Constraints.BuildingNumberMaxLength);
+                .NotEmpty()
+                .MaximumLength(Address.BuildingNumberMaxLength);
         }
     }
-    
+
     internal sealed class CreateAdvertisementCommandHandler(ApplicationDbContext db, IDateTimeService dateTimeService)
         : IRequestHandler<CreateAdvertisementCommand, Guid>
     {
         public async Task<Guid> Handle(CreateAdvertisementCommand request, CancellationToken cancellationToken)
         {
-            PickupAddress pickupAddress = new()
+            Person person =
+                await db.Persons
+                    .Where(x => x.Id == request.PersonId)
+                    .Include(x => x.Cats)
+                    .FirstOrDefaultAsync(cancellationToken)
+                ?? throw new NotFoundExceptions.PersonNotFoundException(request.PersonId);
+
+            Address pickupAddress = new()
             {
                 Country = request.PickupAddressCountry,
                 State = request.PickupAddressState,
@@ -97,37 +106,29 @@ public class CreateAdvertisement : IEndpoint
                 Street = request.PickupAddressStreet,
                 BuildingNumber = request.PickupAddressBuildingNumber
             };
-
-            ContactInfo contactInfo = new()
-            {
-                Email = request.ContactInfoEmail,
-                PhoneNumber = request.ContactInfoPhoneNumber
-            };
-
-            Person person = await db.Persons
-                                .Where(x=>x.Id == request.PersonId)
-                                .Include(x => x.Cats)
-                                .FirstOrDefaultAsync(cancellationToken)
-                            ?? throw new NotFoundExceptions.PersonNotFoundException(request.PersonId);
+            Email contactInfoEmail = Email.Create(request.ContactInfoEmail);
+            PhoneNumber contactInfoPhoneNumber = PhoneNumber.Create(request.ContactInfoPhoneNumber);
+            Description description = Description.Create(request.Description);
 
             Advertisement advertisement = Advertisement.Create(
                 currentDate: dateTimeService.Now,
-                person: person,
+                personId: person.Id,
                 catsIdsToAssign: request.CatsIdsToAssign,
                 pickupAddress: pickupAddress,
-                contactInfo: contactInfo,
-                description: null);
-            
+                contactInfoEmail: contactInfoEmail,
+                contactInfoPhoneNumber: contactInfoPhoneNumber,
+                description: description);
+
             db.Advertisements.Add(advertisement);
             await db.SaveChangesAsync(cancellationToken);
             return advertisement.Id;
         }
     }
-    
+
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapPost("advertisements", async 
-            (CreateAdvertisementRequest request,
+        endpointRouteBuilder.MapPost("advertisements", async
+        (CreateAdvertisementRequest request,
             ISender sender,
             CancellationToken cancellationToken) =>
         {
@@ -141,21 +142,6 @@ public class CreateAdvertisement : IEndpoint
 [Mapper]
 public static partial class CreateAdvertisementMapper
 {
-    [UserMapping(Default = true)]
-    public static CreateAdvertisement.CreateAdvertisementCommand MapToCreateAdvertisementCommand(
-        this CreateAdvertisement.CreateAdvertisementRequest request)
-    {
-        if (request.PickupAddressState is not null && string.IsNullOrWhiteSpace(request.PickupAddressState))
-        {
-            request = request with { PickupAddressState = null };
-        }
-
-        CreateAdvertisement.CreateAdvertisementCommand dto = request.ToCreateAdvertisementCommand();
-        return dto;
-    }
-
-    private static partial CreateAdvertisement.CreateAdvertisementCommand ToCreateAdvertisementCommand(
+    public static partial CreateAdvertisement.CreateAdvertisementCommand MapToCreateAdvertisementCommand(
         this CreateAdvertisement.CreateAdvertisementRequest request);
-    
 }
-    
