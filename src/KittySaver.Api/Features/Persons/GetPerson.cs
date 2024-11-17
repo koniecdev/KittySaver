@@ -15,11 +15,12 @@ public sealed class GetPerson : IEndpoint
     {
         public async Task<PersonResponse> Handle(GetPersonQuery request, CancellationToken cancellationToken)
         {
-            PersonResponse person = await db.Persons
-                                        .AsNoTracking()
-                                        .Where(x => x.Id == request.IdOrUserIdentityId || x.UserIdentityId == request.IdOrUserIdentityId)
-                                        .ProjectToDto()
-                .FirstOrDefaultAsync(cancellationToken)
+            PersonResponse person =
+                await db.Persons
+                    .AsNoTracking()
+                    .Where(x => x.Id == request.IdOrUserIdentityId || x.UserIdentityId == request.IdOrUserIdentityId)
+                    .ProjectToDto()
+                    .FirstOrDefaultAsync(cancellationToken)
                 ?? throw new NotFoundExceptions.PersonNotFoundException(request.IdOrUserIdentityId);
             return person;
         }
