@@ -12,7 +12,7 @@ public sealed class Advertisement : AggregateRoot
 {
     public static Advertisement Create(
         DateTimeOffset currentDate,
-        Guid personId,
+        Person person,
         IEnumerable<Guid> catsIdsToAssign,
         Address pickupAddress,
         Email contactInfoEmail,
@@ -28,17 +28,22 @@ public sealed class Advertisement : AggregateRoot
         }
         
         Advertisement advertisement = new(
-            personId: personId,
+            personId: person.Id,
             pickupAddress: pickupAddress,
             contactInfoEmail: contactInfoEmail,
             contactInfoPhoneNumber: contactInfoPhoneNumber,
             description: description,
             expiresOn: expiresOn);
         
-        advertisement.RaiseDomainEvent(new AdvertisementCreatedDomainEvent(
-            AdvertisementId: advertisement.Id,
-            PersonId: personId,
-            catsIdsToAssignToAdvertisement));
+        foreach (Guid catId in catsIdsToAssignToAdvertisement)
+        {
+            person.AssignCatToDraftAdvertisement(advertisement.Id, catId);
+        }
+        
+        AdvertisementService advertisementService = AdvertisementService.Create(advertisement, person);
+        advertisementService.RecalculatePriorityScore();
+
+        advertisement.Status = AdvertisementStatus.Active;
         return advertisement;
     }
 
@@ -78,7 +83,7 @@ public sealed class Advertisement : AggregateRoot
 
     public DateTimeOffset ExpiresOn { get; private set; }
 
-    public AdvertisementStatus Status { get; private set; } = AdvertisementStatus.Active;
+    public AdvertisementStatus Status { get; private set; } = AdvertisementStatus.Draft;
 
     public double PriorityScore
     {
@@ -151,6 +156,7 @@ public sealed class Advertisement : AggregateRoot
 
     public enum AdvertisementStatus
     {
+        Draft,
         Active,
         Closed,
         Expired //TODO: Background running task every day

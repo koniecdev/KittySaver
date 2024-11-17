@@ -130,9 +130,17 @@ public sealed class Person : AggregateRoot
         }
     }
 
-    public void AssignCatToAdvertisement(Guid advertisementId, Guid catId)
+    public void AssignCatToDraftAdvertisement(Guid advertisementId, Guid catId)
     {
-        Cat cat = Cats.First(c => c.Id == catId)
+        Cat cat = Cats.FirstOrDefault(c => c.Id == catId)
+                  ?? throw new NotFoundExceptions.CatNotFoundException(catId);
+        
+        cat.AssignAdvertisement(advertisementId);
+    }
+    
+    public void AssignCatToActiveAdvertisement(Guid advertisementId, Guid catId)
+    {
+        Cat cat = Cats.FirstOrDefault(c => c.Id == catId)
                   ?? throw new NotFoundExceptions.CatNotFoundException(catId);
         
         cat.AssignAdvertisement(advertisementId);
