@@ -1,8 +1,8 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Features.Cats.SharedContracts;
-using KittySaver.Api.Shared.Domain.Entites;
-using KittySaver.Api.Shared.Domain.Enums;
-using KittySaver.Api.Shared.Domain.Services;
+using KittySaver.Api.Shared.Domain.Common.Primitives.Enums;
+using KittySaver.Api.Shared.Domain.Persons;
+using KittySaver.Api.Shared.Domain.ValueObjects;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
 using MediatR;
@@ -16,7 +16,6 @@ public sealed class CreateCat : IEndpoint
     public sealed record CreateCatRequest(
         string Name,
         bool IsCastrated,
-        bool IsInNeedOfSeeingVet,
         string MedicalHelpUrgency,
         string AgeCategory,
         string Behavior,
@@ -27,7 +26,6 @@ public sealed class CreateCat : IEndpoint
         Guid PersonId,
         string Name,
         bool IsCastrated,
-        bool IsInNeedOfSeeingVet,
         MedicalHelpUrgency? MedicalHelpUrgency,
         AgeCategory? AgeCategory,
         Behavior? Behavior,
@@ -40,11 +38,11 @@ public sealed class CreateCat : IEndpoint
         {
             RuleFor(x => x.PersonId).NotEmpty();
             
-            RuleFor(x => x.Name).NotEmpty();
+            RuleFor(x => x.Name)
+                .NotEmpty()
+                .MaximumLength(CatName.MaxLength);
             
-            RuleFor(x => x.Name).MaximumLength(Cat.Constraints.NameMaxLength);
-            
-            RuleFor(x => x.AdditionalRequirements).MaximumLength(Cat.Constraints.AdditionalRequirementsMaxLength);
+            RuleFor(x => x.AdditionalRequirements).MaximumLength(Description.MaxLength);
             
             RuleFor(x => x.HealthStatus)
                 .NotNull()
@@ -64,7 +62,7 @@ public sealed class CreateCat : IEndpoint
         }
     }
     
-    internal sealed class CreateCatCommandHandler(ApplicationDbContext db, ICatPriorityCalculator calculator) : IRequestHandler<CreateCatCommand, Guid>
+    internal sealed class CreateCatCommandHandler(ApplicationDbContext db, ICatPriorityCalculatorService calculator) : IRequestHandler<CreateCatCommand, Guid>
     {
         public async Task<Guid> Handle(CreateCatCommand request, CancellationToken cancellationToken)
         {
@@ -73,33 +71,34 @@ public sealed class CreateCat : IEndpoint
             ArgumentNullException.ThrowIfNull(request.AgeCategory);
             ArgumentNullException.ThrowIfNull(request.MedicalHelpUrgency);
             
-            Person root = await db.Persons
+            Person person = await db.Persons
                               .Include(x => x.Cats)
                               .FirstOrDefaultAsync(x => x.Id == request.PersonId, cancellationToken)
                           ?? throw new NotFoundExceptions.PersonNotFoundException(request.PersonId);
+
+            CatName catName = CatName.Create(request.Name);
+            Description additionalRequirements = Description.Create(request.AdditionalRequirements);
             
-            Cat entity = Cat.Create(
-                calculator: calculator,
-                person: root,
-                name: request.Name,
+            Cat cat = Cat.Create(
+                priorityScoreCalculator: calculator,
+                person: person,
+                name: catName,
                 medicalHelpUrgency: request.MedicalHelpUrgency,
                 ageCategory: request.AgeCategory,
                 behavior: request.Behavior,
                 healthStatus: request.HealthStatus,
                 isCastrated: request.IsCastrated,
-                isInNeedOfSeeingVet: request.IsInNeedOfSeeingVet,
-                additionalRequirements: request.AdditionalRequirements);
+                additionalRequirements: additionalRequirements);
             
-            root.AddCat(entity);
             await db.SaveChangesAsync(cancellationToken);
-            return entity.Id;
+            return cat.Id;
         }
     }
     
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapPost("persons/{personId:guid}/cats", async 
-            (Guid personId,
+        endpointRouteBuilder.MapPost("persons/{personId:guid}/cats", async (
+            Guid personId,
             CreateCatRequest request,
             ISender sender,
             CancellationToken cancellationToken) =>
@@ -117,11 +116,6 @@ public static partial class CreateCatMapper
     public static CreateCat.CreateCatCommand MapToCreateCatCommand(this CreateCat.CreateCatRequest request,
         Guid personId)
     {
-        if (request.AdditionalRequirements is not null && string.IsNullOrWhiteSpace(request.AdditionalRequirements))
-        {
-            request = request with { AdditionalRequirements = null };
-        }
-        
         request.RetrieveSmartEnumsFromNames(
             out (bool mappedSuccessfully, MedicalHelpUrgency value) medicalHelpUrgencyResults,
             out (bool mappedSuccessfully, AgeCategory value) ageCategoryResults,
@@ -136,6 +130,10 @@ public static partial class CreateCatMapper
         return dto;
     }
     
+    [MapperIgnoreSource(nameof(CreateCat.CreateCatRequest.Behavior))]
+    [MapperIgnoreSource(nameof(CreateCat.CreateCatRequest.MedicalHelpUrgency))]
+    [MapperIgnoreSource(nameof(CreateCat.CreateCatRequest.AgeCategory))]
+    [MapperIgnoreSource(nameof(CreateCat.CreateCatRequest.HealthStatus))]
     private static partial CreateCat.CreateCatCommand ToCreateCatCommand(
         this CreateCat.CreateCatRequest request,
         Guid personId,

@@ -1,5 +1,4 @@
-﻿using KittySaver.Api.Shared.Domain.Enums;
-using KittySaver.Api.Shared.Domain.Enums.Common;
+﻿using KittySaver.Api.Shared.Domain.Common.Primitives.Enums;
 
 namespace KittySaver.Api.Features.Cats.SharedContracts;
 

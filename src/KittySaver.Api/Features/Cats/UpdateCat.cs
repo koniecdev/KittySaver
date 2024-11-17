@@ -1,8 +1,8 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Features.Cats.SharedContracts;
-using KittySaver.Api.Shared.Domain.Entites;
-using KittySaver.Api.Shared.Domain.Enums;
-using KittySaver.Api.Shared.Domain.Services;
+using KittySaver.Api.Shared.Domain.Common.Primitives.Enums;
+using KittySaver.Api.Shared.Domain.Persons;
+using KittySaver.Api.Shared.Domain.ValueObjects;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
 using MediatR;
@@ -16,7 +16,6 @@ public sealed class UpdateCat : IEndpoint
     public sealed record UpdateCatRequest(
         string Name,
         bool IsCastrated,
-        bool IsInNeedOfSeeingVet,
         string MedicalHelpUrgency,
         string AgeCategory,
         string Behavior,
@@ -28,7 +27,6 @@ public sealed class UpdateCat : IEndpoint
         Guid Id,
         string Name,
         bool IsCastrated,
-        bool IsInNeedOfSeeingVet,
         MedicalHelpUrgency? MedicalHelpUrgency,
         AgeCategory? AgeCategory,
         Behavior? Behavior,
@@ -40,13 +38,19 @@ public sealed class UpdateCat : IEndpoint
     {
         public UpdateCatCommandValidator()
         {
-            RuleFor(x => x.Id).NotEmpty();
+            RuleFor(x => x.Id)
+                .NotEmpty()
+                .NotEqual(x => x.PersonId);
             
-            RuleFor(x => x.Name).NotEmpty();
+            RuleFor(x => x.PersonId)
+                .NotEmpty()
+                .NotEqual(x => x.Id);
             
-            RuleFor(x => x.Name).MaximumLength(Cat.Constraints.NameMaxLength);
+            RuleFor(x => x.Name)
+                .NotEmpty()
+                .MaximumLength(CatName.MaxLength);
             
-            RuleFor(x => x.AdditionalRequirements).MaximumLength(Cat.Constraints.AdditionalRequirementsMaxLength);
+            RuleFor(x => x.AdditionalRequirements).MaximumLength(Description.MaxLength);
             
             RuleFor(x => x.HealthStatus)
                 .NotNull()
@@ -66,7 +70,7 @@ public sealed class UpdateCat : IEndpoint
         }
     }
     
-    internal sealed class UpdateCatCommandHandler(ApplicationDbContext db, ICatPriorityCalculator calculator)
+    internal sealed class UpdateCatCommandHandler(ApplicationDbContext db, ICatPriorityCalculatorService calculator)
         : IRequestHandler<UpdateCatCommand>
     {
         public async Task Handle(UpdateCatCommand request, CancellationToken cancellationToken)
@@ -84,7 +88,20 @@ public sealed class UpdateCat : IEndpoint
             Cat catToUpdate = catOwner.Cats.FirstOrDefault(x => x.Id == request.Id)
                               ?? throw new NotFoundExceptions.CatNotFoundException(request.Id);
             
-            UpdateCatMapper.MapUpdateCatCommandPropertiesToExistingCat(request, catToUpdate, calculator);
+            CatName catName = CatName.Create(request.Name);
+            Description additionalRequirements = Description.Create(request.AdditionalRequirements);
+
+            catToUpdate.Name = catName;
+            catToUpdate.AdditionalRequirements = additionalRequirements;
+            catToUpdate.IsCastrated = request.IsCastrated;
+            catOwner.ReplaceCatPriorityCompounds(
+                calculator,
+                request.Id,
+                request.HealthStatus,
+                request.AgeCategory,
+                request.Behavior,
+                request.MedicalHelpUrgency);
+            
             await db.SaveChangesAsync(cancellationToken);
         }
     }
@@ -110,11 +127,6 @@ public static partial class UpdateCatMapper
 {
     public static UpdateCat.UpdateCatCommand MapToUpdateCatCommand(this UpdateCat.UpdateCatRequest request, Guid personId, Guid id)
     {
-        if (request.AdditionalRequirements is not null && string.IsNullOrWhiteSpace(request.AdditionalRequirements))
-        {
-            request = request with { AdditionalRequirements = null };
-        }
-        
         request.RetrieveSmartEnumsFromNames(
             out (bool mappedSuccessfully, MedicalHelpUrgency value) medicalHelpUrgencyResults,
             out (bool mappedSuccessfully, AgeCategory value) ageCategoryResults,
@@ -131,6 +143,10 @@ public static partial class UpdateCatMapper
         return dto;
     }
     
+    [MapperIgnoreSource(nameof(CreateCat.CreateCatRequest.Behavior))]
+    [MapperIgnoreSource(nameof(CreateCat.CreateCatRequest.MedicalHelpUrgency))]
+    [MapperIgnoreSource(nameof(CreateCat.CreateCatRequest.AgeCategory))]
+    [MapperIgnoreSource(nameof(CreateCat.CreateCatRequest.HealthStatus))]
     private static partial UpdateCat.UpdateCatCommand ToUpdateCatCommand(
         this UpdateCat.UpdateCatRequest request,
         Guid personId,
@@ -139,15 +155,4 @@ public static partial class UpdateCatMapper
         AgeCategory? ageCategory,
         Behavior? behavior,
         HealthStatus? healthStatus);
-
-    public static void MapUpdateCatCommandPropertiesToExistingCat(UpdateCat.UpdateCatCommand command,
-        Cat entity, ICatPriorityCalculator calculator)
-    {
-        UpdateCatCommandPropertiesToExistingCat(command, entity);
-        entity.ReCalculatePriorityScore(calculator);
-    }
-    
-    private static partial void UpdateCatCommandPropertiesToExistingCat(
-        UpdateCat.UpdateCatCommand command,
-        Cat entity);
 }

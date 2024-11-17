@@ -15,14 +15,15 @@ public sealed class GetCat : IEndpoint
     {
         public async Task<CatResponse> Handle(GetCatQuery request, CancellationToken cancellationToken)
         {
-            CatResponse cat = await db.Persons
-                                  .AsNoTracking()
-                                  .Where(x=>x.Id == request.PersonId)
-                                  .SelectMany(x=>x.Cats)
-                                  .Where(x=>x.Id == request.Id)
-                                  .ProjectToDto()
-                                  .FirstOrDefaultAsync(cancellationToken)
-                              ?? throw new NotFoundExceptions.CatNotFoundException(request.Id);;
+            CatResponse cat =
+                await db.Persons
+                    .AsNoTracking()
+                    .Where(x => x.Id == request.PersonId)
+                    .SelectMany(x => x.Cats)
+                    .Where(x => x.Id == request.Id)
+                    .ProjectToDto()
+                    .FirstOrDefaultAsync(cancellationToken)
+                ?? throw new NotFoundExceptions.CatNotFoundException(request.Id);
             return cat;
         }
     }
