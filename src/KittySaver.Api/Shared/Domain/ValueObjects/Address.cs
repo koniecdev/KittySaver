@@ -1,12 +1,10 @@
-﻿using KittySaver.Api.Shared.Domain.Common.Interfaces;
-using KittySaver.Api.Shared.Domain.ValueObjects.Common;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+﻿using KittySaver.Api.Shared.Domain.Common.Primitives;
+
 // ReSharper disable EntityFramework.ModelValidation.UnlimitedStringLength - String Length properties limits are always set in entity that contains value object. 
 
 namespace KittySaver.Api.Shared.Domain.ValueObjects;
 
-public sealed class Address : ValueObject, IAddress
+public sealed class Address : ValueObject
 {
     private readonly string? _state;
     private readonly string _country = null!;
@@ -14,6 +12,13 @@ public sealed class Address : ValueObject, IAddress
     private readonly string _city = null!;
     private readonly string _street = null!;
     private readonly string _buildingNumber = null!;
+    
+    public const int StateMaxLength = 100;
+    public const int CountryMaxLength = 60;
+    public const int ZipCodeMaxLength = 10;
+    public const int CityMaxLength = 100;
+    public const int StreetMaxLength = 100;
+    public const int BuildingNumberMaxLength = 20;
 
     public string? State
     {
@@ -31,10 +36,10 @@ public sealed class Address : ValueObject, IAddress
                 return;
             }
             
-            if (value.Length > IAddress.Constraints.StateMaxLength)
+            if (value.Length > StateMaxLength)
             {
                 throw new ArgumentOutOfRangeException(nameof(State), value,
-                    $"Maximum allowed length is: {IAddress.Constraints.StateMaxLength}");
+                    $"Maximum allowed length is: {StateMaxLength}");
             }
             _state = value;
         }
@@ -46,10 +51,10 @@ public sealed class Address : ValueObject, IAddress
         init
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(Country));
-            if (value.Length > IAddress.Constraints.CountryMaxLength)
+            if (value.Length > CountryMaxLength)
             {
                 throw new ArgumentOutOfRangeException(nameof(Country), value,
-                    $"Maximum allowed length is: {IAddress.Constraints.CountryMaxLength}");
+                    $"Maximum allowed length is: {CountryMaxLength}");
             }
             _country = value;
         }
@@ -61,10 +66,10 @@ public sealed class Address : ValueObject, IAddress
         init
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(ZipCode));
-            if (value.Length > IAddress.Constraints.ZipCodeMaxLength)
+            if (value.Length > ZipCodeMaxLength)
             {
                 throw new ArgumentOutOfRangeException(nameof(ZipCode), value,
-                    $"Maximum allowed length is: {IAddress.Constraints.ZipCodeMaxLength}");
+                    $"Maximum allowed length is: {ZipCodeMaxLength}");
             }
             _zipCode = value;
         }
@@ -76,10 +81,10 @@ public sealed class Address : ValueObject, IAddress
         init
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(City));
-            if (value.Length > IAddress.Constraints.CityMaxLength)
+            if (value.Length > CityMaxLength)
             {
                 throw new ArgumentOutOfRangeException(nameof(City), value,
-                    $"Maximum allowed length is: {IAddress.Constraints.CityMaxLength}");
+                    $"Maximum allowed length is: {CityMaxLength}");
             }
             _city = value;
         }
@@ -91,10 +96,10 @@ public sealed class Address : ValueObject, IAddress
         init
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(Street));
-            if (value.Length > IAddress.Constraints.StreetMaxLength)
+            if (value.Length > StreetMaxLength)
             {
                 throw new ArgumentOutOfRangeException(nameof(Street), value,
-                    $"Maximum allowed length is: {IAddress.Constraints.StreetMaxLength}");
+                    $"Maximum allowed length is: {StreetMaxLength}");
             }
             _street = value;
         }
@@ -106,10 +111,10 @@ public sealed class Address : ValueObject, IAddress
         init
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(BuildingNumber));
-            if (value.Length > IAddress.Constraints.BuildingNumberMaxLength)
+            if (value.Length > BuildingNumberMaxLength)
             {
                 throw new ArgumentOutOfRangeException(nameof(BuildingNumber), value,
-                    $"Maximum allowed length is: {IAddress.Constraints.BuildingNumberMaxLength}");
+                    $"Maximum allowed length is: {BuildingNumberMaxLength}");
             }
             _buildingNumber = value;
         }
