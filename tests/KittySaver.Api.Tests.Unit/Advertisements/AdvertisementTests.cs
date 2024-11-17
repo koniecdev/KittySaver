@@ -1,15 +1,17 @@
 ﻿using System.Reflection;
 using Bogus;
 using FluentAssertions;
-using KittySaver.Api.Shared.Domain.Entites;
-using KittySaver.Api.Shared.Domain.Enums;
-using KittySaver.Api.Shared.Domain.Services;
+using KittySaver.Api.Shared.Domain.Advertisement;
+using KittySaver.Api.Shared.Domain.Advertisement.Events;
+using KittySaver.Api.Shared.Domain.Common.Primitives.Enums;
+using KittySaver.Api.Shared.Domain.Persons;
 using KittySaver.Api.Shared.Domain.ValueObjects;
 using NSubstitute;
+using Person = KittySaver.Api.Shared.Domain.Persons.Person;
 
 namespace KittySaver.Api.Tests.Unit.Advertisements;
 
-using Person = Shared.Domain.Entites.Person;
+using Person = Person;
 
 public class AdvertisementTests
 {
@@ -27,9 +29,9 @@ public class AdvertisementTests
                 BuildingNumber = faker.Address.BuildingNumber()
             }).Generate();
 
-    private static readonly Faker<PickupAddress> PickupAddress = new Faker<PickupAddress>()
+    private static readonly Faker<Address> PickupAddressGenerator = new Faker<Address>()
         .CustomInstantiator(faker =>
-            new PickupAddress
+            new Address
             {
                 Country = faker.Address.Country(),
                 State = faker.Address.State(),
@@ -39,40 +41,39 @@ public class AdvertisementTests
                 BuildingNumber = faker.Address.BuildingNumber()
             });
 
-    private static readonly Faker<ContactInfo> ContactInfo = new Faker<ContactInfo>()
-        .CustomInstantiator(faker =>
-            new ContactInfo
-            {
-                Email = faker.Person.Email,
-                PhoneNumber = faker.Person.Phone
-            });
-
+    private static readonly Faker<Email> ContactInfoEmailGenerator = new Faker<Email>()
+        .CustomInstantiator(faker => Email.Create(faker.Person.Email));
+    
+    private static readonly Faker<PhoneNumber> ContactInfoPhoneNumberGenerator = new Faker<PhoneNumber>()
+        .CustomInstantiator(faker => PhoneNumber.Create(faker.Person.Phone));
+    
     private static readonly Person Person = new Faker<Person>()
         .CustomInstantiator(faker =>
             Person.Create(
                 userIdentityId: Guid.NewGuid(),
-                firstName: faker.Person.FirstName,
-                lastName: faker.Person.LastName,
-                email: faker.Person.Email,
-                phoneNumber: faker.Person.Phone,
-                address: Address,
-                defaultAdvertisementPickupAddress: PickupAddress.Generate(),
-                defaultAdvertisementContactInfo: ContactInfo.Generate()
+                firstName: FirstName.Create(faker.Person.FirstName),
+                lastName: LastName.Create(faker.Person.LastName),
+                email: Email.Create(faker.Person.Email),
+                phoneNumber: PhoneNumber.Create(faker.Person.Phone),
+                residentalAddress: Address,
+                defaultAdvertisementPickupAddress: PickupAddressGenerator.Generate(),
+                defaultAdvertisementContactInfoEmail: ContactInfoEmailGenerator.Generate(),
+                defaultAdvertisementContactInfoPhoneNumber: ContactInfoPhoneNumberGenerator.Generate()
             )).Generate();
 
     private static readonly Faker<Cat> CatGenerator = new Faker<Cat>()
         .CustomInstantiator(faker =>
             Cat.Create(
-                calculator: new DefaultCatPriorityCalculator(),
+                priorityScoreCalculator: new DefaultCatPriorityCalculatorService(),
                 person: Person,
-                name: faker.Person.FirstName,
+                name: CatName.Create(faker.Person.FirstName),
                 medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet,
                     MedicalHelpUrgency.HaveToSeeVet),
                 ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
                 behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
                 healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
                 isCastrated: faker.PickRandomParam(true, false),
-                isInNeedOfSeeingVet: faker.PickRandomParam(true, false)
+                additionalRequirements: Description.Create(faker.Lorem.Lines(2))
             ));
 
     [Fact]
@@ -80,224 +81,73 @@ public class AdvertisementTests
     {
         //Arrange
         List<Cat> cats = [CatGenerator.Generate(), CatGenerator.Generate(), CatGenerator.Generate()];
-        PickupAddress pickupAddress = PickupAddress.Generate();
-        ContactInfo contactInfo = ContactInfo.Generate();
+        Address pickupAddress = PickupAddressGenerator.Generate();
+        Email contactInfoEmail = ContactInfoEmailGenerator.Generate();
+        PhoneNumber contactInfoPhoneNumber = ContactInfoPhoneNumberGenerator.Generate();
 
         //Act
         Advertisement advertisement = Advertisement.Create(
             currentDate: Date,
-            person: Person,
+            personId: Person.Id,
             catsIdsToAssign: cats.Select(x=>x.Id),
             pickupAddress: pickupAddress,
-            contactInfo: contactInfo,
-            description: "lorem ipsum");
+            contactInfoEmail: contactInfoEmail,
+            contactInfoPhoneNumber: contactInfoPhoneNumber,
+            description: Description.Create("lorem ipsum"));
 
         //Assert
         advertisement.Should().NotBeNull();
         advertisement.Id.Should().NotBeEmpty();
         advertisement.PickupAddress.Should().BeEquivalentTo(pickupAddress);
-        advertisement.ContactInfo.Should().BeEquivalentTo(contactInfo);
-        advertisement.PriorityScore.Should().BeGreaterThan(0);
+        advertisement.ContactInfoEmail.Should().BeEquivalentTo(contactInfoEmail);
+        advertisement.ContactInfoPhoneNumber.Should().BeEquivalentTo(contactInfoPhoneNumber);
         advertisement.ExpiresOn.Should().Be(Date.AddDays(30));
-        advertisement.Description.Should().Be("lorem ipsum");
+        advertisement.Description.Value.Should().Be("Lorem ipsum");
         advertisement.Status.Should().Be(Advertisement.AdvertisementStatus.Active);
-
         advertisement.PersonId.Should().Be(Person.Id);
+        advertisement.GetDomainEvents().Count.Should().Be(1);
+        advertisement.GetDomainEvents().First().Should().BeOfType<AdvertisementCreatedDomainEvent>();
     }
 
     [Fact]
     public void CreateAdvertisement_ShouldThrowArgumentException_WhenEmptyCatsListIsProvided()
     {
+        //Arrange
+        Address pickupAddress = PickupAddressGenerator.Generate();
+        Email contactInfoEmail = ContactInfoEmailGenerator.Generate();
+        PhoneNumber contactInfoPhoneNumber = ContactInfoPhoneNumberGenerator.Generate();
+        
         //Act
         Action creation = () =>
         {
             Advertisement.Create(
                 currentDate: Date,
-                person: Person,
+                personId: Person.Id,
                 catsIdsToAssign: [],
-                pickupAddress: PickupAddress,
-                contactInfo: ContactInfo);
+                pickupAddress: pickupAddress,
+                contactInfoEmail: contactInfoEmail,
+                contactInfoPhoneNumber: contactInfoPhoneNumber,
+                description: Description.Create("lorem ipsum"));
         };
         
         //Assert
         creation.Should()
             .ThrowExactly<ArgumentException>()
-            .WithMessage("Advertisement cats list must not be empty. (Parameter 'catsIds')");
+            .WithMessage("Advertisement cats list must not be empty. (Parameter 'catsIdsToAssign')");
     }
-
-    [Fact]
-    public void CreateAdvertisement_ShouldThrowArgumentException_WhenWrongPersonIsProvided()
-    {
-        //Arrange
-        Person invalidPerson = new Faker<Person>()
-            .CustomInstantiator(faker =>
-                Person.Create(
-                    userIdentityId: Guid.NewGuid(),
-                    firstName: faker.Person.FirstName,
-                    lastName: faker.Person.LastName,
-                    email: faker.Person.Email,
-                    phoneNumber: faker.Person.Phone,
-                    address: Address,
-                    defaultAdvertisementPickupAddress: PickupAddress.Generate(),
-                    defaultAdvertisementContactInfo: ContactInfo.Generate()
-                )).Generate();
-        List<Cat> cats = [CatGenerator.Generate(), CatGenerator.Generate(), CatGenerator.Generate()];
-        PickupAddress pickupAddress = PickupAddress.Generate();
-        ContactInfo contactInfo = ContactInfo.Generate();
-
-        //Act
-        Action creation = () =>
-        {
-            Advertisement.Create(
-                currentDate: Date,
-                person: invalidPerson,
-                catsIdsToAssign: cats.Select(x=>x.Id),
-                pickupAddress: pickupAddress,
-                contactInfo: contactInfo);
-        };
-
-        //Assert
-        creation.Should()
-            .ThrowExactly<ArgumentException>()
-            .WithMessage("One or more provided cats do not belong to provided person. (Parameter 'catsIds')");
-    }
-
-    [Fact]
-    public void CreateAdvertisement_ShouldThrowArgumentException_WhenWrongCatIsProvided()
-    {
-        //Arrange
-        Person invalidPerson = new Faker<Person>()
-            .CustomInstantiator(faker =>
-                Person.Create(
-                    userIdentityId: Guid.NewGuid(),
-                    firstName: faker.Person.FirstName,
-                    lastName: faker.Person.LastName,
-                    email: faker.Person.Email,
-                    phoneNumber: faker.Person.Phone,
-                    address: Address,
-                    defaultAdvertisementPickupAddress: PickupAddress.Generate(),
-                    defaultAdvertisementContactInfo: ContactInfo.Generate()
-                )).Generate();
-        Cat invalidPersonCat = new Faker<Cat>()
-            .CustomInstantiator(faker =>
-                Cat.Create(
-                    calculator: new DefaultCatPriorityCalculator(),
-                    person: invalidPerson,
-                    name: faker.Person.FirstName,
-                    medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed,
-                        MedicalHelpUrgency.ShouldSeeVet,
-                        MedicalHelpUrgency.HaveToSeeVet),
-                    ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
-                    behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
-                    healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
-                    isCastrated: faker.PickRandomParam(true, false),
-                    isInNeedOfSeeingVet: faker.PickRandomParam(true, false)
-                )).Generate();
-        List<Cat> cats = [CatGenerator.Generate(), CatGenerator.Generate(), CatGenerator.Generate()];
-        SharedHelper.SetBackingFieldDirectly(Person, "_cats", cats);
-        SharedHelper.SetBackingFieldDirectly(invalidPerson, "_cats", new List<Cat> { invalidPersonCat });
-        PickupAddress pickupAddress = PickupAddress.Generate();
-        ContactInfo contactInfo = ContactInfo.Generate();
-        cats.Add(invalidPersonCat);
-
-        //Act
-        Action creation = () =>
-        {
-            Advertisement.Create(
-                currentDate: Date,
-                person: invalidPerson,
-                catsIdsToAssign: cats.Select(x=>x.Id),
-                pickupAddress: pickupAddress,
-                contactInfo: contactInfo);
-        };
-
-        //Assert
-        creation.Should()
-            .ThrowExactly<ArgumentException>()
-            .WithMessage("One or more provided cats do not belong to provided person. (Parameter 'catsIds')");
-    }
-
-    [Fact]
-    public void CreateAdvertisement_ShouldThrowInvalidOperationException_WhenAlreadyAssignedCatsAreProvided()
-    {
-        //Arrange
-        List<Cat> cats = [CatGenerator.Generate(), CatGenerator.Generate(), CatGenerator.Generate()];
-        SharedHelper.SetBackingFieldDirectly(Person, "_cats", cats);
-        PickupAddress pickupAddress = PickupAddress.Generate();
-        ContactInfo contactInfo = ContactInfo.Generate();
-        Advertisement.Create(
-            currentDate: Date,
-            person: Person,
-            catsIdsToAssign: cats.Select(x=>x.Id),
-            pickupAddress: pickupAddress,
-            contactInfo: contactInfo);
-
-        //Act
-        Action creation = () =>
-        {
-            Advertisement.Create(
-                currentDate: Date,
-                person: Person,
-                catsIdsToAssign: cats.Select(x=>x.Id),
-                pickupAddress: pickupAddress,
-                contactInfo: contactInfo);
-        };
-
-        //Assert
-        creation.Should().ThrowExactly<InvalidOperationException>();
-    }
-
-    [Fact]
-    public void PersonId_ShouldThrowArgumentException_WhenProvidedEmptyValue()
-    {
-        //Arrange
-        Person person = new Faker<Person>()
-            .CustomInstantiator(faker =>
-                Person.Create(
-                    userIdentityId: Guid.NewGuid(),
-                    firstName: faker.Person.FirstName,
-                    lastName: faker.Person.LastName,
-                    email: faker.Person.Email,
-                    phoneNumber: faker.Person.Phone,
-                    address: Address,
-                    defaultAdvertisementPickupAddress: PickupAddress,
-                    defaultAdvertisementContactInfo: ContactInfo
-                )).Generate();
-        Cat cat = Cat.Create(
-            calculator: Substitute.For<ICatPriorityCalculator>(),
-            person: person,
-            name: "Whiskers",
-            medicalHelpUrgency: MedicalHelpUrgency.HaveToSeeVet,
-            ageCategory: AgeCategory.Senior,
-            behavior: Behavior.Friendly,
-            healthStatus: HealthStatus.Critical
-        );
-        SharedHelper.SetBackingField(person, nameof(Person.Id), Guid.Empty);
-
-        //Act
-        Action creation = () =>
-        {
-            Advertisement.Create(
-                currentDate: Date,
-                person: person,
-                catsIdsToAssign: [cat.Id],
-                pickupAddress: PickupAddress,
-                contactInfo: ContactInfo);
-        };
-        //Assert
-        creation.Should().Throw<ArgumentException>();
-    }
-
+    
     [Fact]
     public void Close_ShouldCloseSuccessfully_WhenValidDataAreProvided()
     {
         //Arrange
         Advertisement advertisement = Advertisement.Create(
                 currentDate: Date,
-                person: Person,
+                personId: Person.Id,
                 catsIdsToAssign: [CatGenerator.Generate().Id],
-                pickupAddress: PickupAddress,
-                contactInfo: ContactInfo);
+                pickupAddress: PickupAddressGenerator.Generate(),
+                contactInfoEmail: ContactInfoEmailGenerator.Generate(),
+                contactInfoPhoneNumber: ContactInfoPhoneNumberGenerator.Generate(),
+                description: Description.Create("lorem ipsum"));
         
         //Act
         DateTimeOffset closureDate = Date.AddDays(1);
@@ -316,10 +166,12 @@ public class AdvertisementTests
 
         Advertisement advertisement = Advertisement.Create(
             currentDate: Date,
-            person: Person,
+            personId: Person.Id,
             catsIdsToAssign: [cat.Id],
-            pickupAddress: PickupAddress,
-            contactInfo: ContactInfo);
+            pickupAddress: PickupAddressGenerator,
+            contactInfoEmail: ContactInfoEmailGenerator.Generate(),
+            contactInfoPhoneNumber: ContactInfoPhoneNumberGenerator.Generate(),
+            description: Description.Create("lorem ipsum"));
         
         //Act
         DateTimeOffset expirationDate = advertisement.ExpiresOn.AddDays(1);
