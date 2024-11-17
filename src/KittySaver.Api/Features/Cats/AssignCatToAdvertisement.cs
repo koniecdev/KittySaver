@@ -50,7 +50,7 @@ public sealed class AssignCatToAdvertisement : IEndpoint
                 throw new NotFoundExceptions.AdvertisementNotFoundException(request.AdvertisementId);
             }
 
-            person.AssignCatToAdvertisement(request.AdvertisementId, request.CatId);
+            person.AssignCatToActiveAdvertisement(request.AdvertisementId, request.CatId);
             
             await db.SaveChangesAsync(cancellationToken);
         }
