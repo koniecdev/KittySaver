@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using KittySaver.Api.Shared.Domain.Persons;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
 using MediatR;
@@ -24,21 +25,25 @@ public sealed class DeletePerson : IEndpoint
     {
         public async Task Handle(DeletePersonCommand request, CancellationToken cancellationToken)
         {
-            int numberOfDeletedPersons = await db.Persons
-                .Where(x =>
-                    x.Id == request.IdOrUserIdentityId
-                    || x.UserIdentityId == request.IdOrUserIdentityId)
-                .ExecuteDeleteAsync(cancellationToken);
-            if (numberOfDeletedPersons == 0)
-            {
-                throw new NotFoundExceptions.PersonNotFoundException(request.IdOrUserIdentityId);
-            }
+            //Potential GetPerson in PersonRepository
+            Person person = await db.Persons
+                .Where(x => x.Id == request.IdOrUserIdentityId || x.UserIdentityId == request.IdOrUserIdentityId)
+                .Include(x => x.Cats)
+                .FirstOrDefaultAsync(cancellationToken)
+                ?? throw new NotFoundExceptions.PersonNotFoundException(request.IdOrUserIdentityId);
+            
+            //Potential DeletePerson in PersonRepository
+            db.Persons.Remove(person);
+            person.AnnounceDeletion();
+            
+            await db.SaveChangesAsync(cancellationToken);
         }
     }
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapDelete("persons/{id:guid}", async (Guid id,
+        endpointRouteBuilder.MapDelete("persons/{id:guid}", async (
+            Guid id,
             ISender sender,
             CancellationToken cancellationToken) =>
         {

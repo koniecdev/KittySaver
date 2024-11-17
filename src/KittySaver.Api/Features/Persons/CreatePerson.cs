@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
-using KittySaver.Api.Shared.Domain.Common.Interfaces;
-using KittySaver.Api.Shared.Domain.Entites;
+using KittySaver.Api.Shared.Domain.Persons;
 using KittySaver.Api.Shared.Domain.ValueObjects;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
@@ -28,8 +27,8 @@ public sealed class CreatePerson : IEndpoint
         string? DefaultAdvertisementPickupAddressState,
         string DefaultAdvertisementPickupAddressZipCode,
         string DefaultAdvertisementPickupAddressCity,
-        string? DefaultAdvertisementPickupAddressStreet,
-        string? DefaultAdvertisementPickupAddressBuildingNumber,
+        string DefaultAdvertisementPickupAddressStreet,
+        string DefaultAdvertisementPickupAddressBuildingNumber,
         string DefaultAdvertisementContactInfoEmail,
         string DefaultAdvertisementContactInfoPhoneNumber);
     
@@ -49,8 +48,8 @@ public sealed class CreatePerson : IEndpoint
         string? DefaultAdvertisementPickupAddressState,
         string DefaultAdvertisementPickupAddressZipCode,
         string DefaultAdvertisementPickupAddressCity,
-        string? DefaultAdvertisementPickupAddressStreet,
-        string? DefaultAdvertisementPickupAddressBuildingNumber,
+        string DefaultAdvertisementPickupAddressStreet,
+        string DefaultAdvertisementPickupAddressBuildingNumber,
         string DefaultAdvertisementContactInfoEmail,
         string DefaultAdvertisementContactInfoPhoneNumber) : ICommand<Guid>;
 
@@ -70,87 +69,87 @@ public sealed class CreatePerson : IEndpoint
             
             RuleFor(x => x.FirstName)
                 .NotEmpty()
-                .MaximumLength(Person.Constraints.FirstNameMaxLength);
+                .MaximumLength(FirstName.MaxLength);
             
             RuleFor(x => x.LastName)
                 .NotEmpty()
-                .MaximumLength(Person.Constraints.LastNameMaxLength);
+                .MaximumLength(LastName.MaxLength);
             
             RuleFor(x => x.PhoneNumber)
                 .NotEmpty()
-                .MaximumLength(IContact.Constraints.PhoneNumberMaxLength)
+                .MaximumLength(PhoneNumber.MaxLength)
                 .MustAsync(async (phoneNumber, ct) => await IsPhoneNumberUniqueAsync(phoneNumber, ct))
                 .WithMessage("'Phone Number' is already used by another user.");
             
             RuleFor(x => x.Email)
                 .NotEmpty()
-                .MaximumLength(IContact.Constraints.EmailMaxLength)
-                .Matches(IContact.Constraints.EmailPattern)
+                .MaximumLength(Email.MaxLength)
+                .Matches(Email.RegexPattern)
                 .MustAsync(async (email, ct) => await IsEmailUniqueAsync(email, ct))
                 .WithMessage("'Email' is already used by another user.");
             
             RuleFor(x => x.DefaultAdvertisementContactInfoPhoneNumber)
                 .NotEmpty()
-                .MaximumLength(IContact.Constraints.PhoneNumberMaxLength);
+                .MaximumLength(PhoneNumber.MaxLength);
 
             RuleFor(x => x.DefaultAdvertisementContactInfoEmail)
                 .NotEmpty()
-                .MaximumLength(IContact.Constraints.EmailMaxLength)
-                .Matches(IContact.Constraints.EmailPattern);
+                .MaximumLength(Email.MaxLength)
+                .Matches(Email.RegexPattern);
             
             RuleFor(x => x.AddressCountry)
                 .NotEmpty()
-                .MaximumLength(IAddress.Constraints.CountryMaxLength);
+                .MaximumLength(Address.CountryMaxLength);
             
             RuleFor(x => x.AddressState)
-                .MaximumLength(IAddress.Constraints.StateMaxLength);
+                .MaximumLength(Address.StateMaxLength);
             
             RuleFor(x => x.AddressZipCode)
                 .NotEmpty()
-                .MaximumLength(IAddress.Constraints.ZipCodeMaxLength);
+                .MaximumLength(Address.ZipCodeMaxLength);
             
             RuleFor(x => x.AddressCity)
                 .NotEmpty()
-                .MaximumLength(IAddress.Constraints.CityMaxLength);
+                .MaximumLength(Address.CityMaxLength);
             
             RuleFor(x => x.AddressStreet)
                 .NotEmpty()
-                .MaximumLength(IAddress.Constraints.StreetMaxLength);
+                .MaximumLength(Address.StreetMaxLength);
             
             RuleFor(x => x.AddressBuildingNumber)
                 .NotEmpty()
-                .MaximumLength(IAddress.Constraints.BuildingNumberMaxLength);
+                .MaximumLength(Address.BuildingNumberMaxLength);
             
             RuleFor(x => x.DefaultAdvertisementPickupAddressCountry)
                 .NotEmpty()
-                .MaximumLength(IAddress.Constraints.CountryMaxLength);
+                .MaximumLength(Address.CountryMaxLength);
             
             RuleFor(x => x.DefaultAdvertisementPickupAddressState)
-                .MaximumLength(IAddress.Constraints.StateMaxLength);
+                .MaximumLength(Address.StateMaxLength);
             
             RuleFor(x => x.DefaultAdvertisementPickupAddressZipCode)
                 .NotEmpty()
-                .MaximumLength(IAddress.Constraints.ZipCodeMaxLength);
+                .MaximumLength(Address.ZipCodeMaxLength);
             
             RuleFor(x => x.DefaultAdvertisementPickupAddressCity)
                 .NotEmpty()
-                .MaximumLength(IAddress.Constraints.CityMaxLength);
+                .MaximumLength(Address.CityMaxLength);
             
             RuleFor(x => x.DefaultAdvertisementPickupAddressStreet)
-                .MaximumLength(IAddress.Constraints.StreetMaxLength);
+                .MaximumLength(Address.StreetMaxLength);
             
             RuleFor(x => x.DefaultAdvertisementPickupAddressBuildingNumber)
-                .MaximumLength(IAddress.Constraints.BuildingNumberMaxLength);
+                .MaximumLength(Address.BuildingNumberMaxLength);
         }
         private async Task<bool> IsPhoneNumberUniqueAsync(string phone, CancellationToken ct) 
             => !await _db.Persons
                 .AsNoTracking()
-                .AnyAsync(x=>x.PhoneNumber == phone, ct);
+                .AnyAsync(x=>x.PhoneNumber.Value == phone, ct);
         
         private async Task<bool> IsEmailUniqueAsync(string email, CancellationToken ct) 
             => !await _db.Persons
                 .AsNoTracking()
-                .AnyAsync(x=>x.Email == email, ct);
+                .AnyAsync(x=>x.Email.Value == email, ct);
 
         private async Task<bool> IsUserIdentityIdUniqueAsync(Guid userIdentityId, CancellationToken ct) 
             => !await _db.Persons
@@ -162,7 +161,11 @@ public sealed class CreatePerson : IEndpoint
     {
         public async Task<Guid> Handle(CreatePersonCommand request, CancellationToken cancellationToken)
         {
-            Address personalAddress = new()
+            FirstName firstName = FirstName.Create(request.FirstName);
+            LastName lastName = LastName.Create(request.LastName);
+            Email email = Email.Create(request.Email);
+            PhoneNumber phoneNumber = PhoneNumber.Create(request.PhoneNumber);
+            Address residentalAddress = new()
             {
                 Country = request.AddressCountry,
                 State = request.AddressState,
@@ -171,8 +174,7 @@ public sealed class CreatePerson : IEndpoint
                 Street = request.AddressStreet,
                 BuildingNumber = request.AddressBuildingNumber
             };
-            
-            PickupAddress defaultAdvertisementPickupAddress = new()
+            Address defaultAdvertisementPickupAddress = new()
             {
                 Country = request.DefaultAdvertisementPickupAddressCountry,
                 State = request.DefaultAdvertisementPickupAddressState,
@@ -181,14 +183,20 @@ public sealed class CreatePerson : IEndpoint
                 Street = request.DefaultAdvertisementPickupAddressStreet,
                 BuildingNumber = request.DefaultAdvertisementPickupAddressBuildingNumber
             };
+            Email defaultAdvertisementContactInfoEmail = Email.Create(request.DefaultAdvertisementContactInfoEmail);
+            PhoneNumber defaultAdvertisementContactInfoPhoneNumber = PhoneNumber.Create(request.DefaultAdvertisementContactInfoPhoneNumber);
 
-            ContactInfo defaultAdvertisementContactInfo = new()
-            {
-                Email = request.DefaultAdvertisementContactInfoEmail,
-                PhoneNumber = request.DefaultAdvertisementContactInfoPhoneNumber
-            };
+            Person person = Person.Create(
+                userIdentityId: request.UserIdentityId,
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                phoneNumber: phoneNumber,
+                residentalAddress: residentalAddress,
+                defaultAdvertisementPickupAddress: defaultAdvertisementPickupAddress,
+                defaultAdvertisementContactInfoEmail: defaultAdvertisementContactInfoEmail,
+                defaultAdvertisementContactInfoPhoneNumber: defaultAdvertisementContactInfoPhoneNumber);
             
-            Person person = request.MapToPersonEntity(personalAddress, defaultAdvertisementPickupAddress, defaultAdvertisementContactInfo);
             db.Persons.Add(person);
             await db.SaveChangesAsync(cancellationToken);
             return person.Id;
@@ -197,8 +205,8 @@ public sealed class CreatePerson : IEndpoint
     
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapPost("persons", async 
-            (CreatePersonRequest request,
+        endpointRouteBuilder.MapPost("persons", async (
+            CreatePersonRequest request,
             ISender sender,
             CancellationToken cancellationToken) =>
         {
@@ -212,38 +220,7 @@ public sealed class CreatePerson : IEndpoint
 [Mapper]
 public static partial class CreatePersonMapper
 {
-    [UserMapping(Default = true)]
-    public static CreatePerson.CreatePersonCommand MapToCreatePersonCommand(
-        this CreatePerson.CreatePersonRequest request)
-    {
-        if (request.AddressState is not null && string.IsNullOrWhiteSpace(request.AddressState))
-        {
-            request = request with { AddressState = null };
-        }
-
-        CreatePerson.CreatePersonCommand dto = request.ToCreatePersonCommand();
-        return dto;
-    }
-
-    private static partial CreatePerson.CreatePersonCommand ToCreatePersonCommand(
+    public static partial CreatePerson.CreatePersonCommand MapToCreatePersonCommand(
         this CreatePerson.CreatePersonRequest request);
-
-    public static Person MapToPersonEntity(
-        this CreatePerson.CreatePersonCommand command,
-        Address personalAddress,
-        PickupAddress defaultAdvertisementPickupAddress,
-        ContactInfo defaultAdvertisementPickupContactInfo)
-    {
-        Person person = Person.Create(
-            userIdentityId: command.UserIdentityId,
-            firstName: command.FirstName,
-            lastName: command.LastName,
-            email: command.Email,
-            phoneNumber: command.PhoneNumber,
-            address: personalAddress,
-            defaultAdvertisementPickupAddress: defaultAdvertisementPickupAddress,
-            defaultAdvertisementContactInfo: defaultAdvertisementPickupContactInfo);
-        return person;
-    }
 }
     

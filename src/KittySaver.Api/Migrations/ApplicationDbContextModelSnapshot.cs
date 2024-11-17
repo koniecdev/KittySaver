@@ -23,10 +23,9 @@ namespace KittySaver.Api.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("KittySaver.Api.Shared.Domain.Entites.Advertisement", b =>
+            modelBuilder.Entity("KittySaver.Api.Shared.Domain.Advertisement.Advertisement", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTimeOffset?>("ClosedOn")
@@ -38,10 +37,6 @@ namespace KittySaver.Api.Migrations
 
                     b.Property<DateTimeOffset>("CreatedOn")
                         .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
 
                     b.Property<DateTimeOffset>("ExpiresOn")
                         .HasColumnType("datetimeoffset");
@@ -61,26 +56,42 @@ namespace KittySaver.Api.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.ComplexProperty<Dictionary<string, object>>("ContactInfo", "KittySaver.Api.Shared.Domain.Entites.Advertisement.ContactInfo#ContactInfo", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("ContactInfoEmail", "KittySaver.Api.Shared.Domain.Advertisement.Advertisement.ContactInfoEmail#Email", b1 =>
                         {
                             b1.IsRequired();
 
-                            b1.Property<string>("Email")
+                            b1.Property<string>("Value")
                                 .IsRequired()
-                                .HasMaxLength(254)
-                                .HasColumnType("nvarchar(254)");
+                                .HasMaxLength(256)
+                                .HasColumnType("nvarchar(256)");
+                        });
 
-                            b1.Property<string>("PhoneNumber")
+                    b.ComplexProperty<Dictionary<string, object>>("ContactInfoPhoneNumber", "KittySaver.Api.Shared.Domain.Advertisement.Advertisement.ContactInfoPhoneNumber#PhoneNumber", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasMaxLength(31)
                                 .HasColumnType("nvarchar(31)");
                         });
 
-                    b.ComplexProperty<Dictionary<string, object>>("PickupAddress", "KittySaver.Api.Shared.Domain.Entites.Advertisement.PickupAddress#PickupAddress", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("Description", "KittySaver.Api.Shared.Domain.Advertisement.Advertisement.Description#Description", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(1000)
+                                .HasColumnType("nvarchar(1000)");
+                        });
+
+                    b.ComplexProperty<Dictionary<string, object>>("PickupAddress", "KittySaver.Api.Shared.Domain.Advertisement.Advertisement.PickupAddress#Address", b1 =>
                         {
                             b1.IsRequired();
 
                             b1.Property<string>("BuildingNumber")
+                                .IsRequired()
                                 .HasMaxLength(20)
                                 .HasColumnType("nvarchar(20)");
 
@@ -99,6 +110,7 @@ namespace KittySaver.Api.Migrations
                                 .HasColumnType("nvarchar(100)");
 
                             b1.Property<string>("Street")
+                                .IsRequired()
                                 .HasMaxLength(100)
                                 .HasColumnType("nvarchar(100)");
 
@@ -115,15 +127,10 @@ namespace KittySaver.Api.Migrations
                     b.ToTable("Advertisements", (string)null);
                 });
 
-            modelBuilder.Entity("KittySaver.Api.Shared.Domain.Entites.Cat", b =>
+            modelBuilder.Entity("KittySaver.Api.Shared.Domain.Persons.Cat", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("AdditionalRequirements")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<Guid?>("AdvertisementId")
                         .HasColumnType("uniqueidentifier");
@@ -150,9 +157,6 @@ namespace KittySaver.Api.Migrations
                     b.Property<bool>("IsCastrated")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsInNeedOfSeeingVet")
-                        .HasColumnType("bit");
-
                     b.Property<string>("LastModificationBy")
                         .HasColumnType("nvarchar(max)");
 
@@ -162,16 +166,31 @@ namespace KittySaver.Api.Migrations
                     b.Property<int>("MedicalHelpUrgency")
                         .HasColumnType("int");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<Guid>("PersonId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<double>("PriorityScore")
                         .HasColumnType("float");
+
+                    b.ComplexProperty<Dictionary<string, object>>("AdditionalRequirements", "KittySaver.Api.Shared.Domain.Persons.Cat.AdditionalRequirements#Description", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(1000)
+                                .HasColumnType("nvarchar(1000)");
+                        });
+
+                    b.ComplexProperty<Dictionary<string, object>>("Name", "KittySaver.Api.Shared.Domain.Persons.Cat.Name#CatName", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(30)
+                                .HasColumnType("nvarchar(30)");
+                        });
 
                     b.HasKey("Id");
 
@@ -182,10 +201,9 @@ namespace KittySaver.Api.Migrations
                     b.ToTable("Cats", (string)null);
                 });
 
-            modelBuilder.Entity("KittySaver.Api.Shared.Domain.Entites.Person", b =>
+            modelBuilder.Entity("KittySaver.Api.Shared.Domain.Persons.Person", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("CreatedBy")
@@ -198,36 +216,36 @@ namespace KittySaver.Api.Migrations
                     b.Property<int>("CurrentRole")
                         .HasColumnType("int");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(254)
-                        .HasColumnType("nvarchar(254)");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<string>("LastModificationBy")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTimeOffset?>("LastModificationOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasMaxLength(31)
-                        .HasColumnType("nvarchar(31)");
-
                     b.Property<Guid>("UserIdentityId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.ComplexProperty<Dictionary<string, object>>("Address", "KittySaver.Api.Shared.Domain.Entites.Person.Address#Address", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("DefaultAdvertisementsContactInfoEmail", "KittySaver.Api.Shared.Domain.Persons.Person.DefaultAdvertisementsContactInfoEmail#Email", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(256)
+                                .HasColumnType("nvarchar(256)");
+                        });
+
+                    b.ComplexProperty<Dictionary<string, object>>("DefaultAdvertisementsContactInfoPhoneNumber", "KittySaver.Api.Shared.Domain.Persons.Person.DefaultAdvertisementsContactInfoPhoneNumber#PhoneNumber", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(31)
+                                .HasColumnType("nvarchar(31)");
+                        });
+
+                    b.ComplexProperty<Dictionary<string, object>>("DefaultAdvertisementsPickupAddress", "KittySaver.Api.Shared.Domain.Persons.Person.DefaultAdvertisementsPickupAddress#Address", b1 =>
                         {
                             b1.IsRequired();
 
@@ -261,26 +279,52 @@ namespace KittySaver.Api.Migrations
                                 .HasColumnType("nvarchar(10)");
                         });
 
-                    b.ComplexProperty<Dictionary<string, object>>("DefaultAdvertisementsContactInfo", "KittySaver.Api.Shared.Domain.Entites.Person.DefaultAdvertisementsContactInfo#ContactInfo", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("Email", "KittySaver.Api.Shared.Domain.Persons.Person.Email#Email", b1 =>
                         {
                             b1.IsRequired();
 
-                            b1.Property<string>("Email")
+                            b1.Property<string>("Value")
                                 .IsRequired()
-                                .HasMaxLength(254)
-                                .HasColumnType("nvarchar(254)");
+                                .HasMaxLength(256)
+                                .HasColumnType("nvarchar(256)");
+                        });
 
-                            b1.Property<string>("PhoneNumber")
+                    b.ComplexProperty<Dictionary<string, object>>("FirstName", "KittySaver.Api.Shared.Domain.Persons.Person.FirstName#FirstName", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
+                        });
+
+                    b.ComplexProperty<Dictionary<string, object>>("LastName", "KittySaver.Api.Shared.Domain.Persons.Person.LastName#LastName", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)");
+                        });
+
+                    b.ComplexProperty<Dictionary<string, object>>("PhoneNumber", "KittySaver.Api.Shared.Domain.Persons.Person.PhoneNumber#PhoneNumber", b1 =>
+                        {
+                            b1.IsRequired();
+
+                            b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasMaxLength(31)
                                 .HasColumnType("nvarchar(31)");
                         });
 
-                    b.ComplexProperty<Dictionary<string, object>>("DefaultAdvertisementsPickupAddress", "KittySaver.Api.Shared.Domain.Entites.Person.DefaultAdvertisementsPickupAddress#PickupAddress", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("ResidentalAddress", "KittySaver.Api.Shared.Domain.Persons.Person.ResidentalAddress#Address", b1 =>
                         {
                             b1.IsRequired();
 
                             b1.Property<string>("BuildingNumber")
+                                .IsRequired()
                                 .HasMaxLength(20)
                                 .HasColumnType("nvarchar(20)");
 
@@ -299,6 +343,7 @@ namespace KittySaver.Api.Migrations
                                 .HasColumnType("nvarchar(100)");
 
                             b1.Property<string>("Street")
+                                .IsRequired()
                                 .HasMaxLength(100)
                                 .HasColumnType("nvarchar(100)");
 
@@ -310,55 +355,33 @@ namespace KittySaver.Api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.HasIndex("PhoneNumber")
-                        .IsUnique();
-
-                    b.HasIndex("UserIdentityId")
-                        .IsUnique();
-
                     b.ToTable("Persons", (string)null);
                 });
 
-            modelBuilder.Entity("KittySaver.Api.Shared.Domain.Entites.Advertisement", b =>
+            modelBuilder.Entity("KittySaver.Api.Shared.Domain.Advertisement.Advertisement", b =>
                 {
-                    b.HasOne("KittySaver.Api.Shared.Domain.Entites.Person", "Person")
-                        .WithMany("Advertisements")
+                    b.HasOne("KittySaver.Api.Shared.Domain.Persons.Person", null)
+                        .WithMany()
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Person");
                 });
 
-            modelBuilder.Entity("KittySaver.Api.Shared.Domain.Entites.Cat", b =>
+            modelBuilder.Entity("KittySaver.Api.Shared.Domain.Persons.Cat", b =>
                 {
-                    b.HasOne("KittySaver.Api.Shared.Domain.Entites.Advertisement", "Advertisement")
-                        .WithMany("Cats")
+                    b.HasOne("KittySaver.Api.Shared.Domain.Advertisement.Advertisement", null)
+                        .WithMany()
                         .HasForeignKey("AdvertisementId");
 
-                    b.HasOne("KittySaver.Api.Shared.Domain.Entites.Person", "Person")
+                    b.HasOne("KittySaver.Api.Shared.Domain.Persons.Person", null)
                         .WithMany("Cats")
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Advertisement");
-
-                    b.Navigation("Person");
                 });
 
-            modelBuilder.Entity("KittySaver.Api.Shared.Domain.Entites.Advertisement", b =>
+            modelBuilder.Entity("KittySaver.Api.Shared.Domain.Persons.Person", b =>
                 {
-                    b.Navigation("Cats");
-                });
-
-            modelBuilder.Entity("KittySaver.Api.Shared.Domain.Entites.Person", b =>
-                {
-                    b.Navigation("Advertisements");
-
                     b.Navigation("Cats");
                 });
 #pragma warning restore 612, 618

@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using KittySaver.Api.Shared.Domain.Persons;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
 using MediatR;
@@ -15,8 +16,13 @@ public sealed class DeleteCat : IEndpoint
     {
         public DeleteCatCommandValidator()
         {
-            RuleFor(x => x.Id).NotEmpty();
-            RuleFor(x => x.PersonId).NotEmpty();
+            RuleFor(x => x.Id)
+                .NotEmpty()
+                .NotEqual(x => x.PersonId);
+            
+            RuleFor(x => x.PersonId)
+                .NotEmpty()
+                .NotEqual(x => x.Id);
         }
     }
 
@@ -25,17 +31,20 @@ public sealed class DeleteCat : IEndpoint
     {
         public async Task Handle(DeleteCatCommand request, CancellationToken cancellationToken)
         {
-            //for now, there are no invariants in domain that would suggest choosing approach with fetching whole aggregate
-            int numberOfDeletedCats = await db.Persons
-                .Where(x => x.Id == request.PersonId)
-                .SelectMany(x => x.Cats)
-                .Where(x => x.Id == request.Id)
-                .ExecuteDeleteAsync(cancellationToken);
+            Person person =
+                await db.Persons
+                    .Where(x => x.Id == request.PersonId)
+                    .Include(x => x.Cats)
+                    .FirstOrDefaultAsync(cancellationToken)
+                ?? throw new NotFoundExceptions.PersonNotFoundException(request.PersonId);
             
-            if (numberOfDeletedCats == 0)
-            {
-                throw new NotFoundExceptions.CatNotFoundException(request.Id);
-            }
+            Cat catToDelete =
+                person.Cats
+                    .FirstOrDefault(x => x.Id == request.Id)
+                ?? throw new NotFoundExceptions.CatNotFoundException(request.Id);
+            
+            person.RemoveCat(catToDelete);
+            await db.SaveChangesAsync(cancellationToken);
         }
     }
 

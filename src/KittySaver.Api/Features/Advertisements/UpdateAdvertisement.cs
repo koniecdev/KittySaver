@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
-using KittySaver.Api.Shared.Domain.Common.Interfaces;
-using KittySaver.Api.Shared.Domain.Entites;
+using KittySaver.Api.Shared.Domain.Advertisement;
+using KittySaver.Api.Shared.Domain.Persons;
 using KittySaver.Api.Shared.Domain.ValueObjects;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
@@ -18,21 +18,20 @@ public sealed class UpdateAdvertisement : IEndpoint
         string? PickupAddressState,
         string PickupAddressZipCode,
         string PickupAddressCity,
-        string? PickupAddressStreet,
-        string? PickupAddressBuildingNumber,
+        string PickupAddressStreet,
+        string PickupAddressBuildingNumber,
         string ContactInfoEmail,
         string ContactInfoPhoneNumber);
 
     public sealed record UpdateAdvertisementCommand(
         Guid Id,
-        Guid PersonId,
         string? Description,
         string PickupAddressCountry,
         string? PickupAddressState,
         string PickupAddressZipCode,
         string PickupAddressCity,
-        string? PickupAddressStreet,
-        string? PickupAddressBuildingNumber,
+        string PickupAddressStreet,
+        string PickupAddressBuildingNumber,
         string ContactInfoEmail,
         string ContactInfoPhoneNumber) : ICommand;
 
@@ -42,39 +41,40 @@ public sealed class UpdateAdvertisement : IEndpoint
         public UpdateAdvertisementCommandValidator()
         {
             RuleFor(x => x.Id).NotEmpty();
-            RuleFor(x => x.PersonId).NotEmpty();
             
-            RuleFor(x => x.Description).MaximumLength(Advertisement.Constraints.DescriptionMaxLength);
+            RuleFor(x => x.Description).MaximumLength(Description.MaxLength);
             
             RuleFor(x => x.ContactInfoPhoneNumber)
                 .NotEmpty()
-                .MaximumLength(IContact.Constraints.PhoneNumberMaxLength);
+                .MaximumLength(PhoneNumber.MaxLength);
 
             RuleFor(x => x.ContactInfoEmail)
                 .NotEmpty()
-                .MaximumLength(IContact.Constraints.EmailMaxLength)
-                .Matches(IContact.Constraints.EmailPattern);
+                .MaximumLength(Email.MaxLength)
+                .Matches(Email.RegexPattern);
             
             RuleFor(x => x.PickupAddressCountry)
                 .NotEmpty()
-                .MaximumLength(IAddress.Constraints.CountryMaxLength);
+                .MaximumLength(Address.CountryMaxLength);
             
             RuleFor(x => x.PickupAddressState)
-                .MaximumLength(IAddress.Constraints.StateMaxLength);
+                .MaximumLength(Address.StateMaxLength);
             
             RuleFor(x => x.PickupAddressZipCode)
                 .NotEmpty()
-                .MaximumLength(IAddress.Constraints.ZipCodeMaxLength);
+                .MaximumLength(Address.ZipCodeMaxLength);
             
             RuleFor(x => x.PickupAddressCity)
                 .NotEmpty()
-                .MaximumLength(IAddress.Constraints.CityMaxLength);
+                .MaximumLength(Address.CityMaxLength);
             
             RuleFor(x => x.PickupAddressStreet)
-                .MaximumLength(IAddress.Constraints.StreetMaxLength);
+                .NotEmpty()
+                .MaximumLength(Address.StreetMaxLength);
             
             RuleFor(x => x.PickupAddressBuildingNumber)
-                .MaximumLength(IAddress.Constraints.BuildingNumberMaxLength);
+                .NotEmpty()
+                .MaximumLength(Address.BuildingNumberMaxLength);
         }
     }
 
@@ -83,14 +83,13 @@ public sealed class UpdateAdvertisement : IEndpoint
     {
         public async Task Handle(UpdateAdvertisementCommand request, CancellationToken cancellationToken)
         {
-            Advertisement advertisement = await db.Advertisements
-                                .Where(x => 
-                                    x.Id == request.Id
-                                    && x.PersonId == request.PersonId)
-                                .FirstOrDefaultAsync(cancellationToken)
-                            ?? throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);
+            Advertisement advertisement = 
+                await db.Advertisements
+                    .Where(x => x.Id == request.Id)
+                    .FirstOrDefaultAsync(cancellationToken)
+                ?? throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);
             
-            PickupAddress pickupAddress = new()
+            Address pickupAddress = new()
             {
                 Country = request.PickupAddressCountry,
                 State = request.PickupAddressState,
@@ -99,16 +98,14 @@ public sealed class UpdateAdvertisement : IEndpoint
                 Street = request.PickupAddressStreet,
                 BuildingNumber = request.PickupAddressBuildingNumber
             };
-
-            ContactInfo contactInfo = new()
-            {
-                Email = request.ContactInfoEmail,
-                PhoneNumber = request.ContactInfoPhoneNumber
-            };
+            Email contactInfoEmail = Email.Create(request.ContactInfoEmail);
+            PhoneNumber contactInfoPhoneNumber = PhoneNumber.Create(request.ContactInfoPhoneNumber);
+            Description description = Description.Create(request.Description);
             
             advertisement.PickupAddress = pickupAddress;
-            advertisement.ContactInfo = contactInfo;
-            advertisement.Description = request.Description;
+            advertisement.ContactInfoEmail = contactInfoEmail;
+            advertisement.ContactInfoPhoneNumber = contactInfoPhoneNumber;
+            advertisement.Description = description;
             
             await db.SaveChangesAsync(cancellationToken);
         }
@@ -116,7 +113,7 @@ public sealed class UpdateAdvertisement : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapPut("persons/{id:guid}", async (
+        endpointRouteBuilder.MapPut("advertisements/{id:guid}", async (
             Guid id,
             UpdateAdvertisementRequest request,
             ISender sender,
@@ -134,5 +131,5 @@ public static partial class UpdateAdvertisementMapper
 {
     public static partial UpdateAdvertisement.UpdateAdvertisementCommand MapToUpdateAdvertisementCommand(
         this UpdateAdvertisement.UpdateAdvertisementRequest request,
-        Guid idOrUserIdentityId);
+        Guid id);
 }

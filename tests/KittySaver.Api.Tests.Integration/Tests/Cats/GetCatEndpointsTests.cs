@@ -6,7 +6,7 @@ using FluentAssertions;
 using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Features.Persons.SharedContracts;
-using KittySaver.Api.Shared.Domain.Enums;
+using KittySaver.Api.Shared.Domain.Common.Primitives.Enums;
 using KittySaver.Api.Tests.Integration.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -56,7 +56,6 @@ public class GetCatEndpointsTests : IAsyncLifetime
                 new CreateCat.CreateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: true,
-                    IsInNeedOfSeeingVet: false,
                     MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
                     Behavior: Behavior.Friendly.Name,
                     HealthStatus: HealthStatus.Good.Name,
@@ -86,7 +85,6 @@ public class GetCatEndpointsTests : IAsyncLifetime
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         CatResponse cat = await response.Content.ReadFromJsonAsync<CatResponse>() ?? throw new JsonException();
         cat.Id.Should().Be(catCreateResponse.Id);
-        cat.PersonId.Should().Be(personRegisterResponse.Id);
         cat.Name.Should().Be(_createCatRequest.Name);
         cat.AdditionalRequirements.Should().Be(_createCatRequest.AdditionalRequirements);
         cat.Behavior.Should().Be(_createCatRequest.Behavior);
@@ -94,7 +92,6 @@ public class GetCatEndpointsTests : IAsyncLifetime
         cat.MedicalHelpUrgency.Should().Be(_createCatRequest.MedicalHelpUrgency);
         cat.HealthStatus.Should().Be(_createCatRequest.HealthStatus);
         cat.IsCastrated.Should().Be(_createCatRequest.IsCastrated);
-        cat.IsInNeedOfSeeingVet.Should().Be(_createCatRequest.IsInNeedOfSeeingVet);
         cat.PriorityScore.Should().BeGreaterThan(0);
     }
     

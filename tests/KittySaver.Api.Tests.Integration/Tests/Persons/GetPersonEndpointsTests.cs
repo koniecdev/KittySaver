@@ -66,12 +66,12 @@ public class GetPersonEndpointsTests : IAsyncLifetime
         person.Email.Should().Be(request.Email);
         person.FullName.Should().Be($"{request.FirstName} {request.LastName}");
         person.PhoneNumber.Should().Be(request.PhoneNumber);
-        person.Address.Country.Should().Be(request.AddressCountry);
-        person.Address.State.Should().Be(request.AddressState);
-        person.Address.ZipCode.Should().Be(request.AddressZipCode);
-        person.Address.City.Should().Be(request.AddressCity);
-        person.Address.Street.Should().Be(request.AddressStreet);
-        person.Address.BuildingNumber.Should().Be(request.AddressBuildingNumber);
+        person.ResidentalAddress.Country.Should().Be(request.AddressCountry);
+        person.ResidentalAddress.State.Should().Be(request.AddressState);
+        person.ResidentalAddress.ZipCode.Should().Be(request.AddressZipCode);
+        person.ResidentalAddress.City.Should().Be(request.AddressCity);
+        person.ResidentalAddress.Street.Should().Be(request.AddressStreet);
+        person.ResidentalAddress.BuildingNumber.Should().Be(request.AddressBuildingNumber);
     }
     
     [Fact]

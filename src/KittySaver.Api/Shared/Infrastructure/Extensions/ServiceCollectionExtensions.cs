@@ -2,10 +2,11 @@
 using System.Text;
 using FluentValidation;
 using KittySaver.Api.Shared.Behaviours;
-using KittySaver.Api.Shared.Domain.Services;
+using KittySaver.Api.Shared.Domain.Persons;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Api.Shared.Security;
+using MediatR.NotificationPublishers;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -23,12 +24,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICurrentEnvironmentService, CurrentEnvironmentService>();
         services.AddScoped<IDateTimeService, DefaultDateTimeService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
-        services.AddScoped<ICatPriorityCalculator, DefaultCatPriorityCalculator>();
+        services.AddScoped<ICatPriorityCalculatorService, DefaultCatPriorityCalculatorService>();
         services.AddValidatorsFromAssembly(assembly);
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssembly(assembly);
             cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+            cfg.NotificationPublisher = new TaskWhenAllPublisher();
         });
         AddAuth();
 

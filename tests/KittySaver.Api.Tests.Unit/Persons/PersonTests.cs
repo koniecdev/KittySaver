@@ -1,24 +1,21 @@
 using Bogus;
-using Bogus.Extensions;
 using FluentAssertions;
-using KittySaver.Api.Shared.Domain.Common.Interfaces;
-using KittySaver.Api.Shared.Domain.Entites;
-using KittySaver.Api.Shared.Domain.Enums;
-using KittySaver.Api.Shared.Domain.Services;
+using KittySaver.Api.Shared.Domain.Common.Primitives.Enums;
+using KittySaver.Api.Shared.Domain.Persons;
 using KittySaver.Api.Shared.Domain.ValueObjects;
 using NSubstitute;
 using Shared;
-using Person = KittySaver.Api.Shared.Domain.Entites.Person;
+using Person = KittySaver.Api.Shared.Domain.Persons.Person;
 
 namespace KittySaver.Api.Tests.Unit.Persons;
 
 public class PersonTests
 {
     private readonly Guid _userIdentityId = Guid.NewGuid();
-    private const string DefaultProperFirstName = "artur";
-    private const string DefaultProperLastName = "koniec";
-    private const string DefaultProperEmail = "fake@fake.fake";
-    private const string DefaultProperPhone = "+48111222333";
+    private readonly FirstName _defaultProperFirstName = FirstName.Create("Artur");
+    private readonly LastName _defaultProperLastName = LastName.Create("Koniec");
+    private readonly Email _defaultProperEmail = Email.Create("fake@fake.fake");
+    private readonly PhoneNumber _defaultProperPhone = PhoneNumber.Create("+48111222333");
 
     private static readonly Address Address = new Faker<Address>()
         .CustomInstantiator(faker =>
@@ -32,9 +29,9 @@ public class PersonTests
                 BuildingNumber = faker.Address.BuildingNumber()
             }).Generate();
     
-    private static readonly PickupAddress PickupAddress = new Faker<PickupAddress>()
+    private static readonly Address PickupAddress = new Faker<Address>()
         .CustomInstantiator(faker =>
-            new PickupAddress
+            new Address
             {
                 Country = faker.Address.Country(),
                 State = faker.Address.State(),
@@ -44,22 +41,16 @@ public class PersonTests
                 BuildingNumber = faker.Address.BuildingNumber()
             }).Generate();
     
-    private static readonly ContactInfo ContactInfo = new Faker<ContactInfo>()
-        .CustomInstantiator(faker =>
-            new ContactInfo
-            {
-                Email = faker.Person.Email,
-                PhoneNumber = faker.Person.Phone
-            }).Generate();
-    
     [Fact]
     public void PersonGetters_ShouldReturnProperValues_WhenPersonIsInstantiated()
     {
         //Arrange
-        const string firstName = "Artur";
-        const string lastName = "Koniec";
-        const string email = "koniecdev@gmail.com";
-        const string phone = "535143330";
+        FirstName firstName = FirstName.Create("Artur");
+        LastName lastName = LastName.Create("Koniec");
+        Email email = Email.Create("koniecdev@gmail.com");
+        PhoneNumber phoneNumber = PhoneNumber.Create("535143330");
+        Email defaultEmail = Email.Create("koniecdevcontact@gmail.com");
+        PhoneNumber defaultPhoneNumber = PhoneNumber.Create("5351433300");
         
         //Act
         Person sut = Person.Create(
@@ -67,10 +58,11 @@ public class PersonTests
             firstName: firstName,
             lastName: lastName,
             email: email,
-            phoneNumber: phone,
-            address: Address,
+            phoneNumber: phoneNumber,
+            residentalAddress: Address,
             defaultAdvertisementPickupAddress: PickupAddress,
-            defaultAdvertisementContactInfo: ContactInfo
+            defaultAdvertisementContactInfoEmail: defaultEmail,
+            defaultAdvertisementContactInfoPhoneNumber: defaultPhoneNumber
         );
 
         //Assert
@@ -79,10 +71,11 @@ public class PersonTests
         sut.LastName.Should().Be(lastName);
         sut.FullName.Should().Be($"{firstName} {lastName}");
         sut.Email.Should().Be(email);
-        sut.PhoneNumber.Should().Be(phone);
-        sut.Address.Should().BeEquivalentTo(Address);
+        sut.PhoneNumber.Should().Be(phoneNumber);
+        sut.ResidentalAddress.Should().BeEquivalentTo(Address);
         sut.DefaultAdvertisementsPickupAddress.Should().BeEquivalentTo(PickupAddress);
-        sut.DefaultAdvertisementsContactInfo.Should().BeEquivalentTo(ContactInfo);
+        sut.DefaultAdvertisementsContactInfoEmail.Should().BeEquivalentTo(defaultEmail);
+        sut.DefaultAdvertisementsContactInfoPhoneNumber.Should().BeEquivalentTo(defaultPhoneNumber);
         sut.UserIdentityId.Should().Be(_userIdentityId);
         sut.CurrentRole.Should().Be(Person.Role.Regular);
     }
@@ -91,10 +84,12 @@ public class PersonTests
     public void PersonGetters_ShouldReturnProperValues_WhenPersonIsInstantiatedWithJustRequiredProperties()
     {
         //Arrange
-        const string firstName = "Artur";
-        const string lastName = "Koniec";
-        const string email = "koniecdev@gmail.com";
-        const string phone = "535143330";
+        FirstName firstName = FirstName.Create("Artur");
+        LastName lastName = LastName.Create("Koniec");
+        Email email = Email.Create("koniecdev@gmail.com");
+        PhoneNumber phoneNumber = PhoneNumber.Create("535143330");
+        Email defaultEmail = Email.Create("koniecdevcontact@gmail.com");
+        PhoneNumber defaultPhoneNumber = PhoneNumber.Create("5351433300");
         
         Address address = new Faker<Address>()
         .CustomInstantiator(faker =>
@@ -108,16 +103,16 @@ public class PersonTests
                 BuildingNumber = faker.Address.BuildingNumber()
             }).Generate();
     
-        PickupAddress pickupAddress = new Faker<PickupAddress>()
+        Address pickupAddress = new Faker<Address>()
         .CustomInstantiator(faker =>
-            new PickupAddress
+            new Address
             {
                 Country = faker.Address.Country(),
                 State = "",
                 ZipCode = faker.Address.ZipCode(),
                 City = faker.Address.City(),
-                Street = "",
-                BuildingNumber = ""
+                Street = faker.Address.StreetName(),
+                BuildingNumber = faker.Address.BuildingNumber()
             }).Generate();
         
         //Act
@@ -126,10 +121,11 @@ public class PersonTests
             firstName: firstName,
             lastName: lastName,
             email: email,
-            phoneNumber: phone,
-            address: address,
+            phoneNumber: phoneNumber,
+            residentalAddress: address,
             defaultAdvertisementPickupAddress: pickupAddress,
-            defaultAdvertisementContactInfo: ContactInfo
+            defaultAdvertisementContactInfoEmail: defaultEmail,
+            defaultAdvertisementContactInfoPhoneNumber: defaultPhoneNumber
         );
 
         //Assert
@@ -138,111 +134,25 @@ public class PersonTests
         sut.LastName.Should().Be(lastName);
         sut.FullName.Should().Be($"{firstName} {lastName}");
         sut.Email.Should().Be(email);
-        sut.PhoneNumber.Should().Be(phone);
-        sut.Address.Should().NotBeNull();
-        sut.Address.Country.Should().Be(address.Country);
-        sut.Address.State.Should().BeNull();
-        sut.Address.ZipCode.Should().Be(address.ZipCode);
-        sut.Address.City.Should().Be(address.City);
-        sut.Address.Street.Should().Be(address.Street);
-        sut.Address.BuildingNumber.Should().Be(address.BuildingNumber);
+        sut.PhoneNumber.Should().Be(phoneNumber);
+        sut.ResidentalAddress.Should().NotBeNull();
+        sut.ResidentalAddress.Country.Should().Be(address.Country);
+        sut.ResidentalAddress.State.Should().BeNull();
+        sut.ResidentalAddress.ZipCode.Should().Be(address.ZipCode);
+        sut.ResidentalAddress.City.Should().Be(address.City);
+        sut.ResidentalAddress.Street.Should().Be(address.Street);
+        sut.ResidentalAddress.BuildingNumber.Should().Be(address.BuildingNumber);
         sut.DefaultAdvertisementsPickupAddress.Should().NotBeNull();
         sut.DefaultAdvertisementsPickupAddress.Country.Should().Be(pickupAddress.Country);
         sut.DefaultAdvertisementsPickupAddress.State.Should().BeNull();
         sut.DefaultAdvertisementsPickupAddress.ZipCode.Should().Be(pickupAddress.ZipCode);
         sut.DefaultAdvertisementsPickupAddress.City.Should().Be(pickupAddress.City);
-        sut.DefaultAdvertisementsPickupAddress.Street.Should().BeNull();
-        sut.DefaultAdvertisementsPickupAddress.BuildingNumber.Should().BeNull();
-        sut.DefaultAdvertisementsContactInfo.Should().BeEquivalentTo(ContactInfo);
+        sut.DefaultAdvertisementsPickupAddress.Street.Should().Be(pickupAddress.Street);
+        sut.DefaultAdvertisementsPickupAddress.BuildingNumber.Should().Be(pickupAddress.BuildingNumber);
+        sut.DefaultAdvertisementsContactInfoEmail.Should().BeEquivalentTo(defaultEmail);
+        sut.DefaultAdvertisementsContactInfoPhoneNumber.Should().BeEquivalentTo(defaultPhoneNumber);
         sut.UserIdentityId.Should().Be(_userIdentityId);
         sut.CurrentRole.Should().Be(Person.Role.Regular);
-    }
-    
-    [Theory]
-    [InlineData("artur")]
-    [InlineData("Artur")]
-    [InlineData("ARTUR")]
-    public void FirstNameSet_ShouldCapitalizeFirstLetter_WhenNotEmptyValueIsProvided(string firstName)
-    {
-        //Act
-        Person sut = Person.Create(
-            userIdentityId: _userIdentityId,
-            firstName: firstName,
-            lastName: DefaultProperLastName,
-            email: DefaultProperEmail,
-            phoneNumber: DefaultProperPhone,
-            address: Address,
-            defaultAdvertisementPickupAddress: PickupAddress,
-            defaultAdvertisementContactInfo: ContactInfo
-        );
-        //Assert
-        sut.FirstName.Should().Be("Artur");
-    }
-
-    [Theory]
-    [InlineData("koniec")]
-    [InlineData("Koniec")]
-    [InlineData("Koniec-Początek")]
-    public void LastNameSet_ShouldCapitalizeFirstLetter_WhenNotEmptyValueIsProvided(string lastName)
-    {
-        //Act
-        Person sut = Person.Create(
-            userIdentityId: _userIdentityId,
-            firstName: DefaultProperFirstName,
-            lastName: lastName,
-            email: DefaultProperEmail,
-            phoneNumber: DefaultProperPhone,
-            address: Address,
-            defaultAdvertisementPickupAddress: PickupAddress,
-            defaultAdvertisementContactInfo: ContactInfo
-        );
-        
-        //Assert
-        sut.LastName.Should().StartWith("Koniec");
-    }
-
-    [Fact]
-    public void FirstNameSet_ShouldThrowArgumentOutOfRangeException_WhenFirstNameExceedsMaxLength()
-    {
-        //Arrange
-        string longFirstName = new('A', Person.Constraints.FirstNameMaxLength + 1);
-
-        //Act
-        Action creation = () => Person.Create(
-            userIdentityId: _userIdentityId,
-            firstName: longFirstName,
-            lastName: DefaultProperLastName,
-            email: DefaultProperEmail,
-            phoneNumber: DefaultProperPhone,
-            address: Address,
-            defaultAdvertisementPickupAddress: PickupAddress,
-            defaultAdvertisementContactInfo: ContactInfo
-        );
-
-        //Assert
-        creation.Should().Throw<ArgumentOutOfRangeException>();
-    }
-    
-    [Fact]
-    public void LastNameSet_ShouldThrowArgumentOutOfRangeException_WhenLastNameExceedsMaxLength()
-    {
-        //Arrange
-        string longLastName = new('B', Person.Constraints.LastNameMaxLength + 1);
-
-        //Act
-        Action creation = () => Person.Create(
-            userIdentityId: _userIdentityId,
-            firstName: DefaultProperFirstName,
-            lastName: longLastName,
-            email: DefaultProperEmail,
-            phoneNumber: DefaultProperPhone,
-            address: Address,
-            defaultAdvertisementPickupAddress: PickupAddress,
-            defaultAdvertisementContactInfo: ContactInfo
-        );
-
-        //Assert
-        creation.Should().Throw<ArgumentOutOfRangeException>();
     }
     
     [Fact]
@@ -251,188 +161,18 @@ public class PersonTests
         //Act
         Person sut = Person.Create(
             userIdentityId: _userIdentityId,
-            firstName: DefaultProperFirstName,
-            lastName: DefaultProperLastName,
-            email: DefaultProperEmail,
-            phoneNumber: DefaultProperPhone,
-            address: Address,
+            firstName: _defaultProperFirstName,
+            lastName: _defaultProperLastName,
+            email: _defaultProperEmail,
+            phoneNumber: _defaultProperPhone,
+            residentalAddress: Address,
             defaultAdvertisementPickupAddress: PickupAddress,
-            defaultAdvertisementContactInfo: ContactInfo
+            defaultAdvertisementContactInfoEmail: _defaultProperEmail,
+            defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
         );
 
         //Assert
         sut.FullName.Should().Be("Artur Koniec");
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData(" ")]
-    public void EmailSet_ShouldThrowEmailEmptyException_WhenEmptyEmailIsProvided(string emptyEmail)
-    {
-        //Act
-        Action creation = () => Person.Create(
-            userIdentityId: _userIdentityId,
-            firstName: DefaultProperFirstName,
-            lastName: DefaultProperLastName,
-            email: emptyEmail,
-            phoneNumber: DefaultProperPhone,
-            address: Address,
-            defaultAdvertisementPickupAddress: PickupAddress,
-            defaultAdvertisementContactInfo: ContactInfo
-        );
-
-        //Assert
-        creation.Should().Throw<ArgumentException>();
-    }
-    
-    [Fact]
-    public void EmailSet_ShouldThrowArgumentOutOfRangeException_WhenTooLongEmailIsProvided()
-    {
-        //Act
-        Action creation = () => new Faker<Person>()
-            .CustomInstantiator(faker =>
-                Person.Create(
-                    userIdentityId: _userIdentityId,
-                    firstName: DefaultProperFirstName,
-                    lastName: DefaultProperLastName,
-                    email: faker.Person.Email.ClampLength(IContact.Constraints.EmailMaxLength + 1),
-                    phoneNumber: DefaultProperPhone,
-                    address: Address,
-                    defaultAdvertisementPickupAddress: PickupAddress,
-                    defaultAdvertisementContactInfo: ContactInfo
-                )).Generate();
-
-        //Assert
-        creation.Should().Throw<ArgumentOutOfRangeException>();
-    }
-
-    [Theory]
-    [ClassData(typeof(InvalidEmailData))]
-    public void EmailSet_ShouldThrowEmailInvalidFormatException_WhenInvalidEmailIsProvided(string invalidEmail)
-    {
-        //Act
-        Action creation = () => Person.Create(
-            userIdentityId: _userIdentityId,
-            firstName: DefaultProperFirstName,
-            lastName: DefaultProperLastName,
-            email: invalidEmail,
-            phoneNumber: DefaultProperPhone,
-            address: Address,
-            defaultAdvertisementPickupAddress: PickupAddress,
-            defaultAdvertisementContactInfo: ContactInfo
-        );
-
-        //Assert
-        creation.Should().Throw<FormatException>();
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData(" ")]
-    public void PhoneNumberSet_ShouldThrowPhoneNumberEmptyException_WhenEmptyPhoneNumberIsProvided(
-        string emptyPhoneNumber)
-    {
-        //Act
-        Action creation = () => Person.Create(
-            userIdentityId: _userIdentityId,
-            firstName: DefaultProperFirstName,
-            lastName: DefaultProperLastName,
-            email: DefaultProperEmail,
-            phoneNumber: emptyPhoneNumber,
-            address: Address,
-            defaultAdvertisementPickupAddress: PickupAddress,
-            defaultAdvertisementContactInfo: ContactInfo
-        );
-
-        //Assert
-        creation.Should().Throw<ArgumentException>();
-    }
-    
-    [Fact]
-    public void PhoneNumberSet_ShouldThrowArgumentOutOfRangeException_WhenPhoneNumberExceedsMaxLength()
-    {
-        //Arrange
-        string longPhoneNumber = new('1', IContact.Constraints.PhoneNumberMaxLength + 1);
-
-        //Act
-        Action creation = () => Person.Create(
-            userIdentityId: _userIdentityId,
-            firstName: DefaultProperFirstName,
-            lastName: DefaultProperLastName,
-            email: DefaultProperEmail,
-            phoneNumber: longPhoneNumber,
-            address: Address,
-            defaultAdvertisementPickupAddress: PickupAddress,
-            defaultAdvertisementContactInfo: ContactInfo
-        );
-
-        //Assert
-        creation.Should().Throw<ArgumentOutOfRangeException>();
-    }
-    
-    [Fact]
-    public void AddCat_ShouldAddCatToList_WhenValidCatIsProvided()
-    {
-        //Arrange
-        Person sut = Person.Create(
-            userIdentityId: _userIdentityId,
-            firstName: DefaultProperFirstName,
-            lastName: DefaultProperLastName,
-            email: DefaultProperEmail,
-            phoneNumber: DefaultProperPhone,
-            address: Address,
-            defaultAdvertisementPickupAddress: PickupAddress,
-            defaultAdvertisementContactInfo: ContactInfo
-        );
-        
-        //Act
-        Cat cat = new Faker<Cat>()
-            .CustomInstantiator( faker =>
-                Cat.Create(
-                    calculator: Substitute.For<ICatPriorityCalculator>(),
-                    person: sut,
-                    name: faker.Person.FirstName,
-                    medicalHelpUrgency: MedicalHelpUrgency.NoNeed,
-                    ageCategory: AgeCategory.Baby,
-                    behavior: Behavior.Friendly, 
-                    healthStatus: HealthStatus.Good
-                )).Generate();
-        
-        //Assert
-        sut.Cats.Should().Contain(cat);
-    }
-    
-    [Fact]
-    public void RemoveCat_ShouldRemoveCatFromList_WhenValidCatIsProvided()
-    {
-        //Arrange
-        Person sut = Person.Create(
-            userIdentityId: _userIdentityId,
-            firstName: DefaultProperFirstName,
-            lastName: DefaultProperLastName,
-            email: DefaultProperEmail,
-            phoneNumber: DefaultProperPhone,
-            address: Address,
-            defaultAdvertisementPickupAddress: PickupAddress,
-            defaultAdvertisementContactInfo: ContactInfo
-        );
-        Cat cat = new Faker<Cat>()
-            .CustomInstantiator( faker =>
-                Cat.Create(
-                    calculator: Substitute.For<ICatPriorityCalculator>(),
-                    person: sut,
-                    name: faker.Person.FirstName,
-                    medicalHelpUrgency: MedicalHelpUrgency.NoNeed,
-                    ageCategory: AgeCategory.Baby,
-                    behavior: Behavior.Friendly, 
-                    healthStatus: HealthStatus.Good
-                )).Generate();
-
-        //Act
-        sut.RemoveCat(cat);
-
-        //Assert
-        sut.Cats.Should().NotContain(cat);
     }
     
     [Fact]
@@ -444,86 +184,170 @@ public class PersonTests
         //Act
         Action creation = () => Person.Create(
             userIdentityId: emptyGuid,
-            firstName: DefaultProperFirstName,
-            lastName: DefaultProperLastName,
-            email: DefaultProperEmail,
-            phoneNumber: DefaultProperPhone,
-            address: Address,
+            firstName: _defaultProperFirstName,
+            lastName: _defaultProperLastName,
+            email: _defaultProperEmail,
+            phoneNumber: _defaultProperPhone,
+            residentalAddress: Address,
             defaultAdvertisementPickupAddress: PickupAddress,
-            defaultAdvertisementContactInfo: ContactInfo
+            defaultAdvertisementContactInfoEmail: _defaultProperEmail,
+            defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
         );
 
         //Assert
         creation.Should().Throw<ArgumentException>()
             .WithMessage("Provided empty guid. (Parameter 'UserIdentityId')");
     }
-
+    
     [Fact]
-    public void AddCat_ShouldNotAddUpDuplicatedCatToList_WhenValidCatIsProvided()
+    public void AddCat_ShouldAddCatToList_WhenValidCatIsProvided()
     {
         //Arrange
         Person sut = Person.Create(
-            _userIdentityId,
-            DefaultProperFirstName,
-            DefaultProperLastName,
-            DefaultProperEmail,
-            DefaultProperPhone,
-            Address,
-            PickupAddress,
-            ContactInfo
+            userIdentityId: _userIdentityId,
+            firstName: _defaultProperFirstName,
+            lastName: _defaultProperLastName,
+            email: _defaultProperEmail,
+            phoneNumber: _defaultProperPhone,
+            residentalAddress: Address,
+            defaultAdvertisementPickupAddress: PickupAddress,
+            defaultAdvertisementContactInfoEmail: _defaultProperEmail,
+            defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
         );
+        ICatPriorityCalculatorService calculatorService = Substitute.For<ICatPriorityCalculatorService>();
+        calculatorService.Calculate(Arg.Any<Cat>()).ReturnsForAnyArgs(420);
         
+        //Act
         Cat cat = new Faker<Cat>()
             .CustomInstantiator( faker =>
                 Cat.Create(
-                    Substitute.For<ICatPriorityCalculator>(),
-                    sut,
-                    faker.Person.FirstName,
-                    MedicalHelpUrgency.NoNeed,
-                    AgeCategory.Baby,
-                    Behavior.Friendly, 
-                    HealthStatus.Good
-                )).Generate();
-        
-        //Act
-        sut.AddCat(cat);
+                    priorityScoreCalculator: calculatorService,
+                    person: sut,
+                    name: CatName.Create(faker.Person.FirstName), 
+                    medicalHelpUrgency: MedicalHelpUrgency.NoNeed,
+                    ageCategory: AgeCategory.Baby,
+                    behavior: Behavior.Friendly, 
+                    healthStatus: HealthStatus.Good,
+                    additionalRequirements: Description.Create(faker.Lorem.Lines(2)),
+                    isCastrated: false))
+            .Generate();
         
         //Assert
-        sut.Cats.Count.Should().Be(1);
+        sut.Cats.Should().Contain(cat);
     }
     
     [Fact]
-    public void RemoveCat_ShouldNotDoAnythingUnexpectedToList_WhenValidCatIsProvided()
+    public void RemoveCat_ShouldRemoveCatFromList_WhenValidCatIsProvided()
     {
         //Arrange
         Person sut = Person.Create(
-            _userIdentityId,
-            DefaultProperFirstName,
-            DefaultProperLastName,
-            DefaultProperEmail,
-            DefaultProperPhone,
-            Address,
-            PickupAddress,
-            ContactInfo
+            userIdentityId: _userIdentityId,
+            firstName: _defaultProperFirstName,
+            lastName: _defaultProperLastName,
+            email: _defaultProperEmail,
+            phoneNumber: _defaultProperPhone,
+            residentalAddress: Address,
+            defaultAdvertisementPickupAddress: PickupAddress,
+            defaultAdvertisementContactInfoEmail: _defaultProperEmail,
+            defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
         );
-        
+        ICatPriorityCalculatorService calculatorService = Substitute.For<ICatPriorityCalculatorService>();
+        calculatorService.Calculate(Arg.Any<Cat>()).ReturnsForAnyArgs(420);
         Cat cat = new Faker<Cat>()
             .CustomInstantiator( faker =>
                 Cat.Create(
-                    Substitute.For<ICatPriorityCalculator>(),
-                    sut,
-                    faker.Person.FirstName,
-                    MedicalHelpUrgency.NoNeed,
-                    AgeCategory.Baby,
-                    Behavior.Friendly, 
-                    HealthStatus.Good
-                )).Generate();
-        sut.RemoveCat(cat);
+                    priorityScoreCalculator: calculatorService,
+                    person: sut,
+                    name: CatName.Create(faker.Person.FirstName), 
+                    medicalHelpUrgency: MedicalHelpUrgency.NoNeed,
+                    ageCategory: AgeCategory.Baby,
+                    behavior: Behavior.Friendly, 
+                    healthStatus: HealthStatus.Good,
+                    additionalRequirements: Description.Create(faker.Lorem.Lines(2)),
+                    isCastrated: false))
+            .Generate();
         
         //Act
         sut.RemoveCat(cat);
+
+        //Assert
+        sut.Cats.Should().NotContain(cat);
+    }
+
+    [Fact]
+    public void AddCat_ShouldThrowInvalidOperationException_WhenTheSameCatIsProvided()
+    {
+        //Arrange
+        Person sut = Person.Create(
+            userIdentityId: _userIdentityId,
+            firstName: _defaultProperFirstName,
+            lastName: _defaultProperLastName,
+            email: _defaultProperEmail,
+            phoneNumber: _defaultProperPhone,
+            residentalAddress: Address,
+            defaultAdvertisementPickupAddress: PickupAddress,
+            defaultAdvertisementContactInfoEmail: _defaultProperEmail,
+            defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
+        );
+        ICatPriorityCalculatorService calculatorService = Substitute.For<ICatPriorityCalculatorService>();
+        calculatorService.Calculate(Arg.Any<Cat>()).ReturnsForAnyArgs(420);
+        Cat cat = new Faker<Cat>()
+            .CustomInstantiator( faker =>
+                Cat.Create(
+                    priorityScoreCalculator: calculatorService,
+                    person: sut,
+                    name: CatName.Create(faker.Person.FirstName), 
+                    medicalHelpUrgency: MedicalHelpUrgency.NoNeed,
+                    ageCategory: AgeCategory.Baby,
+                    behavior: Behavior.Friendly, 
+                    healthStatus: HealthStatus.Good,
+                    additionalRequirements: Description.Create(faker.Lorem.Lines(2)),
+                    isCastrated: false))
+            .Generate();
+        
+        //Act
+        Action operation = () => sut.AddCat(cat);
         
         //Assert
-        sut.Cats.Count.Should().Be(0);
+        operation.Should().ThrowExactly<InvalidOperationException>();
+    }
+    
+    [Fact]
+    public void RemoveCat_ShouldThrowInvalidOperationException_WhenTheSameCatIsProvided()
+    {
+        //Arrange
+        Person sut = Person.Create(
+            userIdentityId: _userIdentityId,
+            firstName: _defaultProperFirstName,
+            lastName: _defaultProperLastName,
+            email: _defaultProperEmail,
+            phoneNumber: _defaultProperPhone,
+            residentalAddress: Address,
+            defaultAdvertisementPickupAddress: PickupAddress,
+            defaultAdvertisementContactInfoEmail: _defaultProperEmail,
+            defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
+        );
+        ICatPriorityCalculatorService calculatorService = Substitute.For<ICatPriorityCalculatorService>();
+        calculatorService.Calculate(Arg.Any<Cat>()).ReturnsForAnyArgs(420);
+        Cat cat = new Faker<Cat>()
+            .CustomInstantiator( faker =>
+                Cat.Create(
+                    priorityScoreCalculator: calculatorService,
+                    person: sut,
+                    name: CatName.Create(faker.Person.FirstName), 
+                    medicalHelpUrgency: MedicalHelpUrgency.NoNeed,
+                    ageCategory: AgeCategory.Baby,
+                    behavior: Behavior.Friendly, 
+                    healthStatus: HealthStatus.Good,
+                    additionalRequirements: Description.Create(faker.Lorem.Lines(2)),
+                    isCastrated: false))
+            .Generate();
+        sut.RemoveCat(cat);
+        
+        //Act
+        Action operation = () => sut.RemoveCat(cat);
+        
+        //Assert
+        operation.Should().ThrowExactly<InvalidOperationException>();
     }
 }

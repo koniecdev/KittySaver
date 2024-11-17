@@ -1,7 +1,6 @@
 ﻿using System.Security.Claims;
-using KittySaver.Api.Shared.Infrastructure.Services;
 
-namespace KittySaver.Api.Shared.Security;
+namespace KittySaver.Api.Shared.Infrastructure.Services;
 
 public interface ICurrentUserService
 {

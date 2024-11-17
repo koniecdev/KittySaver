@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
-using KittySaver.Api.Shared.Domain.Common.Interfaces;
-using KittySaver.Api.Shared.Domain.Entites;
+using KittySaver.Api.Shared.Domain.Persons;
 using KittySaver.Api.Shared.Domain.ValueObjects;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
@@ -27,8 +26,8 @@ public sealed class UpdatePerson : IEndpoint
         string? DefaultAdvertisementPickupAddressState,
         string DefaultAdvertisementPickupAddressZipCode,
         string DefaultAdvertisementPickupAddressCity,
-        string? DefaultAdvertisementPickupAddressStreet,
-        string? DefaultAdvertisementPickupAddressBuildingNumber,
+        string DefaultAdvertisementPickupAddressStreet,
+        string DefaultAdvertisementPickupAddressBuildingNumber,
         string DefaultAdvertisementContactInfoEmail,
         string DefaultAdvertisementContactInfoPhoneNumber);
 
@@ -48,8 +47,8 @@ public sealed class UpdatePerson : IEndpoint
         string? DefaultAdvertisementPickupAddressState,
         string DefaultAdvertisementPickupAddressZipCode,
         string DefaultAdvertisementPickupAddressCity,
-        string? DefaultAdvertisementPickupAddressStreet,
-        string? DefaultAdvertisementPickupAddressBuildingNumber,
+        string DefaultAdvertisementPickupAddressStreet,
+        string DefaultAdvertisementPickupAddressBuildingNumber,
         string DefaultAdvertisementContactInfoEmail,
         string DefaultAdvertisementContactInfoPhoneNumber) : ICommand;
 
@@ -62,91 +61,96 @@ public sealed class UpdatePerson : IEndpoint
         {
             _db = db;
             RuleFor(x => x.IdOrUserIdentityId).NotEmpty();
-            
+
             RuleFor(x => x.FirstName)
                 .NotEmpty()
-                .MaximumLength(Person.Constraints.FirstNameMaxLength);
-            
+                .MaximumLength(FirstName.MaxLength);
+
             RuleFor(x => x.LastName)
                 .NotEmpty()
-                .MaximumLength(Person.Constraints.LastNameMaxLength);
-            
+                .MaximumLength(LastName.MaxLength);
+
             RuleFor(x => x.Email)
                 .NotEmpty()
-                .MaximumLength(IContact.Constraints.EmailMaxLength)
-                .Matches(IContact.Constraints.EmailPattern)
+                .MaximumLength(Email.MaxLength)
+                .Matches(Email.RegexPattern)
                 .MustAsync(async (command, email, ct) => await IsEmailUniqueAsync(command, email, ct))
                 .WithMessage("'Email' is already used by another user.");
-            
+
             RuleFor(x => x.PhoneNumber)
                 .NotEmpty()
-                .MaximumLength(IContact.Constraints.PhoneNumberMaxLength)
+                .MaximumLength(PhoneNumber.MaxLength)
                 .MustAsync(async (command, phoneNumber, ct) => await IsPhoneNumberUniqueAsync(command, phoneNumber, ct))
                 .WithMessage("'Phone Number' is already used by another user.");
-            
+
             RuleFor(x => x.DefaultAdvertisementContactInfoPhoneNumber)
                 .NotEmpty()
-                .MaximumLength(IContact.Constraints.PhoneNumberMaxLength);
+                .MaximumLength(PhoneNumber.MaxLength);
 
             RuleFor(x => x.DefaultAdvertisementContactInfoEmail)
                 .NotEmpty()
-                .MaximumLength(IContact.Constraints.EmailMaxLength)
-                .Matches(IContact.Constraints.EmailPattern);
-            
+                .MaximumLength(Email.MaxLength)
+                .Matches(Email.RegexPattern);
+
             RuleFor(x => x.AddressCountry)
                 .NotEmpty()
-                .MaximumLength(IAddress.Constraints.CountryMaxLength);
-            
+                .MaximumLength(Address.CountryMaxLength);
+
             RuleFor(x => x.AddressState)
-                .MaximumLength(IAddress.Constraints.StateMaxLength);
-            
+                .MaximumLength(Address.StateMaxLength);
+
             RuleFor(x => x.AddressZipCode)
                 .NotEmpty()
-                .MaximumLength(IAddress.Constraints.ZipCodeMaxLength);
-            
+                .MaximumLength(Address.ZipCodeMaxLength);
+
             RuleFor(x => x.AddressCity)
                 .NotEmpty()
-                .MaximumLength(IAddress.Constraints.CityMaxLength);
-            
+                .MaximumLength(Address.CityMaxLength);
+
             RuleFor(x => x.AddressStreet)
                 .NotEmpty()
-                .MaximumLength(IAddress.Constraints.StreetMaxLength);
-            
+                .MaximumLength(Address.StreetMaxLength);
+
             RuleFor(x => x.AddressBuildingNumber)
                 .NotEmpty()
-                .MaximumLength(IAddress.Constraints.BuildingNumberMaxLength);
-            
+                .MaximumLength(Address.BuildingNumberMaxLength);
+
             RuleFor(x => x.DefaultAdvertisementPickupAddressCountry)
                 .NotEmpty()
-                .MaximumLength(IAddress.Constraints.CountryMaxLength);
-            
+                .MaximumLength(Address.CountryMaxLength);
+
             RuleFor(x => x.DefaultAdvertisementPickupAddressState)
-                .MaximumLength(IAddress.Constraints.StateMaxLength);
-            
+                .MaximumLength(Address.StateMaxLength);
+
             RuleFor(x => x.DefaultAdvertisementPickupAddressZipCode)
                 .NotEmpty()
-                .MaximumLength(IAddress.Constraints.ZipCodeMaxLength);
-            
+                .MaximumLength(Address.ZipCodeMaxLength);
+
             RuleFor(x => x.DefaultAdvertisementPickupAddressCity)
                 .NotEmpty()
-                .MaximumLength(IAddress.Constraints.CityMaxLength);
-            
+                .MaximumLength(Address.CityMaxLength);
+
             RuleFor(x => x.DefaultAdvertisementPickupAddressStreet)
-                .MaximumLength(IAddress.Constraints.StreetMaxLength);
-            
+                .MaximumLength(Address.StreetMaxLength);
+
             RuleFor(x => x.DefaultAdvertisementPickupAddressBuildingNumber)
-                .MaximumLength(IAddress.Constraints.BuildingNumberMaxLength);
+                .MaximumLength(Address.BuildingNumberMaxLength);
         }
-        
-        private async Task<bool> IsPhoneNumberUniqueAsync(UpdatePersonCommand command, string phone, CancellationToken ct) 
+
+        private async Task<bool> IsPhoneNumberUniqueAsync(UpdatePersonCommand command, string phone,
+            CancellationToken ct)
             => !await _db.Persons
                 .AsNoTracking()
-                .AnyAsync(x=>x.PhoneNumber == phone && x.Id != command.IdOrUserIdentityId && x.UserIdentityId != command.IdOrUserIdentityId, ct);
-        
-        private async Task<bool> IsEmailUniqueAsync(UpdatePersonCommand command, string email, CancellationToken ct) 
+                .AnyAsync(
+                    x => x.PhoneNumber.Value == phone && x.Id != command.IdOrUserIdentityId &&
+                         x.UserIdentityId != command.IdOrUserIdentityId, ct);
+
+        private async Task<bool> IsEmailUniqueAsync(UpdatePersonCommand command, string email, CancellationToken ct)
             => !await _db.Persons
                 .AsNoTracking()
-                .AnyAsync(x=> x.Email == email && x.Id != command.IdOrUserIdentityId && x.UserIdentityId != command.IdOrUserIdentityId, ct);
+                .AnyAsync(
+                    x => x.Email.Value == email && x.Id != command.IdOrUserIdentityId &&
+                         x.UserIdentityId != command.IdOrUserIdentityId, ct);
     }
 
     internal sealed class UpdatePersonCommandHandler(ApplicationDbContext db)
@@ -154,15 +158,20 @@ public sealed class UpdatePerson : IEndpoint
     {
         public async Task Handle(UpdatePersonCommand request, CancellationToken cancellationToken)
         {
-            Person person = await db.Persons
-                                .Where(x => 
-                                    x.Id == request.IdOrUserIdentityId
-                                    || x.UserIdentityId == request.IdOrUserIdentityId)
-                                .Include(x => x.Cats)
-                                .FirstOrDefaultAsync(cancellationToken)
-                            ?? throw new NotFoundExceptions.PersonNotFoundException(request.IdOrUserIdentityId);
-            
-            Address address = new()
+            Person person =
+                await db.Persons
+                    .Where(x =>
+                        x.Id == request.IdOrUserIdentityId
+                        || x.UserIdentityId == request.IdOrUserIdentityId)
+                    .Include(x => x.Cats)
+                    .FirstOrDefaultAsync(cancellationToken)
+                ?? throw new NotFoundExceptions.PersonNotFoundException(request.IdOrUserIdentityId);
+
+            FirstName firstName = FirstName.Create(request.FirstName);
+            LastName lastName = LastName.Create(request.LastName);
+            Email email = Email.Create(request.Email);
+            PhoneNumber phoneNumber = PhoneNumber.Create(request.PhoneNumber);
+            Address residentalAddress = new()
             {
                 Country = request.AddressCountry,
                 State = request.AddressState,
@@ -171,8 +180,7 @@ public sealed class UpdatePerson : IEndpoint
                 Street = request.AddressStreet,
                 BuildingNumber = request.AddressBuildingNumber
             };
-            
-            PickupAddress defaultAdvertisementPickupAddress = new()
+            Address defaultAdvertisementPickupAddress = new()
             {
                 Country = request.DefaultAdvertisementPickupAddressCountry,
                 State = request.DefaultAdvertisementPickupAddressState,
@@ -181,21 +189,19 @@ public sealed class UpdatePerson : IEndpoint
                 Street = request.DefaultAdvertisementPickupAddressStreet,
                 BuildingNumber = request.DefaultAdvertisementPickupAddressBuildingNumber
             };
+            Email defaultAdvertisementContactInfoEmail = Email.Create(request.DefaultAdvertisementContactInfoEmail);
+            PhoneNumber defaultAdvertisementContactInfoPhoneNumber =
+                PhoneNumber.Create(request.DefaultAdvertisementContactInfoPhoneNumber);
 
-            ContactInfo defaultAdvertisementContactInfo = new()
-            {
-                Email = request.DefaultAdvertisementContactInfoEmail,
-                PhoneNumber = request.DefaultAdvertisementContactInfoPhoneNumber
-            };
-            
-            person.FirstName = request.FirstName;
-            person.LastName = request.LastName;
-            person.Email = request.Email;
-            person.PhoneNumber = request.PhoneNumber;
-            person.Address = address;
+            person.FirstName = firstName;
+            person.LastName = lastName;
+            person.Email = email;
+            person.PhoneNumber = phoneNumber;
+            person.ResidentalAddress = residentalAddress;
             person.DefaultAdvertisementsPickupAddress = defaultAdvertisementPickupAddress;
-            person.DefaultAdvertisementsContactInfo = defaultAdvertisementContactInfo;
-            
+            person.DefaultAdvertisementsContactInfoEmail = defaultAdvertisementContactInfoEmail;
+            person.DefaultAdvertisementsContactInfoPhoneNumber = defaultAdvertisementContactInfoPhoneNumber;
+
             await db.SaveChangesAsync(cancellationToken);
         }
     }
