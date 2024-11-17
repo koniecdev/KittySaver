@@ -1,12 +1,9 @@
-﻿using System.Reflection;
-using Bogus;
+﻿using Bogus;
 using FluentAssertions;
 using KittySaver.Api.Shared.Domain.Advertisement;
-using KittySaver.Api.Shared.Domain.Advertisement.Events;
 using KittySaver.Api.Shared.Domain.Common.Primitives.Enums;
 using KittySaver.Api.Shared.Domain.Persons;
 using KittySaver.Api.Shared.Domain.ValueObjects;
-using NSubstitute;
 using Person = KittySaver.Api.Shared.Domain.Persons.Person;
 
 namespace KittySaver.Api.Tests.Unit.Advertisements;
@@ -88,7 +85,7 @@ public class AdvertisementTests
         //Act
         Advertisement advertisement = Advertisement.Create(
             currentDate: Date,
-            personId: Person.Id,
+            person: Person,
             catsIdsToAssign: cats.Select(x=>x.Id),
             pickupAddress: pickupAddress,
             contactInfoEmail: contactInfoEmail,
@@ -105,8 +102,6 @@ public class AdvertisementTests
         advertisement.Description.Value.Should().Be("Lorem ipsum");
         advertisement.Status.Should().Be(Advertisement.AdvertisementStatus.Active);
         advertisement.PersonId.Should().Be(Person.Id);
-        advertisement.GetDomainEvents().Count.Should().Be(1);
-        advertisement.GetDomainEvents().First().Should().BeOfType<AdvertisementCreatedDomainEvent>();
     }
 
     [Fact]
@@ -122,7 +117,7 @@ public class AdvertisementTests
         {
             Advertisement.Create(
                 currentDate: Date,
-                personId: Person.Id,
+                person: Person,
                 catsIdsToAssign: [],
                 pickupAddress: pickupAddress,
                 contactInfoEmail: contactInfoEmail,
@@ -142,7 +137,7 @@ public class AdvertisementTests
         //Arrange
         Advertisement advertisement = Advertisement.Create(
                 currentDate: Date,
-                personId: Person.Id,
+                person: Person,
                 catsIdsToAssign: [CatGenerator.Generate().Id],
                 pickupAddress: PickupAddressGenerator.Generate(),
                 contactInfoEmail: ContactInfoEmailGenerator.Generate(),
@@ -166,7 +161,7 @@ public class AdvertisementTests
 
         Advertisement advertisement = Advertisement.Create(
             currentDate: Date,
-            personId: Person.Id,
+            person: Person,
             catsIdsToAssign: [cat.Id],
             pickupAddress: PickupAddressGenerator,
             contactInfoEmail: ContactInfoEmailGenerator.Generate(),
