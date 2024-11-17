@@ -1,7 +1,9 @@
-﻿using KittySaver.Api.Shared.Domain.Entites;
-using KittySaver.Api.Shared.Domain.Entites.Common;
+﻿using KittySaver.Api.Shared.Domain.Advertisement;
+using KittySaver.Api.Shared.Domain.Common.Primitives;
+using KittySaver.Api.Shared.Domain.Persons;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Security;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using SmartEnum.EFCore;
@@ -11,7 +13,8 @@ namespace KittySaver.Api.Shared.Persistence;
 public sealed class ApplicationDbContext(
     DbContextOptions<ApplicationDbContext> options,
     IDateTimeService dateTimeProvider,
-    ICurrentUserService currentUserService) 
+    ICurrentUserService currentUserService,
+    IPublisher? publisher = null)
     : DbContext(options)
 {
     public DbSet<Person> Persons => Set<Person>();
@@ -28,7 +31,7 @@ public sealed class ApplicationDbContext(
         base.ConfigureConventions(configurationBuilder);
     }
 
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         foreach (EntityEntry<AuditableEntity> entity in ChangeTracker.Entries<AuditableEntity>())
         {
@@ -49,6 +52,37 @@ public sealed class ApplicationDbContext(
                     break;
             }
         }
-        return base.SaveChangesAsync(cancellationToken);
+
+        if (publisher is null)
+        {
+            return await base.SaveChangesAsync(cancellationToken);
+        }
+        await PublishDomainEvents(cancellationToken);
+        
+        return await base.SaveChangesAsync(cancellationToken);
+    }
+    
+    private async Task PublishDomainEvents(CancellationToken cancellationToken)
+    {
+        if (publisher is null)
+        {
+            return;
+        }
+        
+        List<EntityEntry<AggregateRoot>> aggregateRootsEntryListQuery = ChangeTracker
+            .Entries<AggregateRoot>()
+            .Where(entityEntry => entityEntry.Entity.GetDomainEvents().Count != 0)
+            .ToList();
+
+        List<DomainEvent> domainEvents = aggregateRootsEntryListQuery.SelectMany(entityEntry => entityEntry.Entity.GetDomainEvents()).ToList();
+
+        foreach (EntityEntry<AggregateRoot> aggregateRootEntry in aggregateRootsEntryListQuery)
+        {
+            aggregateRootEntry.Entity.ClearDomainEvents();
+        }
+
+        IEnumerable<Task> tasks = domainEvents.Select(domainEvent => publisher.Publish(domainEvent, cancellationToken));
+
+        await Task.WhenAll(tasks);
     }
 }
