@@ -10,7 +10,7 @@ internal sealed class DomainExceptionHandler(ILogger<DomainExceptionHandler> log
         Exception exception,
         CancellationToken cancellationToken)
     {
-        if (exception is not ArgumentException or ArgumentOutOfRangeException or FormatException)
+        if (exception is not (ArgumentException or ArgumentOutOfRangeException or FormatException or InvalidOperationException))
         {
             return false;
         }
