@@ -24,12 +24,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICurrentEnvironmentService, CurrentEnvironmentService>();
         services.AddScoped<IDateTimeService, DefaultDateTimeService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
-        services.AddScoped<ICatPriorityCalculator, DefaultCatPriorityCalculator>();
+        services.AddScoped<ICatPriorityCalculatorService, DefaultCatPriorityCalculatorService>();
         services.AddValidatorsFromAssembly(assembly);
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssembly(assembly);
             cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+            cfg.NotificationPublisher = new TaskWhenAllPublisher();
         });
         AddAuth();
 
