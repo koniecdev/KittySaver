@@ -176,6 +176,7 @@ internal sealed class AdvertisementConfiguration : IEntityTypeConfiguration<Adve
         builder.HasMany<Cat>()
             .WithOne()
             .HasForeignKey(cat => cat.AdvertisementId)
+            .OnDelete(DeleteBehavior.NoAction)
             .IsRequired(false);
 
         builder.Property(x => x.PersonId).IsRequired();

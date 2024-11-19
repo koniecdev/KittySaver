@@ -371,7 +371,8 @@ namespace KittySaver.Api.Migrations
                 {
                     b.HasOne("KittySaver.Api.Shared.Domain.Advertisement.Advertisement", null)
                         .WithMany()
-                        .HasForeignKey("AdvertisementId");
+                        .HasForeignKey("AdvertisementId")
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("KittySaver.Api.Shared.Domain.Persons.Person", null)
                         .WithMany("Cats")
