@@ -26,9 +26,15 @@ public sealed class AdvertisementService
     
     public void RecalculatePriorityScore()
     {
-        IEnumerable<Guid> catsAssignedToAdvertisement = _person.Cats
+        List<Guid> catsAssignedToAdvertisement = _person.Cats
             .Where(x => x.AdvertisementId == _advertisement.Id)
-            .Select(x=>x.Id);
+            .Select(x=>x.Id)
+            .ToList();
+
+        if (catsAssignedToAdvertisement.Count == 0)
+        {
+            return;
+        }
         
         double catsToAssignToAdvertisementHighestPriorityScore = _person.GetHighestPriorityScoreFromGivenCats(catsAssignedToAdvertisement);
         _advertisement.PriorityScore = catsToAssignToAdvertisementHighestPriorityScore;
