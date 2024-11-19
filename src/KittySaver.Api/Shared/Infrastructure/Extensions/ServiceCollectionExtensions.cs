@@ -30,7 +30,6 @@ public static class ServiceCollectionExtensions
         {
             cfg.RegisterServicesFromAssembly(assembly);
             cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
-            cfg.NotificationPublisher = new TaskWhenAllPublisher();
         });
         AddAuth();
 
