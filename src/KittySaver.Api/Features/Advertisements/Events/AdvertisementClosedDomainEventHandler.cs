@@ -33,7 +33,5 @@ public class AdvertisementClosedDomainEventHandler(ApplicationDbContext db)
         {
             cat.MarkAsAdopted();
         }
-
-        await db.SaveChangesAsync(cancellationToken);
     }
 }
