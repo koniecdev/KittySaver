@@ -1,4 +1,7 @@
-﻿using System.Text;
+﻿using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
+using Shared;
 
 namespace KittySaver.Api.Tests.Integration.Helpers;
 
@@ -19,5 +22,13 @@ public static class Extensions
             result.Append(character);
         }
         return result.ToString();
+    }
+    
+    public static async Task<ApiResponses.CreatedWithIdResponse> GetIdResponseFromResponseMessageAsync(this HttpResponseMessage responseMessage)
+    {
+        ApiResponses.CreatedWithIdResponse response =
+            await responseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
+            ?? throw new JsonException();
+        return response;
     }
 }
