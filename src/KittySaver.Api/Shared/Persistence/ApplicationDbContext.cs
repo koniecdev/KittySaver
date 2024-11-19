@@ -81,8 +81,9 @@ public sealed class ApplicationDbContext(
             aggregateRootEntry.Entity.ClearDomainEvents();
         }
 
-        IEnumerable<Task> tasks = domainEvents.Select(domainEvent => publisher.Publish(domainEvent, cancellationToken));
-
-        await Task.WhenAll(tasks);
+        foreach (DomainEvent domainEvent in domainEvents)
+        {
+            await publisher.Publish(domainEvent, cancellationToken);
+        }
     }
 }
