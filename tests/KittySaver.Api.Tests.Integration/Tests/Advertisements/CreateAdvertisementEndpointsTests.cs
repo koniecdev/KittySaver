@@ -312,7 +312,6 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
 
         //Assert
         responseMessage.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        
     }
 
     [Fact]

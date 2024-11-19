@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Shared.Domain.Advertisement;
+using KittySaver.Api.Shared.Domain.Persons;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
 using MediatR;
@@ -25,9 +26,20 @@ public sealed class DeleteAdvertisement : IEndpoint
     {
         public async Task Handle(DeleteAdvertisementCommand request, CancellationToken cancellationToken)
         {
-            Advertisement advertisement = await db.Advertisements
-                .FirstOrDefaultAsync(x=> x.Id == request.Id, cancellationToken)
-                ?? throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);
+            Advertisement advertisement = 
+                await db.Advertisements
+                    .FirstOrDefaultAsync(x=> x.Id == request.Id, cancellationToken)
+                    ?? throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);
+            Person person = 
+                await db.Persons
+                    .Include(x=>x.Cats)
+                    .FirstOrDefaultAsync(x=> x.Id == advertisement.PersonId, cancellationToken)
+                    ?? throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);
+            IEnumerable<Cat> catsThatAreAssignedToAdvertisement = person.Cats.Where(x => x.AdvertisementId == advertisement.Id);
+            foreach (Cat cat in catsThatAreAssignedToAdvertisement)
+            {
+                person.UnassignCatFromAdvertisement(cat.Id);
+            }
             db.Remove(advertisement);
             await db.SaveChangesAsync(cancellationToken);
         }
