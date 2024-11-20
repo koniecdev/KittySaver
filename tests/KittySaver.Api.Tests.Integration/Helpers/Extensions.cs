@@ -31,4 +31,10 @@ public static class Extensions
             ?? throw new JsonException();
         return response;
     }
+    public static async Task<TResponse> GetResponseFromResponseMessageAsync<TResponse>(this HttpResponseMessage responseMessage)
+    {
+        TResponse response = await responseMessage.Content.ReadFromJsonAsync<TResponse>()
+                             ?? throw new JsonException();
+        return response;
+    }
 }
