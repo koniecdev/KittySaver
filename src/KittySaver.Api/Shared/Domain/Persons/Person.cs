@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using KittySaver.Api.Shared.Domain.Advertisements;
 using KittySaver.Api.Shared.Domain.Common.Primitives;
 using KittySaver.Api.Shared.Domain.Common.Primitives.Enums;
 using KittySaver.Api.Shared.Domain.Persons.Events;
@@ -129,23 +129,12 @@ public sealed class Person : AggregateRoot
                 break;
         }
     }
-
-    public void AssignCatToDraftAdvertisement(Guid advertisementId, Guid catId)
+    public void AssignCatToAdvertisement(Guid advertisementId, Guid catId)
     {
         Cat cat = Cats.FirstOrDefault(c => c.Id == catId)
                   ?? throw new NotFoundExceptions.CatNotFoundException(catId);
         
         cat.AssignAdvertisement(advertisementId);
-    }
-    
-    public void AssignCatToActiveAdvertisement(Guid advertisementId, Guid catId)
-    {
-        Cat cat = Cats.FirstOrDefault(c => c.Id == catId)
-                  ?? throw new NotFoundExceptions.CatNotFoundException(catId);
-        
-        cat.AssignAdvertisement(advertisementId);
-        
-        RaiseDomainEvent(new AssignedToAdvertisementCatStatusChangedDomainEvent(cat.AdvertisementId!.Value));
     }
 
     public void UnassignCatFromAdvertisement(Guid catId)
@@ -180,15 +169,26 @@ public sealed class Person : AggregateRoot
         }
     }
 
+    public void ValidateCatsOwnership(IEnumerable<Guid> catIds)
+    {
+        HashSet<Guid> catIdsFromPersonCats = Cats.Select(cat => cat.Id).ToHashSet();
+        if (!catIds.All(catId => catIdsFromPersonCats.Contains(catId)))
+        {
+            throw new ArgumentException("One or more provided cats do not belong to provided person.", nameof(catIds));
+        }
+    }
+
+    private IEnumerable<Cat> GetCats(IEnumerable<Guid> catIds)
+    {
+        IEnumerable<Cat> cats = Cats.Where(c => catIds.Contains(c.Id));
+        return cats;
+    }
+    
     public double GetHighestPriorityScoreFromGivenCats(IEnumerable<Guid> catsIds)
     {
         List<Guid> catsIdsList = catsIds.ToList();
 
-        HashSet<Guid> catIdsFromPersonCats = Cats.Select(cat => cat.Id).ToHashSet();
-        if (!catsIdsList.All(catId => catIdsFromPersonCats.Contains(catId)))
-        {
-            throw new ArgumentException("One or more provided cats do not belong to provided person.", nameof(catsIds));
-        }
+        ValidateCatsOwnership(catsIdsList);
 
         double highestPriorityScore = Cats
             .Where(cat => catsIdsList.Contains(cat.Id))
@@ -225,7 +225,7 @@ internal sealed class PersonConfiguration : IEntityTypeConfiguration<Person>
             .OnDelete(DeleteBehavior.Cascade)
             .IsRequired();
 
-        builder.HasMany<Advertisement.Advertisement>()
+        builder.HasMany<Advertisement>()
             .WithOne()
             .HasForeignKey(advertisement => advertisement.PersonId)
             .IsRequired();
