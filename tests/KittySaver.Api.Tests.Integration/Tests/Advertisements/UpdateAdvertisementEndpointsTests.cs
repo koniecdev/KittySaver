@@ -67,7 +67,7 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
                 ));
     
     [Fact]
-    public async Task UpdatePerson_ShouldReturnSuccess_WhenValidDataIsProvided()
+    public async Task UpdateAdvertisement_ShouldReturnSuccess_WhenValidDataIsProvided()
     {
         //Arrange
         CreatePerson.CreatePersonRequest? createPersonRequest = _createPersonRequestGenerator.Generate();
@@ -236,7 +236,7 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
     }
     
     [Fact]
-    public async Task UpdatePerson_ShouldReturnNotFound_WhenNonRegisteredUserIdProvided()
+    public async Task UpdateAdvertisement_ShouldReturnNotFound_WhenNonRegisteredUserIdProvided()
     {
         //Arrange
         Guid randomId = Guid.NewGuid();

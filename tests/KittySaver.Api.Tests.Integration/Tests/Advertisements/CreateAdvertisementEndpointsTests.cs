@@ -218,9 +218,9 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
 
         //Assert
         responseMessage.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        ProblemDetails? notFoundProblemDetails = await responseMessage.Content.ReadFromJsonAsync<ProblemDetails>();
-        notFoundProblemDetails.Should().NotBeNull();
-        notFoundProblemDetails!.Status.Should().Be(StatusCodes.Status404NotFound);
+        ProblemDetails? problemDetails = await responseMessage.Content.ReadFromJsonAsync<ProblemDetails>();
+        problemDetails.Should().NotBeNull();
+        problemDetails!.Status.Should().Be(StatusCodes.Status404NotFound);
     }
 
     [Theory]

@@ -98,9 +98,7 @@ public class DeleteAdvertisementEndpointsTests : IAsyncLifetime
                     ));
 
         HttpResponseMessage advertisementResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/advertisements", request);
-        ApiResponses.CreatedWithIdResponse advertisementResponse =
-            await advertisementResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
+        ApiResponses.CreatedWithIdResponse advertisementResponse = await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
         
         //Act
         HttpResponseMessage deleteResponseMessage = await _httpClient.DeleteAsync($"api/v1/advertisements/{advertisementResponse.Id}");
