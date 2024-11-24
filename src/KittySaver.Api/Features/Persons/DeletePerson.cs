@@ -25,14 +25,12 @@ public sealed class DeletePerson : IEndpoint
     {
         public async Task Handle(DeletePersonCommand request, CancellationToken cancellationToken)
         {
-            //Potential GetPerson in PersonRepository
             Person person = await db.Persons
                 .Where(x => x.Id == request.IdOrUserIdentityId || x.UserIdentityId == request.IdOrUserIdentityId)
                 .Include(x => x.Cats)
                 .FirstOrDefaultAsync(cancellationToken)
                 ?? throw new NotFoundExceptions.PersonNotFoundException(request.IdOrUserIdentityId);
             
-            //Potential DeletePerson in PersonRepository
             db.Persons.Remove(person);
             person.AnnounceDeletion();
             
