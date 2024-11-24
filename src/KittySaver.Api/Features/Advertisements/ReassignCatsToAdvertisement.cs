@@ -37,8 +37,8 @@ public sealed class ReassignCatsToAdvertisement : IEndpoint
                                 .Include(x => x.Cats)
                                 .FirstAsync(x => x.Id == advertisement.PersonId, cancellationToken);
 
-            CatAdvertisementAssignmentService catAdvertisementAssignmentService = new();
-            catAdvertisementAssignmentService.ReplaceCatsOfAdvertisement(person, advertisement, request.CatIds);
+            AdvertisementService advertisementService = new();
+            advertisementService.ReplaceCatsOfAdvertisement(person, advertisement, request.CatIds);
             
             await db.SaveChangesAsync(cancellationToken);
         }

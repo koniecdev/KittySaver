@@ -22,7 +22,7 @@ public class AssignedToAdvertisementCatStatusChangedDomainEventHandler(Applicati
             .Include(x => x.Cats)
             .FirstAsync(cancellationToken);
         
-        AdvertisementService advertisementService = AdvertisementService.Create(advertisement, person);
-        advertisementService.RecalculatePriorityScore();
+        AdvertisementService advertisementService = new();
+        advertisementService.RecalculatePriorityScore(person, advertisement);
     }
 }

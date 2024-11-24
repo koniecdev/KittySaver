@@ -35,8 +35,8 @@ public sealed class Advertisement : AggregateRoot
             description: description,
             expiresOn: expiresOn);
         
-        CatAdvertisementAssignmentService catAdvertisementAssignmentService = new();
-        catAdvertisementAssignmentService.AssignCatsToAdvertisement(person, advertisement, catsIdsToAssignList);
+        AdvertisementService advertisementService = new();
+        advertisementService.AssignCatsToAdvertisement(person, advertisement, catsIdsToAssignList);
 
         advertisement.Status = AdvertisementStatus.Active;
         return advertisement;
