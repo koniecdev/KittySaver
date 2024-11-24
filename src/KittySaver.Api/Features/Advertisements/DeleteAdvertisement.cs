@@ -30,17 +30,8 @@ public sealed class DeleteAdvertisement : IEndpoint
                 await db.Advertisements
                     .FirstOrDefaultAsync(x=> x.Id == request.Id, cancellationToken)
                     ?? throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);
-            Person person = 
-                await db.Persons
-                    .Include(x=>x.Cats)
-                    .FirstOrDefaultAsync(x=> x.Id == advertisement.PersonId, cancellationToken)
-                    ?? throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);
-            IEnumerable<Cat> catsThatAreAssignedToAdvertisement = person.Cats.Where(x => x.AdvertisementId == advertisement.Id);
-            foreach (Cat cat in catsThatAreAssignedToAdvertisement)
-            {
-                person.UnassignCatFromAdvertisement(cat.Id);
-            }
             db.Remove(advertisement);
+            advertisement.AnnounceDeletion();
             await db.SaveChangesAsync(cancellationToken);
         }
     }
