@@ -85,7 +85,6 @@ public sealed class Advertisement : AggregateRoot
 
     public DateTimeOffset ExpiresOn { get; private set; }
 
-
     public double PriorityScore
     {
         get => _priorityScore;
@@ -93,8 +92,6 @@ public sealed class Advertisement : AggregateRoot
             ? throw new ArgumentException(ErrorMessages.ZeroPriorityScore, nameof(PriorityScore))
             : value;
     }
-
-    public Description Description { get; set; }
 
     public required Guid PersonId
     {
@@ -108,10 +105,26 @@ public sealed class Advertisement : AggregateRoot
             _personId = value;
         }
     }
+    public Description Description { get; private set; }
+    public Address PickupAddress { get; private set; }
+    public Email ContactInfoEmail { get; private set; }
+    public PhoneNumber ContactInfoPhoneNumber { get; private set; }
+
+    public void ChangeDescription(Description description)
+    {
+        Description = description;
+    }
     
-    public required Address PickupAddress { get; set; }
-    public required Email ContactInfoEmail { get; set; }
-    public required PhoneNumber ContactInfoPhoneNumber { get; set; }
+    public void ChangePickupAddress(Address pickupAddress)
+    {
+        PickupAddress = pickupAddress;
+    }
+
+    public void ChangeContactInfo(Email contactInfoEmail, PhoneNumber contactInfoPhoneNumber)
+    {
+        ContactInfoEmail = contactInfoEmail;
+        ContactInfoPhoneNumber = contactInfoPhoneNumber;
+    }
 
     public void Close(DateTimeOffset currentDate)
     {
