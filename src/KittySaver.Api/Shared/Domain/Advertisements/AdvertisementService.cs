@@ -4,39 +4,14 @@ namespace KittySaver.Api.Shared.Domain.Advertisements;
 
 public sealed class AdvertisementService
 {
-    private readonly Advertisement _advertisement;
-    private readonly Person _person;
-
-    private AdvertisementService(Advertisement advertisement, Person person)
+    // ReSharper disable once MemberCanBeMadeStatic.Global - suggestion is purely mechanical.
+    public void RecalculatePriorityScore(Advertisement advertisement, Person person)
     {
-        _advertisement = advertisement;
-        _person = person;
-    }
-
-    public static AdvertisementService Create(Advertisement advertisement, Person person)
-    {
-        if (advertisement.PersonId != person.Id)
-        {
-            throw new InvalidOperationException($"Person with id '{person.Id}' do not have permission to alter Advertisement with id '{advertisement.Id}'");
-        }
-
-        AdvertisementService advertisementService = new(advertisement, person);
-        return advertisementService;
-    }
-    
-    public void RecalculatePriorityScore()
-    {
-        List<Guid> catsAssignedToAdvertisement = _person.Cats
-            .Where(x => x.AdvertisementId == _advertisement.Id)
-            .Select(x=>x.Id)
-            .ToList();
-
-        if (catsAssignedToAdvertisement.Count == 0)
-        {
-            return;
-        }
+        advertisement.ValidateOwnership(person.Id);
         
-        double catsToAssignToAdvertisementHighestPriorityScore = _person.GetHighestPriorityScoreFromGivenCats(catsAssignedToAdvertisement);
-        _advertisement.PriorityScore = catsToAssignToAdvertisementHighestPriorityScore;
+        double catsToAssignToAdvertisementHighestPriorityScore =
+            person.GetHighestPriorityScoreFromGivenCats(person.GetAssignedToConcreteAdvertisementCatIds(advertisement.Id));
+        
+        advertisement.PriorityScore = catsToAssignToAdvertisementHighestPriorityScore;
     }
 }
