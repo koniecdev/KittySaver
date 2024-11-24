@@ -12,27 +12,25 @@ public class CatTests
 {
     private static readonly Address Address = new Faker<Address>()
         .CustomInstantiator(faker =>
-            new Address
-            {
-                Country = faker.Address.Country(),
-                State = faker.Address.State(),
-                ZipCode = faker.Address.ZipCode(),
-                City = faker.Address.City(),
-                Street = faker.Address.StreetName(),
-                BuildingNumber = faker.Address.BuildingNumber()
-            }).Generate();
-    
+            Address.Create(
+                country: faker.Address.Country(),
+                state: faker.Address.State(),
+                zipCode: faker.Address.ZipCode(),
+                city: faker.Address.City(),
+                street: faker.Address.StreetName(),
+                buildingNumber: faker.Address.BuildingNumber()
+            )).Generate();
+
     private static readonly Address PickupAddress = new Faker<Address>()
         .CustomInstantiator(faker =>
-            new Address
-            {
-                Country = faker.Address.Country(),
-                State = faker.Address.State(),
-                ZipCode = faker.Address.ZipCode(),
-                City = faker.Address.City(),
-                Street = faker.Address.StreetName(),
-                BuildingNumber = faker.Address.BuildingNumber()
-            }).Generate();
+            Address.Create(
+                country: faker.Address.Country(),
+                state: faker.Address.State(),
+                zipCode: faker.Address.ZipCode(),
+                city: faker.Address.City(),
+                street: faker.Address.StreetName(),
+                buildingNumber: faker.Address.BuildingNumber()
+            )).Generate();
     
     private static readonly Person Person = new Faker<Person>()
         .CustomInstantiator(faker =>

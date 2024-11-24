@@ -98,15 +98,13 @@ public class CreateAdvertisement : IEndpoint
                     .FirstOrDefaultAsync(cancellationToken)
                 ?? throw new NotFoundExceptions.PersonNotFoundException(request.PersonId);
 
-            Address pickupAddress = new()
-            {
-                Country = request.PickupAddressCountry,
-                State = request.PickupAddressState,
-                ZipCode = request.PickupAddressZipCode,
-                City = request.PickupAddressCity,
-                Street = request.PickupAddressStreet,
-                BuildingNumber = request.PickupAddressBuildingNumber
-            };
+            Address pickupAddress = Address.Create(
+                country: request.PickupAddressCountry,
+                state: request.PickupAddressState,
+                zipCode: request.PickupAddressZipCode,
+                city: request.PickupAddressCity,
+                street: request.PickupAddressStreet,
+                buildingNumber: request.PickupAddressBuildingNumber);
             Email contactInfoEmail = Email.Create(request.ContactInfoEmail);
             PhoneNumber contactInfoPhoneNumber = PhoneNumber.Create(request.ContactInfoPhoneNumber);
             Description description = Description.Create(request.Description);

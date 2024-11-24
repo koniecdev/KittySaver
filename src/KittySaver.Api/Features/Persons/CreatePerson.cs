@@ -165,24 +165,23 @@ public sealed class CreatePerson : IEndpoint
             LastName lastName = LastName.Create(request.LastName);
             Email email = Email.Create(request.Email);
             PhoneNumber phoneNumber = PhoneNumber.Create(request.PhoneNumber);
-            Address residentalAddress = new()
-            {
-                Country = request.AddressCountry,
-                State = request.AddressState,
-                ZipCode = request.AddressZipCode,
-                City = request.AddressCity,
-                Street = request.AddressStreet,
-                BuildingNumber = request.AddressBuildingNumber
-            };
-            Address defaultAdvertisementPickupAddress = new()
-            {
-                Country = request.DefaultAdvertisementPickupAddressCountry,
-                State = request.DefaultAdvertisementPickupAddressState,
-                ZipCode = request.DefaultAdvertisementPickupAddressZipCode,
-                City = request.DefaultAdvertisementPickupAddressCity,
-                Street = request.DefaultAdvertisementPickupAddressStreet,
-                BuildingNumber = request.DefaultAdvertisementPickupAddressBuildingNumber
-            };
+            
+            Address residentalAddress = Address.Create(
+                country: request.AddressCountry,
+                state: request.AddressState,
+                zipCode: request.AddressZipCode,
+                city: request.AddressCity,
+                street: request.AddressStreet,
+                buildingNumber: request.AddressBuildingNumber);
+            
+            Address defaultAdvertisementPickupAddress = Address.Create(
+                country: request.DefaultAdvertisementPickupAddressCountry,
+                state: request.DefaultAdvertisementPickupAddressState,
+                zipCode: request.DefaultAdvertisementPickupAddressZipCode,
+                city: request.DefaultAdvertisementPickupAddressCity,
+                street: request.DefaultAdvertisementPickupAddressStreet,
+                buildingNumber: request.DefaultAdvertisementPickupAddressBuildingNumber);
+            
             Email defaultAdvertisementContactInfoEmail = Email.Create(request.DefaultAdvertisementContactInfoEmail);
             PhoneNumber defaultAdvertisementContactInfoPhoneNumber = PhoneNumber.Create(request.DefaultAdvertisementContactInfoPhoneNumber);
 
