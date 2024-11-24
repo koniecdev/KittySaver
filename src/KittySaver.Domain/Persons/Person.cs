@@ -202,25 +202,27 @@ public sealed class Person : AggregateRoot
             cat.MarkAsAdopted();
         }
     }
-    
-    public void ReplaceCatPriorityCompounds(
-        ICatPriorityCalculatorService catPriorityCalculator,
+
+    public void UpdateCat(
         Guid catId,
+        ICatPriorityCalculatorService catPriorityCalculator,
+        CatName name,
+        Description additionalRequirements,
+        bool isCastrated,
         HealthStatus healthStatus,
         AgeCategory ageCategory,
         Behavior behavior,
         MedicalHelpUrgency medicalHelpUrgency)
     {
-        Cat cat = GetCatById(catId);
-        cat.HealthStatus = healthStatus;
-        cat.AgeCategory = ageCategory;
-        cat.Behavior = behavior;
-        cat.MedicalHelpUrgency = medicalHelpUrgency;
-        cat.RecalculatePriorityScore(catPriorityCalculator);
+        Cat catToUpdate = GetCatById(catId);
+        catToUpdate.ChangeName(name);
+        catToUpdate.ChangeAdditionalRequirements(additionalRequirements);
+        catToUpdate.ChangeIsCastratedFlag(isCastrated);
+        catToUpdate.ChangePriorityCompounds(catPriorityCalculator, healthStatus, ageCategory, behavior, medicalHelpUrgency);
         
-        if (cat.AdvertisementId.HasValue)
+        if (catToUpdate.AdvertisementId.HasValue)
         {
-            RaiseDomainEvent(new AssignedToAdvertisementCatStatusChangedDomainEvent(cat.AdvertisementId.Value));
+            RaiseDomainEvent(new AssignedToAdvertisementCatStatusChangedDomainEvent(catToUpdate.AdvertisementId.Value));
         }
     }
     
