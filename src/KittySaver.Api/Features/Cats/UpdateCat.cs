@@ -86,22 +86,20 @@ public sealed class UpdateCat : IEndpoint
                                   .Include(x => x.Cats)
                                   .FirstOrDefaultAsync(cancellationToken)
                               ?? throw new NotFoundExceptions.PersonNotFoundException(request.PersonId);
-            Cat catToUpdate = catOwner.Cats.FirstOrDefault(x => x.Id == request.Id)
-                              ?? throw new NotFoundExceptions.CatNotFoundException(request.Id);
             
             CatName catName = CatName.Create(request.Name);
             Description additionalRequirements = Description.Create(request.AdditionalRequirements);
 
-            catToUpdate.Name = catName;
-            catToUpdate.AdditionalRequirements = additionalRequirements;
-            catToUpdate.IsCastrated = request.IsCastrated;
-            catOwner.ReplaceCatPriorityCompounds(
-                calculator,
-                request.Id,
-                request.HealthStatus,
-                request.AgeCategory,
-                request.Behavior,
-                request.MedicalHelpUrgency);
+            catOwner.UpdateCat(
+                catId: request.Id,
+                catPriorityCalculator: calculator,
+                name: catName,
+                additionalRequirements: additionalRequirements,
+                isCastrated: request.IsCastrated,
+                healthStatus: request.HealthStatus,
+                ageCategory: request.AgeCategory,
+                behavior: request.Behavior,
+                medicalHelpUrgency: request.MedicalHelpUrgency);
             
             await db.SaveChangesAsync(cancellationToken);
         }
