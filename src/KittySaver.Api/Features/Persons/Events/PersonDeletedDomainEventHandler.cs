@@ -1,5 +1,5 @@
-﻿using KittySaver.Api.Shared.Domain.Persons.Events;
-using KittySaver.Api.Shared.Persistence;
+﻿using KittySaver.Api.Shared.Persistence;
+using KittySaver.Domain.Persons.Events;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 

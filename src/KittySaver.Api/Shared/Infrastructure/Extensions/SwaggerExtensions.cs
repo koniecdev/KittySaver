@@ -1,5 +1,5 @@
 ﻿using Asp.Versioning.ApiExplorer;
-using KittySaver.Api.Shared.OpenApi;
+using KittySaver.Api.Shared.Infrastructure.OpenApi;
 
 namespace KittySaver.Api.Shared.Infrastructure.Extensions;
 

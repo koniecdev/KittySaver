@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.Auth.Api", "src\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.Auth.Api.Tests.Unit", "tests\KittySaver.Auth.Api.Tests.Unit\KittySaver.Auth.Api.Tests.Unit.csproj", "{D496F3D5-A04C-4A05-B623-E34B8F14362F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.Api.Tests.Unit", "tests\KittySaver.Api.Tests.Unit\KittySaver.Api.Tests.Unit.csproj", "{985A7DA6-8A0A-4DE5-9BC9-6EF02117EB16}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.Domain.Tests.Unit", "tests\KittySaver.Domain.Tests.Unit\KittySaver.Domain.Tests.Unit.csproj", "{985A7DA6-8A0A-4DE5-9BC9-6EF02117EB16}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.Api.Tests.Integration", "tests\KittySaver.Api.Tests.Integration\KittySaver.Api.Tests.Integration.csproj", "{37EC39F0-9189-4B3B-9E61-35E5057072B2}"
 EndProject
@@ -24,6 +24,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "tests\Shared\Shared.csproj", "{7740A292-2F7D-4A0B-A74B-1BAD9AD3170E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.WebApplication", "src\KittySaver.WebApplication\KittySaver.WebApplication.csproj", "{8B8003D4-EB3B-4580-9400-05ABFFE0E2B2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.Domain", "src\KittySaver.Domain\KittySaver.Domain.csproj", "{6231BA9E-9E5D-463F-9979-097FA392B6C4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -63,6 +65,10 @@ Global
 		{8B8003D4-EB3B-4580-9400-05ABFFE0E2B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8B8003D4-EB3B-4580-9400-05ABFFE0E2B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8B8003D4-EB3B-4580-9400-05ABFFE0E2B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6231BA9E-9E5D-463F-9979-097FA392B6C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6231BA9E-9E5D-463F-9979-097FA392B6C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6231BA9E-9E5D-463F-9979-097FA392B6C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6231BA9E-9E5D-463F-9979-097FA392B6C4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{8E9504A6-C398-4B17-864D-58F6254B0F7D} = {74DEC7A6-AEB4-444C-A522-11F65EAFA372}
@@ -75,5 +81,6 @@ Global
 		{89D62D13-A990-4FB8-9118-AF3FFD27869C} = {EAA93F7D-FC99-4667-84A2-22C4C7C672AD}
 		{7740A292-2F7D-4A0B-A74B-1BAD9AD3170E} = {EAA93F7D-FC99-4667-84A2-22C4C7C672AD}
 		{8B8003D4-EB3B-4580-9400-05ABFFE0E2B2} = {8E9504A6-C398-4B17-864D-58F6254B0F7D}
+		{6231BA9E-9E5D-463F-9979-097FA392B6C4} = {8E9504A6-C398-4B17-864D-58F6254B0F7D}
 	EndGlobalSection
 EndGlobal

@@ -2,14 +2,12 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using Bogus;
-using Bogus.Extensions;
 using FluentAssertions;
 using KittySaver.Api.Features.Advertisements;
 using KittySaver.Api.Features.Persons;
-using KittySaver.Api.Shared.Domain.Common.Primitives.Enums;
-using KittySaver.Api.Shared.Domain.Persons;
-using KittySaver.Api.Shared.Domain.ValueObjects;
 using KittySaver.Api.Tests.Integration.Helpers;
+using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Domain.ValueObjects;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;

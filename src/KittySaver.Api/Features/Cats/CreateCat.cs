@@ -1,10 +1,11 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Features.Cats.SharedContracts;
-using KittySaver.Api.Shared.Domain.Common.Primitives.Enums;
-using KittySaver.Api.Shared.Domain.Persons;
-using KittySaver.Api.Shared.Domain.ValueObjects;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
+using KittySaver.Domain.Common.Exceptions;
+using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Domain.Persons;
+using KittySaver.Domain.ValueObjects;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Riok.Mapperly.Abstractions;
@@ -89,7 +90,6 @@ public sealed class CreateCat : IEndpoint
                 healthStatus: request.HealthStatus,
                 isCastrated: request.IsCastrated,
                 additionalRequirements: additionalRequirements);
-            
             await db.SaveChangesAsync(cancellationToken);
             return cat.Id;
         }

@@ -1,8 +1,9 @@
 ﻿using FluentValidation;
-using KittySaver.Api.Shared.Domain.Advertisements;
-using KittySaver.Api.Shared.Domain.Persons;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
+using KittySaver.Domain.Advertisements;
+using KittySaver.Domain.Common.Exceptions;
+using KittySaver.Domain.Persons;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
