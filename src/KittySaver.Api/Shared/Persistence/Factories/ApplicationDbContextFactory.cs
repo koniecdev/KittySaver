@@ -1,5 +1,4 @@
 ﻿using KittySaver.Api.Shared.Infrastructure.Services;
-using KittySaver.Api.Shared.Security;
 using Microsoft.EntityFrameworkCore;
 
 namespace KittySaver.Api.Shared.Persistence.Factories;
