@@ -1,4 +1,4 @@
-﻿using KittySaver.Api.Shared.Domain.Persons;
+﻿using KittySaver.Domain.Persons;
 using Riok.Mapperly.Abstractions;
 
 namespace KittySaver.Api.Features.Persons.SharedContracts;

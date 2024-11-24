@@ -1,7 +1,8 @@
-﻿using KittySaver.Api.Shared.Domain.Advertisements;
-using KittySaver.Api.Shared.Domain.Persons;
-using KittySaver.Api.Shared.Domain.Persons.Events;
-using KittySaver.Api.Shared.Persistence;
+﻿using KittySaver.Api.Shared.Persistence;
+using KittySaver.Domain.Advertisements;
+using KittySaver.Domain.Common.Exceptions;
+using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.Events;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 

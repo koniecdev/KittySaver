@@ -1,7 +1,8 @@
-﻿using KittySaver.Api.Shared.Domain.Advertisements;
-using KittySaver.Api.Shared.Domain.Common.Primitives;
-using KittySaver.Api.Shared.Domain.Persons;
-using KittySaver.Api.Shared.Infrastructure.Services;
+﻿using KittySaver.Api.Shared.Infrastructure.Services;
+using KittySaver.Domain;
+using KittySaver.Domain.Advertisements;
+using KittySaver.Domain.Common.Primitives;
+using KittySaver.Domain.Persons;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -21,7 +22,7 @@ public sealed class ApplicationDbContext(
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        builder.ApplyConfigurationsFromAssembly(typeof(Program).Assembly);
+        builder.ApplyConfigurationsFromAssembly(typeof(IDomainMarker).Assembly);
     }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
