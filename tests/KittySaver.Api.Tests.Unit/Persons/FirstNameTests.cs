@@ -29,6 +29,22 @@ public class FirstNameTests
             }).Generate();
     
    
+    [Fact]
+    public void FirstNameCreate_ShouldCreateSuccessfully_WhenCorrectValueIsProvided()
+    {
+        //Assign
+        const string properFirstName = "ProperfirstName";
+        
+        //Act
+        FirstName firstName = FirstName.Create(properFirstName);
+        string firstNameAsString = firstName.ToString();
+        
+        //Assert
+        firstName.Value.Should().Be(properFirstName);
+        firstNameAsString.Should().Be(properFirstName);
+    }
+
+    
     [Theory]
     [InlineData("artur")]
     [InlineData("Artur")]

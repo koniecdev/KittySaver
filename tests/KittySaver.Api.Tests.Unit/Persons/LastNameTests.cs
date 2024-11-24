@@ -12,6 +12,21 @@ namespace KittySaver.Api.Tests.Unit.Persons;
 public class LastNameTests
 {
     [Fact]
+    public void LastNameCreate_ShouldCreateSuccessfully_WhenCorrectValueIsProvided()
+    {
+        //Assign
+        const string properLastName = "ProperlastName";
+        
+        //Act
+        LastName lastName = LastName.Create(properLastName);
+        string lastNameAsString = lastName.ToString();
+        
+        //Assert
+        lastName.Value.Should().Be(properLastName);
+        lastNameAsString.Should().Be(properLastName);
+    }
+    
+    [Fact]
     public void LastNameCreate_ShouldThrowArgumentOutOfRangeException_WhenLastNameExceedsMaxLength()
     {
         //Arrange
