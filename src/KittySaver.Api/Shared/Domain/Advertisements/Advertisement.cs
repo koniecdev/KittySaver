@@ -1,12 +1,12 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using KittySaver.Api.Shared.Domain.Advertisement.Events;
+using KittySaver.Api.Shared.Domain.Advertisements.Events;
 using KittySaver.Api.Shared.Domain.Common.Primitives;
 using KittySaver.Api.Shared.Domain.Persons;
 using KittySaver.Api.Shared.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace KittySaver.Api.Shared.Domain.Advertisement;
+namespace KittySaver.Api.Shared.Domain.Advertisements;
 
 public sealed class Advertisement : AggregateRoot
 {

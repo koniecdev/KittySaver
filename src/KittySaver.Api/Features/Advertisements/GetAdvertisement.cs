@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using KittySaver.Api.Features.Advertisements.SharedContracts;
+﻿using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Shared.Domain.Persons;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;

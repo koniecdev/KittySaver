@@ -6,7 +6,7 @@ using KittySaver.Api.Shared.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace KittySaver.Api.Features.Cats;
+namespace KittySaver.Api.Features.Advertisements;
 
 public sealed class ReassignCatsToAdvertisement : IEndpoint
 {
@@ -38,16 +38,15 @@ public sealed class ReassignCatsToAdvertisement : IEndpoint
                                 .FirstAsync(x => x.Id == advertisement.PersonId, cancellationToken);
 
             CatAdvertisementAssignmentService catAdvertisementAssignmentService = new();
-            catAdvertisementAssignmentService.AssignOrReplaceCatsToAdvertisement(person, advertisement, request.CatIds);
+            catAdvertisementAssignmentService.ReplaceCatsOfAdvertisement(person, advertisement, request.CatIds);
             
             await db.SaveChangesAsync(cancellationToken);
         }
-        
     }
     
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapPut("/advertisements/{id:guid}/cats", async (
+        endpointRouteBuilder.MapPut("advertisements/{id:guid}/cats", async (
             Guid id,
             ReassignCatsToAdvertisementRequest request,
             ISender sender,

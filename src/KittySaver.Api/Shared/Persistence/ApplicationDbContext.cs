@@ -1,8 +1,7 @@
-﻿using KittySaver.Api.Shared.Domain.Advertisement;
+﻿using KittySaver.Api.Shared.Domain.Advertisements;
 using KittySaver.Api.Shared.Domain.Common.Primitives;
 using KittySaver.Api.Shared.Domain.Persons;
 using KittySaver.Api.Shared.Infrastructure.Services;
-using KittySaver.Api.Shared.Security;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;

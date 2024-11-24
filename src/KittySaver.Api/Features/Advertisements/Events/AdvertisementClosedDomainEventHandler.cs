@@ -1,5 +1,5 @@
-﻿using KittySaver.Api.Shared.Domain.Advertisement;
-using KittySaver.Api.Shared.Domain.Advertisement.Events;
+﻿using KittySaver.Api.Shared.Domain.Advertisements;
+using KittySaver.Api.Shared.Domain.Advertisements.Events;
 using KittySaver.Api.Shared.Domain.Persons;
 using KittySaver.Api.Shared.Persistence;
 using MediatR;

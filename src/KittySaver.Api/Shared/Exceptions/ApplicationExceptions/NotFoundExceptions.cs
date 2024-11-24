@@ -1,4 +1,4 @@
-﻿using KittySaver.Api.Shared.Domain.Advertisement;
+﻿using KittySaver.Api.Shared.Domain.Advertisements;
 using KittySaver.Api.Shared.Domain.Persons;
 
 namespace KittySaver.Api.Shared.Exceptions.ApplicationExceptions;

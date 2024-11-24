@@ -1,6 +1,6 @@
 ﻿using KittySaver.Api.Shared.Domain.Persons;
 
-namespace KittySaver.Api.Shared.Domain.Advertisement;
+namespace KittySaver.Api.Shared.Domain.Advertisements;
 
 public sealed class AdvertisementService
 {
