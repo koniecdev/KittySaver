@@ -190,17 +190,16 @@ public sealed class UpdatePerson : IEndpoint
                 buildingNumber: request.DefaultAdvertisementPickupAddressBuildingNumber);
             
             Email defaultAdvertisementContactInfoEmail = Email.Create(request.DefaultAdvertisementContactInfoEmail);
-            PhoneNumber defaultAdvertisementContactInfoPhoneNumber =
-                PhoneNumber.Create(request.DefaultAdvertisementContactInfoPhoneNumber);
+            PhoneNumber defaultAdvertisementContactInfoPhoneNumber = PhoneNumber.Create(request.DefaultAdvertisementContactInfoPhoneNumber);
 
-            person.FirstName = firstName;
-            person.LastName = lastName;
-            person.Email = email;
-            person.PhoneNumber = phoneNumber;
-            person.ResidentalAddress = residentalAddress;
-            person.DefaultAdvertisementsPickupAddress = defaultAdvertisementPickupAddress;
-            person.DefaultAdvertisementsContactInfoEmail = defaultAdvertisementContactInfoEmail;
-            person.DefaultAdvertisementsContactInfoPhoneNumber = defaultAdvertisementContactInfoPhoneNumber;
+            person.ChangeName(firstName, lastName);
+            person.ChangeEmail(email);
+            person.ChangePhoneNumber(phoneNumber);
+            person.ChangeResidentalAddress(residentalAddress);
+            person.ChangeDefaultsForAdvertisement(
+                defaultAdvertisementPickupAddress,
+                defaultAdvertisementContactInfoEmail,
+                defaultAdvertisementContactInfoPhoneNumber);
 
             await db.SaveChangesAsync(cancellationToken);
         }
