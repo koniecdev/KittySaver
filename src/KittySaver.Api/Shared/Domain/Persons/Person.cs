@@ -76,6 +76,12 @@ public sealed class Person : AggregateRoot
         return person;
     }
 
+    public enum Role
+    {
+        Regular,
+        Admin
+    }
+    
     public Role CurrentRole { get; private init; } = Role.Regular;
     public FirstName FirstName { get; set; }
     public LastName LastName { get; set; }
@@ -103,52 +109,68 @@ public sealed class Person : AggregateRoot
 
     public IReadOnlyList<Cat> Cats => _cats.ToList();
 
+    public IEnumerable<Guid> GetAssignedToConcreteAdvertisementCatIds(Guid advertisementId)
+    {
+        List<Guid> cats = Cats
+            .Where(x => x.AdvertisementId == advertisementId)
+            .Select(x=>x.Id)
+            .ToList();
+        return cats;
+    }
+
     public void AddCat(Cat cat)
     {
-        if (_cats.Count > 0 && _cats.Any(c => c.Id == cat.Id))
-        {
-            throw new InvalidOperationException($"Cat with id: '{cat.Id}' is already assigned to Person with id {Id}.");
-        }
-
+        ThrowIfCatExists(cat.Id);
         _cats.Add(cat);
     }
 
-    public void RemoveCat(Cat cat)
+    public void RemoveCat(Guid catId)
     {
-        switch (_cats.Count)
+        Cat cat = GetCatById(catId);
+        if (cat.AdvertisementId.HasValue)
         {
-            case 0:
-            case > 0 when _cats.All(c => c.Id != cat.Id):
-                throw new InvalidOperationException($"Cat with id: '{cat.Id}' is not even assigned to Person with id {Id}.");
-            default:
-                if (cat.AdvertisementId is not null)
-                {
-                    throw new InvalidOperationException("Can not delete cat, that is assigned to advertisement.");
-                }
-                _cats.Remove(cat);
-                break;
+            ThrowIfCatNotExists(cat.Id);
         }
+        _cats.Remove(cat);
     }
+    
     public void AssignCatToAdvertisement(Guid advertisementId, Guid catId)
     {
-        Cat cat = Cats.FirstOrDefault(c => c.Id == catId)
-                  ?? throw new NotFoundExceptions.CatNotFoundException(catId);
-        
+        Cat cat = GetCatById(catId);
         cat.AssignAdvertisement(advertisementId);
     }
 
     public void UnassignCatFromAdvertisement(Guid catId)
     {
-        Cat cat = Cats.FirstOrDefault(c => c.Id == catId)
-                  ?? throw new NotFoundExceptions.CatNotFoundException(catId);
-        
+        Cat cat = GetCatById(catId);
         Guid? unassignedAdvertisementId = cat.AdvertisementId;
         
         cat.UnassignAdvertisement();
         
-        RaiseDomainEvent(new AssignedToAdvertisementCatStatusChangedDomainEvent(unassignedAdvertisementId!.Value));
+        if (unassignedAdvertisementId.HasValue)
+        {
+            RaiseDomainEvent(new AssignedToAdvertisementCatStatusChangedDomainEvent(unassignedAdvertisementId.Value));
+        }
+    }
+    
+    public void UnassignCatsFromRemovedAdvertisement(Guid advertisementId)
+    {
+        IEnumerable<Cat> catsQuery = GetAssignedToConcreteAdvertisementCats(advertisementId);
+        foreach (Cat cat in catsQuery)
+        {
+            cat.UnassignAdvertisement();
+        }
     }
 
+    public void MarkCatsFromConcreteAdvertisementAsAdopted(Guid advertisementId)
+    {
+        IEnumerable<Cat> catsQuery = GetAssignedToConcreteAdvertisementCats(advertisementId);
+        foreach (Cat cat in catsQuery)
+        {
+            cat.MarkAsAdopted();
+        }
+    }
+    
     public void ReplaceCatPriorityCompounds(
         ICatPriorityCalculatorService catPriorityCalculator,
         Guid catId,
@@ -157,31 +179,17 @@ public sealed class Person : AggregateRoot
         Behavior behavior,
         MedicalHelpUrgency medicalHelpUrgency)
     {
-        Cat cat = Cats.First(c => c.Id == catId);
+        Cat cat = GetCatById(catId);
         cat.HealthStatus = healthStatus;
         cat.AgeCategory = ageCategory;
         cat.Behavior = behavior;
         cat.MedicalHelpUrgency = medicalHelpUrgency;
         cat.RecalculatePriorityScore(catPriorityCalculator);
-        if (cat.AdvertisementId is not null)
+        
+        if (cat.AdvertisementId.HasValue)
         {
             RaiseDomainEvent(new AssignedToAdvertisementCatStatusChangedDomainEvent(cat.AdvertisementId.Value));
         }
-    }
-
-    public void ValidateCatsOwnership(IEnumerable<Guid> catIds)
-    {
-        HashSet<Guid> catIdsFromPersonCats = Cats.Select(cat => cat.Id).ToHashSet();
-        if (!catIds.All(catId => catIdsFromPersonCats.Contains(catId)))
-        {
-            throw new ArgumentException("One or more provided cats do not belong to provided person.", nameof(catIds));
-        }
-    }
-
-    private IEnumerable<Cat> GetCats(IEnumerable<Guid> catIds)
-    {
-        IEnumerable<Cat> cats = Cats.Where(c => catIds.Contains(c.Id));
-        return cats;
     }
     
     public double GetHighestPriorityScoreFromGivenCats(IEnumerable<Guid> catsIds)
@@ -197,15 +205,45 @@ public sealed class Person : AggregateRoot
         return highestPriorityScore;
     }
 
-    public void AnnounceDeletion()
+    public void AnnounceDeletion() => RaiseDomainEvent(new PersonDeletedDomainEvent(Id));
+
+    private IEnumerable<Cat> GetAssignedToConcreteAdvertisementCats(Guid advertisementId) 
+        => _cats.Where(x => x.AdvertisementId == advertisementId);
+    
+    private void ValidateCatsOwnership(IEnumerable<Guid> catIds)
     {
-        RaiseDomainEvent(new PersonDeletedDomainEvent(Id));
+        HashSet<Guid> catIdsFromPersonCats = Cats.Select(cat => cat.Id).ToHashSet();
+        if (!catIds.All(catId => catIdsFromPersonCats.Contains(catId)))
+        {
+            throw new ArgumentException(ErrorMessages.InvalidCatsOwnership, nameof(catIds));
+        }
+    }
+    
+    private void ThrowIfCatExists(Guid catId)
+    {
+        if (_cats.Any(c => c.Id == catId))
+        {
+            throw new InvalidOperationException(string.Format(ErrorMessages.CatAlreadyAssigned, catId, Id));
+        }
     }
 
-    public enum Role
+    private void ThrowIfCatNotExists(Guid catId)
     {
-        Regular,
-        Admin
+        if (_cats.All(c => c.Id != catId))
+        {
+            throw new InvalidOperationException(string.Format(ErrorMessages.CatNotAssigned, catId, Id));
+        }
+    }
+    
+    private Cat GetCatById(Guid catId) =>
+        _cats.FirstOrDefault(c => c.Id == catId) ?? 
+        throw new NotFoundExceptions.CatNotFoundException(catId);
+    
+    private static class ErrorMessages
+    {
+        public const string CatAlreadyAssigned = "Cat with id: '{0}' is already assigned to Person with id {1}.";
+        public const string CatNotAssigned = "Cat with id: '{0}' is not even assigned to Person with id {1}.";
+        public const string InvalidCatsOwnership = "One or more provided cats do not belong to provided person.";
     }
 }
 
