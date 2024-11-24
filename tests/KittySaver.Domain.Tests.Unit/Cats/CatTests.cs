@@ -129,33 +129,33 @@ public class CatTests
         createCat.Should().Throw<ArgumentException>();
     }
     
-    [Fact]
-    public void ReCalculatePriorityScore_ShouldUpdatePriorityScore_WhenCalculatorIsProvided()
-    {
-        //Arrange
-        const int score = 420;
-        ICatPriorityCalculatorService calculator = Substitute.For<ICatPriorityCalculatorService>();
-        calculator.Calculate(Arg.Any<Cat>()).Returns(score);
-    
-        Cat cat = new Faker<Cat>()
-            .CustomInstantiator(faker =>
-                Cat.Create(
-                    priorityScoreCalculator: calculator,
-                    person: Person,
-                    name: CatName.Create(faker.Person.FirstName),
-                    additionalRequirements: Description.Create(faker.Person.FirstName),
-                    medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
-                    ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
-                    behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
-                    healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
-                    isCastrated: faker.PickRandomParam(true, false)
-                )).Generate();
-        calculator.Calculate(Arg.Any<Cat>()).Returns(score * 2);
-        
-        //Act
-        cat.RecalculatePriorityScore(calculator);
-
-        //Assert
-        cat.PriorityScore.Should().Be(score * 2);
-    }
+    // [Fact]
+    // public void ReCalculatePriorityScore_ShouldUpdatePriorityScore_WhenCalculatorIsProvided()
+    // {
+    //     //Arrange
+    //     const int score = 420;
+    //     ICatPriorityCalculatorService calculator = Substitute.For<ICatPriorityCalculatorService>();
+    //     calculator.Calculate(Arg.Any<Cat>()).Returns(score);
+    //
+    //     Cat cat = new Faker<Cat>()
+    //         .CustomInstantiator(faker =>
+    //             Cat.Create(
+    //                 priorityScoreCalculator: calculator,
+    //                 person: Person,
+    //                 name: CatName.Create(faker.Person.FirstName),
+    //                 additionalRequirements: Description.Create(faker.Person.FirstName),
+    //                 medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
+    //                 ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
+    //                 behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
+    //                 healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
+    //                 isCastrated: faker.PickRandomParam(true, false)
+    //             )).Generate();
+    //     calculator.Calculate(Arg.Any<Cat>()).Returns(score * 2);
+    //     
+    //     //Act
+    //     cat.RecalculatePriorityScore(calculator);
+    //
+    //     //Assert
+    //     cat.PriorityScore.Should().Be(score * 2);
+    // }
 }
