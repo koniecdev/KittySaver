@@ -24,14 +24,6 @@ public class AdvertisementClosedDomainEventHandler(ApplicationDbContext db)
                 .Include(x => x.Cats)
                 .FirstAsync(cancellationToken);
 
-        List<Cat> catsThatAreAssignedToClosedAdvertisement =
-            person.Cats
-                .Where(x => x.AdvertisementId == advertisement.Id)
-                .ToList();
-
-        foreach (Cat cat in catsThatAreAssignedToClosedAdvertisement)
-        {
-            cat.MarkAsAdopted();
-        }
+        person.MarkCatsFromConcreteAdvertisementAsAdopted(advertisement.Id);
     }
 }
