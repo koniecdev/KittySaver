@@ -97,13 +97,13 @@ public sealed class Cat : AuditableEntity
             _advertisementId = value;
         }
     }
-    public CatName Name { get; set; }
-    public Description AdditionalRequirements { get; set; }
-    public MedicalHelpUrgency MedicalHelpUrgency { get; internal set; }
-    public AgeCategory AgeCategory { get; internal set; }
-    public Behavior Behavior { get; internal set; }
-    public HealthStatus HealthStatus { get; internal set; }
-    public required bool IsCastrated { get; set; }
+    public CatName Name { get; private set; }
+    public Description AdditionalRequirements { get; private set; }
+    public MedicalHelpUrgency MedicalHelpUrgency { get; private set; }
+    public AgeCategory AgeCategory { get; private set; }
+    public Behavior Behavior { get; private set; }
+    public HealthStatus HealthStatus { get; private set; }
+    public bool IsCastrated { get; private set; }
     public bool IsAdopted { get; private set; }
 
     public double PriorityScore
@@ -118,6 +118,35 @@ public sealed class Cat : AuditableEntity
             _priorityScore = value;
         }
     }
+    
+    internal void ChangeName(CatName catName)
+    {
+        Name = catName;
+    }
+    
+    internal void ChangeAdditionalRequirements(Description additionalRequirements)
+    {
+        AdditionalRequirements = additionalRequirements;
+    }
+
+    internal void ChangeIsCastratedFlag(bool isCastrated)
+    {
+        IsCastrated = isCastrated;
+    }
+    
+    internal void ChangePriorityCompounds(
+        ICatPriorityCalculatorService priorityScoreCalculator,
+        HealthStatus healthStatus,
+        AgeCategory ageCategory,
+        Behavior behavior,
+        MedicalHelpUrgency medicalHelpUrgency)
+    {
+        HealthStatus = healthStatus;
+        AgeCategory = ageCategory;
+        Behavior = behavior;
+        MedicalHelpUrgency = medicalHelpUrgency;
+        RecalculatePriorityScore(priorityScoreCalculator);
+    }
 
     internal void MarkAsAdopted()
     {
@@ -127,7 +156,7 @@ public sealed class Cat : AuditableEntity
     /// <remarks>
     /// Only for use within Person aggregate
     /// </remarks>
-    internal void RecalculatePriorityScore(ICatPriorityCalculatorService calculator)
+    private void RecalculatePriorityScore(ICatPriorityCalculatorService calculator)
     {
         double priority = calculator.Calculate(this);
         PriorityScore = priority;

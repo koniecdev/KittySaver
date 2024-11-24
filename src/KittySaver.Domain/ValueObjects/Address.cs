@@ -20,10 +20,25 @@ public sealed class Address : ValueObject
     public const int StreetMaxLength = 100;
     public const int BuildingNumberMaxLength = 20;
 
+    public static Address Create(string country, string? state, string zipCode, string city, string street, string buildingNumber)
+    {
+        return new Address(country, state, zipCode, city, street, buildingNumber);
+    }
+
+    private Address(string country, string? state, string zipCode, string city, string street, string buildingNumber)
+    {
+        Country = country;
+        State = state;
+        ZipCode = zipCode;
+        City = city;
+        Street = street;
+        BuildingNumber = buildingNumber;
+    }
+    
     public string? State
     {
         get => _state;
-        init
+        private init
         {
             if (value is null)
             {
@@ -45,10 +60,10 @@ public sealed class Address : ValueObject
         }
     }
 
-    public required string Country
+    public string Country
     {
         get => _country;
-        init
+        private init
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(Country));
             if (value.Length > CountryMaxLength)
@@ -60,10 +75,10 @@ public sealed class Address : ValueObject
         }
     }
 
-    public required string ZipCode
+    public string ZipCode
     {
         get => _zipCode;
-        init
+        private init
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(ZipCode));
             if (value.Length > ZipCodeMaxLength)
@@ -75,10 +90,10 @@ public sealed class Address : ValueObject
         }
     }
 
-    public required string City
+    public string City
     {
         get => _city;
-        init
+        private init
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(City));
             if (value.Length > CityMaxLength)
@@ -90,10 +105,10 @@ public sealed class Address : ValueObject
         }
     }
 
-    public required string Street
+    public string Street
     {
         get => _street;
-        init
+        private init
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(Street));
             if (value.Length > StreetMaxLength)
@@ -105,10 +120,10 @@ public sealed class Address : ValueObject
         }
     }
 
-    public required string BuildingNumber
+    public string BuildingNumber
     {
         get => _buildingNumber;
-        init
+        private init
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(BuildingNumber));
             if (value.Length > BuildingNumberMaxLength)

@@ -84,15 +84,15 @@ public sealed class Person : AggregateRoot
     }
     
     public Role CurrentRole { get; private init; } = Role.Regular;
-    public FirstName FirstName { get; set; }
-    public LastName LastName { get; set; }
+    public FirstName FirstName { get; private set; }
+    public LastName LastName { get; private set; }
     public string FullName => $"{FirstName} {LastName}";
-    public Email Email { get; set; }
-    public PhoneNumber PhoneNumber { get; set; }
-    public Address ResidentalAddress { get; set; }
-    public Address DefaultAdvertisementsPickupAddress { get; set; }
-    public Email DefaultAdvertisementsContactInfoEmail { get; set; }
-    public PhoneNumber DefaultAdvertisementsContactInfoPhoneNumber { get; set; }
+    public Email Email { get; private set; }
+    public PhoneNumber PhoneNumber { get; private set; }
+    public Address ResidentalAddress { get; private set; }
+    public Address DefaultAdvertisementsPickupAddress { get; private set; }
+    public Email DefaultAdvertisementsContactInfoEmail { get; private set; }
+    public PhoneNumber DefaultAdvertisementsContactInfoPhoneNumber { get; private set; }
 
     public Guid UserIdentityId
     {
@@ -110,6 +110,37 @@ public sealed class Person : AggregateRoot
 
     public IReadOnlyList<Cat> Cats => _cats.ToList();
 
+    public void ChangeName(FirstName firstName, LastName lastName)
+    {
+        FirstName = firstName;
+        LastName = lastName;
+    }
+
+    public void ChangeEmail(Email email)
+    {
+        Email = email;
+    }
+    
+    public void ChangePhoneNumber(PhoneNumber phoneNumber)
+    {
+        PhoneNumber = phoneNumber;
+    }
+    
+    public void ChangeResidentalAddress(Address residentalAddress)
+    {
+        ResidentalAddress = residentalAddress;
+    }
+    
+    public void ChangeDefaultsForAdvertisement(
+        Address defaultAdvertisementsPickupAddress,
+        Email defaultAdvertisementsContactInfoEmail,
+        PhoneNumber defaultAdvertisementsContactInfoPhoneNumber)
+    {
+        DefaultAdvertisementsPickupAddress = defaultAdvertisementsPickupAddress;
+        DefaultAdvertisementsContactInfoEmail = defaultAdvertisementsContactInfoEmail;
+        DefaultAdvertisementsContactInfoPhoneNumber = defaultAdvertisementsContactInfoPhoneNumber;
+    }
+    
     public IEnumerable<Guid> GetAssignedToConcreteAdvertisementCatIds(Guid advertisementId)
     {
         List<Guid> cats = Cats
@@ -171,25 +202,27 @@ public sealed class Person : AggregateRoot
             cat.MarkAsAdopted();
         }
     }
-    
-    public void ReplaceCatPriorityCompounds(
-        ICatPriorityCalculatorService catPriorityCalculator,
+
+    public void UpdateCat(
         Guid catId,
+        ICatPriorityCalculatorService catPriorityCalculator,
+        CatName name,
+        Description additionalRequirements,
+        bool isCastrated,
         HealthStatus healthStatus,
         AgeCategory ageCategory,
         Behavior behavior,
         MedicalHelpUrgency medicalHelpUrgency)
     {
-        Cat cat = GetCatById(catId);
-        cat.HealthStatus = healthStatus;
-        cat.AgeCategory = ageCategory;
-        cat.Behavior = behavior;
-        cat.MedicalHelpUrgency = medicalHelpUrgency;
-        cat.RecalculatePriorityScore(catPriorityCalculator);
+        Cat catToUpdate = GetCatById(catId);
+        catToUpdate.ChangeName(name);
+        catToUpdate.ChangeAdditionalRequirements(additionalRequirements);
+        catToUpdate.ChangeIsCastratedFlag(isCastrated);
+        catToUpdate.ChangePriorityCompounds(catPriorityCalculator, healthStatus, ageCategory, behavior, medicalHelpUrgency);
         
-        if (cat.AdvertisementId.HasValue)
+        if (catToUpdate.AdvertisementId.HasValue)
         {
-            RaiseDomainEvent(new AssignedToAdvertisementCatStatusChangedDomainEvent(cat.AdvertisementId.Value));
+            RaiseDomainEvent(new AssignedToAdvertisementCatStatusChangedDomainEvent(catToUpdate.AdvertisementId.Value));
         }
     }
     
