@@ -9,6 +9,21 @@ namespace KittySaver.Api.Tests.Unit.Cats;
 public class CatNameTests
 {
     [Fact]
+    public void CatNameCreate_ShouldCreateSuccessfully_WhenCorrectValueIsProvided()
+    {
+        //Assign
+        const string properCatName = "ProperCatName";
+        
+        //Act
+        CatName catName = CatName.Create(properCatName);
+        string catNameAsString = catName.ToString();
+        
+        //Assert
+        catName.Value.Should().Be(properCatName);
+        catNameAsString.Should().Be(properCatName);
+    }
+    
+    [Fact]
     public void CatNameCreate_ShouldThrowArgumentOutOfRangeException_WhenNameExceedsMaxLength()
     {
         //Arrange

@@ -355,7 +355,7 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
     }
     
     [Fact]
-    public async Task CreateCat_ShouldReturnBadRequest_WhenTooLongDataAreProvided()
+    public async Task UpdateCat_ShouldReturnBadRequest_WhenTooLongDataAreProvided()
     {
         //Arrange
         HttpResponseMessage personRegisterResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);

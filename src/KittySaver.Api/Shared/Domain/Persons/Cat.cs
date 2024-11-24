@@ -80,9 +80,8 @@ public sealed class Cat : AuditableEntity
         {
             if (value == Guid.Empty)
             {
-                throw new ArgumentException("Provided person id is empty", nameof(PersonId));
+                throw new ArgumentException(ErrorMessages.EmptyPersonId, nameof(PersonId));
             }
-
             _personId = value;
         }
     }
@@ -94,9 +93,8 @@ public sealed class Cat : AuditableEntity
         {
             if (value == Guid.Empty)
             {
-                throw new ArgumentException("Provided advertisement id is empty", nameof(AdvertisementId));
+                throw new ArgumentException(ErrorMessages.EmptyAdvertisementId, nameof(AdvertisementId));
             }
-
             _advertisementId = value;
         }
     }
@@ -116,7 +114,7 @@ public sealed class Cat : AuditableEntity
         {
             if (value == 0)
             {
-                throw new ArgumentException("PriorityScore can not be zero, probably something went wrong.", nameof(PriorityScore));
+                throw new ArgumentException(ErrorMessages.ZeroPriorityScore, nameof(PriorityScore));
             }
             _priorityScore = value;
         }
@@ -143,7 +141,7 @@ public sealed class Cat : AuditableEntity
     {
         if (AdvertisementId is not null)
         {
-            throw new InvalidOperationException("You can not assign advertisement to cat, that is already assigned to some other advertisement.");
+            throw new InvalidOperationException(ErrorMessages.AlreadyAssignedToAdvertisement);
         }
         AdvertisementId = advertisementId;
     }
@@ -155,10 +153,20 @@ public sealed class Cat : AuditableEntity
     {
         if (AdvertisementId is null)
         {
-            throw new InvalidOperationException("You can not unassign advertisement from cat, that do not even have advertisement assigned.");
+            throw new InvalidOperationException(ErrorMessages.NotAssignedToAdvertisement);
         }
         AdvertisementId = null;
     }
+    
+    private static class ErrorMessages
+    {
+        public const string EmptyPersonId = "Provided person id is empty";
+        public const string EmptyAdvertisementId = "Provided advertisement id is empty";
+        public const string ZeroPriorityScore = "PriorityScore cannot be zero, probably something went wrong.";
+        public const string AlreadyAssignedToAdvertisement = "Cannot assign advertisement to cat that is already assigned to another advertisement.";
+        public const string NotAssignedToAdvertisement = "Cannot unassign advertisement from cat that has no advertisement assigned.";
+    }
+
 }
 
 internal sealed class CatConfiguration : IEntityTypeConfiguration<Cat>

@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using KittySaver.Api.Shared.Domain.Advertisement;
+using KittySaver.Api.Shared.Domain.Advertisements;
 using KittySaver.Api.Shared.Domain.Persons;
 using KittySaver.Api.Shared.Domain.ValueObjects;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
@@ -109,10 +109,10 @@ public class CreateAdvertisement : IEndpoint
             Email contactInfoEmail = Email.Create(request.ContactInfoEmail);
             PhoneNumber contactInfoPhoneNumber = PhoneNumber.Create(request.ContactInfoPhoneNumber);
             Description description = Description.Create(request.Description);
-
+            
             Advertisement advertisement = Advertisement.Create(
                 currentDate: dateTimeService.Now,
-                personId: person.Id,
+                person: person,
                 catsIdsToAssign: request.CatsIdsToAssign,
                 pickupAddress: pickupAddress,
                 contactInfoEmail: contactInfoEmail,

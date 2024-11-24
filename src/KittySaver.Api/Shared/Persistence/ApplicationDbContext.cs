@@ -1,8 +1,7 @@
-﻿using KittySaver.Api.Shared.Domain.Advertisement;
+﻿using KittySaver.Api.Shared.Domain.Advertisements;
 using KittySaver.Api.Shared.Domain.Common.Primitives;
 using KittySaver.Api.Shared.Domain.Persons;
 using KittySaver.Api.Shared.Infrastructure.Services;
-using KittySaver.Api.Shared.Security;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -81,8 +80,9 @@ public sealed class ApplicationDbContext(
             aggregateRootEntry.Entity.ClearDomainEvents();
         }
 
-        IEnumerable<Task> tasks = domainEvents.Select(domainEvent => publisher.Publish(domainEvent, cancellationToken));
-
-        await Task.WhenAll(tasks);
+        foreach (DomainEvent domainEvent in domainEvents)
+        {
+            await publisher.Publish(domainEvent, cancellationToken);
+        }
     }
 }

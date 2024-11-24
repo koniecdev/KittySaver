@@ -1,7 +1,7 @@
 using System.Reflection;
 using Bogus;
 using FluentAssertions;
-using KittySaver.Api.Shared.Domain.Advertisement;
+using KittySaver.Api.Shared.Domain.Advertisements;
 using KittySaver.Api.Shared.Domain.Common.Primitives.Enums;
 using KittySaver.Api.Shared.Domain.Persons;
 using KittySaver.Api.Shared.Domain.ValueObjects;

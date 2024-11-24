@@ -1,6 +1,4 @@
-﻿using Riok.Mapperly.Abstractions;
-
-namespace KittySaver.Api.Features.Advertisements.SharedContracts;
+﻿namespace KittySaver.Api.Features.Advertisements.SharedContracts;
 
 public sealed class AdvertisementResponse
 {

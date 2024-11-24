@@ -1,5 +1,5 @@
-﻿using KittySaver.Api.Shared.Domain.Advertisement;
-using KittySaver.Api.Shared.Domain.Advertisement.Events;
+﻿using KittySaver.Api.Shared.Domain.Advertisements;
+using KittySaver.Api.Shared.Domain.Advertisements.Events;
 using KittySaver.Api.Shared.Domain.Persons;
 using KittySaver.Api.Shared.Persistence;
 using MediatR;
@@ -24,16 +24,6 @@ public class AdvertisementClosedDomainEventHandler(ApplicationDbContext db)
                 .Include(x => x.Cats)
                 .FirstAsync(cancellationToken);
 
-        List<Cat> catsThatAreAssignedToClosedAdvertisement =
-            person.Cats
-                .Where(x => x.AdvertisementId == advertisement.Id)
-                .ToList();
-
-        foreach (Cat cat in catsThatAreAssignedToClosedAdvertisement)
-        {
-            cat.MarkAsAdopted();
-        }
-
-        await db.SaveChangesAsync(cancellationToken);
+        person.MarkCatsFromConcreteAdvertisementAsAdopted(advertisement.Id);
     }
 }

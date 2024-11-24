@@ -38,12 +38,7 @@ public sealed class DeleteCat : IEndpoint
                     .FirstOrDefaultAsync(cancellationToken)
                 ?? throw new NotFoundExceptions.PersonNotFoundException(request.PersonId);
             
-            Cat catToDelete =
-                person.Cats
-                    .FirstOrDefault(x => x.Id == request.Id)
-                ?? throw new NotFoundExceptions.CatNotFoundException(request.Id);
-            
-            person.RemoveCat(catToDelete);
+            person.RemoveCat(request.Id);
             await db.SaveChangesAsync(cancellationToken);
         }
     }

@@ -1,5 +1,4 @@
 ﻿using KittySaver.Api.Shared.Domain.Common.Primitives;
-using KittySaver.Api.Shared.Domain.Persons;
 
 namespace KittySaver.Api.Shared.Domain.ValueObjects;
 

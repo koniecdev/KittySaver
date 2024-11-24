@@ -10,7 +10,7 @@ namespace KittySaver.Api.Tests.Unit.Advertisements;
 
 using Person = Person;
 
-public class AdvertisementTests
+public class CatAdvertisementAssignmentServiceTests
 {
     private static readonly DateTimeOffset Date = new(2024, 10, 31, 11, 0, 0, TimeSpan.Zero);
 
@@ -82,7 +82,6 @@ public class AdvertisementTests
         Email contactInfoEmail = ContactInfoEmailGenerator.Generate();
         PhoneNumber contactInfoPhoneNumber = ContactInfoPhoneNumberGenerator.Generate();
 
-        //Act
         Advertisement advertisement = Advertisement.Create(
             currentDate: Date,
             person: Person,
@@ -91,88 +90,20 @@ public class AdvertisementTests
             contactInfoEmail: contactInfoEmail,
             contactInfoPhoneNumber: contactInfoPhoneNumber,
             description: Description.Create("lorem ipsum"));
+        
+        //Act
+        Cat catToAssign = CatGenerator.Generate();
+        AdvertisementService service = new();
+        service.ReplaceCatsOfAdvertisement(person: Person,
+            advertisement: advertisement,
+            catIdsToAssign: [catToAssign.Id]);
 
         //Assert
         advertisement.Should().NotBeNull();
         advertisement.Id.Should().NotBeEmpty();
-        advertisement.PickupAddress.Should().BeEquivalentTo(pickupAddress);
-        advertisement.ContactInfoEmail.Should().BeEquivalentTo(contactInfoEmail);
-        advertisement.ContactInfoPhoneNumber.Should().BeEquivalentTo(contactInfoPhoneNumber);
-        advertisement.ExpiresOn.Should().Be(Date.AddDays(30));
-        advertisement.Description.Value.Should().Be("Lorem ipsum");
-        advertisement.Status.Should().Be(Advertisement.AdvertisementStatus.Active);
-        advertisement.PersonId.Should().Be(Person.Id);
-    }
-
-    [Fact]
-    public void CreateAdvertisement_ShouldThrowArgumentException_WhenEmptyCatsListIsProvided()
-    {
-        //Arrange
-        Address pickupAddress = PickupAddressGenerator.Generate();
-        Email contactInfoEmail = ContactInfoEmailGenerator.Generate();
-        PhoneNumber contactInfoPhoneNumber = ContactInfoPhoneNumberGenerator.Generate();
-        
-        //Act
-        Action creation = () =>
-        {
-            Advertisement.Create(
-                currentDate: Date,
-                person: Person,
-                catsIdsToAssign: [],
-                pickupAddress: pickupAddress,
-                contactInfoEmail: contactInfoEmail,
-                contactInfoPhoneNumber: contactInfoPhoneNumber,
-                description: Description.Create("lorem ipsum"));
-        };
-        
-        //Assert
-        creation.Should()
-            .ThrowExactly<ArgumentException>()
-            .WithMessage("Advertisement cats list must not be empty. (Parameter 'catsIdsToAssign')");
-    }
-    
-    [Fact]
-    public void Close_ShouldCloseSuccessfully_WhenValidDataAreProvided()
-    {
-        //Arrange
-        Advertisement advertisement = Advertisement.Create(
-                currentDate: Date,
-                person: Person,
-                catsIdsToAssign: [CatGenerator.Generate().Id],
-                pickupAddress: PickupAddressGenerator.Generate(),
-                contactInfoEmail: ContactInfoEmailGenerator.Generate(),
-                contactInfoPhoneNumber: ContactInfoPhoneNumberGenerator.Generate(),
-                description: Description.Create("lorem ipsum"));
-        
-        //Act
-        DateTimeOffset closureDate = Date.AddDays(1);
-        advertisement.Close(closureDate);
-
-        //Assert
-        advertisement.Status.Should().Be(Advertisement.AdvertisementStatus.Closed);
-        advertisement.ClosedOn.Should().Be(closureDate);
-    }
-    
-    [Fact]
-    public void Expire_ShouldExpireSuccessfully_WhenValidDataAreProvided()
-    {
-        //Arrange
-        Cat cat = CatGenerator.Generate();
-
-        Advertisement advertisement = Advertisement.Create(
-            currentDate: Date,
-            person: Person,
-            catsIdsToAssign: [cat.Id],
-            pickupAddress: PickupAddressGenerator,
-            contactInfoEmail: ContactInfoEmailGenerator.Generate(),
-            contactInfoPhoneNumber: ContactInfoPhoneNumberGenerator.Generate(),
-            description: Description.Create("lorem ipsum"));
-        
-        //Act
-        DateTimeOffset expirationDate = advertisement.ExpiresOn.AddDays(1);
-        advertisement.Expire(expirationDate);
-        
-        //Assert
-        advertisement.Status.Should().Be(Advertisement.AdvertisementStatus.Expired);
+        Person.Cats
+            .Count(x => x.AdvertisementId == advertisement.Id)
+            .Should()
+            .Be(1);
     }
 }

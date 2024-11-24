@@ -1,4 +1,4 @@
-﻿using KittySaver.Api.Shared.Domain.Advertisement;
+﻿using KittySaver.Api.Shared.Domain.Advertisements;
 using KittySaver.Api.Shared.Domain.Persons;
 using KittySaver.Api.Shared.Domain.Persons.Events;
 using KittySaver.Api.Shared.Persistence;
@@ -22,7 +22,7 @@ public class AssignedToAdvertisementCatStatusChangedDomainEventHandler(Applicati
             .Include(x => x.Cats)
             .FirstAsync(cancellationToken);
         
-        AdvertisementService advertisementService = AdvertisementService.Create(advertisement, person);
-        advertisementService.RecalculatePriorityScore();
+        AdvertisementService advertisementService = new();
+        advertisementService.RecalculatePriorityScore(person, advertisement);
     }
 }

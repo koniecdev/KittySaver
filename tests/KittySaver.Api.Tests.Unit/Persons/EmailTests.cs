@@ -11,6 +11,21 @@ namespace KittySaver.Api.Tests.Unit.Persons;
 
 public class EmailTests
 {
+    [Fact]
+    public void EmailCreate_ShouldCreateSuccessfully_WhenCorrectValueIsProvided()
+    {
+        //Assign
+        const string properEmail = "properemail@properemail.com";
+        
+        //Act
+        Email email = Email.Create(properEmail);
+        string emailAsString = email.ToString();
+        
+        //Assert
+        email.Value.Should().Be(properEmail);
+        emailAsString.Should().Be(properEmail);
+    }
+    
     [Theory]
     [InlineData("")]
     [InlineData(" ")]

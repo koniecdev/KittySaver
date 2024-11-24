@@ -1,5 +1,8 @@
 ﻿using System.Net.Http.Json;
+using KittySaver.Api.Features.Advertisements.SharedContracts;
+using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Features.Persons.SharedContracts;
+using Microsoft.AspNetCore.Mvc;
 
 namespace KittySaver.Api.Tests.Integration.Helpers;
 
@@ -7,9 +10,27 @@ public class CleanupHelper(HttpClient httpClient)
 {
     public async Task Cleanup()
     {
+        await CleanupAdvertisements();
         await CleanupPersons();
     }
 
+    private async Task CleanupAdvertisements()
+    {
+        ICollection<AdvertisementResponse>? advertisements = 
+            await httpClient.GetFromJsonAsync<ICollection<AdvertisementResponse>>("api/v1/advertisements");
+        if (advertisements is null)
+        {
+            return;
+        }
+        foreach (AdvertisementResponse advertisement in advertisements)
+        {
+            var msg1 = await httpClient.DeleteAsync($"api/v1/advertisements/{advertisement.Id}");
+            if (!msg1.IsSuccessStatusCode)
+            {
+                ProblemDetails msg1ProblemDetail = await msg1.Content.ReadFromJsonAsync<ProblemDetails>() ?? throw new Exception();
+            }
+        }
+    }
     private async Task CleanupPersons()
     {
         ICollection<PersonResponse>? persons = await httpClient.GetFromJsonAsync<ICollection<PersonResponse>>("api/v1/persons");
@@ -19,7 +40,23 @@ public class CleanupHelper(HttpClient httpClient)
         }
         foreach (PersonResponse person in persons)
         {
-            await httpClient.DeleteAsync($"api/v1/persons/{person.Id}");
+            ICollection<CatResponse>? cats = await httpClient.GetFromJsonAsync<ICollection<CatResponse>>($"api/v1/persons/{person.Id}/cats");
+            if (cats is not null)
+            {
+                foreach (CatResponse cat in cats)
+                {
+                    var msg2 = await httpClient.DeleteAsync($"api/v1/persons/{person.Id}/cats/{cat.Id}");
+                    if (!msg2.IsSuccessStatusCode)
+                    {
+                        ProblemDetails msg2ProblemDetail = await msg2.Content.ReadFromJsonAsync<ProblemDetails>() ?? throw new Exception();
+                    }
+                }
+            }
+            var msg3 = await httpClient.DeleteAsync($"api/v1/persons/{person.Id}");
+            if (!msg3.IsSuccessStatusCode)
+            {
+                ProblemDetails msg3ProblemDetail = await msg3.Content.ReadFromJsonAsync<ProblemDetails>() ?? throw new Exception();
+            }
         }
     }
 }

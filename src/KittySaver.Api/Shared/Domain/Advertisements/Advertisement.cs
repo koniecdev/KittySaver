@@ -1,44 +1,44 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using KittySaver.Api.Shared.Domain.Advertisement.Events;
+using KittySaver.Api.Shared.Domain.Advertisements.Events;
 using KittySaver.Api.Shared.Domain.Common.Primitives;
 using KittySaver.Api.Shared.Domain.Persons;
 using KittySaver.Api.Shared.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace KittySaver.Api.Shared.Domain.Advertisement;
+namespace KittySaver.Api.Shared.Domain.Advertisements;
 
 public sealed class Advertisement : AggregateRoot
 {
     public static Advertisement Create(
         DateTimeOffset currentDate,
-        Guid personId,
+        Person person,
         IEnumerable<Guid> catsIdsToAssign,
         Address pickupAddress,
         Email contactInfoEmail,
         PhoneNumber contactInfoPhoneNumber,
         Description description)
     {
-        DateTimeOffset expiresOn = currentDate + ExpiringPeriodInDays;
-        
-        List<Guid> catsIdsToAssignToAdvertisement = catsIdsToAssign.ToList();
-        if (catsIdsToAssignToAdvertisement.Count == 0)
+        List<Guid> catsIdsToAssignList = catsIdsToAssign.ToList();
+        if (catsIdsToAssignList.Count == 0)
         {
-            throw new ArgumentException("Advertisement cats list must not be empty.", nameof(catsIdsToAssign));
+            throw new ArgumentException(ErrorMessages.EmptyCatsList, nameof(catsIdsToAssign));
         }
         
+        DateTimeOffset expiresOn = currentDate + ExpiringPeriodInDays;
+        
         Advertisement advertisement = new(
-            personId: personId,
+            personId: person.Id,
             pickupAddress: pickupAddress,
             contactInfoEmail: contactInfoEmail,
             contactInfoPhoneNumber: contactInfoPhoneNumber,
             description: description,
             expiresOn: expiresOn);
         
-        advertisement.RaiseDomainEvent(new AdvertisementCreatedDomainEvent(
-            AdvertisementId: advertisement.Id,
-            PersonId: personId,
-            catsIdsToAssignToAdvertisement));
+        AdvertisementService advertisementService = new();
+        advertisementService.AssignCatsToAdvertisement(person, advertisement, catsIdsToAssignList);
+
+        advertisement.Status = AdvertisementStatus.Active;
         return advertisement;
     }
 
@@ -73,24 +73,25 @@ public sealed class Advertisement : AggregateRoot
     private static readonly TimeSpan ExpiringPeriodInDays = new(days: 30, hours: 0, minutes: 0, seconds: 0);
     private readonly Guid _personId;
     private double _priorityScore;
-
+    public enum AdvertisementStatus
+    {
+        Draft,
+        Active,
+        Closed,
+        Expired //TODO: Background running task every day
+    }
+    public AdvertisementStatus Status { get; private set; } = AdvertisementStatus.Draft;
     public DateTimeOffset? ClosedOn { get; private set; }
 
     public DateTimeOffset ExpiresOn { get; private set; }
 
-    public AdvertisementStatus Status { get; private set; } = AdvertisementStatus.Active;
 
     public double PriorityScore
     {
         get => _priorityScore;
-        internal set
-        {
-            if (value == 0)
-            {
-                throw new ArgumentException("PriorityScore can not be zero, probably something went wrong.", nameof(PriorityScore));
-            }
-            _priorityScore = value;
-        }
+        internal set => _priorityScore = value == 0 
+            ? throw new ArgumentException(ErrorMessages.ZeroPriorityScore, nameof(PriorityScore))
+            : value;
     }
 
     public Description Description { get; set; }
@@ -102,9 +103,8 @@ public sealed class Advertisement : AggregateRoot
         {
             if (value == Guid.Empty)
             {
-                throw new ArgumentException("Provided person id is empty", nameof(PersonId));
+                throw new ArgumentException(ErrorMessages.EmptyPersonId, nameof(PersonId));
             }
-
             _personId = value;
         }
     }
@@ -115,10 +115,7 @@ public sealed class Advertisement : AggregateRoot
 
     public void Close(DateTimeOffset currentDate)
     {
-        if (Status is not AdvertisementStatus.Active)
-        {
-            throw new InvalidOperationException("You can not close advertisement that is not active");
-        }
+        EnsureAdvertisementIsActive();
 
         ClosedOn = currentDate;
         Status = AdvertisementStatus.Closed;
@@ -128,10 +125,7 @@ public sealed class Advertisement : AggregateRoot
 
     public void Expire(DateTimeOffset currentDate)
     {
-        if (Status is not AdvertisementStatus.Active)
-        {
-            throw new InvalidOperationException("You can not expire advertisement that is not active");
-        }
+        EnsureAdvertisementIsActive();
 
         if (ExpiresOn <= currentDate)
         {
@@ -143,17 +137,38 @@ public sealed class Advertisement : AggregateRoot
     {
         if (Status is not (AdvertisementStatus.Active or AdvertisementStatus.Expired))
         {
-            throw new InvalidOperationException("You can not refresh advertisement that is not active/expired");
+            throw new InvalidOperationException(ErrorMessages.InvalidRefreshOperation);
         }
 
         ExpiresOn = currentDate + ExpiringPeriodInDays;
     }
+    
+    public void AnnounceDeletion() => RaiseDomainEvent(new AdvertisementDeletedDomainEvent(Id, PersonId));
 
-    public enum AdvertisementStatus
+    public void ValidateOwnership(Guid personId)
     {
-        Active,
-        Closed,
-        Expired //TODO: Background running task every day
+        if (personId != PersonId)
+        {
+            throw new ArgumentException(ErrorMessages.InvalidPersonId, nameof(personId));
+        }
+    }
+    
+    private void EnsureAdvertisementIsActive()
+    {
+        if (Status is not AdvertisementStatus.Active)
+        {
+            throw new InvalidOperationException(ErrorMessages.InvalidStatusOperation);
+        }
+    }
+
+    private static class ErrorMessages
+    {
+        public const string EmptyCatsList = "Advertisement cats list must not be empty.";
+        public const string ZeroPriorityScore = "PriorityScore cannot be zero, probably something went wrong.";
+        public const string EmptyPersonId = "Provided person id is empty.";
+        public const string InvalidPersonId = "Provided person id is not id of advertisement owner.";
+        public const string InvalidStatusOperation = "Active advertisement status is required for that operation.";
+        public const string InvalidRefreshOperation = "You cannot refresh an advertisement that is not active/expired.";
     }
 }
 
@@ -170,6 +185,7 @@ internal sealed class AdvertisementConfiguration : IEntityTypeConfiguration<Adve
         builder.HasMany<Cat>()
             .WithOne()
             .HasForeignKey(cat => cat.AdvertisementId)
+            .OnDelete(DeleteBehavior.NoAction)
             .IsRequired(false);
 
         builder.Property(x => x.PersonId).IsRequired();

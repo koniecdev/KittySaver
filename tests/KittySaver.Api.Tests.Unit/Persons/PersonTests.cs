@@ -3,6 +3,7 @@ using FluentAssertions;
 using KittySaver.Api.Shared.Domain.Common.Primitives.Enums;
 using KittySaver.Api.Shared.Domain.Persons;
 using KittySaver.Api.Shared.Domain.ValueObjects;
+using KittySaver.Api.Shared.Exceptions.ApplicationExceptions;
 using NSubstitute;
 using Shared;
 using Person = KittySaver.Api.Shared.Domain.Persons.Person;
@@ -268,7 +269,7 @@ public class PersonTests
             .Generate();
         
         //Act
-        sut.RemoveCat(cat);
+        sut.RemoveCat(cat.Id);
 
         //Assert
         sut.Cats.Should().NotContain(cat);
@@ -313,7 +314,7 @@ public class PersonTests
     }
     
     [Fact]
-    public void RemoveCat_ShouldThrowInvalidOperationException_WhenTheSameCatIsProvided()
+    public void RemoveCat_ShouldThrowCatNotFoundException_WhenTheSameCatIsProvided()
     {
         //Arrange
         Person sut = Person.Create(
@@ -342,12 +343,12 @@ public class PersonTests
                     additionalRequirements: Description.Create(faker.Lorem.Lines(2)),
                     isCastrated: false))
             .Generate();
-        sut.RemoveCat(cat);
+        sut.RemoveCat(cat.Id);
         
         //Act
-        Action operation = () => sut.RemoveCat(cat);
+        Action operation = () => sut.RemoveCat(cat.Id);
         
         //Assert
-        operation.Should().ThrowExactly<InvalidOperationException>();
+        operation.Should().ThrowExactly<NotFoundExceptions.CatNotFoundException>();
     }
 }
