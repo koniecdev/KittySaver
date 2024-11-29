@@ -152,17 +152,14 @@ public sealed class Person : AggregateRoot
 
     public void AddCat(Cat cat)
     {
-        ThrowIfCatExists(cat.Id);
+        ThrowIfCatAlreadyExists(cat.Id);
         _cats.Add(cat);
     }
 
     public void RemoveCat(Guid catId)
     {
         Cat cat = GetCatById(catId);
-        if (cat.AdvertisementId.HasValue)
-        {
-            ThrowIfCatNotExists(cat.Id);
-        }
+        ThrowIfCatIsAssignedToAdvertisement(cat);
         _cats.Remove(cat);
     }
     
@@ -175,14 +172,7 @@ public sealed class Person : AggregateRoot
     public void UnassignCatFromAdvertisement(Guid catId)
     {
         Cat cat = GetCatById(catId);
-        Guid? unassignedAdvertisementId = cat.AdvertisementId;
-        
         cat.UnassignAdvertisement();
-        
-        if (unassignedAdvertisementId.HasValue)
-        {
-            RaiseDomainEvent(new AssignedToAdvertisementCatStatusChangedDomainEvent(unassignedAdvertisementId.Value));
-        }
     }
     
     public void UnassignCatsFromRemovedAdvertisement(Guid advertisementId)
@@ -253,19 +243,19 @@ public sealed class Person : AggregateRoot
         }
     }
     
-    private void ThrowIfCatExists(Guid catId)
+    private void ThrowIfCatAlreadyExists(Guid catId)
     {
         if (_cats.Any(c => c.Id == catId))
         {
-            throw new InvalidOperationException(string.Format(ErrorMessages.CatAlreadyAssigned, catId, Id));
+            throw new InvalidOperationException(string.Format(ErrorMessages.CatAlreadyAssignedToPerson, catId, Id));
         }
     }
 
-    private void ThrowIfCatNotExists(Guid catId)
+    private void ThrowIfCatIsAssignedToAdvertisement(Cat cat)
     {
-        if (_cats.All(c => c.Id != catId))
+        if (cat.AdvertisementId.HasValue)
         {
-            throw new InvalidOperationException(string.Format(ErrorMessages.CatNotAssigned, catId, Id));
+            throw new InvalidOperationException(string.Format(ErrorMessages.CatIsAssignedToAdvertisement, cat.Id, cat.AdvertisementId));
         }
     }
     
@@ -275,8 +265,8 @@ public sealed class Person : AggregateRoot
     
     private static class ErrorMessages
     {
-        public const string CatAlreadyAssigned = "Cat with id: '{0}' is already assigned to Person with id {1}.";
-        public const string CatNotAssigned = "Cat with id: '{0}' is not even assigned to Person with id {1}.";
+        public const string CatAlreadyAssignedToPerson = "Cat with id: '{0}' is already assigned to Person with id {1}.";
+        public const string CatIsAssignedToAdvertisement = "Cat with id: '{0}' is assigned to advertisement with id: {1}, so it can not be removed.";
         public const string InvalidCatsOwnership = "One or more provided cats do not belong to provided person.";
     }
 }

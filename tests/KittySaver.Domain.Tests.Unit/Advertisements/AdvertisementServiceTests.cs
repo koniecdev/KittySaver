@@ -10,7 +10,7 @@ namespace KittySaver.Domain.Tests.Unit.Advertisements;
 
 using Person = Person;
 
-public class CatAdvertisementAssignmentServiceTests
+public class AdvertisementServiceTests
 {
     private static readonly DateTimeOffset Date = new(2024, 10, 31, 11, 0, 0, TimeSpan.Zero);
 
