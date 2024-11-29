@@ -4,13 +4,14 @@ using KittySaver.Domain.Advertisements;
 using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
+using NSubstitute;
 using Person = KittySaver.Domain.Persons.Person;
 
 namespace KittySaver.Domain.Tests.Unit.Advertisements;
 
 using Person = Person;
 
-public class CatAdvertisementAssignmentServiceTests
+public class AdvertisementServiceTests
 {
     private static readonly DateTimeOffset Date = new(2024, 10, 31, 11, 0, 0, TimeSpan.Zero);
 
@@ -72,7 +73,7 @@ public class CatAdvertisementAssignmentServiceTests
             ));
 
     [Fact]
-    public void CreateAdvertisement_ShouldCreateSuccessfully_WhenValidDataAreProvided()
+    public void ReplaceCatsOfAdvertisement_ShouldReplaceOldCatsWithNewOne_WhenValidDataAreProvided()
     {
         //Arrange
         List<Cat> cats = [CatGenerator.Generate(), CatGenerator.Generate(), CatGenerator.Generate()];
@@ -103,5 +104,60 @@ public class CatAdvertisementAssignmentServiceTests
             .Count(x => x.AdvertisementId == advertisement.Id)
             .Should()
             .Be(1);
+    }
+    
+    [Fact]
+    public void RecalculatePriorityScore_ShouldRecalculateAdvertisementPriorityScore_WhenCatsChange()
+    {
+        //Arrange
+        ICatPriorityCalculatorService catPriorityCalculatorService = Substitute.For<ICatPriorityCalculatorService>();
+        catPriorityCalculatorService.Calculate(Arg.Any<Cat>()).Returns(420);
+        Cat cat =  new Faker<Cat>()
+            .CustomInstantiator(faker =>
+                Cat.Create(
+                    priorityScoreCalculator: new DefaultCatPriorityCalculatorService(),
+                    person: Person,
+                    name: CatName.Create(faker.Person.FirstName),
+                    medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet,
+                        MedicalHelpUrgency.HaveToSeeVet),
+                    ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
+                    behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
+                    healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
+                    isCastrated: faker.PickRandomParam(true, false),
+                    additionalRequirements: Description.Create(faker.Lorem.Lines(2))
+                )).Generate();
+        Address pickupAddress = PickupAddressGenerator.Generate();
+        Email contactInfoEmail = ContactInfoEmailGenerator.Generate();
+        PhoneNumber contactInfoPhoneNumber = ContactInfoPhoneNumberGenerator.Generate();
+
+        Advertisement advertisement = Advertisement.Create(
+            currentDate: Date,
+            person: Person,
+            catsIdsToAssign: [cat.Id],
+            pickupAddress: pickupAddress,
+            contactInfoEmail: contactInfoEmail,
+            contactInfoPhoneNumber: contactInfoPhoneNumber,
+            description: Description.Create("lorem ipsum"));
+        
+        //Act
+        const int updatedPriorityScore = 100;
+        catPriorityCalculatorService.Calculate(Arg.Any<Cat>()).Returns(updatedPriorityScore);
+        Person.UpdateCat(
+            catId: cat.Id,
+            catPriorityCalculator: catPriorityCalculatorService,
+            name: cat.Name,
+            additionalRequirements: cat.AdditionalRequirements,
+            isCastrated: false,
+            healthStatus: HealthStatus.Critical, 
+            ageCategory: cat.AgeCategory,
+            behavior: cat.Behavior,
+            medicalHelpUrgency: cat.MedicalHelpUrgency);
+        AdvertisementService service = new();
+        service.RecalculatePriorityScore(
+            person: Person,
+            advertisement: advertisement);
+
+        //Assert
+        advertisement.PriorityScore.Should().Be(updatedPriorityScore);
     }
 }

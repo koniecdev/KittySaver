@@ -179,7 +179,7 @@ public sealed class Cat : AuditableEntity
     /// </remarks>
     internal void UnassignAdvertisement()
     {
-        if (AdvertisementId is null)
+        if (AdvertisementId is null)    
         {
             throw new InvalidOperationException(ErrorMessages.NotAssignedToAdvertisement);
         }

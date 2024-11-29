@@ -1,8 +1,11 @@
 using Bogus;
 using FluentAssertions;
+using KittySaver.Domain.Advertisements;
 using KittySaver.Domain.Common.Exceptions;
+using KittySaver.Domain.Common.Primitives;
 using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.Events;
 using KittySaver.Domain.ValueObjects;
 using NSubstitute;
 using Person = KittySaver.Domain.Persons.Person;
@@ -345,5 +348,298 @@ public class PersonTests
         
         //Assert
         operation.Should().ThrowExactly<NotFoundExceptions.CatNotFoundException>();
+    }
+
+    [Fact]
+    public void GetHighestPriorityScoreFromGivenCats_ShouldBeSuccessfull_WhenValidDataAreProvided()
+    {
+        //Arrange
+        Person sut = Person.Create(
+            userIdentityId: _userIdentityId,
+            firstName: _defaultProperFirstName,
+            lastName: _defaultProperLastName,
+            email: _defaultProperEmail,
+            phoneNumber: _defaultProperPhone,
+            residentalAddress: Address,
+            defaultAdvertisementPickupAddress: PickupAddress,
+            defaultAdvertisementContactInfoEmail: _defaultProperEmail,
+            defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
+        );
+        ICatPriorityCalculatorService calculatorService = Substitute.For<ICatPriorityCalculatorService>();
+        calculatorService.Calculate(Arg.Any<Cat>()).ReturnsForAnyArgs(420);
+        Faker<Cat> catGenerator = new Faker<Cat>()
+            .CustomInstantiator(faker =>
+                Cat.Create(
+                    priorityScoreCalculator: calculatorService,
+                    person: sut,
+                    name: CatName.Create(faker.Person.FirstName),
+                    additionalRequirements: Description.Create(faker.Person.FirstName),
+                    medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
+                    ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
+                    behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
+                    healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
+                    isCastrated: false));
+        Cat cat1 = catGenerator.Generate();
+        Cat cat2 = catGenerator.Generate();
+        
+        //Act
+        double result = sut.GetHighestPriorityScoreFromGivenCats([cat1.Id, cat2.Id]);
+
+        //Assert
+        result.Should().Be(420);
+    }
+    
+    [Fact]
+    public void GetHighestPriorityScoreFromGivenCats_ShouldThrow_WhenCatsOfAnotherPersonAreProvided()
+    {
+        //Arrange
+        Person sut = Person.Create(
+            userIdentityId: _userIdentityId,
+            firstName: _defaultProperFirstName,
+            lastName: _defaultProperLastName,
+            email: _defaultProperEmail,
+            phoneNumber: _defaultProperPhone,
+            residentalAddress: Address,
+            defaultAdvertisementPickupAddress: PickupAddress,
+            defaultAdvertisementContactInfoEmail: _defaultProperEmail,
+            defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
+        );
+        Person anotherPerson = new Faker<Person>().CustomInstantiator(faker => Person.Create(
+            userIdentityId: _userIdentityId,
+            firstName: FirstName.Create(faker.Person.FirstName),
+            lastName: LastName.Create(faker.Person.LastName), 
+            email: Email.Create(faker.Person.Email),
+            phoneNumber: PhoneNumber.Create(faker.Person.Phone),
+            residentalAddress: Address,
+            defaultAdvertisementPickupAddress: PickupAddress,
+            defaultAdvertisementContactInfoEmail: Email.Create(faker.Person.Email),
+            defaultAdvertisementContactInfoPhoneNumber: PhoneNumber.Create(faker.Person.Phone)
+        )).Generate();
+        ICatPriorityCalculatorService calculatorService = Substitute.For<ICatPriorityCalculatorService>();
+        calculatorService.Calculate(Arg.Any<Cat>()).ReturnsForAnyArgs(420);
+        Cat cat1 = new Faker<Cat>()
+            .CustomInstantiator(faker =>
+                Cat.Create(
+                    priorityScoreCalculator: calculatorService,
+                    person: sut,
+                    name: CatName.Create(faker.Person.FirstName),
+                    additionalRequirements: Description.Create(faker.Person.FirstName),
+                    medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
+                    ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
+                    behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
+                    healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
+                    isCastrated: false)).Generate();
+        Cat cat2 = new Faker<Cat>()
+            .CustomInstantiator(faker =>
+                Cat.Create(
+                    priorityScoreCalculator: calculatorService,
+                    person: anotherPerson,
+                    name: CatName.Create(faker.Person.FirstName),
+                    additionalRequirements: Description.Create(faker.Person.FirstName),
+                    medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
+                    ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
+                    behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
+                    healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
+                    isCastrated: false)).Generate();
+        
+        //Act
+        Action results = () => sut.GetHighestPriorityScoreFromGivenCats([cat1.Id, cat2.Id]);
+
+        //Assert
+        results.Should().Throw<ArgumentException>();
+    }
+    
+    [Fact]
+    public void UpdateCat_ShouldBeSuccessfull_WhenProperCatIsProvided()
+    {
+        //Arrange
+        Person sut = Person.Create(
+            userIdentityId: _userIdentityId,
+            firstName: _defaultProperFirstName,
+            lastName: _defaultProperLastName,
+            email: _defaultProperEmail,
+            phoneNumber: _defaultProperPhone,
+            residentalAddress: Address,
+            defaultAdvertisementPickupAddress: PickupAddress,
+            defaultAdvertisementContactInfoEmail: _defaultProperEmail,
+            defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
+        );
+        ICatPriorityCalculatorService calculatorService = Substitute.For<ICatPriorityCalculatorService>();
+        calculatorService.Calculate(Arg.Any<Cat>()).ReturnsForAnyArgs(420);
+        Cat cat1 = new Faker<Cat>()
+            .CustomInstantiator(faker =>
+                Cat.Create(
+                    priorityScoreCalculator: calculatorService,
+                    person: sut,
+                    name: CatName.Create(faker.Person.FirstName),
+                    additionalRequirements: Description.Create(faker.Person.FirstName),
+                    medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
+                    ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
+                    behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
+                    healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
+                    isCastrated: false)).Generate();
+        Advertisement advertisement = Advertisement.Create(
+            currentDate: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
+            person: sut,
+            catsIdsToAssign: [cat1.Id],
+            pickupAddress: sut.DefaultAdvertisementsPickupAddress,
+            contactInfoEmail: sut.DefaultAdvertisementsContactInfoEmail,
+            contactInfoPhoneNumber: sut.DefaultAdvertisementsContactInfoPhoneNumber,
+            description: Description.Create("lorem ipsum"));
+        //Act
+        CatName nameForUpdate = CatName.Create("Krówka");
+        Description descriptionForUpdate = Description.Create("Krówkaa");
+        sut.UpdateCat(
+            catId: cat1.Id,
+            catPriorityCalculator: calculatorService,
+            name: nameForUpdate,
+            additionalRequirements: descriptionForUpdate,
+            isCastrated: true,
+            healthStatus: HealthStatus.Good, 
+            ageCategory: AgeCategory.Adult, 
+            behavior: Behavior.Friendly, 
+            medicalHelpUrgency: MedicalHelpUrgency.NoNeed);
+        
+        //Assert
+        cat1.Name.Value.Should().Be(nameForUpdate.Value);
+        cat1.AdditionalRequirements.Value.Should().Be(descriptionForUpdate.Value);
+        cat1.HealthStatus.Value.Should().Be(HealthStatus.Good);
+        cat1.AgeCategory.Value.Should().Be(AgeCategory.Adult);
+        cat1.Behavior.Value.Should().Be(Behavior.Friendly);
+        cat1.MedicalHelpUrgency.Value.Should().Be(MedicalHelpUrgency.NoNeed);
+        IReadOnlyCollection<DomainEvent> personEvents = sut.GetDomainEvents();
+        personEvents.Count.Should().Be(1);
+        personEvents.First().Should().BeOfType<AssignedToAdvertisementCatStatusChangedDomainEvent>();
+        AssignedToAdvertisementCatStatusChangedDomainEvent castedEvent =
+            (AssignedToAdvertisementCatStatusChangedDomainEvent)personEvents.First();
+        castedEvent.AdvertisementId.Should().Be(advertisement.Id);
+    }
+    
+    [Fact]
+    public void UpdateCat_ShouldThrowCatNotFound_WhenNotExistingCatIdIsProvided()
+    {
+        //Arrange
+        Person sut = Person.Create(
+            userIdentityId: _userIdentityId,
+            firstName: _defaultProperFirstName,
+            lastName: _defaultProperLastName,
+            email: _defaultProperEmail,
+            phoneNumber: _defaultProperPhone,
+            residentalAddress: Address,
+            defaultAdvertisementPickupAddress: PickupAddress,
+            defaultAdvertisementContactInfoEmail: _defaultProperEmail,
+            defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
+        );
+        ICatPriorityCalculatorService calculatorService = Substitute.For<ICatPriorityCalculatorService>();
+        calculatorService.Calculate(Arg.Any<Cat>()).ReturnsForAnyArgs(420);
+        //Act
+        CatName nameForUpdate = CatName.Create("Krówka");
+        Description descriptionForUpdate = Description.Create("Krówkaa");
+        Action results = () => sut.UpdateCat(
+            catId: Guid.NewGuid(),
+            catPriorityCalculator: calculatorService,
+            name: nameForUpdate,
+            additionalRequirements: descriptionForUpdate,
+            isCastrated: true,
+            healthStatus: HealthStatus.Good, 
+            ageCategory: AgeCategory.Adult, 
+            behavior: Behavior.Friendly, 
+            medicalHelpUrgency: MedicalHelpUrgency.NoNeed);
+
+        //Assert
+        results.Should().ThrowExactly<NotFoundExceptions.CatNotFoundException>();
+    }
+    
+    [Fact]
+    public void RemoveCat_ShouldThrowInvalidOperationException_WhenCatWithAssignedAdvertisementIsProvided()
+    {
+        //Arrange
+        Person sut = Person.Create(
+            userIdentityId: _userIdentityId,
+            firstName: _defaultProperFirstName,
+            lastName: _defaultProperLastName,
+            email: _defaultProperEmail,
+            phoneNumber: _defaultProperPhone,
+            residentalAddress: Address,
+            defaultAdvertisementPickupAddress: PickupAddress,
+            defaultAdvertisementContactInfoEmail: _defaultProperEmail,
+            defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
+        );
+        ICatPriorityCalculatorService calculatorService = Substitute.For<ICatPriorityCalculatorService>();
+        calculatorService.Calculate(Arg.Any<Cat>()).ReturnsForAnyArgs(420);
+        Cat cat1 = new Faker<Cat>()
+            .CustomInstantiator(faker =>
+                Cat.Create(
+                    priorityScoreCalculator: calculatorService,
+                    person: sut,
+                    name: CatName.Create(faker.Person.FirstName),
+                    additionalRequirements: Description.Create(faker.Person.FirstName),
+                    medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
+                    ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
+                    behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
+                    healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
+                    isCastrated: false)).Generate();
+        Advertisement.Create(
+            currentDate: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
+            person: sut,
+            catsIdsToAssign: [cat1.Id],
+            pickupAddress: sut.DefaultAdvertisementsPickupAddress,
+            contactInfoEmail: sut.DefaultAdvertisementsContactInfoEmail,
+            contactInfoPhoneNumber: sut.DefaultAdvertisementsContactInfoPhoneNumber,
+            description: Description.Create("lorem ipsum"));
+        
+        //Act
+        Action results = () => sut.RemoveCat(cat1.Id);
+        
+        //Assert
+        results.Should().ThrowExactly<InvalidOperationException>();
+    }
+    
+    [Fact]
+    public void MarkCatsFromConcreteAdvertisementAsAdopted_BeSuccessfull_WhenValidDataAreProvided()
+    {
+        //Arrange
+        Person sut = Person.Create(
+            userIdentityId: _userIdentityId,
+            firstName: _defaultProperFirstName,
+            lastName: _defaultProperLastName,
+            email: _defaultProperEmail,
+            phoneNumber: _defaultProperPhone,
+            residentalAddress: Address,
+            defaultAdvertisementPickupAddress: PickupAddress,
+            defaultAdvertisementContactInfoEmail: _defaultProperEmail,
+            defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
+        );
+        ICatPriorityCalculatorService calculatorService = Substitute.For<ICatPriorityCalculatorService>();
+        calculatorService.Calculate(Arg.Any<Cat>()).ReturnsForAnyArgs(420);
+        Faker<Cat> catGenerator = new Faker<Cat>()
+            .CustomInstantiator(faker =>
+                Cat.Create(
+                    priorityScoreCalculator: calculatorService,
+                    person: sut,
+                    name: CatName.Create(faker.Person.FirstName),
+                    additionalRequirements: Description.Create(faker.Person.FirstName),
+                    medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
+                    ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
+                    behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
+                    healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
+                    isCastrated: false));
+        Cat cat1 = catGenerator.Generate();
+        Cat cat2 = catGenerator.Generate();
+        Advertisement advertisement = Advertisement.Create(
+            currentDate: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
+            person: sut,
+            catsIdsToAssign: [cat1.Id, cat2.Id],
+            pickupAddress: sut.DefaultAdvertisementsPickupAddress,
+            contactInfoEmail: sut.DefaultAdvertisementsContactInfoEmail,
+            contactInfoPhoneNumber: sut.DefaultAdvertisementsContactInfoPhoneNumber,
+            description: Description.Create("lorem ipsum"));
+        
+        //Act
+        sut.MarkCatsFromConcreteAdvertisementAsAdopted(advertisement.Id);
+        
+        //Assert
+        cat1.IsAdopted.Should().BeTrue();
+        cat2.IsAdopted.Should().BeTrue();
     }
 }
