@@ -1,5 +1,6 @@
 using Bogus;
 using FluentAssertions;
+using KittySaver.Domain.Advertisements;
 using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
@@ -114,7 +115,7 @@ public class CatTests
             new Faker<Cat>()
              .CustomInstantiator(faker => Cat.Create(
                      priorityScoreCalculator: Substitute.For<ICatPriorityCalculatorService>(),
-                     person: Person,
+                     person: person,
                      name: CatName.Create(faker.Person.FirstName),
                      additionalRequirements: Description.Create(faker.Person.FirstName),
                      medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
@@ -126,36 +127,155 @@ public class CatTests
         };
         
         //Assert
-        createCat.Should().Throw<ArgumentException>();
+        createCat.Should().Throw<ArgumentException>().WithMessage("Provided person id is empty (Parameter 'PersonId')");
     }
     
-    // [Fact]
-    // public void ReCalculatePriorityScore_ShouldUpdatePriorityScore_WhenCalculatorIsProvided()
-    // {
-    //     //Arrange
-    //     const int score = 420;
-    //     ICatPriorityCalculatorService calculator = Substitute.For<ICatPriorityCalculatorService>();
-    //     calculator.Calculate(Arg.Any<Cat>()).Returns(score);
-    //
-    //     Cat cat = new Faker<Cat>()
-    //         .CustomInstantiator(faker =>
-    //             Cat.Create(
-    //                 priorityScoreCalculator: calculator,
-    //                 person: Person,
-    //                 name: CatName.Create(faker.Person.FirstName),
-    //                 additionalRequirements: Description.Create(faker.Person.FirstName),
-    //                 medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
-    //                 ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
-    //                 behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
-    //                 healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
-    //                 isCastrated: faker.PickRandomParam(true, false)
-    //             )).Generate();
-    //     calculator.Calculate(Arg.Any<Cat>()).Returns(score * 2);
-    //     
-    //     //Act
-    //     cat.RecalculatePriorityScore(calculator);
-    //
-    //     //Assert
-    //     cat.PriorityScore.Should().Be(score * 2);
-    // }
+    [Fact]
+    public void AdvertisementIdSet_ShouldThrowArgumentException_WhenProvidedEmptyValue()
+    {
+        Person person = new Faker<Person>()
+        .CustomInstantiator(faker =>
+            Person.Create(
+                userIdentityId: Guid.NewGuid(),
+                firstName: FirstName.Create(faker.Person.FirstName),
+                lastName: LastName.Create(faker.Person.LastName),
+                email: Email.Create(faker.Person.Email),
+                phoneNumber: PhoneNumber.Create(faker.Person.Phone),
+                residentalAddress: Address,
+                defaultAdvertisementPickupAddress: PickupAddress,
+                defaultAdvertisementContactInfoEmail: Email.Create(faker.Person.Email),
+                defaultAdvertisementContactInfoPhoneNumber: PhoneNumber.Create(faker.Person.Phone)
+            )).Generate();
+        ICatPriorityCalculatorService priorityScoreCalculator = Substitute.For<ICatPriorityCalculatorService>();
+        priorityScoreCalculator.Calculate(Arg.Any<Cat>()).Returns(420);
+        Cat cat = new Faker<Cat>()
+         .CustomInstantiator(faker => Cat.Create(
+                 priorityScoreCalculator: priorityScoreCalculator,
+                 person: person,
+                 name: CatName.Create(faker.Person.FirstName),
+                 additionalRequirements: Description.Create(faker.Person.FirstName),
+                 medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
+                 ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
+                 behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
+                 healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
+                 isCastrated: faker.PickRandomParam(true, false)
+             )).Generate();
+        
+        //Act
+        Action results = () =>
+        {
+            SharedHelper.SetPrivateSetProperty(cat, nameof(Cat.AdvertisementId), Guid.Empty);
+        };
+        
+        //Assert
+        results.Should().Throw<Exception>().WithInnerException<ArgumentException>().WithMessage("Provided advertisement id is empty (Parameter 'AdvertisementId')");
+    }
+
+    [Fact]
+    public void UnassignAdvertisement_ShouldBeSuccessfull_WhenValidDataAreProvided()
+    {
+        //Arrange
+        ICatPriorityCalculatorService? calculator = Substitute.For<ICatPriorityCalculatorService>();
+        calculator.Calculate(Arg.Any<Cat>()).Returns(420);
+        
+        CatName name = CatName.Create("Whiskers");
+        Description additionalRequirements = Description.Create("Lorem ipsum");
+        MedicalHelpUrgency medicalHelpUrgency = MedicalHelpUrgency.NoNeed;
+        AgeCategory ageCategory = AgeCategory.Adult;
+        Behavior behavior = Behavior.Friendly;
+        HealthStatus healthStatus = HealthStatus.Good;
+        const bool isCastrated = true;
+        
+        Cat sut = Cat.Create(
+            priorityScoreCalculator: calculator,
+            person: Person,
+            name: name,
+            medicalHelpUrgency: medicalHelpUrgency,
+            ageCategory: ageCategory,
+            behavior: behavior,
+            healthStatus: healthStatus,
+            additionalRequirements: additionalRequirements,
+            isCastrated: isCastrated
+        );
+        Advertisement.Create(
+            currentDate: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
+            person: Person,
+            catsIdsToAssign: [sut.Id],
+            pickupAddress: Person.DefaultAdvertisementsPickupAddress,
+            contactInfoEmail: Person.DefaultAdvertisementsContactInfoEmail,
+            contactInfoPhoneNumber: Person.DefaultAdvertisementsContactInfoPhoneNumber,
+            description: Description.Create("lorem ipsum"));
+        
+        //Act
+        sut.UnassignAdvertisement();
+        
+        //Assert
+        sut.AdvertisementId.Should().BeNull();
+    }
+    
+    [Fact]
+    public void UnassignAdvertisement_ShouldThrowInvalidOperationException_WhenCatIsNotAssignedToAnyAdvertisement()
+    {
+        //Arrange
+        ICatPriorityCalculatorService? calculator = Substitute.For<ICatPriorityCalculatorService>();
+        calculator.Calculate(Arg.Any<Cat>()).Returns(420);
+        
+        CatName name = CatName.Create("Whiskers");
+        Description additionalRequirements = Description.Create("Lorem ipsum");
+        MedicalHelpUrgency medicalHelpUrgency = MedicalHelpUrgency.NoNeed;
+        AgeCategory ageCategory = AgeCategory.Adult;
+        Behavior behavior = Behavior.Friendly;
+        HealthStatus healthStatus = HealthStatus.Good;
+        const bool isCastrated = true;
+        
+        Cat cat = Cat.Create(
+            priorityScoreCalculator: calculator,
+            person: Person,
+            name: name,
+            medicalHelpUrgency: medicalHelpUrgency,
+            ageCategory: ageCategory,
+            behavior: behavior,
+            healthStatus: healthStatus,
+            additionalRequirements: additionalRequirements,
+            isCastrated: isCastrated
+        );
+        
+        //Act
+        Action results = () => cat.UnassignAdvertisement();
+        
+        //Assert
+        results.Should().ThrowExactly<InvalidOperationException>();
+    }
+    
+    [Fact]
+    public void PriorityScoreSet_ShouldThrowArgumentException_WhenZeroIsProvided()
+    {
+        //Arrange
+        ICatPriorityCalculatorService? calculator = Substitute.For<ICatPriorityCalculatorService>();
+        calculator.Calculate(Arg.Any<Cat>()).Returns(0);
+        
+        CatName name = CatName.Create("Whiskers");
+        Description additionalRequirements = Description.Create("Lorem ipsum");
+        MedicalHelpUrgency medicalHelpUrgency = MedicalHelpUrgency.NoNeed;
+        AgeCategory ageCategory = AgeCategory.Adult;
+        Behavior behavior = Behavior.Friendly;
+        HealthStatus healthStatus = HealthStatus.Good;
+        const bool isCastrated = true;
+        
+        //Act
+        Action results = () => Cat.Create(
+            priorityScoreCalculator: calculator,
+            person: Person,
+            name: name,
+            medicalHelpUrgency: medicalHelpUrgency,
+            ageCategory: ageCategory,
+            behavior: behavior,
+            healthStatus: healthStatus,
+            additionalRequirements: additionalRequirements,
+            isCastrated: isCastrated
+        );
+        
+        //Assert
+        results.Should().ThrowExactly<ArgumentException>().WithMessage("PriorityScore cannot be zero, probably something went wrong. (Parameter 'PriorityScore')");
+    }
 }
