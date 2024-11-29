@@ -1,5 +1,5 @@
 ﻿using KittySaver.Domain.Persons;
-
+// ReSharper disable MemberCanBeMadeStatic.Local
 // ReSharper disable MemberCanBeMadeStatic.Global
 
 namespace KittySaver.Domain.Advertisements;
@@ -13,10 +13,10 @@ public sealed class AdvertisementService
     {
         List<Guid> catIdsToAssignList = catIdsToAssign.ToList();
 
-        InvokeCatAssignmentToAdvertisement(person, advertisement, catIdsToAssignList);
-
+        AssignCatsToAdvertisement(person, advertisement, catIdsToAssignList);
         SetAdvertisementPriorityScore(person, advertisement, catIdsToAssignList);
     }
+    
     public void ReplaceCatsOfAdvertisement(
         Person person,
         Advertisement advertisement,
@@ -29,20 +29,10 @@ public sealed class AdvertisementService
             person.UnassignCatFromAdvertisement(catId);
         }
 
-        InvokeCatAssignmentToAdvertisement(person, advertisement, catIdsToAssignList);
-
+        AssignCatsToAdvertisement(person, advertisement, catIdsToAssignList);
         SetAdvertisementPriorityScore(person, advertisement, catIdsToAssignList);
     }
-
-    private static void InvokeCatAssignmentToAdvertisement(Person person, Advertisement advertisement,
-        List<Guid> catIdsToAssignList)
-    {
-        foreach (Guid catId in catIdsToAssignList)
-        {
-            person.AssignCatToAdvertisement(advertisement.Id, catId);
-        }
-    }
-
+    
     public void RecalculatePriorityScore(Person person, Advertisement advertisement)
     {
         advertisement.ValidateOwnership(person.Id);
@@ -50,6 +40,15 @@ public sealed class AdvertisementService
         SetAdvertisementPriorityScore(person, advertisement, catsAssignedToAdvertisement);
     }
 
+    private static void AssignCatsToAdvertisement(Person person, Advertisement advertisement,
+        List<Guid> catIdsToAssignList)
+    {
+        foreach (Guid catId in catIdsToAssignList)
+        {
+            person.AssignCatToAdvertisement(advertisement.Id, catId);
+        }
+    }
+    
     private static void SetAdvertisementPriorityScore(Person person, Advertisement advertisement, IEnumerable<Guid> catIdsToAssignList)
     {
         double catsToAssignToAdvertisementHighestPriorityScore = person.GetHighestPriorityScoreFromGivenCats(catIdsToAssignList);
