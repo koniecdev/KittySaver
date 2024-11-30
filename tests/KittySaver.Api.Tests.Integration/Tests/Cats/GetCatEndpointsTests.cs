@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Bogus;
 using FluentAssertions;
+using KittySaver.Api.Features.Advertisements;
 using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Tests.Integration.Helpers;
@@ -92,6 +93,123 @@ public class GetCatEndpointsTests : IAsyncLifetime
         cat.HealthStatus.Should().Be(_createCatRequest.HealthStatus);
         cat.IsCastrated.Should().Be(_createCatRequest.IsCastrated);
         cat.PriorityScore.Should().BeGreaterThan(0);
+        cat.IsAssignedToAdvertisement.Should().BeFalse();
+    }
+    
+    [Fact]
+    public async Task GetCat_ShouldReturnCatWithPositiveIsAssignedToAdvertisementFlag_WhenCatIsAssignedToAdvertisement()
+    {
+        //Arrange
+        HttpResponseMessage personRegisterResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
+        ApiResponses.CreatedWithIdResponse personRegisterResponse =
+            await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
+            ?? throw new JsonException();
+        
+        HttpResponseMessage catCreateResponseMessage = 
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", _createCatRequest);
+        ApiResponses.CreatedWithIdResponse catCreateResponse = 
+            await catCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
+            ?? throw new JsonException();
+        CreateAdvertisement.CreateAdvertisementRequest request =
+            new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
+                .CustomInstantiator(faker =>
+                    new CreateAdvertisement.CreateAdvertisementRequest(
+                        PersonId: personRegisterResponse.Id,
+                        CatsIdsToAssign: [catCreateResponse.Id],
+                        Description: faker.Lorem.Lines(2),
+                        PickupAddressCountry: faker.Address.Country(),
+                        PickupAddressState: faker.Address.State(),
+                        PickupAddressZipCode: faker.Address.ZipCode(),
+                        PickupAddressCity: faker.Address.City(),
+                        PickupAddressStreet: faker.Address.StreetName(),
+                        PickupAddressBuildingNumber: faker.Address.BuildingNumber(),
+                        ContactInfoEmail: faker.Person.Email,
+                        ContactInfoPhoneNumber: faker.Person.Phone
+                    ));
+        
+        await _httpClient.PostAsJsonAsync("api/v1/advertisements", request);
+        
+        //Act
+        HttpResponseMessage response = await _httpClient.GetAsync($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}");
+        
+        //Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        CatResponse cat = await response.Content.ReadFromJsonAsync<CatResponse>() ?? throw new JsonException();
+        cat.Id.Should().Be(catCreateResponse.Id);
+        cat.IsAssignedToAdvertisement.Should().BeTrue();
+    }
+    
+    [Fact]
+    public async Task GetCat_ShouldReturnCatWithPositiveIsAssignedToAdvertisementFlag_WhenCatIsReassignedToAdvertisement()
+    {
+        //Arrange
+        HttpResponseMessage personRegisterResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
+        ApiResponses.CreatedWithIdResponse personRegisterResponse =
+            await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
+            ?? throw new JsonException();
+        
+        HttpResponseMessage catCreateResponseMessage = 
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", _createCatRequest);
+        ApiResponses.CreatedWithIdResponse catCreateResponse = 
+            await catCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
+            ?? throw new JsonException();
+        CreateAdvertisement.CreateAdvertisementRequest request =
+            new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
+                .CustomInstantiator(faker =>
+                    new CreateAdvertisement.CreateAdvertisementRequest(
+                        PersonId: personRegisterResponse.Id,
+                        CatsIdsToAssign: [catCreateResponse.Id],
+                        Description: faker.Lorem.Lines(2),
+                        PickupAddressCountry: faker.Address.Country(),
+                        PickupAddressState: faker.Address.State(),
+                        PickupAddressZipCode: faker.Address.ZipCode(),
+                        PickupAddressCity: faker.Address.City(),
+                        PickupAddressStreet: faker.Address.StreetName(),
+                        PickupAddressBuildingNumber: faker.Address.BuildingNumber(),
+                        ContactInfoEmail: faker.Person.Email,
+                        ContactInfoPhoneNumber: faker.Person.Phone
+                    ));
+        
+        HttpResponseMessage advertisementResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/advertisements", request);
+        ApiResponses.CreatedWithIdResponse advertisementResponse = await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
+        CreateCat.CreateCatRequest anotherCatCreateRequest =
+            new Faker<CreateCat.CreateCatRequest>()
+                .CustomInstantiator(faker =>
+                    new CreateCat.CreateCatRequest(
+                        Name: faker.Name.FirstName(),
+                        IsCastrated: true,
+                        MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
+                        Behavior: Behavior.Friendly.Name,
+                        HealthStatus: HealthStatus.Good.Name,
+                        AgeCategory: AgeCategory.Adult.Name,
+                        AdditionalRequirements: "Lorem ipsum"
+                    )).Generate();
+        HttpResponseMessage anotherCatCreateResponseMessage =
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", anotherCatCreateRequest);
+        ApiResponses.CreatedWithIdResponse anotherCatCreateResponse = await anotherCatCreateResponseMessage.GetIdResponseFromResponseMessageAsync();
+
+        ReassignCatsToAdvertisement.ReassignCatsToAdvertisementRequest reassignCatsRequest = new([
+            anotherCatCreateResponse.Id
+        ]);
+        
+        await _httpClient.PutAsJsonAsync($"api/v1/advertisements/{advertisementResponse.Id}/cats", reassignCatsRequest);
+
+        //Act
+        HttpResponseMessage response =
+            await _httpClient.GetAsync($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}");
+        HttpResponseMessage responseOfAnotherCat =
+            await _httpClient.GetAsync($"api/v1/persons/{personRegisterResponse.Id}/cats/{anotherCatCreateResponse.Id}");
+        
+        //Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        CatResponse cat = await response.Content.ReadFromJsonAsync<CatResponse>() ?? throw new JsonException();
+        cat.Id.Should().Be(catCreateResponse.Id);
+        cat.IsAssignedToAdvertisement.Should().BeFalse();
+        
+        responseOfAnotherCat.StatusCode.Should().Be(HttpStatusCode.OK);
+        CatResponse anotherCat = await responseOfAnotherCat.Content.ReadFromJsonAsync<CatResponse>() ?? throw new JsonException();
+        anotherCat.Id.Should().Be(anotherCat.Id);
+        anotherCat.IsAssignedToAdvertisement.Should().BeTrue();
     }
     
     [Fact]
