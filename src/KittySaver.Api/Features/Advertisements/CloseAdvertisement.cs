@@ -33,12 +33,13 @@ public sealed class CloseAdvertisement : IEndpoint
                 ?? throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);
             
             advertisement.Close(dateTimeService.Now);
+            await db.SaveChangesAsync(cancellationToken);
         }
     }
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapDelete("advertisements/{id:guid}/close", async (
+        endpointRouteBuilder.MapPost("advertisements/{id:guid}/close", async (
             Guid id,
             ISender sender,
             CancellationToken cancellationToken) =>
