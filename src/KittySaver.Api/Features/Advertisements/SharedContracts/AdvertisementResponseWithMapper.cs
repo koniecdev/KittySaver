@@ -1,4 +1,7 @@
-﻿namespace KittySaver.Api.Features.Advertisements.SharedContracts;
+﻿using KittySaver.Domain.Advertisements;
+using Riok.Mapperly.Abstractions;
+
+namespace KittySaver.Api.Features.Advertisements.SharedContracts;
 
 public sealed class AdvertisementResponse
 {
@@ -10,6 +13,7 @@ public sealed class AdvertisementResponse
     public required string? Description { get; init; }
     public required string ContactInfoEmail { get; init; }
     public required string ContactInfoPhoneNumber { get; init; }
+    public required AdvertisementStatus Status { get; init; }
     public ICollection<CatDto> Cats { get; set; } = new List<CatDto>();
     public required PickupAddressDto PickupAddress { get; init; }
     
@@ -28,4 +32,18 @@ public sealed class AdvertisementResponse
         public required Guid Id { get; init; }
         public required string Name { get; init; }
     }
+    
+    public enum AdvertisementStatus
+    {
+        Draft,
+        Active,
+        Closed,
+        Expired
+    }
+}
+
+[Mapper]
+public static partial class AdvertisementStatusMapper
+{
+    public static partial AdvertisementResponse.AdvertisementStatus MapStatus(Advertisement.AdvertisementStatus status);
 }

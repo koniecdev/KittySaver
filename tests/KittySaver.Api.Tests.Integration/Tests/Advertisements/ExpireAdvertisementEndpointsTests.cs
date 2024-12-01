@@ -5,7 +5,6 @@ using Bogus;
 using FluentAssertions;
 using KittySaver.Api.Features.Advertisements;
 using KittySaver.Api.Features.Advertisements.SharedContracts;
-using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
@@ -16,11 +15,11 @@ using Shared;
 namespace KittySaver.Api.Tests.Integration.Tests.Advertisements;
 
 [Collection("Api")]
-public class CloseAdvertisementEndpointsTests : IAsyncLifetime
+public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
 {
     private readonly HttpClient _httpClient;
     private readonly CleanupHelper _cleanup;
-    public CloseAdvertisementEndpointsTests(KittySaverApiFactory appFactory)
+    public ExpireAdvertisementEndpointsTests(KittySaverApiFactory appFactory)
     {
         _httpClient = appFactory.CreateClient();
         _cleanup = new CleanupHelper(_httpClient);
@@ -65,7 +64,7 @@ public class CloseAdvertisementEndpointsTests : IAsyncLifetime
                 ));
     
     [Fact]
-    public async Task CloseAdvertisement_ShouldReturnSuccess_WhenValidDataIsProvided()
+    public async Task ExpireAdvertisement_ShouldReturnSuccess_WhenValidDataIsProvided()
     {
         //Arrange
         CreatePerson.CreatePersonRequest personRegisterRequest = _createPersonRequestGenerator.Generate();
@@ -98,22 +97,18 @@ public class CloseAdvertisementEndpointsTests : IAsyncLifetime
         ApiResponses.CreatedWithIdResponse advertisementResponse = await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
         
         //Act
-        HttpResponseMessage closeResponseMessage = await _httpClient.PostAsync($"api/v1/advertisements/{advertisementResponse.Id}/close", null);
+        HttpResponseMessage expireResponseMessage = await _httpClient.PostAsync($"api/v1/advertisements/{advertisementResponse.Id}/expire", null);
         
         //Assert
-        closeResponseMessage.StatusCode.Should().Be(HttpStatusCode.OK);
-        CatResponse catAfterClosure =
-            await _httpClient.GetFromJsonAsync<CatResponse>($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}")
-            ?? throw new JsonException();
-        catAfterClosure.IsAdopted.Should().BeTrue();
+        expireResponseMessage.StatusCode.Should().Be(HttpStatusCode.OK);
         AdvertisementResponse advertisement =
             await _httpClient.GetFromJsonAsync<AdvertisementResponse>(
                 $"api/v1/advertisements/{advertisementResponse.Id}") ?? throw new JsonException();
-        advertisement.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Closed);
+        advertisement.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Expired);
     }
     
     [Fact]
-    public async Task CloseAdvertisement_ShouldReturnBadRequest_WhenDuplicatedRequestOccur()
+    public async Task ExpireAdvertisement_ShouldReturnBadRequest_WhenDuplicatedRequestOccur()
     {
         //Arrange
         CreatePerson.CreatePersonRequest personRegisterRequest = _createPersonRequestGenerator.Generate();
@@ -144,54 +139,54 @@ public class CloseAdvertisementEndpointsTests : IAsyncLifetime
 
         HttpResponseMessage advertisementResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/advertisements", request);
         ApiResponses.CreatedWithIdResponse advertisementResponse = await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
-        await _httpClient.PostAsync($"api/v1/advertisements/{advertisementResponse.Id}/close", null);
-        
+        await _httpClient.PostAsync($"api/v1/advertisements/{advertisementResponse.Id}/expire", null);
+
         //Act
-        HttpResponseMessage duplicatedCloseResponseMessage = await _httpClient.PostAsync($"api/v1/advertisements/{advertisementResponse.Id}/close", null);
+        HttpResponseMessage duplicatedExpireResponseMessage = await _httpClient.PostAsync($"api/v1/advertisements/{advertisementResponse.Id}/expire", null);
         
         //Assert
-        duplicatedCloseResponseMessage.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        ProblemDetails problemDetails = await duplicatedCloseResponseMessage.GetResponseFromResponseMessageAsync<ProblemDetails>()
+        duplicatedExpireResponseMessage.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        ProblemDetails problemDetails = await duplicatedExpireResponseMessage.GetResponseFromResponseMessageAsync<ProblemDetails>()
                                         ?? throw new JsonException();
         problemDetails.Detail.Should().StartWith("Active advertisement status is required for that operation.");
     }
     
     [Fact]
-    public async Task CloseAdvertisement_ShouldReturnNotFound_WhenInvaliIdIsProvided()
+    public async Task ExpireAdvertisement_ShouldReturnNotFound_WhenInvaliIdIsProvided()
     {
         //Arrange
         Guid randomId = Guid.NewGuid();
         
         //Act
-        HttpResponseMessage closeResponseMessage =
-            await _httpClient.PostAsync($"api/v1/advertisements/{randomId}/close", null);
+        HttpResponseMessage expireResponseMessage =
+            await _httpClient.PostAsync($"api/v1/advertisements/{randomId}/expire", null);
         
         //Assert
-        closeResponseMessage.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        ProblemDetails notFoundProblemDetails = await closeResponseMessage.Content.ReadFromJsonAsync<ProblemDetails>()
+        expireResponseMessage.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        ProblemDetails notFoundProblemDetails = await expireResponseMessage.Content.ReadFromJsonAsync<ProblemDetails>()
                                                  ?? throw new JsonException();
         notFoundProblemDetails.Status.Should().Be(StatusCodes.Status404NotFound);
     }
     
     [Fact]
-    public async Task CloseAdvertisement_ShouldReturnBadRequest_WhenEmptyDataAreProvided()
+    public async Task ExpireAdvertisement_ShouldReturnBadRequest_WhenEmptyDataAreProvided()
     {
         //Arrange
         Guid randomId = Guid.Empty;
         
         //Act
-        HttpResponseMessage closeResponse = await _httpClient.PostAsync($"api/v1/advertisements/{randomId}/close", null);
+        HttpResponseMessage expireResponse = await _httpClient.PostAsync($"api/v1/advertisements/{randomId}/expire", null);
         
         //Assert
-        closeResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        expireResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         ValidationProblemDetails? validationProblemDetails =
-            await closeResponse.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+            await expireResponse.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         validationProblemDetails.Should().NotBeNull();
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
         validationProblemDetails.Errors.Count.Should().Be(1);
-        validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(nameof(DeleteAdvertisement.DeleteAdvertisementCommand.Id));
+        validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(nameof(ExpireAdvertisement.ExpireAdvertisementCommand.Id));
         validationProblemDetails.Errors.Values.Count.Should().Be(1);
-        validationProblemDetails.Errors[nameof(DeleteAdvertisement.DeleteAdvertisementCommand.Id)][0]
+        validationProblemDetails.Errors[nameof(ExpireAdvertisement.ExpireAdvertisementCommand.Id)][0]
             .Should().Be("'Id' must not be empty.");
     }
     
