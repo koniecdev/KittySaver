@@ -166,7 +166,7 @@ public class CloseAdvertisementEndpointsTests : IAsyncLifetime
         closeResponseMessage.StatusCode.Should().Be(HttpStatusCode.NotFound);
         ProblemDetails notFoundProblemDetails = await closeResponseMessage.Content.ReadFromJsonAsync<ProblemDetails>()
                                                  ?? throw new JsonException();
-        notFoundProblemDetails!.Status.Should().Be(StatusCodes.Status404NotFound);
+        notFoundProblemDetails.Status.Should().Be(StatusCodes.Status404NotFound);
     }
     
     [Fact]
