@@ -82,7 +82,6 @@ public sealed class Advertisement : AggregateRoot
     }
     public AdvertisementStatus Status { get; private set; } = AdvertisementStatus.Draft;
     public DateTimeOffset? ClosedOn { get; private set; }
-
     public DateTimeOffset ExpiresOn { get; private set; }
 
     public double PriorityScore

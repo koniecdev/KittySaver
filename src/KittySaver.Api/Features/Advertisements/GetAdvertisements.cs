@@ -26,7 +26,8 @@ public sealed class GetAdvertisements : IEndpoint
                     PriorityScore = x.PriorityScore,
                     Description = x.Description,
                     PersonId = x.PersonId,
-                    PickupAddress = new AdvertisementResponse.PickupAddressDto()
+                    Status = AdvertisementStatusMapper.MapStatus(x.Status),
+                    PickupAddress = new AdvertisementResponse.PickupAddressDto
                     {
                         BuildingNumber = x.PickupAddress.BuildingNumber,
                         City = x.PickupAddress.City,
