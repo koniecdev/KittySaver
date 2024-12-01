@@ -4,6 +4,7 @@ using System.Text.Json;
 using Bogus;
 using FluentAssertions;
 using KittySaver.Api.Features.Advertisements;
+using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Tests.Integration.Helpers;
@@ -106,6 +107,10 @@ public class CloseAdvertisementEndpointsTests : IAsyncLifetime
             await _httpClient.GetFromJsonAsync<CatResponse>($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}")
             ?? throw new JsonException();
         catAfterClosure.IsAdopted.Should().BeTrue();
+        AdvertisementResponse advertisement =
+            await _httpClient.GetFromJsonAsync<AdvertisementResponse>(
+                $"api/v1/advertisements/{advertisementResponse.Id}") ?? throw new JsonException();
+        advertisement.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Closed);
     }
     
     [Fact]
