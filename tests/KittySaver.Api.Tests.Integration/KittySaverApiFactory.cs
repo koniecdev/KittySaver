@@ -1,4 +1,5 @@
-﻿using KittySaver.Api.Shared.Persistence;
+﻿using KittySaver.Api.Shared.Infrastructure.Services;
+using KittySaver.Api.Shared.Persistence;
 using KittySaver.Auth.Api.Shared.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -51,12 +52,8 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
         builder.ConfigureTestServices(services =>
         {
             services.RemoveAll(typeof(IDateTimeProvider));
-            IDateTimeProvider dateTimeSub = Substitute.For<IDateTimeProvider>();
-            
-            dateTimeSub
-                .Now
-                .Returns(FixedDateTime);
-            services.AddScoped<IDateTimeProvider>(_ => dateTimeSub);
+            IDateTimeService dateTimeSub = new ApplicationDateTimeService();
+            services.AddSingleton<IDateTimeService>(_ => dateTimeSub);
             
             services.RemoveAll(typeof(IAuthenticationService));
             services.RemoveAll(typeof(IAuthorizationHandler));
@@ -100,5 +97,19 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
     {
         // _authApiServer.Dispose();
         await _msSqlContainer.DisposeAsync();
+    }
+}
+
+public class ApplicationDateTimeService : IDateTimeService
+{
+    public static DateTimeOffset ApplicationDateTime { get; set; } = new(2024, 2, 10, 1, 1, 1, TimeSpan.Zero);
+
+    public DateTimeOffset Now
+    {
+        get
+        {
+            ApplicationDateTime = ApplicationDateTime.AddMonths(2);
+            return ApplicationDateTime;
+        }
     }
 }
