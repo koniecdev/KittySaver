@@ -11,7 +11,6 @@ using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.JSInterop;
 using Shared;
 
 namespace KittySaver.Api.Tests.Integration.Tests.Advertisements;
