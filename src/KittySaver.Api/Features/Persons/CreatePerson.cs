@@ -1,11 +1,9 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
-using KittySaver.Api.Shared.Persistence.Repositories;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Riok.Mapperly.Abstractions;
 
 namespace KittySaver.Api.Features.Persons;

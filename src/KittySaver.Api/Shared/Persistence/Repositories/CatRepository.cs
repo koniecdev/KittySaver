@@ -1,6 +1,5 @@
 ﻿using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Persons;
-using Microsoft.EntityFrameworkCore;
 
 namespace KittySaver.Api.Shared.Persistence.Repositories;
 
