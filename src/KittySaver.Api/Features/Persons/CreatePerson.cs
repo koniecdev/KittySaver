@@ -69,20 +69,22 @@ public sealed class CreatePerson : IEndpoint
             
             RuleFor(x => x.UserIdentityId)
                 .NotEmpty()
-                .MustAsync(async (userIdentityId, ct) => await personRepository.IsUserIdentityIdUniqueAsync(userIdentityId, ct))
+                .MustAsync(async (userIdentityId, ct) => 
+                    await personRepository.IsUserIdentityIdUniqueAsync(userIdentityId, ct))
                 .WithMessage("'User Identity Id' is already used by another user.");
             
             RuleFor(x => x.PhoneNumber)
                 .NotEmpty()
                 .MaximumLength(PhoneNumber.MaxLength)
-                .MustAsync(async (phoneNumber, ct) => await personRepository.IsPhoneNumberUniqueAsync(phoneNumber, ct))
+                .MustAsync(async (phoneNumber, ct) => 
+                    await personRepository.IsPhoneNumberUniqueAsync(phoneNumber, null, ct))
                 .WithMessage("'Phone Number' is already used by another user.");
             
             RuleFor(x => x.Email)
                 .NotEmpty()
                 .MaximumLength(Email.MaxLength)
                 .Matches(Email.RegexPattern)
-                .MustAsync(async (email, ct) => await personRepository.IsEmailUniqueAsync(email, ct))
+                .MustAsync(async (email, ct) => await personRepository.IsEmailUniqueAsync(email, null, ct))
                 .WithMessage("'Email' is already used by another user.");
             
             RuleFor(x => x.DefaultAdvertisementContactInfoPhoneNumber)

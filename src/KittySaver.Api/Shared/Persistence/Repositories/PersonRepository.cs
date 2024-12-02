@@ -24,22 +24,6 @@ public class PersonRepository(ApplicationDbContext db) : IPersonRepository
                .Include(person => person.Cats)
                .FirstOrDefaultAsync(cancellationToken)
                ?? throw new NotFoundExceptions.PersonNotFoundException(idOrUserIdentityId);
-    
-    public async Task<bool> IsPhoneNumberUniqueAsync(string phone, CancellationToken cancellationToken) 
-        => !await db.Persons
-            .AsNoTracking()
-            .AnyAsync(person => person.PhoneNumber.Value == phone, cancellationToken);
-        
-    public async Task<bool> IsEmailUniqueAsync(string email, CancellationToken cancellationToken) 
-        => !await db.Persons
-            .AsNoTracking()
-            .AnyAsync(person => person.Email.Value == email, cancellationToken);
-
-    public async Task<bool> IsUserIdentityIdUniqueAsync(Guid userIdentityId, CancellationToken cancellationToken) 
-        => !await db.Persons
-            .AsNoTracking()
-            .AnyAsync(person => person.UserIdentityId == userIdentityId, cancellationToken);
-
     public void Insert(Person person)
     {
         db.Persons.Add(person);
@@ -50,4 +34,35 @@ public class PersonRepository(ApplicationDbContext db) : IPersonRepository
         db.Persons.Remove(person);
         person.AnnounceDeletion();
     }
+    
+    public async Task<bool> IsPhoneNumberUniqueAsync(string phone, Guid? userToExcludeIdOrIdentityId, CancellationToken cancellationToken) 
+        => userToExcludeIdOrIdentityId is null 
+            ? !await db.Persons
+                .AsNoTracking()
+                .AnyAsync(person => person.PhoneNumber.Value == phone, cancellationToken)
+            : !await db.Persons
+                .AsNoTracking()
+                .AnyAsync(x => 
+                    x.PhoneNumber.Value == phone 
+                    && x.Id != userToExcludeIdOrIdentityId 
+                    && x.UserIdentityId != userToExcludeIdOrIdentityId,
+                    cancellationToken);
+        
+    public async Task<bool> IsEmailUniqueAsync(string email, Guid? userToExcludeIdOrIdentityId, CancellationToken cancellationToken) 
+        => userToExcludeIdOrIdentityId is null 
+            ? !await db.Persons
+                .AsNoTracking()
+                .AnyAsync(person => person.Email.Value == email, cancellationToken)
+            : !await db.Persons
+                .AsNoTracking()
+                .AnyAsync(x =>
+                    x.Email.Value == email 
+                    && x.Id != userToExcludeIdOrIdentityId 
+                    && x.UserIdentityId != userToExcludeIdOrIdentityId,
+                    cancellationToken);
+
+    public async Task<bool> IsUserIdentityIdUniqueAsync(Guid userIdentityId, CancellationToken cancellationToken) 
+        => !await db.Persons
+            .AsNoTracking()
+            .AnyAsync(person => person.UserIdentityId == userIdentityId, cancellationToken);
 }

@@ -56,11 +56,8 @@ public sealed class UpdatePerson : IEndpoint
     public sealed class UpdatePersonCommandValidator
         : AbstractValidator<UpdatePersonCommand>, IAsyncValidator
     {
-        private readonly ApplicationDbContext _db;
-
-        public UpdatePersonCommandValidator(ApplicationDbContext db)
+        public UpdatePersonCommandValidator(IPersonRepository personRepository)
         {
-            _db = db;
             RuleFor(x => x.IdOrUserIdentityId).NotEmpty();
 
             RuleFor(x => x.FirstName)
@@ -75,13 +72,15 @@ public sealed class UpdatePerson : IEndpoint
                 .NotEmpty()
                 .MaximumLength(Email.MaxLength)
                 .Matches(Email.RegexPattern)
-                .MustAsync(async (command, email, ct) => await IsEmailUniqueAsync(command, email, ct))
+                .MustAsync(async (command, email, ct) => 
+                    await personRepository.IsEmailUniqueAsync(email, command.IdOrUserIdentityId, ct))
                 .WithMessage("'Email' is already used by another user.");
 
             RuleFor(x => x.PhoneNumber)
                 .NotEmpty()
                 .MaximumLength(PhoneNumber.MaxLength)
-                .MustAsync(async (command, phoneNumber, ct) => await IsPhoneNumberUniqueAsync(command, phoneNumber, ct))
+                .MustAsync(async (command, phoneNumber, ct) => 
+                    await personRepository.IsPhoneNumberUniqueAsync(phoneNumber, command.IdOrUserIdentityId, ct))
                 .WithMessage("'Phone Number' is already used by another user.");
 
             RuleFor(x => x.DefaultAdvertisementContactInfoPhoneNumber)
@@ -137,21 +136,6 @@ public sealed class UpdatePerson : IEndpoint
             RuleFor(x => x.DefaultAdvertisementPickupAddressBuildingNumber)
                 .MaximumLength(Address.BuildingNumberMaxLength);
         }
-
-        private async Task<bool> IsPhoneNumberUniqueAsync(UpdatePersonCommand command, string phone,
-            CancellationToken ct)
-            => !await _db.Persons
-                .AsNoTracking()
-                .AnyAsync(
-                    x => x.PhoneNumber.Value == phone && x.Id != command.IdOrUserIdentityId &&
-                         x.UserIdentityId != command.IdOrUserIdentityId, ct);
-
-        private async Task<bool> IsEmailUniqueAsync(UpdatePersonCommand command, string email, CancellationToken ct)
-            => !await _db.Persons
-                .AsNoTracking()
-                .AnyAsync(
-                    x => x.Email.Value == email && x.Id != command.IdOrUserIdentityId &&
-                         x.UserIdentityId != command.IdOrUserIdentityId, ct);
     }
 
     internal sealed class UpdatePersonCommandHandler(ApplicationDbContext db)
