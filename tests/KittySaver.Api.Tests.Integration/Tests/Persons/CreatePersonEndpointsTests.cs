@@ -1,9 +1,11 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using Bogus;
 using Bogus.Extensions;
 using FluentAssertions;
 using KittySaver.Api.Features.Persons;
+using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
@@ -64,6 +66,10 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
         registerResponse.Should().NotBeNull();
         registerResponse!.Id.Should().NotBeEmpty();
         response.Headers.Location!.ToString().Should().Contain($"/api/v1/persons/{registerResponse.Id}");
+        PersonResponse person =
+            await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{registerResponse.Id}")
+            ?? throw new JsonException();
+        person.Id.Should().NotBeEmpty();
     }
     
     [Theory]
