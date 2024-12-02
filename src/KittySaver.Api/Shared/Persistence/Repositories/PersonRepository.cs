@@ -1,4 +1,5 @@
-﻿using KittySaver.Domain.Common.Exceptions;
+﻿using KittySaver.Domain.Advertisements;
+using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Persons;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,7 +35,18 @@ public class PersonRepository(ApplicationDbContext db) : IPersonRepository
         db.Persons.Remove(person);
         person.AnnounceDeletion();
     }
-    
+
+    public async Task RemoveAllPersonAdvertisementsAsync(Guid personId, CancellationToken cancellationToken)
+    {
+        List<Advertisement> advertisementsToRemove = await db.Advertisements
+            .Where(x => x.PersonId == personId)
+            .ToListAsync(cancellationToken);
+        if (advertisementsToRemove.Count > 0)
+        {
+            db.Advertisements.RemoveRange(advertisementsToRemove);
+        }
+    }
+
     public async Task<bool> IsPhoneNumberUniqueAsync(string phone, Guid? userToExcludeIdOrIdentityId, CancellationToken cancellationToken) 
         => userToExcludeIdOrIdentityId is null 
             ? !await db.Persons
