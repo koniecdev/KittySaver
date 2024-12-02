@@ -5,6 +5,8 @@ using KittySaver.Api.Shared.Behaviours;
 using KittySaver.Api.Shared.Infrastructure.Security;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
+using KittySaver.Api.Shared.Persistence.Repositories;
+using KittySaver.Domain.Advertisements;
 using KittySaver.Domain.Persons;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -22,6 +24,9 @@ public static class ServiceCollectionExtensions
         services.AddHttpContextAccessor();
         services.AddScoped<ICurrentEnvironmentService, CurrentEnvironmentService>();
         services.AddScoped<IDateTimeService, DefaultDateTimeService>();
+        services.AddScoped<IPersonRepository, PersonRepository>();
+        services.AddScoped<IAdvertisementRepository, AdvertisementRepository>();
+        services.AddScoped<ICatRepository, CatRepository>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<ICatPriorityCalculatorService, DefaultCatPriorityCalculatorService>();
         services.AddValidatorsFromAssembly(assembly);
@@ -84,6 +89,7 @@ public static class ServiceCollectionExtensions
         services.AddDbContext<ApplicationDbContext>(
             o => o.UseSqlServer(configuration.GetConnectionString("Database")
                                 ?? throw new Exceptions.Database.MissingConnectionStringException()));
+        services.AddScoped<IUnitOfWork>(serviceProvider => serviceProvider.GetRequiredService<ApplicationDbContext>());
         return services;
     }
 
