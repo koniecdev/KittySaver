@@ -64,11 +64,11 @@ public class DeletePersonEndpointsTests : IAsyncLifetime
         //Assert
         deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        HttpResponseMessage userNotFoundProblemDetailsMessage = 
+        HttpResponseMessage issuedDeletedUserResponseMessage = 
             await _httpClient.GetAsync($"api/v1/persons/{registeredPersonResponse.Id}");
-        userNotFoundProblemDetailsMessage.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        issuedDeletedUserResponseMessage.StatusCode.Should().Be(HttpStatusCode.NotFound);
         ProblemDetails? notFoundProblemDetails =
-            await userNotFoundProblemDetailsMessage.Content.ReadFromJsonAsync<ProblemDetails>();
+            await issuedDeletedUserResponseMessage.Content.ReadFromJsonAsync<ProblemDetails>();
         notFoundProblemDetails.Should().NotBeNull();
         notFoundProblemDetails!.Status.Should().Be(StatusCodes.Status404NotFound);
     }

@@ -21,21 +21,16 @@ public sealed class DeletePerson : IEndpoint
         }
     }
 
-    internal sealed class DeletePersonCommandHandler(ApplicationDbContext db)
+    internal sealed class DeletePersonCommandHandler(IPersonRepository personRepository, IUnitOfWork unitOfWork)
         : IRequestHandler<DeletePersonCommand>
     {
         public async Task Handle(DeletePersonCommand request, CancellationToken cancellationToken)
         {
-            Person person = await db.Persons
-                .Where(x => x.Id == request.IdOrUserIdentityId || x.UserIdentityId == request.IdOrUserIdentityId)
-                .Include(x => x.Cats)
-                .FirstOrDefaultAsync(cancellationToken)
-                ?? throw new NotFoundExceptions.PersonNotFoundException(request.IdOrUserIdentityId);
+            Person person = await personRepository.GetPersonByIdOrIdentityIdAsync(request.IdOrUserIdentityId, cancellationToken);
+
+            personRepository.Remove(person);
             
-            db.Persons.Remove(person);
-            person.AnnounceDeletion();
-            
-            await db.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 

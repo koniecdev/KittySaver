@@ -18,6 +18,13 @@ public class PersonRepository(ApplicationDbContext db) : IPersonRepository
             .FirstOrDefaultAsync(cancellationToken) 
             ?? throw new NotFoundExceptions.PersonNotFoundException(id);
     
+    public async Task<Person> GetPersonByIdOrIdentityIdAsync(Guid idOrUserIdentityId, CancellationToken cancellationToken)
+        => await db.Persons
+               .Where(person => person.Id == idOrUserIdentityId || person.UserIdentityId == idOrUserIdentityId)
+               .Include(person => person.Cats)
+               .FirstOrDefaultAsync(cancellationToken)
+               ?? throw new NotFoundExceptions.PersonNotFoundException(idOrUserIdentityId);
+    
     public async Task<bool> IsPhoneNumberUniqueAsync(string phone, CancellationToken cancellationToken) 
         => !await db.Persons
             .AsNoTracking()
@@ -36,5 +43,11 @@ public class PersonRepository(ApplicationDbContext db) : IPersonRepository
     public void Insert(Person person)
     {
         db.Persons.Add(person);
+    }
+
+    public void Remove(Person person)
+    {
+        db.Persons.Remove(person);
+        person.AnnounceDeletion();
     }
 }
