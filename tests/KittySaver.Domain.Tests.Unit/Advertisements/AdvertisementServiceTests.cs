@@ -73,7 +73,7 @@ public class AdvertisementServiceTests
             ));
 
     [Fact]
-    public void ReplaceCatsOfAdvertisement_ShouldReplaceOldCatsWithNewOne_WhenValidDataAreProvided()
+    public async Task ReplaceCatsOfAdvertisement_ShouldReplaceOldCatsWithNewOne_WhenValidDataAreProvided()
     {
         //Arrange
         List<Cat> cats = [CatGenerator.Generate(), CatGenerator.Generate(), CatGenerator.Generate()];
@@ -91,11 +91,18 @@ public class AdvertisementServiceTests
             description: Description.Create("lorem ipsum"));
         
         //Act
+        IPersonRepository personRepository = Substitute.For<IPersonRepository>();
+        personRepository.GetPersonByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns(Person);
+        IAdvertisementRepository advertisementRepository = Substitute.For<IAdvertisementRepository>();
+        advertisementRepository.GetAdvertisementByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns(advertisement);
+        
         Cat catToAssign = CatGenerator.Generate();
-        AdvertisementService service = new();
-        service.ReplaceCatsOfAdvertisement(person: Person,
-            advertisement: advertisement,
-            catIdsToAssign: [catToAssign.Id]);
+        AdvertisementService service = new(advertisementRepository, personRepository);
+        
+        await service.ReplaceCatsOfAdvertisementAsync(
+            advertisement.Id,
+            catIdsToAssign: [catToAssign.Id],
+            CancellationToken.None);
 
         //Assert
         advertisement.Should().NotBeNull();
@@ -107,7 +114,7 @@ public class AdvertisementServiceTests
     }
     
     [Fact]
-    public void RecalculatePriorityScore_ShouldRecalculateAdvertisementPriorityScore_WhenCatsChange()
+    public async Task RecalculatePriorityScore_ShouldRecalculateAdvertisementPriorityScore_WhenCatsChange()
     {
         //Arrange
         ICatPriorityCalculatorService catPriorityCalculatorService = Substitute.For<ICatPriorityCalculatorService>();
@@ -139,6 +146,11 @@ public class AdvertisementServiceTests
             contactInfoPhoneNumber: contactInfoPhoneNumber,
             description: Description.Create("lorem ipsum"));
         
+        IPersonRepository personRepository = Substitute.For<IPersonRepository>();
+        personRepository.GetPersonByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns(Person);
+        IAdvertisementRepository advertisementRepository = Substitute.For<IAdvertisementRepository>();
+        advertisementRepository.GetAdvertisementByIdAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns(advertisement);
+        
         //Act
         const int updatedPriorityScore = 100;
         catPriorityCalculatorService.Calculate(Arg.Any<Cat>()).Returns(updatedPriorityScore);
@@ -152,10 +164,9 @@ public class AdvertisementServiceTests
             ageCategory: cat.AgeCategory,
             behavior: cat.Behavior,
             medicalHelpUrgency: cat.MedicalHelpUrgency);
-        AdvertisementService service = new();
-        service.RecalculatePriorityScore(
-            person: Person,
-            advertisement: advertisement);
+        
+        AdvertisementService service = new(advertisementRepository, personRepository);
+        await service.RecalculatePriorityScoreAsync(advertisement.Id, CancellationToken.None);
 
         //Assert
         advertisement.PriorityScore.Should().Be(updatedPriorityScore);
