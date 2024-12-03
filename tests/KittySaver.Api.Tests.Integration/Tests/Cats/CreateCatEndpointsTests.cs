@@ -229,19 +229,19 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         
         validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.MedicalHelpUrgency)][0]
             .Should()
-            .Be("Provided empty or invalid Medical Help Urgency.");
+            .Be("'Medical Help Urgency' must not be empty.");
         
         validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.Behavior)][0]
             .Should()
-            .Be("Provided empty or invalid Behavior.");
+            .Be("'Behavior' must not be empty.");
         
         validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.AgeCategory)][0]
             .Should()
-            .Be("Provided empty or invalid Age Category.");
+            .Be("'Age Category' must not be empty.");
         
         validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.HealthStatus)][0]
             .Should()
-            .Be("Provided empty or invalid Health Status.");
+            .Be("'Health Status' must not be empty.");
         
         validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.Name)][0]
             .Should()

@@ -404,25 +404,25 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
             nameof(UpdateCat.UpdateCatRequest.HealthStatus)
         );
         validationProblemDetails.Errors.Values.Count.Should().Be(5);
-        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.Name)][0]
+        validationProblemDetails.Errors[nameof(UpdateCat.UpdateCatRequest.Name)][0]
             .Should()
             .Be("'Name' must not be empty.");
         
-        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.MedicalHelpUrgency)][0]
+        validationProblemDetails.Errors[nameof(UpdateCat.UpdateCatRequest.MedicalHelpUrgency)][0]
             .Should()
-            .Be("Provided empty or invalid Medical Help Urgency.");
+            .Be("'Medical Help Urgency' must not be empty.");
         
-        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.Behavior)][0]
+        validationProblemDetails.Errors[nameof(UpdateCat.UpdateCatRequest.Behavior)][0]
             .Should()
-            .Be("Provided empty or invalid Behavior.");
+            .Be("'Behavior' must not be empty.");
         
-        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.AgeCategory)][0]
+        validationProblemDetails.Errors[nameof(UpdateCat.UpdateCatRequest.AgeCategory)][0]
             .Should()
-            .Be("Provided empty or invalid Age Category.");
+            .Be("'Age Category' must not be empty.");
         
-        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.HealthStatus)][0]
+        validationProblemDetails.Errors[nameof(UpdateCat.UpdateCatRequest.HealthStatus)][0]
             .Should()
-            .Be("Provided empty or invalid Health Status.");
+            .Be("'Health Status' must not be empty.");
     }
     
     [Fact]
@@ -463,16 +463,16 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
         validationProblemDetails.Errors.Count.Should().Be(2);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(
-            nameof(CreateCat.CreateCatRequest.Name),
-            nameof(CreateCat.CreateCatRequest.AdditionalRequirements)
+            nameof(UpdateCat.UpdateCatRequest.Name),
+            nameof(UpdateCat.UpdateCatRequest.AdditionalRequirements)
         );
         validationProblemDetails.Errors.Values.Count.Should().Be(2);
         
-        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.Name)][0]
+        validationProblemDetails.Errors[nameof(UpdateCat.UpdateCatRequest.Name)][0]
             .Should()
             .StartWith($"The length of 'Name' must be {CatName.MaxLength} characters or fewer. You entered");
         
-        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.AdditionalRequirements)][0]
+        validationProblemDetails.Errors[nameof(UpdateCat.UpdateCatRequest.AdditionalRequirements)][0]
             .Should()
             .StartWith($"The length of 'Additional Requirements' must be {Description.MaxLength} characters or fewer. You entered");
     }
