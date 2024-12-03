@@ -27,20 +27,16 @@ public sealed class DeleteCat : IEndpoint
         }
     }
 
-    internal sealed class DeleteCatCommandHandler(ApplicationDbContext db)
+    internal sealed class DeleteCatCommandHandler(
+        IPersonRepository personRepository,
+        IUnitOfWork unitOfWork)
         : IRequestHandler<DeleteCatCommand>
     {
         public async Task Handle(DeleteCatCommand request, CancellationToken cancellationToken)
         {
-            Person person =
-                await db.Persons
-                    .Where(x => x.Id == request.PersonId)
-                    .Include(x => x.Cats)
-                    .FirstOrDefaultAsync(cancellationToken)
-                ?? throw new NotFoundExceptions.PersonNotFoundException(request.PersonId);
-            
-            person.RemoveCat(request.Id);
-            await db.SaveChangesAsync(cancellationToken);
+            Person catOwner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
+            catOwner.RemoveCat(request.Id);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 
