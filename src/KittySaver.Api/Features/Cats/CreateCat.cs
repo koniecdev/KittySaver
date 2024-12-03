@@ -21,16 +21,16 @@ public sealed class CreateCat : IEndpoint
         string AgeCategory,
         string Behavior,
         string HealthStatus,
-        string? AdditionalRequirements = null) : ICatSmartEnumsRequest;
+        string? AdditionalRequirements = null);
     
     public sealed record CreateCatCommand(
         Guid PersonId,
         string Name,
         bool IsCastrated,
-        MedicalHelpUrgency? MedicalHelpUrgency,
-        AgeCategory? AgeCategory,
-        Behavior? Behavior,
-        HealthStatus? HealthStatus,
+        string MedicalHelpUrgency,
+        string AgeCategory,
+        string Behavior,
+        string HealthStatus,
         string? AdditionalRequirements = null) : ICommand<Guid>;
 
     public sealed class CreateCatCommandValidator : AbstractValidator<CreateCatCommand>
@@ -44,22 +44,14 @@ public sealed class CreateCat : IEndpoint
                 .MaximumLength(CatName.MaxLength);
             
             RuleFor(x => x.AdditionalRequirements).MaximumLength(Description.MaxLength);
-            
-            RuleFor(x => x.HealthStatus)
-                .NotNull()
-                .WithMessage("Provided empty or invalid Health Status.");
-            
-            RuleFor(x => x.AgeCategory)
-                .NotNull()
-                .WithMessage("Provided empty or invalid Age Category.");
-            
-            RuleFor(x => x.Behavior)
-                .NotNull()
-                .WithMessage("Provided empty or invalid Behavior.");
-            
-            RuleFor(x => x.MedicalHelpUrgency)
-                .NotNull()
-                .WithMessage("Provided empty or invalid Medical Help Urgency.");
+
+            RuleFor(x => x.HealthStatus).NotEmpty();
+
+            RuleFor(x => x.AgeCategory).NotEmpty();
+
+            RuleFor(x => x.Behavior).NotEmpty();
+
+            RuleFor(x => x.MedicalHelpUrgency).NotEmpty();
         }
     }
     
@@ -71,24 +63,24 @@ public sealed class CreateCat : IEndpoint
     {
         public async Task<Guid> Handle(CreateCatCommand request, CancellationToken cancellationToken)
         {
-            ArgumentNullException.ThrowIfNull(request.HealthStatus);
-            ArgumentNullException.ThrowIfNull(request.Behavior);
-            ArgumentNullException.ThrowIfNull(request.AgeCategory);
-            ArgumentNullException.ThrowIfNull(request.MedicalHelpUrgency);
-            
             Person person = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
 
             CatName catName = CatName.Create(request.Name);
             Description additionalRequirements = Description.Create(request.AdditionalRequirements);
+
+            MedicalHelpUrgency medicalHelpUrgency = MedicalHelpUrgency.FromName(request.MedicalHelpUrgency, true);
+            AgeCategory ageCategory = AgeCategory.FromName(request.AgeCategory, true);
+            Behavior behavior = Behavior.FromName(request.Behavior, true);
+            HealthStatus healthStatus = HealthStatus.FromName(request.HealthStatus, true);
             
             Cat cat = Cat.Create(
                 priorityScoreCalculator: calculator,
                 person: person,
                 name: catName,
-                medicalHelpUrgency: request.MedicalHelpUrgency,
-                ageCategory: request.AgeCategory,
-                behavior: request.Behavior,
-                healthStatus: request.HealthStatus,
+                medicalHelpUrgency: medicalHelpUrgency,
+                ageCategory: ageCategory,
+                behavior: behavior,
+                healthStatus: healthStatus,
                 isCastrated: request.IsCastrated,
                 additionalRequirements: additionalRequirements);
             
@@ -115,32 +107,7 @@ public sealed class CreateCat : IEndpoint
 [Mapper]
 public static partial class CreateCatMapper
 {
-    public static CreateCat.CreateCatCommand MapToCreateCatCommand(this CreateCat.CreateCatRequest request,
-        Guid personId)
-    {
-        request.RetrieveSmartEnumsFromNames(
-            out (bool mappedSuccessfully, MedicalHelpUrgency value) medicalHelpUrgencyResults,
-            out (bool mappedSuccessfully, AgeCategory value) ageCategoryResults,
-            out (bool mappedSuccessfully, Behavior value) behaviorResults,
-            out (bool mappedSuccessfully, HealthStatus value) healthStatusResults);
-        
-        CreateCat.CreateCatCommand dto = request.ToCreateCatCommand(personId,
-            medicalHelpUrgencyResults.mappedSuccessfully ? medicalHelpUrgencyResults.value : null,
-            ageCategoryResults.mappedSuccessfully ? ageCategoryResults.value : null,
-            behaviorResults.mappedSuccessfully ? behaviorResults.value : null,
-            healthStatusResults.mappedSuccessfully ? healthStatusResults.value : null);
-        return dto;
-    }
-    
-    [MapperIgnoreSource(nameof(CreateCat.CreateCatRequest.Behavior))]
-    [MapperIgnoreSource(nameof(CreateCat.CreateCatRequest.MedicalHelpUrgency))]
-    [MapperIgnoreSource(nameof(CreateCat.CreateCatRequest.AgeCategory))]
-    [MapperIgnoreSource(nameof(CreateCat.CreateCatRequest.HealthStatus))]
-    private static partial CreateCat.CreateCatCommand ToCreateCatCommand(
+    public static partial CreateCat.CreateCatCommand MapToCreateCatCommand(
         this CreateCat.CreateCatRequest request,
-        Guid personId,
-        MedicalHelpUrgency? medicalHelpUrgency,
-        AgeCategory? ageCategory,
-        Behavior? behavior,
-        HealthStatus? healthStatus);
+        Guid personId);
 }

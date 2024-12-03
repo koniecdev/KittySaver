@@ -28,10 +28,10 @@ public sealed class UpdateCat : IEndpoint
         Guid Id,
         string Name,
         bool IsCastrated,
-        MedicalHelpUrgency? MedicalHelpUrgency,
-        AgeCategory? AgeCategory,
-        Behavior? Behavior,
-        HealthStatus? HealthStatus,
+        string MedicalHelpUrgency,
+        string AgeCategory,
+        string Behavior,
+        string HealthStatus,
         string? AdditionalRequirements = null) : ICommand;
 
     public sealed class UpdateCatCommandValidator
@@ -52,22 +52,14 @@ public sealed class UpdateCat : IEndpoint
                 .MaximumLength(CatName.MaxLength);
             
             RuleFor(x => x.AdditionalRequirements).MaximumLength(Description.MaxLength);
-            
-            RuleFor(x => x.HealthStatus)
-                .NotNull()
-                .WithMessage("Provided empty or invalid Health Status.");
-            
-            RuleFor(x => x.AgeCategory)
-                .NotNull()
-                .WithMessage("Provided empty or invalid Age Category.");
-            
-            RuleFor(x => x.Behavior)
-                .NotNull()
-                .WithMessage("Provided empty or invalid Behavior.");
-            
-            RuleFor(x => x.MedicalHelpUrgency)
-                .NotNull()
-                .WithMessage("Provided empty or invalid Medical Help Urgency.");
+
+            RuleFor(x => x.HealthStatus).NotEmpty();
+
+            RuleFor(x => x.AgeCategory).NotEmpty();
+
+            RuleFor(x => x.Behavior).NotEmpty();
+
+            RuleFor(x => x.MedicalHelpUrgency).NotEmpty();
         }
     }
     
@@ -79,26 +71,26 @@ public sealed class UpdateCat : IEndpoint
     {
         public async Task Handle(UpdateCatCommand request, CancellationToken cancellationToken)
         {
-            ArgumentNullException.ThrowIfNull(request.HealthStatus);
-            ArgumentNullException.ThrowIfNull(request.Behavior);
-            ArgumentNullException.ThrowIfNull(request.AgeCategory);
-            ArgumentNullException.ThrowIfNull(request.MedicalHelpUrgency);
-            
             Person catOwner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
             
             CatName catName = CatName.Create(request.Name);
             Description additionalRequirements = Description.Create(request.AdditionalRequirements);
-
+            
+            MedicalHelpUrgency medicalHelpUrgency = MedicalHelpUrgency.FromName(request.MedicalHelpUrgency, true);
+            AgeCategory ageCategory = AgeCategory.FromName(request.AgeCategory, true);
+            Behavior behavior = Behavior.FromName(request.Behavior, true);
+            HealthStatus healthStatus = HealthStatus.FromName(request.HealthStatus, true);
+            
             catOwner.UpdateCat(
-                catId: request.Id,
-                catPriorityCalculator: calculator,
-                name: catName,
-                additionalRequirements: additionalRequirements,
-                isCastrated: request.IsCastrated,
-                healthStatus: request.HealthStatus,
-                ageCategory: request.AgeCategory,
-                behavior: request.Behavior,
-                medicalHelpUrgency: request.MedicalHelpUrgency);
+                request.Id,
+                calculator,
+                catName,
+                additionalRequirements,
+                request.IsCastrated,
+                healthStatus,
+                ageCategory,
+                behavior,
+                medicalHelpUrgency);
             
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }
@@ -123,34 +115,8 @@ public sealed class UpdateCat : IEndpoint
 [Mapper]
 public static partial class UpdateCatMapper
 {
-    public static UpdateCat.UpdateCatCommand MapToUpdateCatCommand(this UpdateCat.UpdateCatRequest request, Guid personId, Guid id)
-    {
-        request.RetrieveSmartEnumsFromNames(
-            out (bool mappedSuccessfully, MedicalHelpUrgency value) medicalHelpUrgencyResults,
-            out (bool mappedSuccessfully, AgeCategory value) ageCategoryResults,
-            out (bool mappedSuccessfully, Behavior value) behaviorResults,
-            out (bool mappedSuccessfully, HealthStatus value) healthStatusResults);
-
-        UpdateCat.UpdateCatCommand dto = request.ToUpdateCatCommand(
-            personId,
-            id,
-            medicalHelpUrgencyResults.mappedSuccessfully ? medicalHelpUrgencyResults.value : null,
-            ageCategoryResults.mappedSuccessfully ? ageCategoryResults.value : null,
-            behaviorResults.mappedSuccessfully ? behaviorResults.value : null,
-            healthStatusResults.mappedSuccessfully ? healthStatusResults.value : null);
-        return dto;
-    }
-    
-    [MapperIgnoreSource(nameof(CreateCat.CreateCatRequest.Behavior))]
-    [MapperIgnoreSource(nameof(CreateCat.CreateCatRequest.MedicalHelpUrgency))]
-    [MapperIgnoreSource(nameof(CreateCat.CreateCatRequest.AgeCategory))]
-    [MapperIgnoreSource(nameof(CreateCat.CreateCatRequest.HealthStatus))]
-    private static partial UpdateCat.UpdateCatCommand ToUpdateCatCommand(
+    public static partial UpdateCat.UpdateCatCommand MapToUpdateCatCommand(
         this UpdateCat.UpdateCatRequest request,
         Guid personId,
-        Guid id,
-        MedicalHelpUrgency? medicalHelpUrgency,
-        AgeCategory? ageCategory,
-        Behavior? behavior,
-        HealthStatus? healthStatus);
+        Guid id);
 }
