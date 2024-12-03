@@ -11,13 +11,13 @@ public sealed class GetCat : IEndpoint
 {
     public sealed record GetCatQuery(Guid PersonId, Guid Id) : IQuery<CatResponse>;
 
-    internal sealed class GetCatQueryHandler(ApplicationDbContext db)
+    internal sealed class GetCatQueryHandler(ApplicationWriteDbContext writeDb)
         : IRequestHandler<GetCatQuery, CatResponse>
     {
         public async Task<CatResponse> Handle(GetCatQuery request, CancellationToken cancellationToken)
         {
             CatResponse cat =
-                await db.Persons
+                await writeDb.Persons
                     .AsNoTracking()
                     .Where(x => x.Id == request.PersonId)
                     .SelectMany(x => x.Cats)

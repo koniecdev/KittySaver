@@ -14,12 +14,12 @@ public sealed class GetCats : IEndpoint
         public Guid PersonId { get; } = personId;
     }
 
-    internal sealed class GetCatsQueryHandler(ApplicationDbContext db)
+    internal sealed class GetCatsQueryHandler(ApplicationWriteDbContext writeDb)
         : IRequestHandler<GetCatsQuery, ICollection<CatResponse>>
     {
         public async Task<ICollection<CatResponse>> Handle(GetCatsQuery request, CancellationToken cancellationToken)
         {
-            bool personExists = await db.Persons
+            bool personExists = await writeDb.Persons
                 .AsNoTracking()
                 .AnyAsync(x => x.Id == request.PersonId, cancellationToken);
             if (!personExists)
@@ -27,7 +27,7 @@ public sealed class GetCats : IEndpoint
                 throw new NotFoundExceptions.PersonNotFoundException(request.PersonId);
             }
             
-            List<CatResponse> cats = await db.Persons
+            List<CatResponse> cats = await writeDb.Persons
                 .AsNoTracking()
                 .Where(x=>x.Id == request.PersonId)
                 .SelectMany(x=>x.Cats)

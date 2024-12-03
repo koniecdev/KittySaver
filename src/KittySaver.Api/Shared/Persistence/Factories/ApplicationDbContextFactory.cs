@@ -3,11 +3,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KittySaver.Api.Shared.Persistence.Factories;
 
-internal sealed class ApplicationDbContextFactoryFactory : DesignTimeDbContextFactoryBase<ApplicationDbContext>
+internal sealed class ApplicationDbContextFactoryFactory : DesignTimeDbContextFactoryBase<ApplicationWriteDbContext>
 {
-    protected override ApplicationDbContext CreateNewInstance(DbContextOptions<ApplicationDbContext> options)
+    protected override ApplicationWriteDbContext CreateNewInstance(DbContextOptions<ApplicationWriteDbContext> options)
     {
-        ApplicationDbContext db = new ApplicationDbContext(options, new DefaultDateTimeService(), new DesignTimeMigrationsCurrentUserService());
-        return db;
+        ApplicationWriteDbContext writeDb = new ApplicationWriteDbContext(options, new DefaultDateTimeService(), new DesignTimeMigrationsCurrentUserService());
+        return writeDb;
     }
 }

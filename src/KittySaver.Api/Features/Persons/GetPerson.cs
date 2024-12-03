@@ -11,13 +11,13 @@ public sealed class GetPerson : IEndpoint
 {
     public sealed record GetPersonQuery(Guid IdOrUserIdentityId) : IQuery<PersonResponse>;
 
-    internal sealed class GetPersonQueryHandler(ApplicationDbContext db)
+    internal sealed class GetPersonQueryHandler(ApplicationWriteDbContext writeDb)
         : IRequestHandler<GetPersonQuery, PersonResponse>
     {
         public async Task<PersonResponse> Handle(GetPersonQuery request, CancellationToken cancellationToken)
         {
             PersonResponse person =
-                await db.Persons
+                await writeDb.Persons
                     .AsNoTracking()
                     .Where(x => x.Id == request.IdOrUserIdentityId || x.UserIdentityId == request.IdOrUserIdentityId)
                     .ProjectToDto()

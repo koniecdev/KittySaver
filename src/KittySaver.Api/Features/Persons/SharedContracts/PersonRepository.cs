@@ -6,47 +6,47 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KittySaver.Api.Features.Persons.SharedContracts;
 
-public class PersonRepository(ApplicationDbContext db) : IPersonRepository
+public class PersonRepository(ApplicationWriteDbContext writeDb) : IPersonRepository
 {
     public async Task<Person> GetPersonByIdAsync(Guid id, CancellationToken cancellationToken)
-        => await db.Persons
+        => await writeDb.Persons
             .Where(person => person.Id == id)
             .Include(person => person.Cats)
             .FirstOrDefaultAsync(cancellationToken) 
             ?? throw new NotFoundExceptions.PersonNotFoundException(id);
     
     public async Task<Person> GetPersonByIdOrIdentityIdAsync(Guid idOrUserIdentityId, CancellationToken cancellationToken)
-        => await db.Persons
+        => await writeDb.Persons
                .Where(person => person.Id == idOrUserIdentityId || person.UserIdentityId == idOrUserIdentityId)
                .Include(person => person.Cats)
                .FirstOrDefaultAsync(cancellationToken)
                ?? throw new NotFoundExceptions.PersonNotFoundException(idOrUserIdentityId);
     
-    public void Insert(Person person) => db.Persons.Add(person);
+    public void Insert(Person person) => writeDb.Persons.Add(person);
 
     public void Remove(Person person)
     {
-        db.Persons.Remove(person);
+        writeDb.Persons.Remove(person);
         person.AnnounceDeletion();
     }
 
     public async Task RemoveAllPersonAdvertisementsAsync(Guid personId, CancellationToken cancellationToken)
     {
-        List<Advertisement> advertisementsToRemove = await db.Advertisements
+        List<Advertisement> advertisementsToRemove = await writeDb.Advertisements
             .Where(x => x.PersonId == personId)
             .ToListAsync(cancellationToken);
         if (advertisementsToRemove.Count > 0)
         {
-            db.Advertisements.RemoveRange(advertisementsToRemove);
+            writeDb.Advertisements.RemoveRange(advertisementsToRemove);
         }
     }
 
     public async Task<bool> IsPhoneNumberUniqueAsync(string phone, Guid? userToExcludeIdOrIdentityId, CancellationToken cancellationToken) 
         => userToExcludeIdOrIdentityId is null 
-            ? !await db.Persons
+            ? !await writeDb.Persons
                 .AsNoTracking()
                 .AnyAsync(person => person.PhoneNumber.Value == phone, cancellationToken)
-            : !await db.Persons
+            : !await writeDb.Persons
                 .AsNoTracking()
                 .AnyAsync(x => 
                     x.PhoneNumber.Value == phone 
@@ -56,10 +56,10 @@ public class PersonRepository(ApplicationDbContext db) : IPersonRepository
         
     public async Task<bool> IsEmailUniqueAsync(string email, Guid? userToExcludeIdOrIdentityId, CancellationToken cancellationToken) 
         => userToExcludeIdOrIdentityId is null 
-            ? !await db.Persons
+            ? !await writeDb.Persons
                 .AsNoTracking()
                 .AnyAsync(person => person.Email.Value == email, cancellationToken)
-            : !await db.Persons
+            : !await writeDb.Persons
                 .AsNoTracking()
                 .AnyAsync(x =>
                     x.Email.Value == email 
@@ -68,7 +68,7 @@ public class PersonRepository(ApplicationDbContext db) : IPersonRepository
                     cancellationToken);
 
     public async Task<bool> IsUserIdentityIdUniqueAsync(Guid userIdentityId, CancellationToken cancellationToken) 
-        => !await db.Persons
+        => !await writeDb.Persons
             .AsNoTracking()
             .AnyAsync(person => person.UserIdentityId == userIdentityId, cancellationToken);
 }

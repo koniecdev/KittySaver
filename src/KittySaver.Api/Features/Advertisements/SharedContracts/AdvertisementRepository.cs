@@ -6,18 +6,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KittySaver.Api.Features.Advertisements.SharedContracts;
 
-public class AdvertisementRepository(ApplicationDbContext db) : IAdvertisementRepository
+public class AdvertisementRepository(ApplicationWriteDbContext writeDb) : IAdvertisementRepository
 {
     public async Task<Advertisement> GetAdvertisementByIdAsync(Guid id, CancellationToken cancellationToken)
-        => await db.Advertisements
+        => await writeDb.Advertisements
                .FirstOrDefaultAsync(advertisement => advertisement.Id == id, cancellationToken)
                 ?? throw new NotFoundExceptions.AdvertisementNotFoundException(id);
 
-    public void Insert(Advertisement advertisement) => db.Advertisements.Add(advertisement);
+    public void Insert(Advertisement advertisement) => writeDb.Advertisements.Add(advertisement);
     
     public void Remove(Advertisement advertisement)
     {
-        db.Remove(advertisement);
+        writeDb.Remove(advertisement);
         advertisement.AnnounceDeletion();
     }
 }

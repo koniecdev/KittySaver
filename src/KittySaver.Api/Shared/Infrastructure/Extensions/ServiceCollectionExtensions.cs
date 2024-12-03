@@ -39,10 +39,10 @@ public static class ServiceCollectionExtensions
         
         AddAuth();
         
-        services.AddDbContext<ApplicationDbContext>(
+        services.AddDbContext<ApplicationWriteDbContext>(
             o => o.UseSqlServer(configuration.GetConnectionString("Database")
                                 ?? throw new Exceptions.Database.MissingConnectionStringException()));
-        services.AddScoped<IUnitOfWork>(serviceProvider => serviceProvider.GetRequiredService<ApplicationDbContext>());
+        services.AddScoped<IUnitOfWork>(serviceProvider => serviceProvider.GetRequiredService<ApplicationWriteDbContext>());
         
         return services;
         

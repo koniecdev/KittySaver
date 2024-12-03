@@ -10,8 +10,8 @@ using SmartEnum.EFCore;
 
 namespace KittySaver.Api.Shared.Persistence;
 
-public sealed class ApplicationDbContext(
-    DbContextOptions<ApplicationDbContext> options,
+public sealed class ApplicationWriteDbContext(
+    DbContextOptions<ApplicationWriteDbContext> options,
     IDateTimeService dateTimeProvider,
     ICurrentUserService currentUserService,
     IPublisher? publisher = null)

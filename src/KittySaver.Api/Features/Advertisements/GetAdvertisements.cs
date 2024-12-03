@@ -11,12 +11,12 @@ public sealed class GetAdvertisements : IEndpoint
 {
     public sealed record GetAdvertisementsQuery : IQuery<ICollection<AdvertisementResponse>>;
 
-    internal sealed class GetAdvertisementsQueryHandler(ApplicationDbContext db)
+    internal sealed class GetAdvertisementsQueryHandler(ApplicationWriteDbContext writeDb)
         : IRequestHandler<GetAdvertisementsQuery, ICollection<AdvertisementResponse>>
     {
         public async Task<ICollection<AdvertisementResponse>> Handle(GetAdvertisementsQuery request, CancellationToken cancellationToken)
         {
-            List<AdvertisementResponse> advertisements = await db.Advertisements
+            List<AdvertisementResponse> advertisements = await writeDb.Advertisements
                 .AsNoTracking()
                 .Select(x => new AdvertisementResponse
                 {
@@ -40,7 +40,7 @@ public sealed class GetAdvertisements : IEndpoint
             
             foreach (AdvertisementResponse advertisement in advertisements)
             {
-                Person person = await db.Persons
+                Person person = await writeDb.Persons
                     .AsNoTracking()
                     .Where(x => x.Id == advertisement.PersonId)
                     .Include(x => x.Cats.Where(c => c.AdvertisementId == advertisement.Id))

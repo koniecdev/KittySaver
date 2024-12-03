@@ -10,12 +10,12 @@ public sealed class GetPersons : IEndpoint
 {
     public sealed class GetPersonsQuery : IQuery<ICollection<PersonResponse>>;
 
-    internal sealed class GetPersonsQueryHandler(ApplicationDbContext db)
+    internal sealed class GetPersonsQueryHandler(ApplicationWriteDbContext writeDb)
         : IRequestHandler<GetPersonsQuery, ICollection<PersonResponse>>
     {
         public async Task<ICollection<PersonResponse>> Handle(GetPersonsQuery request, CancellationToken cancellationToken)
         {
-            List<PersonResponse> persons = await db.Persons
+            List<PersonResponse> persons = await writeDb.Persons
                 .AsNoTracking()
                 .ProjectToDto()
                 .ToListAsync(cancellationToken);

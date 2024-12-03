@@ -12,12 +12,12 @@ public class GetAdvertisement : IEndpoint
 {
     public sealed record GetAdvertisementQuery(Guid Id) : IQuery<AdvertisementResponse>;
 
-    internal sealed class GetAdvertisementQueryHandler(ApplicationDbContext db)
+    internal sealed class GetAdvertisementQueryHandler(ApplicationWriteDbContext writeDb)
         : IRequestHandler<GetAdvertisementQuery, AdvertisementResponse>
     {
         public async Task<AdvertisementResponse> Handle(GetAdvertisementQuery request, CancellationToken cancellationToken)
         {
-            AdvertisementResponse advertisement = await db.Advertisements
+            AdvertisementResponse advertisement = await writeDb.Advertisements
                 .AsNoTracking()
                 .Where(x=>x.Id == request.Id)
                 .Select(x => new AdvertisementResponse
@@ -41,7 +41,7 @@ public class GetAdvertisement : IEndpoint
                 }).FirstOrDefaultAsync(cancellationToken)
                 ?? throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);
             
-            Person person = await db.Persons
+            Person person = await writeDb.Persons
                 .AsNoTracking()
                 .Where(x => x.Id == advertisement.PersonId)
                 .Include(x => x.Cats.Where(c => c.AdvertisementId == advertisement.Id))
