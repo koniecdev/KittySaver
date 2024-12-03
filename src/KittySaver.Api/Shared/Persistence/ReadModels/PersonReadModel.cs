@@ -1,0 +1,30 @@
+﻿namespace KittySaver.Api.Shared.Persistence.ReadModels;
+
+public sealed record PersonReadModel(
+    Guid Id,
+    string CreatedBy,
+    DateTimeOffset CreatedOn,
+    string? LastModificationBy,
+    DateTimeOffset? LastModificationOn,
+    Guid UserIdentityId,
+    ICollection<CatReadModel> Cats,
+    ICollection<AdvertisementReadModel> Advertisements,
+    string FirstName,
+    string LastName,
+    string Email,
+    string PhoneNumber,
+    string DefaultAdvertisementsContactInfoEmail,
+    string DefaultAdvertisementsContactInfoPhoneNumber,
+    string DefaultAdvertisementsPickupAddressBuildingNumber,
+    string DefaultAdvertisementsPickupAddressCity,
+    string DefaultAdvertisementsPickupAddressCountry,
+    string DefaultAdvertisementsPickupAddressState,
+    string DefaultAdvertisementsPickupAddressStreet,
+    string DefaultAdvertisementsPickupAddressZipCode,
+    string ResidentalAddressBuildingNumber,
+    string ResidentalAddressCity,
+    string ResidentalAddressCountry,
+    string ResidentalAddressState,
+    string ResidentalAddressStreet,
+    string ResidentalAddressZipCode
+);
