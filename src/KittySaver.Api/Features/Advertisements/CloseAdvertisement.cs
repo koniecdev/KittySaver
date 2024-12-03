@@ -22,18 +22,17 @@ public sealed class CloseAdvertisement : IEndpoint
         }
     }
 
-    internal sealed class CloseAdvertisementCommandHandler(ApplicationDbContext db, IDateTimeService dateTimeService)
+    internal sealed class CloseAdvertisementCommandHandler(
+        IAdvertisementRepository advertisementRepository,
+        IUnitOfWork unitOfWork,
+        IDateTimeService dateTimeService)
         : IRequestHandler<CloseAdvertisementCommand>
     {
         public async Task Handle(CloseAdvertisementCommand request, CancellationToken cancellationToken)
         {
-            Advertisement advertisement =
-                await db.Advertisements
-                    .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken)
-                ?? throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);
-            
+            Advertisement advertisement = await advertisementRepository.GetAdvertisementByIdAsync(request.Id, cancellationToken);
             advertisement.Close(dateTimeService.Now);
-            await db.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 
