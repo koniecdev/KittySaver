@@ -2,7 +2,6 @@
 
 public interface IPersonRepository
 {
-    public Task<IEnumerable<Person>> GetAllPersonsAsync(CancellationToken cancellationToken);
     public Task<Person> GetPersonByIdAsync(Guid id, CancellationToken cancellationToken);
     public Task<Person> GetPersonByIdOrIdentityIdAsync(Guid idOrIdentityId, CancellationToken cancellationToken);
     public Task<bool> IsPhoneNumberUniqueAsync(string phone, Guid? userToExcludeIdOrIdentityId, CancellationToken cancellationToken);

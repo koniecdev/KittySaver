@@ -1,17 +1,13 @@
-﻿using KittySaver.Domain.Advertisements;
+﻿using KittySaver.Api.Shared.Persistence;
+using KittySaver.Domain.Advertisements;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Persons;
 using Microsoft.EntityFrameworkCore;
 
-namespace KittySaver.Api.Shared.Persistence.Repositories;
+namespace KittySaver.Api.Features.Persons.SharedContracts;
 
 public class PersonRepository(ApplicationDbContext db) : IPersonRepository
 {
-    public async Task<IEnumerable<Person>> GetAllPersonsAsync(CancellationToken cancellationToken)
-        => await db.Persons
-            .Include(person => person.Cats)
-            .ToListAsync(cancellationToken);
-    
     public async Task<Person> GetPersonByIdAsync(Guid id, CancellationToken cancellationToken)
         => await db.Persons
             .Where(person => person.Id == id)
@@ -25,10 +21,8 @@ public class PersonRepository(ApplicationDbContext db) : IPersonRepository
                .Include(person => person.Cats)
                .FirstOrDefaultAsync(cancellationToken)
                ?? throw new NotFoundExceptions.PersonNotFoundException(idOrUserIdentityId);
-    public void Insert(Person person)
-    {
-        db.Persons.Add(person);
-    }
+    
+    public void Insert(Person person) => db.Persons.Add(person);
 
     public void Remove(Person person)
     {
