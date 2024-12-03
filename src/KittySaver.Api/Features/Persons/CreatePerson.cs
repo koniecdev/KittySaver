@@ -4,7 +4,6 @@ using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Riok.Mapperly.Abstractions;
 
 namespace KittySaver.Api.Features.Persons;
@@ -56,17 +55,8 @@ public sealed class CreatePerson : IEndpoint
     public sealed class CreatePersonCommandValidator 
         : AbstractValidator<CreatePersonCommand>, IAsyncValidator
     {
-        private readonly ApplicationDbContext _db;
-
-        public CreatePersonCommandValidator(ApplicationDbContext db)
+        public CreatePersonCommandValidator(IPersonRepository personRepository)
         {
-            _db = db;
-            
-            RuleFor(x => x.UserIdentityId)
-                .NotEmpty()
-                .MustAsync(async (userIdentityId, ct) => await IsUserIdentityIdUniqueAsync(userIdentityId, ct))
-                .WithMessage("'User Identity Id' is already used by another user.");
-            
             RuleFor(x => x.FirstName)
                 .NotEmpty()
                 .MaximumLength(FirstName.MaxLength);
@@ -75,17 +65,24 @@ public sealed class CreatePerson : IEndpoint
                 .NotEmpty()
                 .MaximumLength(LastName.MaxLength);
             
+            RuleFor(x => x.UserIdentityId)
+                .NotEmpty()
+                .MustAsync(async (userIdentityId, ct) => 
+                    await personRepository.IsUserIdentityIdUniqueAsync(userIdentityId, ct))
+                .WithMessage("'User Identity Id' is already used by another user.");
+            
             RuleFor(x => x.PhoneNumber)
                 .NotEmpty()
                 .MaximumLength(PhoneNumber.MaxLength)
-                .MustAsync(async (phoneNumber, ct) => await IsPhoneNumberUniqueAsync(phoneNumber, ct))
+                .MustAsync(async (phoneNumber, ct) => 
+                    await personRepository.IsPhoneNumberUniqueAsync(phoneNumber, null, ct))
                 .WithMessage("'Phone Number' is already used by another user.");
             
             RuleFor(x => x.Email)
                 .NotEmpty()
                 .MaximumLength(Email.MaxLength)
                 .Matches(Email.RegexPattern)
-                .MustAsync(async (email, ct) => await IsEmailUniqueAsync(email, ct))
+                .MustAsync(async (email, ct) => await personRepository.IsEmailUniqueAsync(email, null, ct))
                 .WithMessage("'Email' is already used by another user.");
             
             RuleFor(x => x.DefaultAdvertisementContactInfoPhoneNumber)
@@ -141,23 +138,10 @@ public sealed class CreatePerson : IEndpoint
             RuleFor(x => x.DefaultAdvertisementPickupAddressBuildingNumber)
                 .MaximumLength(Address.BuildingNumberMaxLength);
         }
-        private async Task<bool> IsPhoneNumberUniqueAsync(string phone, CancellationToken ct) 
-            => !await _db.Persons
-                .AsNoTracking()
-                .AnyAsync(x=>x.PhoneNumber.Value == phone, ct);
-        
-        private async Task<bool> IsEmailUniqueAsync(string email, CancellationToken ct) 
-            => !await _db.Persons
-                .AsNoTracking()
-                .AnyAsync(x=>x.Email.Value == email, ct);
-
-        private async Task<bool> IsUserIdentityIdUniqueAsync(Guid userIdentityId, CancellationToken ct) 
-            => !await _db.Persons
-                .AsNoTracking()
-                .AnyAsync(x=>x.UserIdentityId == userIdentityId, ct);
     }
     
-    internal sealed class CreatePersonCommandHandler(ApplicationDbContext db) : IRequestHandler<CreatePersonCommand, Guid>
+    internal sealed class CreatePersonCommandHandler(IPersonRepository personRepository, IUnitOfWork unitOfWork)
+        : IRequestHandler<CreatePersonCommand, Guid>
     {
         public async Task<Guid> Handle(CreatePersonCommand request, CancellationToken cancellationToken)
         {
@@ -196,8 +180,8 @@ public sealed class CreatePerson : IEndpoint
                 defaultAdvertisementContactInfoEmail: defaultAdvertisementContactInfoEmail,
                 defaultAdvertisementContactInfoPhoneNumber: defaultAdvertisementContactInfoPhoneNumber);
             
-            db.Persons.Add(person);
-            await db.SaveChangesAsync(cancellationToken);
+            personRepository.Insert(person);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
             return person.Id;
         }
     }

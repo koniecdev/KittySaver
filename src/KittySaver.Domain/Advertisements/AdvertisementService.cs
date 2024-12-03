@@ -4,49 +4,40 @@
 
 namespace KittySaver.Domain.Advertisements;
 
-public sealed class AdvertisementService
+public sealed class AdvertisementService(IAdvertisementRepository advertisementRepository, IPersonRepository personRepository)
 {
-    public void AssignCatsToAdvertisement(
-        Person person,
-        Advertisement advertisement,
-        IEnumerable<Guid> catIdsToAssign)
+    public async Task ReplaceCatsOfAdvertisementAsync(
+        Guid advertisementId,
+        IEnumerable<Guid> catIdsToAssign,
+        CancellationToken cancellationToken)
     {
-        List<Guid> catIdsToAssignList = catIdsToAssign.ToList();
-
-        AssignCatsToAdvertisement(person, advertisement, catIdsToAssignList);
-        SetAdvertisementPriorityScore(person, advertisement, catIdsToAssignList);
-    }
-    
-    public void ReplaceCatsOfAdvertisement(
-        Person person,
-        Advertisement advertisement,
-        IEnumerable<Guid> catIdsToAssign)
-    {
+        Advertisement advertisement = await advertisementRepository.GetAdvertisementByIdAsync(advertisementId, cancellationToken);
+        Person advertisementOwner = await personRepository.GetPersonByIdAsync(advertisement.PersonId, cancellationToken);
         List<Guid> catIdsToAssignList = catIdsToAssign.ToList();
         
-        foreach (Guid catId in person.GetAssignedToConcreteAdvertisementCatIds(advertisement.Id))
+        foreach (Guid catId in advertisementOwner.GetAssignedToConcreteAdvertisementCatIds(advertisement.Id))
         {
-            person.UnassignCatFromAdvertisement(catId);
+            advertisementOwner.UnassignCatFromAdvertisement(catId);
         }
 
-        AssignCatsToAdvertisement(person, advertisement, catIdsToAssignList);
-        SetAdvertisementPriorityScore(person, advertisement, catIdsToAssignList);
-    }
-    
-    public void RecalculatePriorityScore(Person person, Advertisement advertisement)
-    {
-        advertisement.ValidateOwnership(person.Id);
-        IEnumerable<Guid> catsAssignedToAdvertisement = person.GetAssignedToConcreteAdvertisementCatIds(advertisement.Id);
-        SetAdvertisementPriorityScore(person, advertisement, catsAssignedToAdvertisement);
-    }
-
-    private static void AssignCatsToAdvertisement(Person person, Advertisement advertisement,
-        List<Guid> catIdsToAssignList)
-    {
         foreach (Guid catId in catIdsToAssignList)
         {
-            person.AssignCatToAdvertisement(advertisement.Id, catId);
+            advertisementOwner.AssignCatToAdvertisement(advertisement.Id, catId);
         }
+        
+        SetAdvertisementPriorityScore(advertisementOwner, advertisement, catIdsToAssignList);
+    }
+    
+    public async Task RecalculatePriorityScoreAsync(
+        Guid advertisementId,
+        CancellationToken cancellationToken)
+    {
+        Advertisement advertisement = await advertisementRepository.GetAdvertisementByIdAsync(advertisementId, cancellationToken);
+        Person advertisementOwner = await personRepository.GetPersonByIdAsync(advertisement.PersonId, cancellationToken);
+        
+        advertisement.ValidateOwnership(advertisementOwner.Id);
+        IEnumerable<Guid> catsAssignedToAdvertisement = advertisementOwner.GetAssignedToConcreteAdvertisementCatIds(advertisement.Id);
+        SetAdvertisementPriorityScore(advertisementOwner, advertisement, catsAssignedToAdvertisement);
     }
     
     private static void SetAdvertisementPriorityScore(Person person, Advertisement advertisement, IEnumerable<Guid> catIdsToAssignList)

@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Advertisements;
@@ -21,18 +22,16 @@ public sealed class DeleteAdvertisement : IEndpoint
         }
     }
 
-    internal sealed class DeleteAdvertisementCommandHandler(ApplicationDbContext db)
+    internal sealed class DeleteAdvertisementCommandHandler(
+        IAdvertisementRepository advertisementRepository,
+        IUnitOfWork unitOfWork)
         : IRequestHandler<DeleteAdvertisementCommand>
     {
         public async Task Handle(DeleteAdvertisementCommand request, CancellationToken cancellationToken)
         {
-            Advertisement advertisement = 
-                await db.Advertisements
-                    .FirstOrDefaultAsync(x=> x.Id == request.Id, cancellationToken)
-                    ?? throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);
-            db.Remove(advertisement);
-            advertisement.AnnounceDeletion();
-            await db.SaveChangesAsync(cancellationToken);
+            Advertisement advertisement = await advertisementRepository.GetAdvertisementByIdAsync(request.Id, cancellationToken);
+            advertisementRepository.Remove(advertisement);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 

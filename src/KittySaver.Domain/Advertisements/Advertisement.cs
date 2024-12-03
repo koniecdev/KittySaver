@@ -35,9 +35,13 @@ public sealed class Advertisement : AggregateRoot
             description: description,
             expiresOn: expiresOn);
         
-        AdvertisementService advertisementService = new();
-        advertisementService.AssignCatsToAdvertisement(person, advertisement, catsIdsToAssignList);
-
+        foreach (Guid catId in catsIdsToAssignList)
+        {
+            person.AssignCatToAdvertisement(advertisement.Id, catId);
+        }
+        double catsToAssignToAdvertisementHighestPriorityScore = person.GetHighestPriorityScoreFromGivenCats(catsIdsToAssignList);
+        advertisement.PriorityScore = catsToAssignToAdvertisementHighestPriorityScore;
+        
         advertisement.Status = AdvertisementStatus.Active;
         return advertisement;
     }

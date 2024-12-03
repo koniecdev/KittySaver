@@ -15,7 +15,7 @@ public sealed class ApplicationDbContext(
     IDateTimeService dateTimeProvider,
     ICurrentUserService currentUserService,
     IPublisher? publisher = null)
-    : DbContext(options)
+    : DbContext(options), IUnitOfWork
 {
     public DbSet<Person> Persons => Set<Person>();
     public DbSet<Advertisement> Advertisements => Set<Advertisement>();

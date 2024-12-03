@@ -86,17 +86,16 @@ public class CreateAdvertisement : IEndpoint
         }
     }
 
-    internal sealed class CreateAdvertisementCommandHandler(ApplicationDbContext db, IDateTimeService dateTimeService)
+    internal sealed class CreateAdvertisementCommandHandler(
+        IPersonRepository personRepository,
+        IAdvertisementRepository advertisementRepository,
+        IUnitOfWork unitOfWork,
+        IDateTimeService dateTimeService)
         : IRequestHandler<CreateAdvertisementCommand, Guid>
     {
         public async Task<Guid> Handle(CreateAdvertisementCommand request, CancellationToken cancellationToken)
         {
-            Person person =
-                await db.Persons
-                    .Where(x => x.Id == request.PersonId)
-                    .Include(x => x.Cats)
-                    .FirstOrDefaultAsync(cancellationToken)
-                ?? throw new NotFoundExceptions.PersonNotFoundException(request.PersonId);
+            Person person = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
 
             Address pickupAddress = Address.Create(
                 country: request.PickupAddressCountry,
@@ -118,8 +117,8 @@ public class CreateAdvertisement : IEndpoint
                 contactInfoPhoneNumber: contactInfoPhoneNumber,
                 description: description);
 
-            db.Advertisements.Add(advertisement);
-            await db.SaveChangesAsync(cancellationToken);
+            advertisementRepository.Insert(advertisement);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
             return advertisement.Id;
         }
     }

@@ -3,9 +3,11 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Bogus;
 using FluentAssertions;
+using KittySaver.Api.Features.Advertisements;
 using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Tests.Integration.Helpers;
+using KittySaver.Domain.Common.Primitives.Enums;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
@@ -48,6 +50,18 @@ public class DeletePersonEndpointsTests : IAsyncLifetime
                     DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 ));
     
+    private readonly Faker<CreateCat.CreateCatRequest> _createCatRequestGenerator =
+        new Faker<CreateCat.CreateCatRequest>()
+            .CustomInstantiator(faker =>
+                new CreateCat.CreateCatRequest(
+                    Name: faker.Name.FirstName(),
+                    IsCastrated: true,
+                    MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
+                    Behavior: Behavior.Friendly.Name,
+                    HealthStatus: HealthStatus.Good.Name,
+                    AgeCategory: AgeCategory.Adult.Name,
+                    AdditionalRequirements: "Lorem ipsum"
+                ));
     [Fact]
     public async Task DeletePerson_ShouldReturnSuccess_WhenValidDataIsProvided()
     {
@@ -64,11 +78,11 @@ public class DeletePersonEndpointsTests : IAsyncLifetime
         //Assert
         deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        HttpResponseMessage userNotFoundProblemDetailsMessage = 
+        HttpResponseMessage issuedDeletedUserResponseMessage = 
             await _httpClient.GetAsync($"api/v1/persons/{registeredPersonResponse.Id}");
-        userNotFoundProblemDetailsMessage.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        issuedDeletedUserResponseMessage.StatusCode.Should().Be(HttpStatusCode.NotFound);
         ProblemDetails? notFoundProblemDetails =
-            await userNotFoundProblemDetailsMessage.Content.ReadFromJsonAsync<ProblemDetails>();
+            await issuedDeletedUserResponseMessage.Content.ReadFromJsonAsync<ProblemDetails>();
         notFoundProblemDetails.Should().NotBeNull();
         notFoundProblemDetails!.Status.Should().Be(StatusCodes.Status404NotFound);
     }
@@ -98,6 +112,57 @@ public class DeletePersonEndpointsTests : IAsyncLifetime
             await userNotFoundProblemDetailsMessage.Content.ReadFromJsonAsync<ProblemDetails>();
         notFoundProblemDetails.Should().NotBeNull();
         notFoundProblemDetails!.Status.Should().Be(StatusCodes.Status404NotFound);
+    }
+    
+    [Fact]
+    public async Task DeletePerson_ShouldReturnSuccess_WhenUserHaveAdvertisement()
+    {
+        //Arrange
+        CreatePerson.CreatePersonRequest createPersonRequest = _createPersonRequestGenerator.Generate();
+        HttpResponseMessage createPersonResponseMessage =
+            await _httpClient.PostAsJsonAsync("api/v1/persons", createPersonRequest);
+        ApiResponses.CreatedWithIdResponse createPersonResponse =
+            await createPersonResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
+            ?? throw new JsonException();
+        CreateCat.CreateCatRequest catCreateRequest = _createCatRequestGenerator.Generate();
+        HttpResponseMessage catCreateResponseMessage =
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{createPersonResponse.Id}/cats", catCreateRequest);
+        ApiResponses.CreatedWithIdResponse catCreateResponse =
+            await catCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
+            ?? throw new JsonException();
+        
+        CreateAdvertisement.CreateAdvertisementRequest request =
+            new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
+                .CustomInstantiator(faker =>
+                    new CreateAdvertisement.CreateAdvertisementRequest(
+                        PersonId: createPersonResponse.Id,
+                        CatsIdsToAssign: [catCreateResponse.Id],
+                        Description: faker.Lorem.Lines(2),
+                        PickupAddressCountry: faker.Address.Country(),
+                        PickupAddressState: faker.Address.State(),
+                        PickupAddressZipCode: faker.Address.ZipCode(),
+                        PickupAddressCity: faker.Address.City(),
+                        PickupAddressStreet: faker.Address.StreetName(),
+                        PickupAddressBuildingNumber: faker.Address.BuildingNumber(),
+                        ContactInfoEmail: faker.Person.Email,
+                        ContactInfoPhoneNumber: faker.Person.Phone
+                    ));
+
+        HttpResponseMessage advertisementResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/advertisements", request);
+        ApiResponses.CreatedWithIdResponse advertisementResponse = await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
+        
+        //Act
+        HttpResponseMessage deleteResponse = await _httpClient.DeleteAsync($"api/v1/persons/{createPersonResponse.Id}");
+        
+        //Assert
+        deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        HttpResponseMessage issuedDeletedUserResponseMessage = await _httpClient.GetAsync($"api/v1/persons/{createPersonResponse.Id}");
+        issuedDeletedUserResponseMessage.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        HttpResponseMessage issuedDeletedUserAdvertisementResponseMessage = 
+            await _httpClient.GetAsync($"api/v1/advertisements/{advertisementResponse.Id}");
+        issuedDeletedUserAdvertisementResponseMessage.StatusCode.Should().Be(HttpStatusCode.NotFound);
+       
     }
     
     [Fact]

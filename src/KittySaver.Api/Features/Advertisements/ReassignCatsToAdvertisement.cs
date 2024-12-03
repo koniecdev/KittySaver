@@ -25,23 +25,18 @@ public sealed class ReassignCatsToAdvertisement : IEndpoint
         }
     }
     
-    public sealed class ReassignCatsToAdvertisementCommandHandler(ApplicationDbContext db) 
+    public sealed class ReassignCatsToAdvertisementCommandHandler(
+        IAdvertisementRepository advertisementRepository,
+        IPersonRepository personRepository,
+        IUnitOfWork unitOfWork) 
         : IRequestHandler<ReassignCatsToAdvertisementCommand>
     {
         public async Task Handle(ReassignCatsToAdvertisementCommand request, CancellationToken cancellationToken)
         {
-            Advertisement advertisement = await db.Advertisements
-                                              .FirstOrDefaultAsync(x => x.Id == request.AdvertisementId, cancellationToken)
-                                          ?? throw new NotFoundExceptions.AdvertisementNotFoundException(request.AdvertisementId);
-
-            Person person = await db.Persons
-                                .Include(x => x.Cats)
-                                .FirstAsync(x => x.Id == advertisement.PersonId, cancellationToken);
-
-            AdvertisementService advertisementService = new();
-            advertisementService.ReplaceCatsOfAdvertisement(person, advertisement, request.CatIds);
+            AdvertisementService advertisementService = new(advertisementRepository, personRepository);
+            await advertisementService.ReplaceCatsOfAdvertisementAsync(request.AdvertisementId, request.CatIds, cancellationToken);
             
-            await db.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
     

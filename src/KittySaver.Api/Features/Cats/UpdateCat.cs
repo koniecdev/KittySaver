@@ -71,7 +71,10 @@ public sealed class UpdateCat : IEndpoint
         }
     }
     
-    internal sealed class UpdateCatCommandHandler(ApplicationDbContext db, ICatPriorityCalculatorService calculator)
+    internal sealed class UpdateCatCommandHandler(
+        IPersonRepository personRepository,
+        IUnitOfWork unitOfWork,
+        ICatPriorityCalculatorService calculator)
         : IRequestHandler<UpdateCatCommand>
     {
         public async Task Handle(UpdateCatCommand request, CancellationToken cancellationToken)
@@ -81,11 +84,7 @@ public sealed class UpdateCat : IEndpoint
             ArgumentNullException.ThrowIfNull(request.AgeCategory);
             ArgumentNullException.ThrowIfNull(request.MedicalHelpUrgency);
             
-            Person catOwner = await db.Persons
-                                  .Where(x => x.Id == request.PersonId)
-                                  .Include(x => x.Cats)
-                                  .FirstOrDefaultAsync(cancellationToken)
-                              ?? throw new NotFoundExceptions.PersonNotFoundException(request.PersonId);
+            Person catOwner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
             
             CatName catName = CatName.Create(request.Name);
             Description additionalRequirements = Description.Create(request.AdditionalRequirements);
@@ -101,7 +100,7 @@ public sealed class UpdateCat : IEndpoint
                 behavior: request.Behavior,
                 medicalHelpUrgency: request.MedicalHelpUrgency);
             
-            await db.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
     
