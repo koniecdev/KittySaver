@@ -1,11 +1,13 @@
 ﻿using System.Reflection;
 using System.Text;
 using FluentValidation;
+using KittySaver.Api.Features.Advertisements.SharedContracts;
+using KittySaver.Api.Features.Cats.SharedContracts;
+using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Shared.Behaviours;
 using KittySaver.Api.Shared.Infrastructure.Security;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
-using KittySaver.Api.Shared.Persistence.Repositories;
 using KittySaver.Domain.Advertisements;
 using KittySaver.Domain.Persons;
 using Microsoft.AspNetCore.Authentication;
@@ -26,7 +28,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDateTimeService, DefaultDateTimeService>();
         services.AddScoped<IPersonRepository, PersonRepository>();
         services.AddScoped<IAdvertisementRepository, AdvertisementRepository>();
-        services.AddScoped<ICatRepository, CatRepository>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<ICatPriorityCalculatorService, DefaultCatPriorityCalculatorService>();
         services.AddValidatorsFromAssembly(assembly);
@@ -35,8 +36,14 @@ public static class ServiceCollectionExtensions
             cfg.RegisterServicesFromAssembly(assembly);
             cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
         });
+        
         AddAuth();
-
+        
+        services.AddDbContext<ApplicationDbContext>(
+            o => o.UseSqlServer(configuration.GetConnectionString("Database")
+                                ?? throw new Exceptions.Database.MissingConnectionStringException()));
+        services.AddScoped<IUnitOfWork>(serviceProvider => serviceProvider.GetRequiredService<ApplicationDbContext>());
+        
         return services;
         
         void AddAuth()
@@ -83,17 +90,8 @@ public static class ServiceCollectionExtensions
             services.AddAuthorization();
         }
     }
-    public static IServiceCollection RegisterPersistenceServices(this IServiceCollection services,
-        IConfiguration configuration)
-    {
-        services.AddDbContext<ApplicationDbContext>(
-            o => o.UseSqlServer(configuration.GetConnectionString("Database")
-                                ?? throw new Exceptions.Database.MissingConnectionStringException()));
-        services.AddScoped<IUnitOfWork>(serviceProvider => serviceProvider.GetRequiredService<ApplicationDbContext>());
-        return services;
-    }
 
-    public static class Exceptions
+    private static class Exceptions
     {
         public static class Database
         {
