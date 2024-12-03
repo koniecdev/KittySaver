@@ -22,18 +22,17 @@ public sealed class ExpireAdvertisement : IEndpoint
         }
     }
 
-    internal sealed class ExpireAdvertisementCommandHandler(ApplicationDbContext db, IDateTimeService dateTimeService)
+    internal sealed class ExpireAdvertisementCommandHandler(
+        IAdvertisementRepository advertisementRepository,
+        IUnitOfWork unitOfWork,
+        IDateTimeService dateTimeService)
         : IRequestHandler<ExpireAdvertisementCommand>
     {
         public async Task Handle(ExpireAdvertisementCommand request, CancellationToken cancellationToken)
         {
-            Advertisement advertisement =
-                await db.Advertisements
-                    .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken)
-                ?? throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);
-            
+            Advertisement advertisement = await advertisementRepository.GetAdvertisementByIdAsync(request.Id, cancellationToken);
             advertisement.Expire(dateTimeService.Now);
-            await db.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 
