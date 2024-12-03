@@ -215,6 +215,7 @@ internal sealed class AdvertisementConfiguration : IEntityTypeConfiguration<Adve
             complexPropertyBuilder.IsRequired();
 
             complexPropertyBuilder.Property(x => x.Value)
+                .HasColumnName($"{nameof(Advertisement.Description)}")
                 .HasMaxLength(Description.MaxLength)
                 .IsRequired();
         });
@@ -224,6 +225,7 @@ internal sealed class AdvertisementConfiguration : IEntityTypeConfiguration<Adve
             complexPropertyBuilder.IsRequired();
 
             complexPropertyBuilder.Property(x => x.Value)
+                .HasColumnName($"{nameof(Advertisement.ContactInfoEmail)}")
                 .HasMaxLength(Email.MaxLength)
                 .IsRequired();
         });
@@ -233,6 +235,7 @@ internal sealed class AdvertisementConfiguration : IEntityTypeConfiguration<Adve
             complexPropertyBuilder.IsRequired();
 
             complexPropertyBuilder.Property(x => x.Value)
+                .HasColumnName($"{nameof(Advertisement.ContactInfoPhoneNumber)}")
                 .HasMaxLength(PhoneNumber.MaxLength)
                 .IsRequired();
         });
@@ -242,24 +245,30 @@ internal sealed class AdvertisementConfiguration : IEntityTypeConfiguration<Adve
             complexPropertyBuilder.IsRequired();
 
             complexPropertyBuilder.Property(x => x.Country)
+                .HasColumnName($"{nameof(Advertisement.PickupAddress)}{nameof(Advertisement.PickupAddress.Country)}")
                 .HasMaxLength(Address.CountryMaxLength)
                 .IsRequired();
 
             complexPropertyBuilder.Property(x => x.State)
+                .HasColumnName($"{nameof(Advertisement.PickupAddress)}{nameof(Advertisement.PickupAddress.State)}")
                 .HasMaxLength(Address.StateMaxLength);
 
             complexPropertyBuilder.Property(x => x.ZipCode)
+                .HasColumnName($"{nameof(Advertisement.PickupAddress)}{nameof(Advertisement.PickupAddress.ZipCode)}")
                 .HasMaxLength(Address.ZipCodeMaxLength)
                 .IsRequired();
 
             complexPropertyBuilder.Property(x => x.City)
+                .HasColumnName($"{nameof(Advertisement.PickupAddress)}{nameof(Advertisement.PickupAddress.City)}")
                 .HasMaxLength(Address.CityMaxLength)
                 .IsRequired();
 
             complexPropertyBuilder.Property(x => x.Street)
+                .HasColumnName($"{nameof(Advertisement.PickupAddress)}{nameof(Advertisement.PickupAddress.Street)}")
                 .HasMaxLength(Address.StreetMaxLength);
 
             complexPropertyBuilder.Property(x => x.BuildingNumber)
+                .HasColumnName($"{nameof(Advertisement.PickupAddress)}{nameof(Advertisement.PickupAddress.BuildingNumber)}")
                 .HasMaxLength(Address.BuildingNumberMaxLength);
         });
     }

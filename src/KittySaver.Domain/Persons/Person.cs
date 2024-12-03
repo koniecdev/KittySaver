@@ -335,36 +335,30 @@ internal sealed class PersonConfiguration : IEntityTypeConfiguration<Person>
         {
             complexPropertyBuilder.IsRequired();
 
-            complexPropertyBuilder
-                .Property(x => x.Country)
+            complexPropertyBuilder.Property(x => x.Country)
                 .HasColumnName($"{nameof(Person.DefaultAdvertisementsPickupAddress)}{nameof(Person.DefaultAdvertisementsPickupAddress.Country)}")
                 .HasMaxLength(Address.CountryMaxLength)
                 .IsRequired();
 
-            complexPropertyBuilder
-                .Property(x => x.State)
+            complexPropertyBuilder.Property(x => x.State)
                 .HasColumnName($"{nameof(Person.DefaultAdvertisementsPickupAddress)}{nameof(Person.DefaultAdvertisementsPickupAddress.State)}")
                 .HasMaxLength(Address.StateMaxLength);
 
-            complexPropertyBuilder
-                .Property(x => x.ZipCode)
+            complexPropertyBuilder.Property(x => x.ZipCode)
                 .HasColumnName($"{nameof(Person.DefaultAdvertisementsPickupAddress)}{nameof(Person.DefaultAdvertisementsPickupAddress.ZipCode)}")
                 .HasMaxLength(Address.ZipCodeMaxLength)
                 .IsRequired();
 
-            complexPropertyBuilder
-                .Property(x => x.City)
+            complexPropertyBuilder.Property(x => x.City)
                 .HasColumnName($"{nameof(Person.DefaultAdvertisementsPickupAddress)}{nameof(Person.DefaultAdvertisementsPickupAddress.City)}")
                 .HasMaxLength(Address.CityMaxLength)
                 .IsRequired();
 
-            complexPropertyBuilder
-                .Property(x => x.Street)
+            complexPropertyBuilder.Property(x => x.Street)
                 .HasColumnName($"{nameof(Person.DefaultAdvertisementsPickupAddress)}{nameof(Person.DefaultAdvertisementsPickupAddress.Street)}")
                 .HasMaxLength(Address.StreetMaxLength);
 
-            complexPropertyBuilder
-                .Property(x => x.BuildingNumber)
+            complexPropertyBuilder.Property(x => x.BuildingNumber)
                 .HasColumnName($"{nameof(Person.DefaultAdvertisementsPickupAddress)}{nameof(Person.DefaultAdvertisementsPickupAddress.BuildingNumber)}")
                 .HasMaxLength(Address.BuildingNumberMaxLength);
         });
@@ -373,8 +367,7 @@ internal sealed class PersonConfiguration : IEntityTypeConfiguration<Person>
         {
             complexPropertyBuilder.IsRequired();
 
-            complexPropertyBuilder
-                .Property(x => x.Value)
+            complexPropertyBuilder.Property(x => x.Value)
                 .HasColumnName($"{nameof(Person.DefaultAdvertisementsContactInfoEmail)}")
                 .HasMaxLength(Email.MaxLength)
                 .IsRequired();
@@ -384,8 +377,7 @@ internal sealed class PersonConfiguration : IEntityTypeConfiguration<Person>
         {
             complexPropertyBuilder.IsRequired();
 
-            complexPropertyBuilder
-                .Property(x => x.Value)
+            complexPropertyBuilder.Property(x => x.Value)
                 .HasColumnName($"{nameof(Person.DefaultAdvertisementsContactInfoPhoneNumber)}")
                 .HasMaxLength(PhoneNumber.MaxLength)
                 .IsRequired();

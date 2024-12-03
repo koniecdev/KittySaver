@@ -19,7 +19,7 @@ public sealed record AdvertisementReadModel(
     string PickupAddressBuildingNumber,
     string PickupAddressCity,
     string PickupAddressCountry,
-    string PickupAddressState,
+    string? PickupAddressState,
     string PickupAddressStreet,
     string PickupAddressZipCode
 );
