@@ -6,17 +6,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KittySaver.Api.Features.Advertisements.Events;
 
-public class AdvertisementDeletedDomainEventHandler(ApplicationDbContext db)
+public class AdvertisementDeletedDomainEventHandler(IPersonRepository personRepository)
     : INotificationHandler<AdvertisementDeletedDomainEvent>
 {
     public async Task Handle(AdvertisementDeletedDomainEvent notification, CancellationToken cancellationToken)
     {
-        Person person =
-            await db.Persons
-                .Where(x => x.Id == notification.OwnerPersonId)
-                .Include(x => x.Cats)
-                .FirstAsync(cancellationToken);
-
+        Person person = await personRepository.GetPersonByIdAsync(notification.OwnerPersonId, cancellationToken);
         person.UnassignCatsFromRemovedAdvertisement(notification.AdvertisementId);
     }
 }
