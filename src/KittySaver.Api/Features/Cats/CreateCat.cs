@@ -63,7 +63,11 @@ public sealed class CreateCat : IEndpoint
         }
     }
     
-    internal sealed class CreateCatCommandHandler(ApplicationDbContext db, ICatPriorityCalculatorService calculator) : IRequestHandler<CreateCatCommand, Guid>
+    internal sealed class CreateCatCommandHandler(
+        IPersonRepository personRepository,
+        IUnitOfWork unitOfWork,
+        ICatPriorityCalculatorService calculator)
+        : IRequestHandler<CreateCatCommand, Guid>
     {
         public async Task<Guid> Handle(CreateCatCommand request, CancellationToken cancellationToken)
         {
@@ -72,10 +76,7 @@ public sealed class CreateCat : IEndpoint
             ArgumentNullException.ThrowIfNull(request.AgeCategory);
             ArgumentNullException.ThrowIfNull(request.MedicalHelpUrgency);
             
-            Person person = await db.Persons
-                              .Include(x => x.Cats)
-                              .FirstOrDefaultAsync(x => x.Id == request.PersonId, cancellationToken)
-                          ?? throw new NotFoundExceptions.PersonNotFoundException(request.PersonId);
+            Person person = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
 
             CatName catName = CatName.Create(request.Name);
             Description additionalRequirements = Description.Create(request.AdditionalRequirements);
@@ -90,7 +91,8 @@ public sealed class CreateCat : IEndpoint
                 healthStatus: request.HealthStatus,
                 isCastrated: request.IsCastrated,
                 additionalRequirements: additionalRequirements);
-            await db.SaveChangesAsync(cancellationToken);
+            
+            await unitOfWork.SaveChangesAsync(cancellationToken);
             return cat.Id;
         }
     }
