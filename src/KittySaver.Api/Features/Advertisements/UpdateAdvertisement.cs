@@ -78,16 +78,14 @@ public sealed class UpdateAdvertisement : IEndpoint
         }
     }
 
-    internal sealed class UpdateAdvertisementCommandHandler(ApplicationDbContext db)
+    internal sealed class UpdateAdvertisementCommandHandler(
+        IAdvertisementRepository advertisementRepository,
+        IUnitOfWork unitOfWork)
         : IRequestHandler<UpdateAdvertisementCommand>
     {
         public async Task Handle(UpdateAdvertisementCommand request, CancellationToken cancellationToken)
         {
-            Advertisement advertisement = 
-                await db.Advertisements
-                    .Where(x => x.Id == request.Id)
-                    .FirstOrDefaultAsync(cancellationToken)
-                ?? throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);
+            Advertisement advertisement = await advertisementRepository.GetAdvertisementByIdAsync(request.Id, cancellationToken);
             
             Address pickupAddress = Address.Create(
                 country: request.PickupAddressCountry,
@@ -104,7 +102,7 @@ public sealed class UpdateAdvertisement : IEndpoint
             advertisement.ChangePickupAddress(pickupAddress);
             advertisement.ChangeContactInfo(contactInfoEmail, contactInfoPhoneNumber);
             
-            await db.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 
