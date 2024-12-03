@@ -207,14 +207,14 @@ internal sealed class CatConfiguration : IEntityTypeConfiguration<Cat>
         
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.PersonId)
-            .IsRequired();
+        builder.Property(x => x.PersonId).IsRequired();
 
         builder.ComplexProperty(x => x.Name, complexPropertyBuilder =>
         {
             complexPropertyBuilder.IsRequired();
 
             complexPropertyBuilder.Property(x => x.Value)
+                .HasColumnName($"{nameof(Cat.Name)}")
                 .HasMaxLength(CatName.MaxLength)
                 .IsRequired();
         });
@@ -224,6 +224,7 @@ internal sealed class CatConfiguration : IEntityTypeConfiguration<Cat>
             complexPropertyBuilder.IsRequired();
 
             complexPropertyBuilder.Property(x => x.Value)
+                .HasColumnName($"{nameof(Cat.AdditionalRequirements)}")
                 .HasMaxLength(Description.MaxLength)
                 .IsRequired();
         });
