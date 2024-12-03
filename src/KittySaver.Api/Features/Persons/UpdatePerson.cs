@@ -138,19 +138,12 @@ public sealed class UpdatePerson : IEndpoint
         }
     }
 
-    internal sealed class UpdatePersonCommandHandler(ApplicationDbContext db)
+    internal sealed class UpdatePersonCommandHandler(IPersonRepository personRepository, IUnitOfWork unitOfWork)
         : IRequestHandler<UpdatePersonCommand>
     {
         public async Task Handle(UpdatePersonCommand request, CancellationToken cancellationToken)
         {
-            Person person =
-                await db.Persons
-                    .Where(x =>
-                        x.Id == request.IdOrUserIdentityId
-                        || x.UserIdentityId == request.IdOrUserIdentityId)
-                    .Include(x => x.Cats)
-                    .FirstOrDefaultAsync(cancellationToken)
-                ?? throw new NotFoundExceptions.PersonNotFoundException(request.IdOrUserIdentityId);
+            Person person = await personRepository.GetPersonByIdOrIdentityIdAsync(request.IdOrUserIdentityId, cancellationToken);
 
             FirstName firstName = FirstName.Create(request.FirstName);
             LastName lastName = LastName.Create(request.LastName);
@@ -185,7 +178,7 @@ public sealed class UpdatePerson : IEndpoint
                 defaultAdvertisementContactInfoEmail,
                 defaultAdvertisementContactInfoPhoneNumber);
 
-            await db.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 
