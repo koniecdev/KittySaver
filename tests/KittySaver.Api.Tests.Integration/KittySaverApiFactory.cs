@@ -79,8 +79,15 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
                 options.UseSqlServer(_msSqlContainer.GetConnectionString());
             });
             
-            //.BaseAddress = new Uri(_authApiServer.Url)
-            
+            ServiceDescriptor? descriptorOfReadDbContext = services.SingleOrDefault(m => m.ServiceType == typeof(DbContextOptions<ApplicationReadDbContext>));
+            if(descriptorOfReadDbContext is not null)
+            {
+                services.Remove(descriptorOfReadDbContext);
+            }
+            services.AddDbContext<ApplicationReadDbContext>(options =>
+            {
+                options.UseSqlServer(_msSqlContainer.GetConnectionString()).UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            });
         });
     }
 
