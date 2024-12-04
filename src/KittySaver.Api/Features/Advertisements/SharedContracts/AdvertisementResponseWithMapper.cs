@@ -1,4 +1,5 @@
-﻿using KittySaver.Domain.Advertisements;
+﻿using KittySaver.Api.Shared.Persistence.ReadModels;
+using KittySaver.Domain.Advertisements;
 using Riok.Mapperly.Abstractions;
 
 namespace KittySaver.Api.Features.Advertisements.SharedContracts;
@@ -7,14 +8,14 @@ public sealed class AdvertisementResponse
 {
     public required Guid Id { get; init; }
     public required Guid PersonId { get; init; }
-    public string PersonName { get; set; } = "";
+    public required string PersonName { get; init; }
     public string Title => string.Join(", ", Cats.Select(c => c.Name));
     public required double PriorityScore { get; init; }
     public required string? Description { get; init; }
     public required string ContactInfoEmail { get; init; }
     public required string ContactInfoPhoneNumber { get; init; }
     public required AdvertisementStatus Status { get; init; }
-    public ICollection<CatDto> Cats { get; set; } = new List<CatDto>();
+    public required ICollection<CatDto> Cats { get; set; } = new List<CatDto>();
     public required PickupAddressDto PickupAddress { get; init; }
     
     public sealed class PickupAddressDto
@@ -46,4 +47,34 @@ public sealed class AdvertisementResponse
 public static partial class AdvertisementStatusMapper
 {
     public static partial AdvertisementResponse.AdvertisementStatus MapStatus(Advertisement.AdvertisementStatus status);
+}
+
+public static class AdvertisementMapper
+{
+    public static IQueryable<AdvertisementResponse> ProjectToDto(this IQueryable<AdvertisementReadModel> persons) =>
+        persons.Select(entity => new AdvertisementResponse
+        {
+            Id = entity.Id,
+            ContactInfoEmail = entity.ContactInfoEmail,
+            ContactInfoPhoneNumber = entity.ContactInfoPhoneNumber,
+            PriorityScore = entity.PriorityScore,
+            Description = entity.Description,
+            PersonId = entity.PersonId,
+            PersonName = entity.Person.FirstName,
+            Cats = entity.Cats.Select(cat => new AdvertisementResponse.CatDto
+            {
+                Id = cat.Id,
+                Name = cat.Name
+            }).ToList(),
+            Status = AdvertisementStatusMapper.MapStatus((Advertisement.AdvertisementStatus)entity.Status),
+            PickupAddress = new AdvertisementResponse.PickupAddressDto
+            {
+                BuildingNumber = entity.PickupAddressBuildingNumber,
+                City = entity.PickupAddressCity,
+                Country = entity.PickupAddressCountry,
+                State = entity.PickupAddressState,
+                Street = entity.PickupAddressStreet,
+                ZipCode = entity.PickupAddressZipCode
+            }
+        });
 }
