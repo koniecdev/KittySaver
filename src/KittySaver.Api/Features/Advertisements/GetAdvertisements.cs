@@ -11,48 +11,14 @@ public sealed class GetAdvertisements : IEndpoint
 {
     public sealed record GetAdvertisementsQuery : IQuery<ICollection<AdvertisementResponse>>;
 
-    internal sealed class GetAdvertisementsQueryHandler(ApplicationWriteDbContext writeDb)
+    internal sealed class GetAdvertisementsQueryHandler(ApplicationReadDbContext db)
         : IRequestHandler<GetAdvertisementsQuery, ICollection<AdvertisementResponse>>
     {
         public async Task<ICollection<AdvertisementResponse>> Handle(GetAdvertisementsQuery request, CancellationToken cancellationToken)
         {
-            List<AdvertisementResponse> advertisements = await writeDb.Advertisements
-                .AsNoTracking()
-                .Select(x => new AdvertisementResponse
-                {
-                    Id = x.Id,
-                    ContactInfoEmail = x.ContactInfoEmail,
-                    ContactInfoPhoneNumber = x.ContactInfoPhoneNumber,
-                    PriorityScore = x.PriorityScore,
-                    Description = x.Description,
-                    PersonId = x.PersonId,
-                    Status = AdvertisementStatusMapper.MapStatus(x.Status),
-                    PickupAddress = new AdvertisementResponse.PickupAddressDto
-                    {
-                        BuildingNumber = x.PickupAddress.BuildingNumber,
-                        City = x.PickupAddress.City,
-                        Country = x.PickupAddress.Country,
-                        State = x.PickupAddress.State,
-                        Street = x.PickupAddress.Street,
-                        ZipCode = x.PickupAddress.ZipCode
-                    }
-                }).ToListAsync(cancellationToken);
-            
-            foreach (AdvertisementResponse advertisement in advertisements)
-            {
-                Person person = await writeDb.Persons
-                    .AsNoTracking()
-                    .Where(x => x.Id == advertisement.PersonId)
-                    .Include(x => x.Cats.Where(c => c.AdvertisementId == advertisement.Id))
-                    .FirstAsync(cancellationToken);
-                List<Cat> cats = person.Cats.ToList();
-                advertisement.PersonName = person.FirstName;
-                advertisement.Cats = cats.Select(x=> new AdvertisementResponse.CatDto
-                {
-                    Id = x.Id,
-                    Name = x.Name
-                }).ToList();
-            }
+            List<AdvertisementResponse> advertisements = await db.Advertisements
+                .ProjectToDto()
+                .ToListAsync(cancellationToken);
 
             return advertisements;
         }
