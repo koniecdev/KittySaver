@@ -21,7 +21,7 @@ public sealed class UpdateCat : IEndpoint
         string AgeCategory,
         string Behavior,
         string HealthStatus,
-        string? AdditionalRequirements = null) : ICatSmartEnumsRequest;
+        string? AdditionalRequirements = null);
     
     public sealed record UpdateCatCommand(
         Guid PersonId,

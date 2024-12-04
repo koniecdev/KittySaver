@@ -1,4 +1,5 @@
 ﻿using KittySaver.Api.Shared.Infrastructure.Services;
+using KittySaver.Api.Shared.Persistence.ReadModels;
 using KittySaver.Domain;
 using KittySaver.Domain.Advertisements;
 using KittySaver.Domain.Common.Primitives;
@@ -10,8 +11,8 @@ using SmartEnum.EFCore;
 
 namespace KittySaver.Api.Shared.Persistence;
 
-public sealed class ApplicationDbContext(
-    DbContextOptions<ApplicationDbContext> options,
+public sealed class ApplicationWriteDbContext(
+    DbContextOptions<ApplicationWriteDbContext> options,
     IDateTimeService dateTimeProvider,
     ICurrentUserService currentUserService,
     IPublisher? publisher = null)
@@ -22,8 +23,10 @@ public sealed class ApplicationDbContext(
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        builder.ApplyConfigurationsFromAssembly(typeof(IDomainMarker).Assembly);
+        builder.ApplyConfigurationsFromAssembly(typeof(IDomainMarker).Assembly, WriteConfigurationFilter);
     }
+
+    private static bool WriteConfigurationFilter(Type type) => !type.IsAssignableTo(typeof(IReadConfiguration));
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {

@@ -69,18 +69,25 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
                     .RequireAssertion(_ => true)
                     .Build());
             
-            ServiceDescriptor? descriptor = services.SingleOrDefault(m => m.ServiceType == typeof(DbContextOptions<ApplicationDbContext>));
+            ServiceDescriptor? descriptor = services.SingleOrDefault(m => m.ServiceType == typeof(DbContextOptions<ApplicationWriteDbContext>));
             if(descriptor is not null)
             {
                 services.Remove(descriptor);
             }
-            services.AddDbContext<ApplicationDbContext>(options =>
+            services.AddDbContext<ApplicationWriteDbContext>(options =>
             {
                 options.UseSqlServer(_msSqlContainer.GetConnectionString());
             });
             
-            //.BaseAddress = new Uri(_authApiServer.Url)
-            
+            ServiceDescriptor? descriptorOfReadDbContext = services.SingleOrDefault(m => m.ServiceType == typeof(DbContextOptions<ApplicationReadDbContext>));
+            if(descriptorOfReadDbContext is not null)
+            {
+                services.Remove(descriptorOfReadDbContext);
+            }
+            services.AddDbContext<ApplicationReadDbContext>(options =>
+            {
+                options.UseSqlServer(_msSqlContainer.GetConnectionString()).UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+            });
         });
     }
 
@@ -88,8 +95,8 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
     {
         await _msSqlContainer.StartAsync();
         using IServiceScope scope = Services.CreateScope();
-        ApplicationDbContext dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        await dbContext.Database.MigrateAsync();
+        ApplicationWriteDbContext writeDbContext = scope.ServiceProvider.GetRequiredService<ApplicationWriteDbContext>();
+        await writeDbContext.Database.MigrateAsync();
     }
 
     public new async Task DisposeAsync()

@@ -1,4 +1,5 @@
-﻿using KittySaver.Domain.Persons;
+﻿using KittySaver.Api.Shared.Persistence.ReadModels;
+using KittySaver.Domain.Persons;
 using Riok.Mapperly.Abstractions;
 
 namespace KittySaver.Api.Features.Persons.SharedContracts;
@@ -28,18 +29,37 @@ public sealed class PersonResponse
     }
 }
 
-[Mapper]
-public static partial class PersonResponseMapper
+public static class PersonResponseMapper
 {
-    public static partial IQueryable<PersonResponse> ProjectToDto(
-        this IQueryable<Person> persons);
-    
-    [MapperIgnoreSource(nameof(Person.CreatedBy))]
-    [MapperIgnoreSource(nameof(Person.CreatedOn))]
-    [MapperIgnoreSource(nameof(Person.LastModificationBy))]
-    [MapperIgnoreSource(nameof(Person.LastModificationOn))]
-    [MapperIgnoreSource(nameof(Person.Cats))]
-    [MapperIgnoreSource(nameof(Person.CurrentRole))]
-    // ReSharper disable once UnusedMember.Local - Required for mapperly to ignore unused properties.
-    private static partial PersonResponse Map(Person person);
+    public static IQueryable<PersonResponse> ProjectToDto(this IQueryable<PersonReadModel> persons) =>
+        persons.Select(entity => new PersonResponse
+        {
+            Id = entity.Id,
+            UserIdentityId = entity.UserIdentityId,
+            FirstName = entity.FirstName,
+            LastName = entity.LastName,
+            FullName = $"{entity.FirstName} {entity.LastName}",
+            Email = entity.Email,
+            PhoneNumber = entity.PhoneNumber,
+            DefaultAdvertisementsContactInfoEmail = entity.DefaultAdvertisementsContactInfoEmail,
+            DefaultAdvertisementsContactInfoPhoneNumber = entity.DefaultAdvertisementsContactInfoPhoneNumber,
+            ResidentalAddress = new PersonResponse.AddressDto
+            {
+                Country = entity.ResidentalAddressCountry,
+                State = entity.ResidentalAddressState,
+                ZipCode = entity.ResidentalAddressZipCode,
+                City = entity.ResidentalAddressCity,
+                Street = entity.ResidentalAddressStreet,
+                BuildingNumber = entity.ResidentalAddressBuildingNumber
+            },
+            DefaultAdvertisementsPickupAddress = new PersonResponse.AddressDto
+            {
+                Country = entity.DefaultAdvertisementsPickupAddressCountry,
+                State = entity.DefaultAdvertisementsPickupAddressState,
+                ZipCode = entity.DefaultAdvertisementsPickupAddressZipCode,
+                City = entity.DefaultAdvertisementsPickupAddressCity,
+                Street = entity.DefaultAdvertisementsPickupAddressStreet,
+                BuildingNumber = entity.DefaultAdvertisementsPickupAddressBuildingNumber
+            }
+        });
 }

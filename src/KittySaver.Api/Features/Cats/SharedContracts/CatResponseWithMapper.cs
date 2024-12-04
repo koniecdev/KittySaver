@@ -1,4 +1,6 @@
-﻿using KittySaver.Domain.Persons;
+﻿using KittySaver.Api.Shared.Persistence.ReadModels;
+using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Domain.Persons;
 using Riok.Mapperly.Abstractions;
 
 namespace KittySaver.Api.Features.Cats.SharedContracts;
@@ -18,22 +20,20 @@ public sealed class CatResponse
     public required double PriorityScore { get; init; }
 }
 
-[Mapper]
-public static partial class CatResponseMapper
+public static class CatResponseMapper
 {
-    public static IQueryable<CatResponse> ProjectToDto(
-        this IQueryable<Cat> cats) =>
-        cats.Select(x => new CatResponse
+    public static IQueryable<CatResponse> ProjectToDto(this IQueryable<CatReadModel> cats)
+        => cats.Select(x => new CatResponse
             {
                 Id = x.Id,
                 Name = x.Name,
                 AdditionalRequirements = x.AdditionalRequirements,
                 IsCastrated = x.IsCastrated,
                 IsAdopted = x.IsAdopted,
-                MedicalHelpUrgency = x.MedicalHelpUrgency.ToString(),
-                AgeCategory = x.AgeCategory.ToString(),
-                Behavior = x.Behavior.ToString(),
-                HealthStatus = x.HealthStatus.ToString(),
+                MedicalHelpUrgency = MedicalHelpUrgency.FromValue(x.MedicalHelpUrgency).ToString(),
+                AgeCategory = AgeCategory.FromValue(x.AgeCategory).ToString(),
+                Behavior = Behavior.FromValue(x.Behavior).ToString(),
+                HealthStatus = HealthStatus.FromValue(x.HealthStatus).ToString(),
                 PriorityScore = x.PriorityScore,
                 IsAssignedToAdvertisement = x.AdvertisementId.HasValue
             }

@@ -5,6 +5,7 @@ using KittySaver.Api.Shared.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -12,9 +13,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KittySaver.Api.Migrations
 {
     [DbContext(typeof(ApplicationWriteDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241203192650_RenameCatValueObjects")]
+    partial class RenameCatValueObjects
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -63,8 +66,7 @@ namespace KittySaver.Api.Migrations
                             b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasMaxLength(256)
-                                .HasColumnType("nvarchar(256)")
-                                .HasColumnName("ContactInfoEmail");
+                                .HasColumnType("nvarchar(256)");
                         });
 
                     b.ComplexProperty<Dictionary<string, object>>("ContactInfoPhoneNumber", "KittySaver.Domain.Advertisements.Advertisement.ContactInfoPhoneNumber#PhoneNumber", b1 =>
@@ -74,8 +76,7 @@ namespace KittySaver.Api.Migrations
                             b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasMaxLength(31)
-                                .HasColumnType("nvarchar(31)")
-                                .HasColumnName("ContactInfoPhoneNumber");
+                                .HasColumnType("nvarchar(31)");
                         });
 
                     b.ComplexProperty<Dictionary<string, object>>("Description", "KittySaver.Domain.Advertisements.Advertisement.Description#Description", b1 =>
@@ -85,8 +86,7 @@ namespace KittySaver.Api.Migrations
                             b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasMaxLength(1000)
-                                .HasColumnType("nvarchar(1000)")
-                                .HasColumnName("Description");
+                                .HasColumnType("nvarchar(1000)");
                         });
 
                     b.ComplexProperty<Dictionary<string, object>>("PickupAddress", "KittySaver.Domain.Advertisements.Advertisement.PickupAddress#Address", b1 =>
@@ -96,37 +96,31 @@ namespace KittySaver.Api.Migrations
                             b1.Property<string>("BuildingNumber")
                                 .IsRequired()
                                 .HasMaxLength(20)
-                                .HasColumnType("nvarchar(20)")
-                                .HasColumnName("PickupAddressBuildingNumber");
+                                .HasColumnType("nvarchar(20)");
 
                             b1.Property<string>("City")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)")
-                                .HasColumnName("PickupAddressCity");
+                                .HasColumnType("nvarchar(100)");
 
                             b1.Property<string>("Country")
                                 .IsRequired()
                                 .HasMaxLength(60)
-                                .HasColumnType("nvarchar(60)")
-                                .HasColumnName("PickupAddressCountry");
+                                .HasColumnType("nvarchar(60)");
 
                             b1.Property<string>("State")
                                 .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)")
-                                .HasColumnName("PickupAddressState");
+                                .HasColumnType("nvarchar(100)");
 
                             b1.Property<string>("Street")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)")
-                                .HasColumnName("PickupAddressStreet");
+                                .HasColumnType("nvarchar(100)");
 
                             b1.Property<string>("ZipCode")
                                 .IsRequired()
                                 .HasMaxLength(10)
-                                .HasColumnType("nvarchar(10)")
-                                .HasColumnName("PickupAddressZipCode");
+                                .HasColumnType("nvarchar(10)");
                         });
 
                     b.HasKey("Id");
