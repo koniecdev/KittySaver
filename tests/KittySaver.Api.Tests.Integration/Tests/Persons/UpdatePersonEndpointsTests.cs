@@ -20,6 +20,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
 {
     private readonly HttpClient _httpClient;
     private readonly CleanupHelper _cleanup;
+
     public UpdatePersonEndpointsTests(KittySaverApiFactory appFactory)
     {
         _httpClient = appFactory.CreateClient();
@@ -28,10 +29,10 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
 
     private readonly CreatePerson.CreatePersonRequest _createPersonRequest =
         new Faker<CreatePerson.CreatePersonRequest>()
-            .CustomInstantiator( faker =>
+            .CustomInstantiator(faker =>
                 new CreatePerson.CreatePersonRequest(
                     Nickname: faker.Person.FirstName,
-                                        Email: faker.Person.Email,
+                    Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     UserIdentityId: Guid.NewGuid(),
                     AddressCountry: faker.Address.Country(),
@@ -49,22 +50,24 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
                     DefaultAdvertisementContactInfoEmail: faker.Person.Email,
                     DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 )).Generate();
-    
+
     [Fact]
     public async Task UpdatePerson_ShouldReturnSuccess_WhenValidDataIsProvided()
     {
         //Arrange
         HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
-        ApiResponses.CreatedWithIdResponse registeredPersonResponse = await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-                                                                      ?? throw new JsonException();
-        PersonResponse person = await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{registeredPersonResponse.Id}") 
-                                ?? throw new JsonException();
+        ApiResponses.CreatedWithIdResponse registeredPersonResponse =
+            await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
+            ?? throw new JsonException();
+        PersonResponse person =
+            await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{registeredPersonResponse.Id}")
+            ?? throw new JsonException();
         //Act
         UpdatePerson.UpdatePersonRequest request = new Faker<UpdatePerson.UpdatePersonRequest>()
             .CustomInstantiator(faker =>
                 new UpdatePerson.UpdatePersonRequest(
                     Nickname: faker.Person.FirstName,
-                                        Email: faker.Person.Email,
+                    Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     AddressCountry: faker.Address.Country(),
                     AddressZipCode: faker.Address.ZipCode(),
@@ -81,16 +84,18 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
                     DefaultAdvertisementContactInfoEmail: faker.Person.Email,
                     DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 ));
-        
-        HttpResponseMessage updateResponse = await _httpClient.PutAsJsonAsync($"api/v1/persons/{registeredPersonResponse.Id}", request);
-        
+
+        HttpResponseMessage updateResponse =
+            await _httpClient.PutAsJsonAsync($"api/v1/persons/{registeredPersonResponse.Id}", request);
+
         //Assert
         updateResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        
-        PersonResponse personAfterUpdate = await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{registeredPersonResponse.Id}") 
-                                ?? throw new JsonException();
+
+        PersonResponse personAfterUpdate =
+            await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{registeredPersonResponse.Id}")
+            ?? throw new JsonException();
         personAfterUpdate.Should().NotBeEquivalentTo(person);
-        personAfterUpdate.FirstName.Should().Be(request.Nickname);
+        personAfterUpdate.Nickname.Should().Be(request.Nickname);
         personAfterUpdate.Email.Should().Be(request.Email);
         personAfterUpdate.PhoneNumber.Should().Be(request.PhoneNumber);
         personAfterUpdate.ResidentalAddress.Country.Should().Be(request.AddressCountry);
@@ -101,22 +106,24 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         personAfterUpdate.ResidentalAddress.City.Should().Be(request.AddressCity);
         personAfterUpdate.ResidentalAddress.BuildingNumber.Should().Be(request.AddressBuildingNumber);
     }
-    
+
     [Fact]
     public async Task UpdatePerson_ShouldReturnSuccess_WhenValidDataIsProvidedWithUserIdentityId()
     {
         //Arrange
         HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
-        ApiResponses.CreatedWithIdResponse registeredPersonResponse = await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-                                                                      ?? throw new JsonException();
-        PersonResponse person = await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{registeredPersonResponse.Id}") 
-                                ?? throw new JsonException();
+        ApiResponses.CreatedWithIdResponse registeredPersonResponse =
+            await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
+            ?? throw new JsonException();
+        PersonResponse person =
+            await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{registeredPersonResponse.Id}")
+            ?? throw new JsonException();
         //Act
         UpdatePerson.UpdatePersonRequest request = new Faker<UpdatePerson.UpdatePersonRequest>()
             .CustomInstantiator(faker =>
                 new UpdatePerson.UpdatePersonRequest(
-                    Nickname: person.FirstName,
-                                        Email: person.Email,
+                    Nickname: person.Nickname,
+                    Email: person.Email,
                     PhoneNumber: person.PhoneNumber,
                     AddressCountry: person.ResidentalAddress.Country,
                     AddressZipCode: person.ResidentalAddress.ZipCode,
@@ -133,16 +140,18 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
                     DefaultAdvertisementContactInfoEmail: faker.Person.Email,
                     DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 )).Generate();
-        
-        HttpResponseMessage updateResponse = await _httpClient.PutAsJsonAsync($"api/v1/persons/{person.UserIdentityId}", request);
-        
+
+        HttpResponseMessage updateResponse =
+            await _httpClient.PutAsJsonAsync($"api/v1/persons/{person.UserIdentityId}", request);
+
         //Assert
         updateResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        
-        PersonResponse personAfterUpdate = await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{registeredPersonResponse.Id}") 
-                                           ?? throw new JsonException();
+
+        PersonResponse personAfterUpdate =
+            await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{registeredPersonResponse.Id}")
+            ?? throw new JsonException();
         personAfterUpdate.Should().NotBeEquivalentTo(person);
-        personAfterUpdate.FirstName.Should().Be(request.Nickname);
+        personAfterUpdate.Nickname.Should().Be(request.Nickname);
         personAfterUpdate.Email.Should().Be(request.Email);
         personAfterUpdate.PhoneNumber.Should().Be(request.PhoneNumber);
         personAfterUpdate.ResidentalAddress.Country.Should().Be(request.AddressCountry);
@@ -153,19 +162,19 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         personAfterUpdate.ResidentalAddress.City.Should().Be(request.AddressCity);
         personAfterUpdate.ResidentalAddress.BuildingNumber.Should().Be(request.AddressBuildingNumber);
     }
-    
+
     [Fact]
     public async Task UpdatePerson_ShouldReturnNotFound_WhenNonRegisteredUserIdProvided()
     {
         //Arrange
         Guid randomId = Guid.NewGuid();
-        
+
         //Act
         UpdatePerson.UpdatePersonRequest request = new Faker<UpdatePerson.UpdatePersonRequest>()
             .CustomInstantiator(faker =>
                 new UpdatePerson.UpdatePersonRequest(
                     Nickname: faker.Person.FirstName,
-                                        Email: faker.Person.Email,
+                    Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     AddressCountry: faker.Address.Country(),
                     AddressZipCode: faker.Address.ZipCode(),
@@ -182,9 +191,9 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
                     DefaultAdvertisementContactInfoEmail: faker.Person.Email,
                     DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 ));
-        
+
         HttpResponseMessage updateResponse = await _httpClient.PutAsJsonAsync($"api/v1/persons/{randomId}", request);
-        
+
         //Assert
         updateResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
         ProblemDetails? notFoundProblemDetails = await updateResponse.Content.ReadFromJsonAsync<ProblemDetails>();
@@ -197,37 +206,40 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
     {
         //Arrange
         HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
-        ApiResponses.CreatedWithIdResponse firstUserIdResponse = await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-                                                                 ?? throw new JsonException();
-        
+        ApiResponses.CreatedWithIdResponse firstUserIdResponse =
+            await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
+            ?? throw new JsonException();
+
         //Act
         UpdatePerson.UpdatePersonRequest request = new(
-                Nickname: "",
-                Email: "",
-                PhoneNumber: "",
-                AddressCountry: "",
-                AddressState: "",
-                AddressZipCode: "",
-                AddressCity: "",
-                AddressStreet: "",
-                AddressBuildingNumber: "",
-                DefaultAdvertisementPickupAddressCountry: "", 
-                DefaultAdvertisementPickupAddressState: "", 
-                DefaultAdvertisementPickupAddressZipCode: "", 
-                DefaultAdvertisementPickupAddressCity: "", 
-                DefaultAdvertisementPickupAddressStreet: "", 
-                DefaultAdvertisementPickupAddressBuildingNumber: "", 
-                DefaultAdvertisementContactInfoEmail: "",
-                DefaultAdvertisementContactInfoPhoneNumber: "" 
-            );
-        HttpResponseMessage updateResponse = await _httpClient.PutAsJsonAsync($"api/v1/persons/{firstUserIdResponse.Id}", request);
-        
+            Nickname: "",
+            Email: "",
+            PhoneNumber: "",
+            AddressCountry: "",
+            AddressState: "",
+            AddressZipCode: "",
+            AddressCity: "",
+            AddressStreet: "",
+            AddressBuildingNumber: "",
+            DefaultAdvertisementPickupAddressCountry: "",
+            DefaultAdvertisementPickupAddressState: "",
+            DefaultAdvertisementPickupAddressZipCode: "",
+            DefaultAdvertisementPickupAddressCity: "",
+            DefaultAdvertisementPickupAddressStreet: "",
+            DefaultAdvertisementPickupAddressBuildingNumber: "",
+            DefaultAdvertisementContactInfoEmail: "",
+            DefaultAdvertisementContactInfoPhoneNumber: ""
+        );
+        HttpResponseMessage updateResponse =
+            await _httpClient.PutAsJsonAsync($"api/v1/persons/{firstUserIdResponse.Id}", request);
+
         //Assert
         updateResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        ValidationProblemDetails? validationProblemDetails = await updateResponse.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        ValidationProblemDetails? validationProblemDetails =
+            await updateResponse.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         validationProblemDetails.Should().NotBeNull();
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
-        validationProblemDetails.Errors.Count.Should().Be(14);
+        validationProblemDetails.Errors.Count.Should().Be(13);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(
             nameof(UpdatePerson.UpdatePersonRequest.Nickname),
             nameof(UpdatePerson.UpdatePersonRequest.Email),
@@ -243,72 +255,79 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
             nameof(UpdatePerson.UpdatePersonRequest.DefaultAdvertisementPickupAddressZipCode),
             nameof(UpdatePerson.UpdatePersonRequest.DefaultAdvertisementPickupAddressCity)
         );
-        
-        validationProblemDetails.Errors.Values.Count.Should().Be(14);
-        
+
+        validationProblemDetails.Errors.Values.Count.Should().Be(13);
+
         validationProblemDetails.Errors[nameof(UpdatePerson.UpdatePersonRequest.Nickname)][0]
             .Should()
-            .Be("'First Name' must not be empty.");
-        
+            .Be("'Nickname' must not be empty.");
+
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.Email)][0]
             .Should()
             .Be("'Email' must not be empty.");
-        
+
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.PhoneNumber)][0]
             .Should()
             .Be("'Phone Number' must not be empty.");
-        
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoEmail)][0]
+
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoEmail)]
+            [0]
             .Should()
             .Be("'Default Advertisement Contact Info Email' must not be empty.");
-        
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoPhoneNumber)][0]
+
+        validationProblemDetails.Errors[
+                nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoPhoneNumber)][0]
             .Should()
             .Be("'Default Advertisement Contact Info Phone Number' must not be empty.");
-        
+
         validationProblemDetails.Errors[nameof(UpdatePerson.UpdatePersonRequest.AddressCountry)][0]
             .Should()
             .Be("'Address Country' must not be empty.");
-        
+
         validationProblemDetails.Errors[nameof(UpdatePerson.UpdatePersonRequest.AddressZipCode)][0]
             .Should()
             .Be("'Address Zip Code' must not be empty.");
-        
+
         validationProblemDetails.Errors[nameof(UpdatePerson.UpdatePersonRequest.AddressCity)][0]
             .Should()
             .Be("'Address City' must not be empty.");
-        
+
         validationProblemDetails.Errors[nameof(UpdatePerson.UpdatePersonRequest.AddressStreet)][0]
             .Should()
             .Be("'Address Street' must not be empty.");
-        
+
         validationProblemDetails.Errors[nameof(UpdatePerson.UpdatePersonRequest.AddressBuildingNumber)][0]
             .Should()
             .Be("'Address Building Number' must not be empty.");
-        
-        validationProblemDetails.Errors[nameof(UpdatePerson.UpdatePersonRequest.DefaultAdvertisementPickupAddressCountry)][0]
+
+        validationProblemDetails.Errors[
+                nameof(UpdatePerson.UpdatePersonRequest.DefaultAdvertisementPickupAddressCountry)][0]
             .Should()
             .Be("'Default Advertisement Pickup Address Country' must not be empty.");
-        
-        validationProblemDetails.Errors[nameof(UpdatePerson.UpdatePersonRequest.DefaultAdvertisementPickupAddressZipCode)][0]
+
+        validationProblemDetails.Errors[
+                nameof(UpdatePerson.UpdatePersonRequest.DefaultAdvertisementPickupAddressZipCode)][0]
             .Should()
             .Be("'Default Advertisement Pickup Address Zip Code' must not be empty.");
-        
-        validationProblemDetails.Errors[nameof(UpdatePerson.UpdatePersonRequest.DefaultAdvertisementPickupAddressCity)][0]
+
+        validationProblemDetails.Errors[nameof(UpdatePerson.UpdatePersonRequest.DefaultAdvertisementPickupAddressCity)]
+            [0]
             .Should()
             .Be("'Default Advertisement Pickup Address City' must not be empty.");
     }
-    
+
     [Fact]
     public async Task UpdatePerson_ShouldReturnBadRequest_WhenTooLongDataAreProvided()
     {
         //Arrange
-        HttpResponseMessage registerResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
-        ApiResponses.CreatedWithIdResponse registerResponse = await registerResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-                                                                     ?? throw new JsonException();
-        
+        HttpResponseMessage registerResponseMessage =
+            await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
+        ApiResponses.CreatedWithIdResponse registerResponse =
+            await registerResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
+            ?? throw new JsonException();
+
         UpdatePerson.UpdatePersonRequest request = new Faker<UpdatePerson.UpdatePersonRequest>()
-            .CustomInstantiator( faker =>
+            .CustomInstantiator(faker =>
                 new UpdatePerson.UpdatePersonRequest(
                     Nickname: faker.Person.FirstName.ClampLength(Nickname.MaxLength + 1),
                     Email: faker.Person.Email.ClampLength(Email.MaxLength + 1),
@@ -317,24 +336,34 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
                     AddressZipCode: faker.Address.ZipCode().ClampLength(Address.ZipCodeMaxLength + 1),
                     AddressCity: faker.Address.City().ClampLength(Address.CityMaxLength + 1),
                     AddressStreet: faker.Address.StreetName().ClampLength(Address.StreetMaxLength + 1),
-                    AddressBuildingNumber: faker.Address.BuildingNumber().ClampLength(Address.BuildingNumberMaxLength + 1),
+                    AddressBuildingNumber: faker.Address.BuildingNumber()
+                        .ClampLength(Address.BuildingNumberMaxLength + 1),
                     AddressState: faker.Address.State().ClampLength(Address.StateMaxLength + 1),
-                    DefaultAdvertisementPickupAddressCountry: faker.Address.Country().ClampLength(Address.CountryMaxLength + 1),
-                    DefaultAdvertisementPickupAddressState: faker.Address.ZipCode().ClampLength(Address.StateMaxLength + 1),
-                    DefaultAdvertisementPickupAddressZipCode: faker.Address.City().ClampLength(Address.ZipCodeMaxLength + 1),
-                    DefaultAdvertisementPickupAddressCity: faker.Address.StreetName().ClampLength(Address.CityMaxLength + 1),
-                    DefaultAdvertisementPickupAddressStreet: faker.Address.BuildingNumber().ClampLength(Address.StreetMaxLength + 1),
-                    DefaultAdvertisementPickupAddressBuildingNumber: faker.Address.State().ClampLength(Address.BuildingNumberMaxLength + 1),
-                    DefaultAdvertisementContactInfoEmail:faker.Person.Email.ClampLength(Email.MaxLength + 1),
-                    DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone.ClampLength(PhoneNumber.MaxLength + 1)
+                    DefaultAdvertisementPickupAddressCountry: faker.Address.Country()
+                        .ClampLength(Address.CountryMaxLength + 1),
+                    DefaultAdvertisementPickupAddressState: faker.Address.ZipCode()
+                        .ClampLength(Address.StateMaxLength + 1),
+                    DefaultAdvertisementPickupAddressZipCode: faker.Address.City()
+                        .ClampLength(Address.ZipCodeMaxLength + 1),
+                    DefaultAdvertisementPickupAddressCity: faker.Address.StreetName()
+                        .ClampLength(Address.CityMaxLength + 1),
+                    DefaultAdvertisementPickupAddressStreet: faker.Address.BuildingNumber()
+                        .ClampLength(Address.StreetMaxLength + 1),
+                    DefaultAdvertisementPickupAddressBuildingNumber: faker.Address.State()
+                        .ClampLength(Address.BuildingNumberMaxLength + 1),
+                    DefaultAdvertisementContactInfoEmail: faker.Person.Email.ClampLength(Email.MaxLength + 1),
+                    DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone.ClampLength(
+                        PhoneNumber.MaxLength + 1)
                 ));
-        
+
         //Act
-        HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"api/v1/persons/{registerResponse.Id}", request);
-        
+        HttpResponseMessage response =
+            await _httpClient.PutAsJsonAsync($"api/v1/persons/{registerResponse.Id}", request);
+
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        ValidationProblemDetails? validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        ValidationProblemDetails? validationProblemDetails =
+            await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         validationProblemDetails.Should().NotBeNull();
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
         validationProblemDetails.Errors.Count.Should().Be(17);
@@ -358,91 +387,115 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
             nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoPhoneNumber)
         );
         validationProblemDetails.Errors.Values.Count.Should().Be(17);
-        
+
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.Nickname)][0]
             .Should()
-            .StartWith($"The length of 'First Name' must be {Nickname.MaxLength} characters or fewer. You entered");
-        
+            .StartWith($"The length of 'Nickname' must be {Nickname.MaxLength} characters or fewer. You entered");
+
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.PhoneNumber)][0]
             .Should()
-            .StartWith($"The length of 'Phone Number' must be {PhoneNumber.MaxLength} characters or fewer. You entered");
+            .StartWith(
+                $"The length of 'Phone Number' must be {PhoneNumber.MaxLength} characters or fewer. You entered");
 
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.Email)][0]
             .Should()
             .StartWith($"The length of 'Email' must be {Email.MaxLength} characters or fewer. You entered");
-        
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoPhoneNumber)][0]
-            .Should()
-            .StartWith($"The length of 'Default Advertisement Contact Info Phone Number' must be {PhoneNumber.MaxLength} characters or fewer. You entered");
 
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoEmail)][0]
+        validationProblemDetails.Errors[
+                nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoPhoneNumber)][0]
             .Should()
-            .StartWith($"The length of 'Default Advertisement Contact Info Email' must be {Email.MaxLength} characters or fewer. You entered");
-        
+            .StartWith(
+                $"The length of 'Default Advertisement Contact Info Phone Number' must be {PhoneNumber.MaxLength} characters or fewer. You entered");
+
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoEmail)]
+            [0]
+            .Should()
+            .StartWith(
+                $"The length of 'Default Advertisement Contact Info Email' must be {Email.MaxLength} characters or fewer. You entered");
+
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.AddressCountry)][0]
             .Should()
-            .StartWith($"The length of 'Address Country' must be {Address.CountryMaxLength} characters or fewer. You entered");
-        
+            .StartWith(
+                $"The length of 'Address Country' must be {Address.CountryMaxLength} characters or fewer. You entered");
+
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.AddressState)][0]
             .Should()
-            .StartWith($"The length of 'Address State' must be {Address.StateMaxLength} characters or fewer. You entered");
+            .StartWith(
+                $"The length of 'Address State' must be {Address.StateMaxLength} characters or fewer. You entered");
 
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.AddressZipCode)][0]
             .Should()
-            .StartWith($"The length of 'Address Zip Code' must be {Address.ZipCodeMaxLength} characters or fewer. You entered");
+            .StartWith(
+                $"The length of 'Address Zip Code' must be {Address.ZipCodeMaxLength} characters or fewer. You entered");
 
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.AddressCity)][0]
             .Should()
-            .StartWith($"The length of 'Address City' must be {Address.CityMaxLength} characters or fewer. You entered");
+            .StartWith(
+                $"The length of 'Address City' must be {Address.CityMaxLength} characters or fewer. You entered");
 
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.AddressStreet)][0]
             .Should()
-            .StartWith($"The length of 'Address Street' must be {Address.StreetMaxLength} characters or fewer. You entered");
+            .StartWith(
+                $"The length of 'Address Street' must be {Address.StreetMaxLength} characters or fewer. You entered");
 
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.AddressBuildingNumber)][0]
             .Should()
-            .StartWith($"The length of 'Address Building Number' must be {Address.BuildingNumberMaxLength} characters or fewer. You entered");
-        
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressCountry)][0]
-            .Should()
-            .StartWith($"The length of 'Default Advertisement Pickup Address Country' must be {Address.CountryMaxLength} characters or fewer. You entered");
-        
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressState)][0]
-            .Should()
-            .StartWith($"The length of 'Default Advertisement Pickup Address State' must be {Address.StateMaxLength} characters or fewer. You entered");
+            .StartWith(
+                $"The length of 'Address Building Number' must be {Address.BuildingNumberMaxLength} characters or fewer. You entered");
 
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressZipCode)][0]
+        validationProblemDetails.Errors[
+                nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressCountry)][0]
             .Should()
-            .StartWith($"The length of 'Default Advertisement Pickup Address Zip Code' must be {Address.ZipCodeMaxLength} characters or fewer. You entered");
+            .StartWith(
+                $"The length of 'Default Advertisement Pickup Address Country' must be {Address.CountryMaxLength} characters or fewer. You entered");
 
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressCity)][0]
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressState)]
+            [0]
             .Should()
-            .StartWith($"The length of 'Default Advertisement Pickup Address City' must be {Address.CityMaxLength} characters or fewer. You entered");
+            .StartWith(
+                $"The length of 'Default Advertisement Pickup Address State' must be {Address.StateMaxLength} characters or fewer. You entered");
 
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressStreet)][0]
+        validationProblemDetails.Errors[
+                nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressZipCode)][0]
             .Should()
-            .StartWith($"The length of 'Default Advertisement Pickup Address Street' must be {Address.StreetMaxLength} characters or fewer. You entered");
+            .StartWith(
+                $"The length of 'Default Advertisement Pickup Address Zip Code' must be {Address.ZipCodeMaxLength} characters or fewer. You entered");
 
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressBuildingNumber)][0]
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressCity)]
+            [0]
             .Should()
-            .StartWith($"The length of 'Default Advertisement Pickup Address Building Number' must be {Address.BuildingNumberMaxLength} characters or fewer. You entered");
+            .StartWith(
+                $"The length of 'Default Advertisement Pickup Address City' must be {Address.CityMaxLength} characters or fewer. You entered");
 
+        validationProblemDetails.Errors[
+                nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressStreet)][0]
+            .Should()
+            .StartWith(
+                $"The length of 'Default Advertisement Pickup Address Street' must be {Address.StreetMaxLength} characters or fewer. You entered");
+
+        validationProblemDetails.Errors[
+                nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressBuildingNumber)][0]
+            .Should()
+            .StartWith(
+                $"The length of 'Default Advertisement Pickup Address Building Number' must be {Address.BuildingNumberMaxLength} characters or fewer. You entered");
     }
-    
+
     [Theory]
     [ClassData(typeof(InvalidEmailData))]
     public async Task UpdatePerson_ShouldReturnBadRequest_WhenInvalidEmailIsProvided(string email)
     {
         //Arrange
-        HttpResponseMessage createPersonResponse = await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
-        ApiResponses.CreatedWithIdResponse idOfCreatedPersonResponse = 
-            await createPersonResponse.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>() 
+        HttpResponseMessage createPersonResponse =
+            await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
+        ApiResponses.CreatedWithIdResponse idOfCreatedPersonResponse =
+            await createPersonResponse.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        PersonResponse person = await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{idOfCreatedPersonResponse.Id}") 
-                                ?? throw new JsonException();
-        
+        PersonResponse person =
+            await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{idOfCreatedPersonResponse.Id}")
+            ?? throw new JsonException();
+
         UpdatePerson.UpdatePersonRequest request = new UpdatePerson.UpdatePersonRequest(
-            Nickname: person.FirstName,
+            Nickname: person.Nickname,
             Email: email,
             PhoneNumber: person.PhoneNumber,
             AddressCountry: person.ResidentalAddress.Country,
@@ -460,10 +513,10 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
             DefaultAdvertisementContactInfoEmail: person.DefaultAdvertisementsContactInfoEmail,
             DefaultAdvertisementContactInfoPhoneNumber: person.DefaultAdvertisementsContactInfoPhoneNumber
         );
-        
+
         //Act
         HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"api/v1/persons/{person.Id}", request);
-        
+
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         ValidationProblemDetails? validationProblemDetails =
@@ -478,30 +531,32 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         validationProblemDetails.Errors[nameof(UpdatePerson.UpdatePersonRequest.Email)][0]
             .Should().Be("'Email' is not in the correct format.");
     }
-    
+
     [Fact]
     public async Task UpdatePerson_ShouldReturnBadRequest_WhenAlreadyTakenUniquePropertiesAreProvided()
     {
         //Arrange
         HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
-        ApiResponses.CreatedWithIdResponse firstUserIdResponse = await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-                                                                 ?? throw new JsonException();
-        
+        ApiResponses.CreatedWithIdResponse firstUserIdResponse =
+            await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
+            ?? throw new JsonException();
+
         CreatePerson.CreatePersonRequest secondPersonCreateRequest = _createPersonRequest with
         {
             Email = "unique@email.com",
             PhoneNumber = "420420420",
             UserIdentityId = Guid.NewGuid()
         };
-        _= await _httpClient.PostAsJsonAsync("api/v1/persons", secondPersonCreateRequest);
-        
-        
-        PersonResponse firstUser = await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{firstUserIdResponse.Id}") 
-                                 ?? throw new JsonException();
-        
+        _ = await _httpClient.PostAsJsonAsync("api/v1/persons", secondPersonCreateRequest);
+
+
+        PersonResponse firstUser =
+            await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{firstUserIdResponse.Id}")
+            ?? throw new JsonException();
+
         //Act
         UpdatePerson.UpdatePersonRequest firstUserUpdateRequest = new(
-            Nickname: firstUser.FirstName,
+            Nickname: firstUser.Nickname,
             Email: secondPersonCreateRequest.Email,
             PhoneNumber: secondPersonCreateRequest.PhoneNumber,
             AddressCountry: firstUser.ResidentalAddress.Country,
@@ -515,13 +570,15 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
             DefaultAdvertisementPickupAddressZipCode: firstUser.DefaultAdvertisementsPickupAddress.ZipCode,
             DefaultAdvertisementPickupAddressCity: firstUser.DefaultAdvertisementsPickupAddress.City,
             DefaultAdvertisementPickupAddressStreet: firstUser.DefaultAdvertisementsPickupAddress.Street,
-            DefaultAdvertisementPickupAddressBuildingNumber: firstUser.DefaultAdvertisementsPickupAddress.BuildingNumber,
+            DefaultAdvertisementPickupAddressBuildingNumber:
+            firstUser.DefaultAdvertisementsPickupAddress.BuildingNumber,
             DefaultAdvertisementContactInfoEmail: firstUser.DefaultAdvertisementsContactInfoEmail,
             DefaultAdvertisementContactInfoPhoneNumber: firstUser.DefaultAdvertisementsContactInfoPhoneNumber
         );
-        
-        HttpResponseMessage updateResponse = await _httpClient.PutAsJsonAsync($"api/v1/persons/{firstUserIdResponse.Id}", firstUserUpdateRequest);
-        
+
+        HttpResponseMessage updateResponse =
+            await _httpClient.PutAsJsonAsync($"api/v1/persons/{firstUserIdResponse.Id}", firstUserUpdateRequest);
+
         //Assert
         updateResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         ValidationProblemDetails? validationProblemDetails =
@@ -539,7 +596,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         validationProblemDetails.Errors[nameof(UpdatePerson.UpdatePersonRequest.PhoneNumber)][0]
             .Should().Be("'Phone Number' is already used by another user.");
     }
-    
+
     public Task InitializeAsync()
     {
         return Task.CompletedTask;

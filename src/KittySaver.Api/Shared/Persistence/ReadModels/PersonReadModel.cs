@@ -22,8 +22,7 @@ public sealed class PersonReadModel
     public required string DefaultAdvertisementsPickupAddressStreet { get; init; }
     public required string DefaultAdvertisementsPickupAddressZipCode { get; init; }
     public required string Email { get; init; }
-    public required string FirstName { get; init; }
-    public required string LastName { get; init; }
+    public required string Nickname { get; init; }
     public required string PhoneNumber { get; init; }
     public required string ResidentalAddressBuildingNumber { get; init; }
     public required string ResidentalAddressCity { get; init; }

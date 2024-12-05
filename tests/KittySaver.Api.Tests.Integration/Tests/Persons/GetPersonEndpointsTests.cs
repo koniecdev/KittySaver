@@ -17,18 +17,19 @@ public class GetPersonEndpointsTests : IAsyncLifetime
 {
     private readonly HttpClient _httpClient;
     private readonly CleanupHelper _cleanup;
+
     public GetPersonEndpointsTests(KittySaverApiFactory appFactory)
     {
         _httpClient = appFactory.CreateClient();
         _cleanup = new CleanupHelper(_httpClient);
     }
-    
+
     private readonly Faker<CreatePerson.CreatePersonRequest> _createPersonRequestGenerator =
         new Faker<CreatePerson.CreatePersonRequest>()
-            .CustomInstantiator( faker =>
+            .CustomInstantiator(faker =>
                 new CreatePerson.CreatePersonRequest(
                     Nickname: faker.Person.FirstName,
-                                        Email: faker.Person.Email,
+                    Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     UserIdentityId: Guid.NewGuid(),
                     AddressCountry: faker.Address.Country(),
@@ -71,7 +72,7 @@ public class GetPersonEndpointsTests : IAsyncLifetime
         person.ResidentalAddress.Street.Should().Be(request.AddressStreet);
         person.ResidentalAddress.BuildingNumber.Should().Be(request.AddressBuildingNumber);
     }
-    
+
     [Fact]
     public async Task GetPerson_ShouldReturnNotFound_WhenNoPersonExist()
     {

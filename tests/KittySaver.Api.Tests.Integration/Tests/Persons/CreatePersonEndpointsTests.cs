@@ -183,7 +183,7 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
 
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.Nickname)][0]
             .Should()
-            .StartWith($"The length of 'First Name' must be {Nickname.MaxLength} characters or fewer. You entered");
+            .StartWith($"The length of 'Nickname' must be {Nickname.MaxLength} characters or fewer. You entered");
 
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.PhoneNumber)][0]
             .Should()
@@ -307,7 +307,7 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
             await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         validationProblemDetails.Should().NotBeNull();
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
-        validationProblemDetails.Errors.Count.Should().Be(15);
+        validationProblemDetails.Errors.Count.Should().Be(14);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(
             nameof(CreatePerson.CreatePersonRequest.Nickname),
             nameof(CreatePerson.CreatePersonRequest.Email),
@@ -324,11 +324,11 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
             nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressZipCode),
             nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressCity)
         );
-        validationProblemDetails.Errors.Values.Count.Should().Be(15);
+        validationProblemDetails.Errors.Values.Count.Should().Be(14);
 
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.Nickname)][0]
             .Should()
-            .Be("'First Name' must not be empty.");
+            .Be("'Nickname' must not be empty.");
 
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.Email)][0]
             .Should()

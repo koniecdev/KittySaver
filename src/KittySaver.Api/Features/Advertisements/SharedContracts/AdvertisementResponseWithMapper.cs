@@ -60,7 +60,7 @@ public static class AdvertisementMapper
             PriorityScore = entity.PriorityScore,
             Description = entity.Description,
             PersonId = entity.PersonId,
-            PersonName = entity.Person.FirstName,
+            PersonName = entity.Person.Nickname,
             Cats = entity.Cats.Select(cat => new AdvertisementResponse.CatDto
             {
                 Id = cat.Id,

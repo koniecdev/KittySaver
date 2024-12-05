@@ -8,9 +8,7 @@ public sealed class PersonResponse
 {
     public required Guid Id { get; init; }
     public required Guid UserIdentityId { get; init; }
-    public required string FirstName { get; init; }
-    public required string LastName { get; init; }
-    public required string FullName { get; init; }
+    public required string Nickname { get; init; }
     public required string Email { get; init; }
     public required string PhoneNumber { get; init; }
     public required string DefaultAdvertisementsContactInfoEmail { get; init; }
@@ -36,9 +34,7 @@ public static class PersonResponseMapper
         {
             Id = entity.Id,
             UserIdentityId = entity.UserIdentityId,
-            FirstName = entity.FirstName,
-            LastName = entity.LastName,
-            FullName = $"{entity.FirstName} {entity.LastName}",
+            Nickname = entity.Nickname,
             Email = entity.Email,
             PhoneNumber = entity.PhoneNumber,
             DefaultAdvertisementsContactInfoEmail = entity.DefaultAdvertisementsContactInfoEmail,
