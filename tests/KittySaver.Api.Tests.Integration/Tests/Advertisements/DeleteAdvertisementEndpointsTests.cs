@@ -28,8 +28,7 @@ public class DeleteAdvertisementEndpointsTests : IAsyncLifetime
         new Faker<CreatePerson.CreatePersonRequest>()
             .CustomInstantiator(faker =>
                 new CreatePerson.CreatePersonRequest(
-                    FirstName: faker.Person.FirstName,
-                    LastName: faker.Person.LastName,
+                    Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     UserIdentityId: Guid.NewGuid(),

@@ -27,9 +27,8 @@ public class GetPersonEndpointsTests : IAsyncLifetime
         new Faker<CreatePerson.CreatePersonRequest>()
             .CustomInstantiator( faker =>
                 new CreatePerson.CreatePersonRequest(
-                    FirstName: faker.Person.FirstName,
-                    LastName: faker.Person.LastName,
-                    Email: faker.Person.Email,
+                    Nickname: faker.Person.FirstName,
+                                        Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     UserIdentityId: Guid.NewGuid(),
                     AddressCountry: faker.Address.Country(),
@@ -64,7 +63,6 @@ public class GetPersonEndpointsTests : IAsyncLifetime
         PersonResponse person = await response.Content.ReadFromJsonAsync<PersonResponse>() ?? throw new JsonException();
         person.Id.Should().Be(registerResponse.Id);
         person.Email.Should().Be(request.Email);
-        person.FullName.Should().Be($"{request.FirstName} {request.LastName}");
         person.PhoneNumber.Should().Be(request.PhoneNumber);
         person.ResidentalAddress.Country.Should().Be(request.AddressCountry);
         person.ResidentalAddress.State.Should().Be(request.AddressState);

@@ -29,9 +29,8 @@ public class DeletePersonEndpointsTests : IAsyncLifetime
         new Faker<CreatePerson.CreatePersonRequest>()
             .CustomInstantiator( faker =>
                 new CreatePerson.CreatePersonRequest(
-                    FirstName: faker.Person.FirstName,
-                    LastName: faker.Person.LastName,
-                    Email: faker.Person.Email,
+                    Nickname: faker.Person.FirstName,
+                                        Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     UserIdentityId: Guid.NewGuid(),
                     AddressCountry: faker.Address.Country(),

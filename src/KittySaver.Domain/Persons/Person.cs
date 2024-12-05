@@ -19,8 +19,7 @@ public sealed class Person : AggregateRoot
     /// </remarks>
     private Person()
     {
-        FirstName = null!;
-        LastName = null!;
+        Nickname = null!;
         Email = null!;
         PhoneNumber = null!;
         ResidentalAddress = null!;
@@ -31,8 +30,7 @@ public sealed class Person : AggregateRoot
 
     private Person(
         Guid userIdentityId,
-        FirstName firstName,
-        LastName lastName,
+        Nickname nickname,
         Email email,
         PhoneNumber phoneNumber,
         Address residentalAddress,
@@ -41,8 +39,7 @@ public sealed class Person : AggregateRoot
         PhoneNumber defaultAdvertisementContactInfoPhone)
     {
         UserIdentityId = userIdentityId;
-        FirstName = firstName;
-        LastName = lastName;
+        Nickname = nickname;
         Email = email;
         ResidentalAddress = residentalAddress;
         PhoneNumber = phoneNumber;
@@ -54,8 +51,7 @@ public sealed class Person : AggregateRoot
 
     public static Person Create(
         Guid userIdentityId,
-        FirstName firstName,
-        LastName lastName,
+        Nickname nickname,
         Email email,
         PhoneNumber phoneNumber,
         Address residentalAddress,
@@ -65,8 +61,7 @@ public sealed class Person : AggregateRoot
     {
         Person person = new(
             userIdentityId: userIdentityId,
-            firstName: firstName,
-            lastName: lastName,
+            nickname: nickname,
             email: email,
             phoneNumber: phoneNumber,
             residentalAddress: residentalAddress,
@@ -84,9 +79,7 @@ public sealed class Person : AggregateRoot
     }
     
     public Role CurrentRole { get; private init; } = Role.Regular;
-    public FirstName FirstName { get; private set; }
-    public LastName LastName { get; private set; }
-    public string FullName => $"{FirstName} {LastName}";
+    public Nickname Nickname { get; private set; }
     public Email Email { get; private set; }
     public PhoneNumber PhoneNumber { get; private set; }
     public Address ResidentalAddress { get; private set; }
@@ -110,10 +103,9 @@ public sealed class Person : AggregateRoot
 
     public IReadOnlyList<Cat> Cats => _cats.ToList();
 
-    public void ChangeName(FirstName firstName, LastName lastName)
+    public void ChangeNickname(Nickname nickname)
     {
-        FirstName = firstName;
-        LastName = lastName;
+        Nickname = nickname;
     }
 
     public void ChangeEmail(Email email)
@@ -383,23 +375,13 @@ internal sealed class PersonConfiguration : IEntityTypeConfiguration<Person>
                 .IsRequired();
         });
 
-        builder.ComplexProperty(x => x.FirstName, complexPropertyBuilder =>
+        builder.ComplexProperty(x => x.Nickname, complexPropertyBuilder =>
         {
             complexPropertyBuilder.IsRequired();
 
             complexPropertyBuilder.Property(x => x.Value)
-                .HasColumnName($"{nameof(Person.FirstName)}")
-                .HasMaxLength(FirstName.MaxLength)
-                .IsRequired();
-        });
-
-        builder.ComplexProperty(x => x.LastName, complexPropertyBuilder =>
-        {
-            complexPropertyBuilder.IsRequired();
-
-            complexPropertyBuilder.Property(x => x.Value)
-                .HasColumnName($"{nameof(Person.LastName)}")
-                .HasMaxLength(LastName.MaxLength)
+                .HasColumnName($"{nameof(Person.Nickname)}")
+                .HasMaxLength(Nickname.MaxLength)
                 .IsRequired();
         });
 
@@ -425,7 +407,5 @@ internal sealed class PersonConfiguration : IEntityTypeConfiguration<Person>
 
         builder.Property(x => x.UserIdentityId)
             .IsRequired();
-
-        builder.Ignore(x => x.FullName);
     }
 }

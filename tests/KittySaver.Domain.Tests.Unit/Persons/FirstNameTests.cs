@@ -6,10 +6,9 @@ using Person = KittySaver.Domain.Persons.Person;
 
 namespace KittySaver.Domain.Tests.Unit.Persons;
 
-public class FirstNameTests
+public class NicknameTests
 {
     private readonly Guid _userIdentityId = Guid.NewGuid();
-    private readonly LastName _defaultProperLastName = LastName.Create("Koniec");
     private readonly Email _defaultProperEmail = Email.Create("fake@fake.fake");
     private readonly PhoneNumber _defaultProperPhone = PhoneNumber.Create("+48111222333");
 
@@ -31,11 +30,11 @@ public class FirstNameTests
         const string properFirstName = "ProperfirstName";
         
         //Act
-        FirstName firstName = FirstName.Create(properFirstName);
-        string firstNameAsString = firstName.ToString();
+        Nickname nickname = Nickname.Create(properFirstName);
+        string firstNameAsString = nickname.ToString();
         
         //Assert
-        firstName.Value.Should().Be(properFirstName);
+        nickname.Value.Should().Be(properFirstName);
         firstNameAsString.Should().Be(properFirstName);
     }
 
@@ -46,11 +45,10 @@ public class FirstNameTests
     public void FirstNameCreate_ShouldCapitalizeFirstLetter_WhenNotEmptyValueIsProvided(string firstNameValue)
     {
         //Act
-        FirstName firstName = FirstName.Create(firstNameValue);
+        Nickname nickname = Nickname.Create(firstNameValue);
         Person sut = Person.Create(
             userIdentityId: _userIdentityId,
-            firstName: firstName,
-            lastName: _defaultProperLastName,
+            nickname: nickname,
             email: _defaultProperEmail,
             phoneNumber: _defaultProperPhone,
             residentalAddress: Address,
@@ -59,17 +57,17 @@ public class FirstNameTests
             defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
         );
         //Assert
-        sut.FirstName.Value.Should().Be("Artur");
+        sut.Nickname.Value.Should().Be("Artur");
     }
 
     [Fact]
     public void FirstNameCreate_ShouldThrowArgumentOutOfRangeException_WhenValueExceedsMaxLength()
     {
         //Arrange
-        string longFirstNameValue = new('A', FirstName.MaxLength + 1);
+        string longFirstNameValue = new('A', Nickname.MaxLength + 1);
         
         //Act
-        Action creation = () => FirstName.Create(longFirstNameValue);
+        Action creation = () => Nickname.Create(longFirstNameValue);
 
         //Assert
         creation.Should().Throw<ArgumentOutOfRangeException>();

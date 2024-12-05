@@ -30,9 +30,8 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         new Faker<CreatePerson.CreatePersonRequest>()
             .CustomInstantiator( faker =>
                 new CreatePerson.CreatePersonRequest(
-                    FirstName: faker.Person.FirstName,
-                    LastName: faker.Person.LastName,
-                    Email: faker.Person.Email,
+                    Nickname: faker.Person.FirstName,
+                                        Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     UserIdentityId: Guid.NewGuid(),
                     AddressCountry: faker.Address.Country(),
@@ -64,9 +63,8 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         UpdatePerson.UpdatePersonRequest request = new Faker<UpdatePerson.UpdatePersonRequest>()
             .CustomInstantiator(faker =>
                 new UpdatePerson.UpdatePersonRequest(
-                    FirstName: faker.Person.FirstName,
-                    LastName: faker.Person.LastName,
-                    Email: faker.Person.Email,
+                    Nickname: faker.Person.FirstName,
+                                        Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     AddressCountry: faker.Address.Country(),
                     AddressZipCode: faker.Address.ZipCode(),
@@ -92,11 +90,9 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         PersonResponse personAfterUpdate = await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{registeredPersonResponse.Id}") 
                                 ?? throw new JsonException();
         personAfterUpdate.Should().NotBeEquivalentTo(person);
-        personAfterUpdate.FirstName.Should().Be(request.FirstName);
-        personAfterUpdate.LastName.Should().Be(request.LastName);
+        personAfterUpdate.FirstName.Should().Be(request.Nickname);
         personAfterUpdate.Email.Should().Be(request.Email);
         personAfterUpdate.PhoneNumber.Should().Be(request.PhoneNumber);
-        personAfterUpdate.FullName.Should().Be($"{request.FirstName} {request.LastName}");
         personAfterUpdate.ResidentalAddress.Country.Should().Be(request.AddressCountry);
         personAfterUpdate.ResidentalAddress.State.Should().Be(request.AddressState);
         personAfterUpdate.ResidentalAddress.ZipCode.Should().Be(request.AddressZipCode);
@@ -119,9 +115,8 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         UpdatePerson.UpdatePersonRequest request = new Faker<UpdatePerson.UpdatePersonRequest>()
             .CustomInstantiator(faker =>
                 new UpdatePerson.UpdatePersonRequest(
-                    FirstName: person.FirstName,
-                    LastName: faker.Person.LastName,
-                    Email: person.Email,
+                    Nickname: person.FirstName,
+                                        Email: person.Email,
                     PhoneNumber: person.PhoneNumber,
                     AddressCountry: person.ResidentalAddress.Country,
                     AddressZipCode: person.ResidentalAddress.ZipCode,
@@ -147,9 +142,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         PersonResponse personAfterUpdate = await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{registeredPersonResponse.Id}") 
                                            ?? throw new JsonException();
         personAfterUpdate.Should().NotBeEquivalentTo(person);
-        personAfterUpdate.FirstName.Should().Be(request.FirstName);
-        personAfterUpdate.LastName.Should().Be(request.LastName);
-        personAfterUpdate.FullName.Should().Be($"{request.FirstName} {request.LastName}");
+        personAfterUpdate.FirstName.Should().Be(request.Nickname);
         personAfterUpdate.Email.Should().Be(request.Email);
         personAfterUpdate.PhoneNumber.Should().Be(request.PhoneNumber);
         personAfterUpdate.ResidentalAddress.Country.Should().Be(request.AddressCountry);
@@ -171,9 +164,8 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         UpdatePerson.UpdatePersonRequest request = new Faker<UpdatePerson.UpdatePersonRequest>()
             .CustomInstantiator(faker =>
                 new UpdatePerson.UpdatePersonRequest(
-                    FirstName: faker.Person.FirstName,
-                    LastName: faker.Person.LastName,
-                    Email: faker.Person.Email,
+                    Nickname: faker.Person.FirstName,
+                                        Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     AddressCountry: faker.Address.Country(),
                     AddressZipCode: faker.Address.ZipCode(),
@@ -210,8 +202,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         
         //Act
         UpdatePerson.UpdatePersonRequest request = new(
-                FirstName: "",
-                LastName: "",
+                Nickname: "",
                 Email: "",
                 PhoneNumber: "",
                 AddressCountry: "",
@@ -238,8 +229,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
         validationProblemDetails.Errors.Count.Should().Be(14);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(
-            nameof(UpdatePerson.UpdatePersonRequest.FirstName),
-            nameof(UpdatePerson.UpdatePersonRequest.LastName),
+            nameof(UpdatePerson.UpdatePersonRequest.Nickname),
             nameof(UpdatePerson.UpdatePersonRequest.Email),
             nameof(UpdatePerson.UpdatePersonRequest.PhoneNumber),
             nameof(UpdatePerson.UpdatePersonRequest.DefaultAdvertisementContactInfoEmail),
@@ -256,13 +246,9 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         
         validationProblemDetails.Errors.Values.Count.Should().Be(14);
         
-        validationProblemDetails.Errors[nameof(UpdatePerson.UpdatePersonRequest.FirstName)][0]
+        validationProblemDetails.Errors[nameof(UpdatePerson.UpdatePersonRequest.Nickname)][0]
             .Should()
             .Be("'First Name' must not be empty.");
-        
-        validationProblemDetails.Errors[nameof(UpdatePerson.UpdatePersonRequest.LastName)][0]
-            .Should()
-            .Be("'Last Name' must not be empty.");
         
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.Email)][0]
             .Should()
@@ -324,8 +310,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         UpdatePerson.UpdatePersonRequest request = new Faker<UpdatePerson.UpdatePersonRequest>()
             .CustomInstantiator( faker =>
                 new UpdatePerson.UpdatePersonRequest(
-                    FirstName: faker.Person.FirstName.ClampLength(FirstName.MaxLength + 1),
-                    LastName: faker.Person.LastName.ClampLength(LastName.MaxLength + 1),
+                    Nickname: faker.Person.FirstName.ClampLength(Nickname.MaxLength + 1),
                     Email: faker.Person.Email.ClampLength(Email.MaxLength + 1),
                     PhoneNumber: faker.Person.Phone.ClampLength(PhoneNumber.MaxLength + 1),
                     AddressCountry: faker.Address.Country().ClampLength(Address.CountryMaxLength + 1),
@@ -352,10 +337,9 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         ValidationProblemDetails? validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         validationProblemDetails.Should().NotBeNull();
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
-        validationProblemDetails.Errors.Count.Should().Be(18);
+        validationProblemDetails.Errors.Count.Should().Be(17);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(
-            nameof(CreatePerson.CreatePersonRequest.FirstName),
-            nameof(CreatePerson.CreatePersonRequest.LastName),
+            nameof(CreatePerson.CreatePersonRequest.Nickname),
             nameof(CreatePerson.CreatePersonRequest.Email),
             nameof(CreatePerson.CreatePersonRequest.PhoneNumber),
             nameof(CreatePerson.CreatePersonRequest.AddressCountry),
@@ -373,16 +357,12 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
             nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoEmail),
             nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoPhoneNumber)
         );
-        validationProblemDetails.Errors.Values.Count.Should().Be(18);
+        validationProblemDetails.Errors.Values.Count.Should().Be(17);
         
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.FirstName)][0]
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.Nickname)][0]
             .Should()
-            .StartWith($"The length of 'First Name' must be {FirstName.MaxLength} characters or fewer. You entered");
+            .StartWith($"The length of 'First Name' must be {Nickname.MaxLength} characters or fewer. You entered");
         
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.LastName)][0]
-            .Should()
-            .StartWith($"The length of 'Last Name' must be {LastName.MaxLength} characters or fewer. You entered");
-
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.PhoneNumber)][0]
             .Should()
             .StartWith($"The length of 'Phone Number' must be {PhoneNumber.MaxLength} characters or fewer. You entered");
@@ -462,8 +442,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
                                 ?? throw new JsonException();
         
         UpdatePerson.UpdatePersonRequest request = new UpdatePerson.UpdatePersonRequest(
-            FirstName: person.FirstName,
-            LastName: person.LastName,
+            Nickname: person.FirstName,
             Email: email,
             PhoneNumber: person.PhoneNumber,
             AddressCountry: person.ResidentalAddress.Country,
@@ -522,8 +501,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         
         //Act
         UpdatePerson.UpdatePersonRequest firstUserUpdateRequest = new(
-            FirstName: firstUser.FirstName,
-            LastName: firstUser.LastName,
+            Nickname: firstUser.FirstName,
             Email: secondPersonCreateRequest.Email,
             PhoneNumber: secondPersonCreateRequest.PhoneNumber,
             AddressCountry: firstUser.ResidentalAddress.Country,

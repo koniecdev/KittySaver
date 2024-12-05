@@ -15,8 +15,7 @@ namespace KittySaver.Domain.Tests.Unit.Persons;
 public class PersonTests
 {
     private readonly Guid _userIdentityId = Guid.NewGuid();
-    private readonly FirstName _defaultProperFirstName = FirstName.Create("Artur");
-    private readonly LastName _defaultProperLastName = LastName.Create("Koniec");
+    private readonly Nickname _defaultProperNickname = Nickname.Create("Artur");
     private readonly Email _defaultProperEmail = Email.Create("fake@fake.fake");
     private readonly PhoneNumber _defaultProperPhone = PhoneNumber.Create("+48111222333");
 
@@ -46,8 +45,7 @@ public class PersonTests
     public void PersonGetters_ShouldReturnProperValues_WhenPersonIsInstantiated()
     {
         //Arrange
-        FirstName firstName = FirstName.Create("Artur");
-        LastName lastName = LastName.Create("Koniec");
+        Nickname nickname = Nickname.Create("Artur");
         Email email = Email.Create("koniecdev@gmail.com");
         PhoneNumber phoneNumber = PhoneNumber.Create("535143330");
         Email defaultEmail = Email.Create("koniecdevcontact@gmail.com");
@@ -56,8 +54,7 @@ public class PersonTests
         //Act
         Person sut = Person.Create(
             userIdentityId: _userIdentityId,
-            firstName: firstName,
-            lastName: lastName,
+            nickname: nickname,
             email: email,
             phoneNumber: phoneNumber,
             residentalAddress: Address,
@@ -68,9 +65,7 @@ public class PersonTests
 
         //Assert
         sut.Id.Should().NotBeEmpty();
-        sut.FirstName.Should().Be(firstName);
-        sut.LastName.Should().Be(lastName);
-        sut.FullName.Should().Be($"{firstName} {lastName}");
+        sut.Nickname.Should().Be(nickname);
         sut.Email.Should().Be(email);
         sut.PhoneNumber.Should().Be(phoneNumber);
         sut.ResidentalAddress.Should().BeEquivalentTo(Address);
@@ -85,8 +80,7 @@ public class PersonTests
     public void PersonGetters_ShouldReturnProperValues_WhenPersonIsInstantiatedWithJustRequiredProperties()
     {
         //Arrange
-        FirstName firstName = FirstName.Create("Artur");
-        LastName lastName = LastName.Create("Koniec");
+        Nickname nickname = Nickname.Create("Artur");
         Email email = Email.Create("koniecdev@gmail.com");
         PhoneNumber phoneNumber = PhoneNumber.Create("535143330");
         Email defaultEmail = Email.Create("koniecdevcontact@gmail.com");
@@ -117,8 +111,7 @@ public class PersonTests
         //Act
         Person sut = Person.Create(
             userIdentityId: _userIdentityId,
-            firstName: firstName,
-            lastName: lastName,
+            nickname: nickname,
             email: email,
             phoneNumber: phoneNumber,
             residentalAddress: address,
@@ -129,9 +122,7 @@ public class PersonTests
 
         //Assert
         sut.Id.Should().NotBeEmpty();
-        sut.FirstName.Should().Be(firstName);
-        sut.LastName.Should().Be(lastName);
-        sut.FullName.Should().Be($"{firstName} {lastName}");
+        sut.Nickname.Should().Be(nickname);
         sut.Email.Should().Be(email);
         sut.PhoneNumber.Should().Be(phoneNumber);
         sut.ResidentalAddress.Should().NotBeNull();
@@ -155,26 +146,6 @@ public class PersonTests
     }
     
     [Fact]
-    public void FullNameGet_ShouldReturnProperlyConcatenatedName_WhenBothFirstNameAndLastNameAreProperlyProvided()
-    {
-        //Act
-        Person sut = Person.Create(
-            userIdentityId: _userIdentityId,
-            firstName: _defaultProperFirstName,
-            lastName: _defaultProperLastName,
-            email: _defaultProperEmail,
-            phoneNumber: _defaultProperPhone,
-            residentalAddress: Address,
-            defaultAdvertisementPickupAddress: PickupAddress,
-            defaultAdvertisementContactInfoEmail: _defaultProperEmail,
-            defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
-        );
-
-        //Assert
-        sut.FullName.Should().Be("Artur Koniec");
-    }
-    
-    [Fact]
     public void UserIdentityIdSet_ShouldThrowArgumentException_WhenEmptyGuidIsProvided()
     {
         //Arrange
@@ -183,8 +154,7 @@ public class PersonTests
         //Act
         Action creation = () => Person.Create(
             userIdentityId: emptyGuid,
-            firstName: _defaultProperFirstName,
-            lastName: _defaultProperLastName,
+            nickname: _defaultProperNickname,
             email: _defaultProperEmail,
             phoneNumber: _defaultProperPhone,
             residentalAddress: Address,
@@ -204,8 +174,7 @@ public class PersonTests
         //Arrange
         Person sut = Person.Create(
             userIdentityId: _userIdentityId,
-            firstName: _defaultProperFirstName,
-            lastName: _defaultProperLastName,
+            nickname: _defaultProperNickname,
             email: _defaultProperEmail,
             phoneNumber: _defaultProperPhone,
             residentalAddress: Address,
@@ -241,8 +210,7 @@ public class PersonTests
         //Arrange
         Person sut = Person.Create(
             userIdentityId: _userIdentityId,
-            firstName: _defaultProperFirstName,
-            lastName: _defaultProperLastName,
+            nickname: _defaultProperNickname,
             email: _defaultProperEmail,
             phoneNumber: _defaultProperPhone,
             residentalAddress: Address,
@@ -279,8 +247,7 @@ public class PersonTests
         //Arrange
         Person sut = Person.Create(
             userIdentityId: _userIdentityId,
-            firstName: _defaultProperFirstName,
-            lastName: _defaultProperLastName,
+            nickname: _defaultProperNickname,
             email: _defaultProperEmail,
             phoneNumber: _defaultProperPhone,
             residentalAddress: Address,
@@ -317,8 +284,7 @@ public class PersonTests
         //Arrange
         Person sut = Person.Create(
             userIdentityId: _userIdentityId,
-            firstName: _defaultProperFirstName,
-            lastName: _defaultProperLastName,
+            nickname: _defaultProperNickname,
             email: _defaultProperEmail,
             phoneNumber: _defaultProperPhone,
             residentalAddress: Address,
@@ -356,8 +322,7 @@ public class PersonTests
         //Arrange
         Person sut = Person.Create(
             userIdentityId: _userIdentityId,
-            firstName: _defaultProperFirstName,
-            lastName: _defaultProperLastName,
+            nickname: _defaultProperNickname,
             email: _defaultProperEmail,
             phoneNumber: _defaultProperPhone,
             residentalAddress: Address,
@@ -395,8 +360,7 @@ public class PersonTests
         //Arrange
         Person sut = Person.Create(
             userIdentityId: _userIdentityId,
-            firstName: _defaultProperFirstName,
-            lastName: _defaultProperLastName,
+            nickname: _defaultProperNickname,
             email: _defaultProperEmail,
             phoneNumber: _defaultProperPhone,
             residentalAddress: Address,
@@ -406,8 +370,7 @@ public class PersonTests
         );
         Person anotherPerson = new Faker<Person>().CustomInstantiator(faker => Person.Create(
             userIdentityId: _userIdentityId,
-            firstName: FirstName.Create(faker.Person.FirstName),
-            lastName: LastName.Create(faker.Person.LastName), 
+            nickname: Nickname.Create(faker.Person.FirstName),
             email: Email.Create(faker.Person.Email),
             phoneNumber: PhoneNumber.Create(faker.Person.Phone),
             residentalAddress: Address,
@@ -455,8 +418,7 @@ public class PersonTests
         //Arrange
         Person sut = Person.Create(
             userIdentityId: _userIdentityId,
-            firstName: _defaultProperFirstName,
-            lastName: _defaultProperLastName,
+            nickname: _defaultProperNickname,
             email: _defaultProperEmail,
             phoneNumber: _defaultProperPhone,
             residentalAddress: Address,
@@ -521,8 +483,7 @@ public class PersonTests
         //Arrange
         Person sut = Person.Create(
             userIdentityId: _userIdentityId,
-            firstName: _defaultProperFirstName,
-            lastName: _defaultProperLastName,
+            nickname: _defaultProperNickname,
             email: _defaultProperEmail,
             phoneNumber: _defaultProperPhone,
             residentalAddress: Address,
@@ -556,8 +517,7 @@ public class PersonTests
         //Arrange
         Person sut = Person.Create(
             userIdentityId: _userIdentityId,
-            firstName: _defaultProperFirstName,
-            lastName: _defaultProperLastName,
+            nickname: _defaultProperNickname,
             email: _defaultProperEmail,
             phoneNumber: _defaultProperPhone,
             residentalAddress: Address,
@@ -601,8 +561,7 @@ public class PersonTests
         //Arrange
         Person sut = Person.Create(
             userIdentityId: _userIdentityId,
-            firstName: _defaultProperFirstName,
-            lastName: _defaultProperLastName,
+            nickname: _defaultProperNickname,
             email: _defaultProperEmail,
             phoneNumber: _defaultProperPhone,
             residentalAddress: Address,

@@ -24,6 +24,7 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
 {
     private readonly HttpClient _httpClient;
     private readonly CleanupHelper _cleanup;
+
     public UpdateCatEndpointsTests(KittySaverApiFactory appFactory)
     {
         _httpClient = appFactory.CreateClient();
@@ -32,10 +33,9 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
 
     private readonly CreatePerson.CreatePersonRequest _createPersonRequest =
         new Faker<CreatePerson.CreatePersonRequest>()
-            .CustomInstantiator( faker =>
+            .CustomInstantiator(faker =>
                 new CreatePerson.CreatePersonRequest(
-                    FirstName: faker.Person.FirstName,
-                    LastName: faker.Person.LastName,
+                    Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     UserIdentityId: Guid.NewGuid(),
@@ -54,7 +54,7 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                     DefaultAdvertisementContactInfoEmail: faker.Person.Email,
                     DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 )).Generate();
-    
+
     private readonly CreateCat.CreateCatRequest _createCatRequest =
         new Faker<CreateCat.CreateCatRequest>()
             .CustomInstantiator(faker =>
@@ -67,26 +67,28 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                     AgeCategory: AgeCategory.Baby.Name,
                     AdditionalRequirements: "Lorem ipsum"
                 )).Generate();
-    
+
     [Fact]
     public async Task UpdateCat_ShouldReturnSuccess_WhenValidDataIsProvided()
     {
         //Arrange
-        HttpResponseMessage personRegisterResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
-        ApiResponses.CreatedWithIdResponse personRegisterResponse = 
+        HttpResponseMessage personRegisterResponseMessage =
+            await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
+        ApiResponses.CreatedWithIdResponse personRegisterResponse =
             await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        
-        HttpResponseMessage catCreateResponseMessage = 
+
+        HttpResponseMessage catCreateResponseMessage =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", _createCatRequest);
-        ApiResponses.CreatedWithIdResponse catCreateResponse = 
+        ApiResponses.CreatedWithIdResponse catCreateResponse =
             await catCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        
+
         CatResponse catBeforeUpdate =
-            await _httpClient.GetFromJsonAsync<CatResponse>($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}") 
+            await _httpClient.GetFromJsonAsync<CatResponse>(
+                $"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}")
             ?? throw new JsonException();
-        
+
         //Act
         UpdateCat.UpdateCatRequest request = new Faker<UpdateCat.UpdateCatRequest>()
             .CustomInstantiator(faker =>
@@ -99,15 +101,17 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                     AgeCategory: AgeCategory.Senior.Name,
                     AdditionalRequirements: "Lorem ipsum dolor sit"
                 )).Generate();
-        
-        HttpResponseMessage updateResponse = 
-            await _httpClient.PutAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}", request);
-        
+
+        HttpResponseMessage updateResponse =
+            await _httpClient.PutAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}",
+                request);
+
         //Assert
         updateResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        
-        CatResponse catAfterUpdate = 
-            await _httpClient.GetFromJsonAsync<CatResponse>($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}") 
+
+        CatResponse catAfterUpdate =
+            await _httpClient.GetFromJsonAsync<CatResponse>(
+                $"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}")
             ?? throw new JsonException();
         catBeforeUpdate.Should().NotBeEquivalentTo(catAfterUpdate);
         catAfterUpdate.Name.Should().Be(request.Name);
@@ -118,17 +122,20 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
         catAfterUpdate.MedicalHelpUrgency.Should().Be(request.MedicalHelpUrgency);
         catAfterUpdate.IsCastrated.Should().Be(request.IsCastrated);
     }
-    
+
     [Fact]
     public async Task UpdateCat_ShouldReturnSuccess_WhenCatWithAssignedAdvertisementIsProvided()
     {
         //Arrange
-        HttpResponseMessage personRegisterResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
-        ApiResponses.CreatedWithIdResponse createPersonResponse = await personRegisterResponseMessage.GetIdResponseFromResponseMessageAsync();
-        
-        HttpResponseMessage catCreateResponseMessage = 
+        HttpResponseMessage personRegisterResponseMessage =
+            await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
+        ApiResponses.CreatedWithIdResponse createPersonResponse =
+            await personRegisterResponseMessage.GetIdResponseFromResponseMessageAsync();
+
+        HttpResponseMessage catCreateResponseMessage =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{createPersonResponse.Id}/cats", _createCatRequest);
-        ApiResponses.CreatedWithIdResponse createCatResponse = await catCreateResponseMessage.GetIdResponseFromResponseMessageAsync();
+        ApiResponses.CreatedWithIdResponse createCatResponse =
+            await catCreateResponseMessage.GetIdResponseFromResponseMessageAsync();
 
         CreateAdvertisement.CreateAdvertisementRequest createAdvertisementRequest =
             new CreateAdvertisement.CreateAdvertisementRequest(
@@ -143,15 +150,17 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                 PickupAddressBuildingNumber: _createPersonRequest.DefaultAdvertisementPickupAddressBuildingNumber,
                 ContactInfoEmail: _createPersonRequest.DefaultAdvertisementContactInfoEmail,
                 ContactInfoPhoneNumber: _createPersonRequest.DefaultAdvertisementContactInfoPhoneNumber);
-        
-        HttpResponseMessage createAdvertisementResponseMessage = 
+
+        HttpResponseMessage createAdvertisementResponseMessage =
             await _httpClient.PostAsJsonAsync($"api/v1/advertisements", createAdvertisementRequest);
-        ApiResponses.CreatedWithIdResponse createAdvertisementResponse = await createAdvertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
-        
+        ApiResponses.CreatedWithIdResponse createAdvertisementResponse =
+            await createAdvertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
+
         CatResponse catBeforeUpdate =
-            await _httpClient.GetFromJsonAsync<CatResponse>($"api/v1/persons/{createPersonResponse.Id}/cats/{createCatResponse.Id}") 
+            await _httpClient.GetFromJsonAsync<CatResponse>(
+                $"api/v1/persons/{createPersonResponse.Id}/cats/{createCatResponse.Id}")
             ?? throw new JsonException();
-        
+
         //Act
         UpdateCat.UpdateCatRequest request = new Faker<UpdateCat.UpdateCatRequest>()
             .CustomInstantiator(faker =>
@@ -164,15 +173,17 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                     AgeCategory: AgeCategory.Senior.Name,
                     AdditionalRequirements: "Lorem ipsum dolor sit"
                 )).Generate();
-        
-        HttpResponseMessage updateResponse = 
-            await _httpClient.PutAsJsonAsync($"api/v1/persons/{createPersonResponse.Id}/cats/{createCatResponse.Id}", request);
-        
+
+        HttpResponseMessage updateResponse =
+            await _httpClient.PutAsJsonAsync($"api/v1/persons/{createPersonResponse.Id}/cats/{createCatResponse.Id}",
+                request);
+
         //Assert
         updateResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        
-        CatResponse catAfterUpdate = 
-            await _httpClient.GetFromJsonAsync<CatResponse>($"api/v1/persons/{createPersonResponse.Id}/cats/{createCatResponse.Id}") 
+
+        CatResponse catAfterUpdate =
+            await _httpClient.GetFromJsonAsync<CatResponse>(
+                $"api/v1/persons/{createPersonResponse.Id}/cats/{createCatResponse.Id}")
             ?? throw new JsonException();
         catBeforeUpdate.Should().NotBeEquivalentTo(catAfterUpdate);
         catAfterUpdate.Name.Should().Be(request.Name);
@@ -182,30 +193,33 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
         catAfterUpdate.AgeCategory.Should().Be(request.AgeCategory);
         catAfterUpdate.MedicalHelpUrgency.Should().Be(request.MedicalHelpUrgency);
         catAfterUpdate.IsCastrated.Should().Be(request.IsCastrated);
-        AdvertisementResponse advertisementAfterUpdate = 
-            await _httpClient.GetFromJsonAsync<AdvertisementResponse>($"api/v1/advertisements/{createAdvertisementResponse.Id}") 
+        AdvertisementResponse advertisementAfterUpdate =
+            await _httpClient.GetFromJsonAsync<AdvertisementResponse>(
+                $"api/v1/advertisements/{createAdvertisementResponse.Id}")
             ?? throw new JsonException();
         advertisementAfterUpdate.PriorityScore.Should().Be(catAfterUpdate.PriorityScore);
     }
-    
+
     [Fact]
     public async Task UpdateCat_ShouldReturnSuccess_WhenValidDataIsProvidedWithoutAdditionalParameters()
     {
         //Arrange
-        HttpResponseMessage personRegisterResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
-        ApiResponses.CreatedWithIdResponse personRegisterResponse = 
+        HttpResponseMessage personRegisterResponseMessage =
+            await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
+        ApiResponses.CreatedWithIdResponse personRegisterResponse =
             await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        HttpResponseMessage catCreateResponseMessage = 
+        HttpResponseMessage catCreateResponseMessage =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", _createCatRequest);
-        ApiResponses.CreatedWithIdResponse catCreateResponse = 
+        ApiResponses.CreatedWithIdResponse catCreateResponse =
             await catCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        
+
         CatResponse catBeforeUpdate =
-            await _httpClient.GetFromJsonAsync<CatResponse>($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}") 
+            await _httpClient.GetFromJsonAsync<CatResponse>(
+                $"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}")
             ?? throw new JsonException();
-        
+
         //Act
         UpdateCat.UpdateCatRequest request = new Faker<UpdateCat.UpdateCatRequest>()
             .CustomInstantiator(faker =>
@@ -218,15 +232,17 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                     AgeCategory: AgeCategory.Senior.Name,
                     AdditionalRequirements: null
                 )).Generate();
-        
-        HttpResponseMessage updateResponse = 
-            await _httpClient.PutAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}", request);
-        
+
+        HttpResponseMessage updateResponse =
+            await _httpClient.PutAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}",
+                request);
+
         //Assert
         updateResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        CatResponse catAfterUpdate = 
-            await _httpClient.GetFromJsonAsync<CatResponse>($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}") 
+        CatResponse catAfterUpdate =
+            await _httpClient.GetFromJsonAsync<CatResponse>(
+                $"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}")
             ?? throw new JsonException();
         catBeforeUpdate.Should().NotBeEquivalentTo(catAfterUpdate);
         catAfterUpdate.AdditionalRequirements.Should().Be(string.Empty);
@@ -237,25 +253,27 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
         catAfterUpdate.MedicalHelpUrgency.Should().Be(request.MedicalHelpUrgency);
         catAfterUpdate.IsCastrated.Should().Be(request.IsCastrated);
     }
-    
+
     [Fact]
     public async Task UpdateCat_ShouldReturnSuccess_WhenInvalidAdditionalRequirementsAreProvided()
     {
         //Arrange
-        HttpResponseMessage personRegisterResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
-        ApiResponses.CreatedWithIdResponse personRegisterResponse = 
+        HttpResponseMessage personRegisterResponseMessage =
+            await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
+        ApiResponses.CreatedWithIdResponse personRegisterResponse =
             await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        HttpResponseMessage catCreateResponseMessage = 
+        HttpResponseMessage catCreateResponseMessage =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", _createCatRequest);
-        ApiResponses.CreatedWithIdResponse catCreateResponse = 
+        ApiResponses.CreatedWithIdResponse catCreateResponse =
             await catCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        
+
         CatResponse catBeforeUpdate =
-            await _httpClient.GetFromJsonAsync<CatResponse>($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}") 
+            await _httpClient.GetFromJsonAsync<CatResponse>(
+                $"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}")
             ?? throw new JsonException();
-        
+
         //Act
         UpdateCat.UpdateCatRequest request = new Faker<UpdateCat.UpdateCatRequest>()
             .CustomInstantiator(faker =>
@@ -268,15 +286,17 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                     AgeCategory: AgeCategory.Senior.Name,
                     AdditionalRequirements: " "
                 )).Generate();
-        
-        HttpResponseMessage updateResponse = 
-            await _httpClient.PutAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}", request);
-        
+
+        HttpResponseMessage updateResponse =
+            await _httpClient.PutAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}",
+                request);
+
         //Assert
         updateResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
-        CatResponse catAfterUpdate = 
-            await _httpClient.GetFromJsonAsync<CatResponse>($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}") 
+        CatResponse catAfterUpdate =
+            await _httpClient.GetFromJsonAsync<CatResponse>(
+                $"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}")
             ?? throw new JsonException();
         catBeforeUpdate.Should().NotBeEquivalentTo(catAfterUpdate);
         catAfterUpdate.AdditionalRequirements.Should().Be(string.Empty);
@@ -287,18 +307,19 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
         catAfterUpdate.MedicalHelpUrgency.Should().Be(request.MedicalHelpUrgency);
         catAfterUpdate.IsCastrated.Should().Be(request.IsCastrated);
     }
-    
+
     [Fact]
     public async Task UpdateCat_ShouldReturnNotFound_WhenNonExistingCatIsProvided()
     {
         //Arrange
         Guid randomId = Guid.NewGuid();
-        
-        HttpResponseMessage personRegisterResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
-        ApiResponses.CreatedWithIdResponse personRegisterResponse = 
+
+        HttpResponseMessage personRegisterResponseMessage =
+            await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
+        ApiResponses.CreatedWithIdResponse personRegisterResponse =
             await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        
+
         //Act
         UpdateCat.UpdateCatRequest request = new Faker<UpdateCat.UpdateCatRequest>()
             .CustomInstantiator(faker =>
@@ -311,34 +332,35 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                     AgeCategory: AgeCategory.Senior.Name,
                     AdditionalRequirements: "Lorem ipsum dolor sit"
                 )).Generate();
-        
-        HttpResponseMessage updateResponse = 
+
+        HttpResponseMessage updateResponse =
             await _httpClient.PutAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats/{randomId}", request);
-        
+
         //Assert
         updateResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
         ProblemDetails? notFoundProblemDetails = await updateResponse.Content.ReadFromJsonAsync<ProblemDetails>();
         notFoundProblemDetails.Should().NotBeNull();
         notFoundProblemDetails!.Status.Should().Be(StatusCodes.Status404NotFound);
     }
-    
+
     [Fact]
     public async Task UpdateCat_ShouldReturnNotFound_WhenNonExistingPersonIsProvided()
     {
         //Arrange
         Guid randomId = Guid.NewGuid();
-        
-        HttpResponseMessage personRegisterResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
-        ApiResponses.CreatedWithIdResponse personRegisterResponse = 
+
+        HttpResponseMessage personRegisterResponseMessage =
+            await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
+        ApiResponses.CreatedWithIdResponse personRegisterResponse =
             await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        
-        HttpResponseMessage catCreateResponseMessage = 
+
+        HttpResponseMessage catCreateResponseMessage =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", _createCatRequest);
-        ApiResponses.CreatedWithIdResponse catCreateResponse = 
+        ApiResponses.CreatedWithIdResponse catCreateResponse =
             await catCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        
+
         //Act
         UpdateCat.UpdateCatRequest request = new Faker<UpdateCat.UpdateCatRequest>()
             .CustomInstantiator(faker =>
@@ -351,32 +373,33 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                     AgeCategory: AgeCategory.Senior.Name,
                     AdditionalRequirements: "Lorem ipsum dolor sit"
                 )).Generate();
-        
-        HttpResponseMessage updateResponse = 
+
+        HttpResponseMessage updateResponse =
             await _httpClient.PutAsJsonAsync($"api/v1/persons/{randomId}/cats/{catCreateResponse.Id}", request);
-        
+
         //Assert
         updateResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
         ProblemDetails? notFoundProblemDetails = await updateResponse.Content.ReadFromJsonAsync<ProblemDetails>();
         notFoundProblemDetails.Should().NotBeNull();
         notFoundProblemDetails!.Status.Should().Be(StatusCodes.Status404NotFound);
     }
-    
+
     [Fact]
     public async Task UpdateCat_ShouldReturnBadRequest_WhenEmptyDataAreProvided()
-    {    
+    {
         //Arrange
-        HttpResponseMessage personRegisterResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
-        ApiResponses.CreatedWithIdResponse personRegisterResponse = 
+        HttpResponseMessage personRegisterResponseMessage =
+            await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
+        ApiResponses.CreatedWithIdResponse personRegisterResponse =
             await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        
-        HttpResponseMessage catCreateResponseMessage = 
+
+        HttpResponseMessage catCreateResponseMessage =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", _createCatRequest);
-        ApiResponses.CreatedWithIdResponse catCreateResponse = 
+        ApiResponses.CreatedWithIdResponse catCreateResponse =
             await catCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        
+
         //Act
         UpdateCat.UpdateCatRequest request =
             new UpdateCat.UpdateCatRequest(
@@ -387,12 +410,14 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                 HealthStatus: "",
                 AgeCategory: ""
             );
-        HttpResponseMessage response = 
-            await _httpClient.PutAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}", request);
-        
+        HttpResponseMessage response =
+            await _httpClient.PutAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}",
+                request);
+
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        ValidationProblemDetails? validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        ValidationProblemDetails? validationProblemDetails =
+            await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         validationProblemDetails.Should().NotBeNull();
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
         validationProblemDetails.Errors.Count.Should().Be(5);
@@ -407,42 +432,43 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
         validationProblemDetails.Errors[nameof(UpdateCat.UpdateCatRequest.Name)][0]
             .Should()
             .Be("'Name' must not be empty.");
-        
+
         validationProblemDetails.Errors[nameof(UpdateCat.UpdateCatRequest.MedicalHelpUrgency)][0]
             .Should()
             .Be("'Medical Help Urgency' must not be empty.");
-        
+
         validationProblemDetails.Errors[nameof(UpdateCat.UpdateCatRequest.Behavior)][0]
             .Should()
             .Be("'Behavior' must not be empty.");
-        
+
         validationProblemDetails.Errors[nameof(UpdateCat.UpdateCatRequest.AgeCategory)][0]
             .Should()
             .Be("'Age Category' must not be empty.");
-        
+
         validationProblemDetails.Errors[nameof(UpdateCat.UpdateCatRequest.HealthStatus)][0]
             .Should()
             .Be("'Health Status' must not be empty.");
     }
-    
+
     [Fact]
     public async Task UpdateCat_ShouldReturnBadRequest_WhenTooLongDataAreProvided()
     {
         //Arrange
-        HttpResponseMessage personRegisterResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
-        ApiResponses.CreatedWithIdResponse personRegisterResponse = 
+        HttpResponseMessage personRegisterResponseMessage =
+            await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
+        ApiResponses.CreatedWithIdResponse personRegisterResponse =
             await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        
-        HttpResponseMessage catCreateResponseMessage = 
+
+        HttpResponseMessage catCreateResponseMessage =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", _createCatRequest);
-        ApiResponses.CreatedWithIdResponse catCreateResponse = 
+        ApiResponses.CreatedWithIdResponse catCreateResponse =
             await catCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        
+
         //Act
         UpdateCat.UpdateCatRequest request = new Faker<UpdateCat.UpdateCatRequest>()
-            .CustomInstantiator( faker =>
+            .CustomInstantiator(faker =>
                 new UpdateCat.UpdateCatRequest(
                     Name: faker.Person.FirstName.ClampLength(CatName.MaxLength + 1),
                     IsCastrated: true,
@@ -452,13 +478,15 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                     AgeCategory: AgeCategory.Baby.Name,
                     AdditionalRequirements: faker.Address.State().ClampLength(Description.MaxLength + 1)
                 )).Generate();
-        
-        HttpResponseMessage response = 
-            await _httpClient.PutAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}", request);
-        
+
+        HttpResponseMessage response =
+            await _httpClient.PutAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}",
+                request);
+
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        ValidationProblemDetails? validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        ValidationProblemDetails? validationProblemDetails =
+            await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         validationProblemDetails.Should().NotBeNull();
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
         validationProblemDetails.Errors.Count.Should().Be(2);
@@ -467,16 +495,17 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
             nameof(UpdateCat.UpdateCatRequest.AdditionalRequirements)
         );
         validationProblemDetails.Errors.Values.Count.Should().Be(2);
-        
+
         validationProblemDetails.Errors[nameof(UpdateCat.UpdateCatRequest.Name)][0]
             .Should()
             .StartWith($"The length of 'Name' must be {CatName.MaxLength} characters or fewer. You entered");
-        
+
         validationProblemDetails.Errors[nameof(UpdateCat.UpdateCatRequest.AdditionalRequirements)][0]
             .Should()
-            .StartWith($"The length of 'Additional Requirements' must be {Description.MaxLength} characters or fewer. You entered");
+            .StartWith(
+                $"The length of 'Additional Requirements' must be {Description.MaxLength} characters or fewer. You entered");
     }
-    
+
     public Task InitializeAsync()
     {
         return Task.CompletedTask;

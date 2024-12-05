@@ -17,6 +17,7 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
 {
     private readonly HttpClient _httpClient;
     private readonly CleanupHelper _cleanup;
+
     public GetAdvertisementsEndpointsTests(KittySaverApiFactory appFactory)
     {
         _httpClient = appFactory.CreateClient();
@@ -27,8 +28,7 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
         new Faker<CreatePerson.CreatePersonRequest>()
             .CustomInstantiator(faker =>
                 new CreatePerson.CreatePersonRequest(
-                    FirstName: faker.Person.FirstName,
-                    LastName: faker.Person.LastName,
+                    Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     UserIdentityId: Guid.NewGuid(),
@@ -60,6 +60,7 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
                     AgeCategory: AgeCategory.Adult.Name,
                     AdditionalRequirements: "Lorem ipsum"
                 ));
+
     [Fact]
     public async Task GetAdvertisements_ShouldReturnTwoAdvertisements_WhenTwoAdvertisementExists()
     {
@@ -93,9 +94,9 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
                         ContactInfoEmail: faker.Person.Email,
                         ContactInfoPhoneNumber: faker.Person.Phone
                     ));
-        
+
         await _httpClient.PostAsJsonAsync("api/v1/advertisements", request);
-        
+
         CreatePerson.CreatePersonRequest secondPersonRegisterRequest = _createPersonRequestGenerator.Generate();
         HttpResponseMessage secondPersonRegisterResponseMessage =
             await _httpClient.PostAsJsonAsync("api/v1/persons", secondPersonRegisterRequest);
@@ -104,7 +105,8 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
             ?? throw new JsonException();
         CreateCat.CreateCatRequest secondCatCreateRequest = _createCatRequestGenerator.Generate();
         HttpResponseMessage secondCatCreateResponseMessage =
-            await _httpClient.PostAsJsonAsync($"api/v1/persons/{secondPersonRegisterResponse.Id}/cats", secondCatCreateRequest);
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{secondPersonRegisterResponse.Id}/cats",
+                secondCatCreateRequest);
         ApiResponses.CreatedWithIdResponse secondCatCreateResponse =
             await secondCatCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
@@ -125,18 +127,20 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
                         ContactInfoEmail: faker.Person.Email,
                         ContactInfoPhoneNumber: faker.Person.Phone
                     ));
-        
+
         await _httpClient.PostAsJsonAsync("api/v1/advertisements", secondRequest);
 
         //Act
         HttpResponseMessage response = await _httpClient.GetAsync("/api/v1/advertisements");
-        
+
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        ICollection<AdvertisementResponse>? advertisements = await response.Content.ReadFromJsonAsync<ICollection<AdvertisementResponse>>();
+        ICollection<AdvertisementResponse>? advertisements =
+            await response.Content.ReadFromJsonAsync<ICollection<AdvertisementResponse>>();
         advertisements.Should().NotBeNull();
         advertisements!.Count.Should().Be(2);
-        AdvertisementResponse firstPersonAdvertisement = advertisements.First(x=>x.PersonId == personRegisterResponse.Id);
+        AdvertisementResponse firstPersonAdvertisement =
+            advertisements.First(x => x.PersonId == personRegisterResponse.Id);
         firstPersonAdvertisement.Id.Should().NotBeEmpty();
         firstPersonAdvertisement.Cats.Count.Should().Be(1);
         firstPersonAdvertisement.Title.Should().Be(firstPersonAdvertisement.Cats.First().Name);
@@ -147,7 +151,8 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
         firstPersonAdvertisement.PickupAddress.Street.Should().Be(request.PickupAddressStreet);
         firstPersonAdvertisement.PickupAddress.BuildingNumber.Should().Be(request.PickupAddressBuildingNumber);
         firstPersonAdvertisement.PriorityScore.Should().BeGreaterThan(0);
-        AdvertisementResponse secondPersonAdvertisement = advertisements.First(x=>x.PersonId == secondPersonRegisterResponse.Id);
+        AdvertisementResponse secondPersonAdvertisement =
+            advertisements.First(x => x.PersonId == secondPersonRegisterResponse.Id);
         secondPersonAdvertisement.Id.Should().NotBeEmpty();
         secondPersonAdvertisement.Cats.Count.Should().Be(1);
         secondPersonAdvertisement.Title.Should().Be(secondPersonAdvertisement.Cats.First().Name);
@@ -159,16 +164,17 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
         secondPersonAdvertisement.PickupAddress.BuildingNumber.Should().Be(secondRequest.PickupAddressBuildingNumber);
         secondPersonAdvertisement.PriorityScore.Should().BeGreaterThan(0);
     }
-    
+
     [Fact]
     public async Task GetAdvertisements_ShouldReturnEmptyList_WhenNoAdvertisementsExist()
     {
         //Act
         HttpResponseMessage response = await _httpClient.GetAsync("/api/v1/advertisements");
-        
+
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        ICollection<AdvertisementResponse>? advertisement = await response.Content.ReadFromJsonAsync<ICollection<AdvertisementResponse>>();
+        ICollection<AdvertisementResponse>? advertisement =
+            await response.Content.ReadFromJsonAsync<ICollection<AdvertisementResponse>>();
         advertisement.Should().NotBeNull();
         advertisement!.Count.Should().Be(0);
     }

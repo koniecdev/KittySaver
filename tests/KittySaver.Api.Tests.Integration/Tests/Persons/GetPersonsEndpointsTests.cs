@@ -23,9 +23,8 @@ public class GetPersonsEndpointsTests : IAsyncLifetime
         new Faker<CreatePerson.CreatePersonRequest>()
             .CustomInstantiator( faker =>
                 new CreatePerson.CreatePersonRequest(
-                    FirstName: faker.Person.FirstName,
-                    LastName: faker.Person.LastName,
-                    Email: faker.Person.Email,
+                    Nickname: faker.Person.FirstName,
+                                        Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     UserIdentityId: Guid.NewGuid(),
                     AddressCountry: faker.Address.Country(),
@@ -59,9 +58,7 @@ public class GetPersonsEndpointsTests : IAsyncLifetime
         persons!.Count.Should().BeGreaterThan(0);
         PersonResponse registeredPerson = persons.First();
         registeredPerson.Id.Should().NotBeEmpty();
-        registeredPerson.FirstName.Should().Be(createRequest.FirstName);
-        registeredPerson.LastName.Should().Be(createRequest.LastName);
-        registeredPerson.FullName.Should().Be($"{createRequest.FirstName} {createRequest.LastName}");
+        registeredPerson.FirstName.Should().Be(createRequest.Nickname);
         registeredPerson.Email.Should().Be(createRequest.Email);
         registeredPerson.PhoneNumber.Should().Be(createRequest.PhoneNumber);
         registeredPerson.ResidentalAddress.Country.Should().Be(createRequest.AddressCountry);

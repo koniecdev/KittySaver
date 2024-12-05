@@ -37,8 +37,7 @@ public class CatTests
         .CustomInstantiator(faker =>
             Person.Create(
                 userIdentityId: Guid.NewGuid(),
-                firstName: FirstName.Create(faker.Person.FirstName),
-                lastName: LastName.Create(faker.Person.LastName),
+                nickname: Nickname.Create(faker.Person.FirstName),
                 email: Email.Create(faker.Person.Email),
                 phoneNumber: PhoneNumber.Create(faker.Person.Phone),
                 residentalAddress: Address,
@@ -97,8 +96,7 @@ public class CatTests
         .CustomInstantiator(faker =>
             Person.Create(
                 userIdentityId: Guid.NewGuid(),
-                firstName: FirstName.Create(faker.Person.FirstName),
-                lastName: LastName.Create(faker.Person.LastName),
+                nickname: Nickname.Create(faker.Person.FirstName),
                 email: Email.Create(faker.Person.Email),
                 phoneNumber: PhoneNumber.Create(faker.Person.Phone),
                 residentalAddress: Address,
@@ -137,8 +135,7 @@ public class CatTests
         .CustomInstantiator(faker =>
             Person.Create(
                 userIdentityId: Guid.NewGuid(),
-                firstName: FirstName.Create(faker.Person.FirstName),
-                lastName: LastName.Create(faker.Person.LastName),
+                nickname: Nickname.Create(faker.Person.FirstName),
                 email: Email.Create(faker.Person.Email),
                 phoneNumber: PhoneNumber.Create(faker.Person.Phone),
                 residentalAddress: Address,

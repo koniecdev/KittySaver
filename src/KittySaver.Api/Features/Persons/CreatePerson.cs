@@ -11,8 +11,7 @@ namespace KittySaver.Api.Features.Persons;
 public sealed class CreatePerson : IEndpoint
 {
     public sealed record CreatePersonRequest(
-        string FirstName,
-        string LastName,
+        string Nickname,
         string Email,
         string PhoneNumber,
         Guid UserIdentityId,
@@ -32,8 +31,7 @@ public sealed class CreatePerson : IEndpoint
         string DefaultAdvertisementContactInfoPhoneNumber);
     
     public sealed record CreatePersonCommand(
-        string FirstName,
-        string LastName,
+        string Nickname,
         string Email,
         string PhoneNumber,
         Guid UserIdentityId,
@@ -57,13 +55,9 @@ public sealed class CreatePerson : IEndpoint
     {
         public CreatePersonCommandValidator(IPersonRepository personRepository)
         {
-            RuleFor(x => x.FirstName)
+            RuleFor(x => x.Nickname)
                 .NotEmpty()
-                .MaximumLength(FirstName.MaxLength);
-            
-            RuleFor(x => x.LastName)
-                .NotEmpty()
-                .MaximumLength(LastName.MaxLength);
+                .MaximumLength(Nickname.MaxLength);
             
             RuleFor(x => x.UserIdentityId)
                 .NotEmpty()
@@ -145,8 +139,7 @@ public sealed class CreatePerson : IEndpoint
     {
         public async Task<Guid> Handle(CreatePersonCommand request, CancellationToken cancellationToken)
         {
-            FirstName firstName = FirstName.Create(request.FirstName);
-            LastName lastName = LastName.Create(request.LastName);
+            Nickname nickname = Nickname.Create(request.Nickname);
             Email email = Email.Create(request.Email);
             PhoneNumber phoneNumber = PhoneNumber.Create(request.PhoneNumber);
             
@@ -171,8 +164,7 @@ public sealed class CreatePerson : IEndpoint
 
             Person person = Person.Create(
                 userIdentityId: request.UserIdentityId,
-                firstName: firstName,
-                lastName: lastName,
+                nickname: nickname,
                 email: email,
                 phoneNumber: phoneNumber,
                 residentalAddress: residentalAddress,

@@ -13,8 +13,7 @@ namespace KittySaver.Api.Features.Persons;
 public sealed class UpdatePerson : IEndpoint
 {
     public sealed record UpdatePersonRequest(
-        string FirstName,
-        string LastName,
+        string Nickname,
         string Email,
         string PhoneNumber,
         string AddressCountry,
@@ -34,8 +33,7 @@ public sealed class UpdatePerson : IEndpoint
 
     public sealed record UpdatePersonCommand(
         Guid IdOrUserIdentityId,
-        string FirstName,
-        string LastName,
+        string Nickname,
         string Email,
         string PhoneNumber,
         string AddressCountry,
@@ -60,13 +58,9 @@ public sealed class UpdatePerson : IEndpoint
         {
             RuleFor(x => x.IdOrUserIdentityId).NotEmpty();
 
-            RuleFor(x => x.FirstName)
+            RuleFor(x => x.Nickname)
                 .NotEmpty()
-                .MaximumLength(FirstName.MaxLength);
-
-            RuleFor(x => x.LastName)
-                .NotEmpty()
-                .MaximumLength(LastName.MaxLength);
+                .MaximumLength(Nickname.MaxLength);
 
             RuleFor(x => x.Email)
                 .NotEmpty()
@@ -145,8 +139,7 @@ public sealed class UpdatePerson : IEndpoint
         {
             Person person = await personRepository.GetPersonByIdOrIdentityIdAsync(request.IdOrUserIdentityId, cancellationToken);
 
-            FirstName firstName = FirstName.Create(request.FirstName);
-            LastName lastName = LastName.Create(request.LastName);
+            Nickname nickname = Nickname.Create(request.Nickname);
             Email email = Email.Create(request.Email);
             PhoneNumber phoneNumber = PhoneNumber.Create(request.PhoneNumber);
             
@@ -169,7 +162,7 @@ public sealed class UpdatePerson : IEndpoint
             Email defaultAdvertisementContactInfoEmail = Email.Create(request.DefaultAdvertisementContactInfoEmail);
             PhoneNumber defaultAdvertisementContactInfoPhoneNumber = PhoneNumber.Create(request.DefaultAdvertisementContactInfoPhoneNumber);
 
-            person.ChangeName(firstName, lastName);
+            person.ChangeNickname(nickname);
             person.ChangeEmail(email);
             person.ChangePhoneNumber(phoneNumber);
             person.ChangeResidentalAddress(residentalAddress);
