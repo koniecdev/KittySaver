@@ -19,17 +19,6 @@ public class PersonTests
     private readonly Email _defaultProperEmail = Email.Create("fake@fake.fake");
     private readonly PhoneNumber _defaultProperPhone = PhoneNumber.Create("+48111222333");
 
-    private static readonly Address Address = new Faker<Address>()
-        .CustomInstantiator(faker =>
-            Address.Create(
-                faker.Address.Country(),
-                faker.Address.State(),
-                faker.Address.ZipCode(),
-                faker.Address.City(),
-                faker.Address.StreetName(),
-                faker.Address.BuildingNumber()
-            )).Generate();
-
     private static readonly Address PickupAddress = new Faker<Address>()
         .CustomInstantiator(faker =>
             Address.Create(
@@ -57,7 +46,6 @@ public class PersonTests
             nickname: nickname,
             email: email,
             phoneNumber: phoneNumber,
-            residentalAddress: Address,
             defaultAdvertisementPickupAddress: PickupAddress,
             defaultAdvertisementContactInfoEmail: defaultEmail,
             defaultAdvertisementContactInfoPhoneNumber: defaultPhoneNumber
@@ -68,7 +56,6 @@ public class PersonTests
         sut.Nickname.Should().Be(nickname);
         sut.Email.Should().Be(email);
         sut.PhoneNumber.Should().Be(phoneNumber);
-        sut.ResidentalAddress.Should().BeEquivalentTo(Address);
         sut.DefaultAdvertisementsPickupAddress.Should().BeEquivalentTo(PickupAddress);
         sut.DefaultAdvertisementsContactInfoEmail.Should().BeEquivalentTo(defaultEmail);
         sut.DefaultAdvertisementsContactInfoPhoneNumber.Should().BeEquivalentTo(defaultPhoneNumber);
@@ -85,18 +72,7 @@ public class PersonTests
         PhoneNumber phoneNumber = PhoneNumber.Create("535143330");
         Email defaultEmail = Email.Create("koniecdevcontact@gmail.com");
         PhoneNumber defaultPhoneNumber = PhoneNumber.Create("5351433300");
-        
-        Address address = new Faker<Address>()
-        .CustomInstantiator(faker =>
-            Address.Create(
-                country: faker.Address.Country(),
-                state: "",
-                zipCode: faker.Address.ZipCode(),
-                city: faker.Address.City(),
-                street: faker.Address.StreetName(),
-                buildingNumber: faker.Address.BuildingNumber()
-            )).Generate();
-    
+
         Address pickupAddress = new Faker<Address>()
         .CustomInstantiator(faker =>
             Address.Create(
@@ -114,7 +90,6 @@ public class PersonTests
             nickname: nickname,
             email: email,
             phoneNumber: phoneNumber,
-            residentalAddress: address,
             defaultAdvertisementPickupAddress: pickupAddress,
             defaultAdvertisementContactInfoEmail: defaultEmail,
             defaultAdvertisementContactInfoPhoneNumber: defaultPhoneNumber
@@ -125,13 +100,6 @@ public class PersonTests
         sut.Nickname.Should().Be(nickname);
         sut.Email.Should().Be(email);
         sut.PhoneNumber.Should().Be(phoneNumber);
-        sut.ResidentalAddress.Should().NotBeNull();
-        sut.ResidentalAddress.Country.Should().Be(address.Country);
-        sut.ResidentalAddress.State.Should().BeNull();
-        sut.ResidentalAddress.ZipCode.Should().Be(address.ZipCode);
-        sut.ResidentalAddress.City.Should().Be(address.City);
-        sut.ResidentalAddress.Street.Should().Be(address.Street);
-        sut.ResidentalAddress.BuildingNumber.Should().Be(address.BuildingNumber);
         sut.DefaultAdvertisementsPickupAddress.Should().NotBeNull();
         sut.DefaultAdvertisementsPickupAddress.Country.Should().Be(pickupAddress.Country);
         sut.DefaultAdvertisementsPickupAddress.State.Should().BeNull();
@@ -157,7 +125,6 @@ public class PersonTests
             nickname: _defaultProperNickname,
             email: _defaultProperEmail,
             phoneNumber: _defaultProperPhone,
-            residentalAddress: Address,
             defaultAdvertisementPickupAddress: PickupAddress,
             defaultAdvertisementContactInfoEmail: _defaultProperEmail,
             defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
@@ -177,7 +144,6 @@ public class PersonTests
             nickname: _defaultProperNickname,
             email: _defaultProperEmail,
             phoneNumber: _defaultProperPhone,
-            residentalAddress: Address,
             defaultAdvertisementPickupAddress: PickupAddress,
             defaultAdvertisementContactInfoEmail: _defaultProperEmail,
             defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
@@ -213,7 +179,6 @@ public class PersonTests
             nickname: _defaultProperNickname,
             email: _defaultProperEmail,
             phoneNumber: _defaultProperPhone,
-            residentalAddress: Address,
             defaultAdvertisementPickupAddress: PickupAddress,
             defaultAdvertisementContactInfoEmail: _defaultProperEmail,
             defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
@@ -250,7 +215,6 @@ public class PersonTests
             nickname: _defaultProperNickname,
             email: _defaultProperEmail,
             phoneNumber: _defaultProperPhone,
-            residentalAddress: Address,
             defaultAdvertisementPickupAddress: PickupAddress,
             defaultAdvertisementContactInfoEmail: _defaultProperEmail,
             defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
@@ -287,7 +251,6 @@ public class PersonTests
             nickname: _defaultProperNickname,
             email: _defaultProperEmail,
             phoneNumber: _defaultProperPhone,
-            residentalAddress: Address,
             defaultAdvertisementPickupAddress: PickupAddress,
             defaultAdvertisementContactInfoEmail: _defaultProperEmail,
             defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
@@ -325,7 +288,6 @@ public class PersonTests
             nickname: _defaultProperNickname,
             email: _defaultProperEmail,
             phoneNumber: _defaultProperPhone,
-            residentalAddress: Address,
             defaultAdvertisementPickupAddress: PickupAddress,
             defaultAdvertisementContactInfoEmail: _defaultProperEmail,
             defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
@@ -363,7 +325,6 @@ public class PersonTests
             nickname: _defaultProperNickname,
             email: _defaultProperEmail,
             phoneNumber: _defaultProperPhone,
-            residentalAddress: Address,
             defaultAdvertisementPickupAddress: PickupAddress,
             defaultAdvertisementContactInfoEmail: _defaultProperEmail,
             defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
@@ -373,7 +334,6 @@ public class PersonTests
             nickname: Nickname.Create(faker.Person.FirstName),
             email: Email.Create(faker.Person.Email),
             phoneNumber: PhoneNumber.Create(faker.Person.Phone),
-            residentalAddress: Address,
             defaultAdvertisementPickupAddress: PickupAddress,
             defaultAdvertisementContactInfoEmail: Email.Create(faker.Person.Email),
             defaultAdvertisementContactInfoPhoneNumber: PhoneNumber.Create(faker.Person.Phone)
@@ -421,7 +381,6 @@ public class PersonTests
             nickname: _defaultProperNickname,
             email: _defaultProperEmail,
             phoneNumber: _defaultProperPhone,
-            residentalAddress: Address,
             defaultAdvertisementPickupAddress: PickupAddress,
             defaultAdvertisementContactInfoEmail: _defaultProperEmail,
             defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
@@ -486,7 +445,6 @@ public class PersonTests
             nickname: _defaultProperNickname,
             email: _defaultProperEmail,
             phoneNumber: _defaultProperPhone,
-            residentalAddress: Address,
             defaultAdvertisementPickupAddress: PickupAddress,
             defaultAdvertisementContactInfoEmail: _defaultProperEmail,
             defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
@@ -520,7 +478,6 @@ public class PersonTests
             nickname: _defaultProperNickname,
             email: _defaultProperEmail,
             phoneNumber: _defaultProperPhone,
-            residentalAddress: Address,
             defaultAdvertisementPickupAddress: PickupAddress,
             defaultAdvertisementContactInfoEmail: _defaultProperEmail,
             defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
@@ -564,7 +521,6 @@ public class PersonTests
             nickname: _defaultProperNickname,
             email: _defaultProperEmail,
             phoneNumber: _defaultProperPhone,
-            residentalAddress: Address,
             defaultAdvertisementPickupAddress: PickupAddress,
             defaultAdvertisementContactInfoEmail: _defaultProperEmail,
             defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone

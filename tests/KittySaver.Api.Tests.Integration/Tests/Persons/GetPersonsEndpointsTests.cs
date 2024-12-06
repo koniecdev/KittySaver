@@ -28,12 +28,6 @@ public class GetPersonsEndpointsTests : IAsyncLifetime
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     UserIdentityId: Guid.NewGuid(),
-                    AddressCountry: faker.Address.Country(),
-                    AddressZipCode: faker.Address.ZipCode(),
-                    AddressCity: faker.Address.City(),
-                    AddressStreet: faker.Address.StreetName(),
-                    AddressBuildingNumber: faker.Address.BuildingNumber(),
-                    AddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressCountry: faker.Address.Country(),
                     DefaultAdvertisementPickupAddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
@@ -62,12 +56,6 @@ public class GetPersonsEndpointsTests : IAsyncLifetime
         registeredPerson.Nickname.Should().Be(createRequest.Nickname);
         registeredPerson.Email.Should().Be(createRequest.Email);
         registeredPerson.PhoneNumber.Should().Be(createRequest.PhoneNumber);
-        registeredPerson.ResidentalAddress.Country.Should().Be(createRequest.AddressCountry);
-        registeredPerson.ResidentalAddress.State.Should().Be(createRequest.AddressState);
-        registeredPerson.ResidentalAddress.ZipCode.Should().Be(createRequest.AddressZipCode);
-        registeredPerson.ResidentalAddress.City.Should().Be(createRequest.AddressCity);
-        registeredPerson.ResidentalAddress.Street.Should().Be(createRequest.AddressStreet);
-        registeredPerson.ResidentalAddress.BuildingNumber.Should().Be(createRequest.AddressBuildingNumber);
     }
 
     [Fact]

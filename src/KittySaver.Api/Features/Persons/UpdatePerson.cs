@@ -16,12 +16,6 @@ public sealed class UpdatePerson : IEndpoint
         string Nickname,
         string Email,
         string PhoneNumber,
-        string AddressCountry,
-        string? AddressState,
-        string AddressZipCode,
-        string AddressCity,
-        string AddressStreet,
-        string AddressBuildingNumber,
         string DefaultAdvertisementPickupAddressCountry,
         string? DefaultAdvertisementPickupAddressState,
         string DefaultAdvertisementPickupAddressZipCode,
@@ -36,12 +30,6 @@ public sealed class UpdatePerson : IEndpoint
         string Nickname,
         string Email,
         string PhoneNumber,
-        string AddressCountry,
-        string? AddressState,
-        string AddressZipCode,
-        string AddressCity,
-        string AddressStreet,
-        string AddressBuildingNumber,
         string DefaultAdvertisementPickupAddressCountry,
         string? DefaultAdvertisementPickupAddressState,
         string DefaultAdvertisementPickupAddressZipCode,
@@ -86,29 +74,6 @@ public sealed class UpdatePerson : IEndpoint
                 .MaximumLength(Email.MaxLength)
                 .Matches(Email.RegexPattern);
 
-            RuleFor(x => x.AddressCountry)
-                .NotEmpty()
-                .MaximumLength(Address.CountryMaxLength);
-
-            RuleFor(x => x.AddressState)
-                .MaximumLength(Address.StateMaxLength);
-
-            RuleFor(x => x.AddressZipCode)
-                .NotEmpty()
-                .MaximumLength(Address.ZipCodeMaxLength);
-
-            RuleFor(x => x.AddressCity)
-                .NotEmpty()
-                .MaximumLength(Address.CityMaxLength);
-
-            RuleFor(x => x.AddressStreet)
-                .NotEmpty()
-                .MaximumLength(Address.StreetMaxLength);
-
-            RuleFor(x => x.AddressBuildingNumber)
-                .NotEmpty()
-                .MaximumLength(Address.BuildingNumberMaxLength);
-
             RuleFor(x => x.DefaultAdvertisementPickupAddressCountry)
                 .NotEmpty()
                 .MaximumLength(Address.CountryMaxLength);
@@ -143,14 +108,6 @@ public sealed class UpdatePerson : IEndpoint
             Email email = Email.Create(request.Email);
             PhoneNumber phoneNumber = PhoneNumber.Create(request.PhoneNumber);
             
-            Address residentalAddress = Address.Create(
-                country: request.AddressCountry,
-                state: request.AddressState,
-                zipCode: request.AddressZipCode,
-                city: request.AddressCity,
-                street: request.AddressStreet,
-                buildingNumber: request.AddressBuildingNumber);
-            
             Address defaultAdvertisementPickupAddress = Address.Create(
                 country: request.DefaultAdvertisementPickupAddressCountry,
                 state: request.DefaultAdvertisementPickupAddressState,
@@ -165,7 +122,6 @@ public sealed class UpdatePerson : IEndpoint
             person.ChangeNickname(nickname);
             person.ChangeEmail(email);
             person.ChangePhoneNumber(phoneNumber);
-            person.ChangeResidentalAddress(residentalAddress);
             person.ChangeDefaultsForAdvertisement(
                 defaultAdvertisementPickupAddress,
                 defaultAdvertisementContactInfoEmail,

@@ -50,7 +50,6 @@ public class AdvertisementServiceTests
                 nickname: Nickname.Create(faker.Person.FirstName),
                 email: Email.Create(faker.Person.Email),
                 phoneNumber: PhoneNumber.Create(faker.Person.Phone),
-                residentalAddress: Address,
                 defaultAdvertisementPickupAddress: PickupAddressGenerator.Generate(),
                 defaultAdvertisementContactInfoEmail: ContactInfoEmailGenerator.Generate(),
                 defaultAdvertisementContactInfoPhoneNumber: ContactInfoPhoneNumberGenerator.Generate()

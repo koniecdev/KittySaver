@@ -22,7 +22,6 @@ public sealed class Person : AggregateRoot
         Nickname = null!;
         Email = null!;
         PhoneNumber = null!;
-        ResidentalAddress = null!;
         DefaultAdvertisementsPickupAddress = null!;
         DefaultAdvertisementsContactInfoEmail = null!;
         DefaultAdvertisementsContactInfoPhoneNumber = null!;
@@ -33,7 +32,6 @@ public sealed class Person : AggregateRoot
         Nickname nickname,
         Email email,
         PhoneNumber phoneNumber,
-        Address residentalAddress,
         Address defaultAdvertisementPickupAddress,
         Email defaultAdvertisementContactInfoEmail,
         PhoneNumber defaultAdvertisementContactInfoPhone)
@@ -41,9 +39,7 @@ public sealed class Person : AggregateRoot
         UserIdentityId = userIdentityId;
         Nickname = nickname;
         Email = email;
-        ResidentalAddress = residentalAddress;
         PhoneNumber = phoneNumber;
-        ResidentalAddress = residentalAddress;
         DefaultAdvertisementsPickupAddress = defaultAdvertisementPickupAddress;
         DefaultAdvertisementsContactInfoEmail = defaultAdvertisementContactInfoEmail;
         DefaultAdvertisementsContactInfoPhoneNumber = defaultAdvertisementContactInfoPhone;
@@ -54,7 +50,6 @@ public sealed class Person : AggregateRoot
         Nickname nickname,
         Email email,
         PhoneNumber phoneNumber,
-        Address residentalAddress,
         Address defaultAdvertisementPickupAddress,
         Email defaultAdvertisementContactInfoEmail,
         PhoneNumber defaultAdvertisementContactInfoPhoneNumber)
@@ -64,7 +59,6 @@ public sealed class Person : AggregateRoot
             nickname: nickname,
             email: email,
             phoneNumber: phoneNumber,
-            residentalAddress: residentalAddress,
             defaultAdvertisementPickupAddress: defaultAdvertisementPickupAddress,
             defaultAdvertisementContactInfoEmail: defaultAdvertisementContactInfoEmail,
             defaultAdvertisementContactInfoPhone: defaultAdvertisementContactInfoPhoneNumber
@@ -82,7 +76,6 @@ public sealed class Person : AggregateRoot
     public Nickname Nickname { get; private set; }
     public Email Email { get; private set; }
     public PhoneNumber PhoneNumber { get; private set; }
-    public Address ResidentalAddress { get; private set; }
     public Address DefaultAdvertisementsPickupAddress { get; private set; }
     public Email DefaultAdvertisementsContactInfoEmail { get; private set; }
     public PhoneNumber DefaultAdvertisementsContactInfoPhoneNumber { get; private set; }
@@ -116,11 +109,6 @@ public sealed class Person : AggregateRoot
     public void ChangePhoneNumber(PhoneNumber phoneNumber)
     {
         PhoneNumber = phoneNumber;
-    }
-    
-    public void ChangeResidentalAddress(Address residentalAddress)
-    {
-        ResidentalAddress = residentalAddress;
     }
     
     public void ChangeDefaultsForAdvertisement(
@@ -243,7 +231,7 @@ public sealed class Person : AggregateRoot
         }
     }
 
-    private void ThrowIfCatIsAssignedToAdvertisement(Cat cat)
+    private static void ThrowIfCatIsAssignedToAdvertisement(Cat cat)
     {
         if (cat.AdvertisementId.HasValue)
         {
@@ -283,45 +271,6 @@ internal sealed class PersonConfiguration : IEntityTypeConfiguration<Person>
             .WithOne()
             .HasForeignKey(advertisement => advertisement.PersonId)
             .IsRequired();
-
-        builder.ComplexProperty(x => x.ResidentalAddress, complexPropertyBuilder =>
-        {
-            complexPropertyBuilder.IsRequired();
-
-            complexPropertyBuilder.Property(x => x.Country)
-                .HasMaxLength(Address.CountryMaxLength)
-                .HasColumnName($"{nameof(Person.ResidentalAddress)}{nameof(Person.ResidentalAddress.Country)}")
-                .IsRequired();
-
-            complexPropertyBuilder
-                .Property(x => x.State)
-                .HasColumnName($"{nameof(Person.ResidentalAddress)}{nameof(Person.ResidentalAddress.State)}")
-                .HasMaxLength(Address.StateMaxLength);
-
-            complexPropertyBuilder
-                .Property(x => x.ZipCode)
-                .HasColumnName($"{nameof(Person.ResidentalAddress)}{nameof(Person.ResidentalAddress.ZipCode)}")
-                .HasMaxLength(Address.ZipCodeMaxLength)
-                .IsRequired();
-
-            complexPropertyBuilder
-                .Property(x => x.City)
-                .HasColumnName($"{nameof(Person.ResidentalAddress)}{nameof(Person.ResidentalAddress.City)}")
-                .HasMaxLength(Address.CityMaxLength)
-                .IsRequired();
-
-            complexPropertyBuilder
-                .Property(x => x.Street)
-                .HasColumnName($"{nameof(Person.ResidentalAddress)}{nameof(Person.ResidentalAddress.Street)}")
-                .HasMaxLength(Address.StreetMaxLength)
-                .IsRequired();
-
-            complexPropertyBuilder
-                .Property(x => x.BuildingNumber)
-                .HasColumnName($"{nameof(Person.ResidentalAddress)}{nameof(Person.ResidentalAddress.BuildingNumber)}")
-                .HasMaxLength(Address.BuildingNumberMaxLength)
-                .IsRequired();
-        });
 
         builder.ComplexProperty(x => x.DefaultAdvertisementsPickupAddress, complexPropertyBuilder =>
         {

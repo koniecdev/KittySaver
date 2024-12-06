@@ -40,7 +40,6 @@ public class CatTests
                 nickname: Nickname.Create(faker.Person.FirstName),
                 email: Email.Create(faker.Person.Email),
                 phoneNumber: PhoneNumber.Create(faker.Person.Phone),
-                residentalAddress: Address,
                 defaultAdvertisementPickupAddress: PickupAddress,
                 defaultAdvertisementContactInfoEmail: Email.Create(faker.Person.Email),
                 defaultAdvertisementContactInfoPhoneNumber: PhoneNumber.Create(faker.Person.Phone)
@@ -99,7 +98,6 @@ public class CatTests
                 nickname: Nickname.Create(faker.Person.FirstName),
                 email: Email.Create(faker.Person.Email),
                 phoneNumber: PhoneNumber.Create(faker.Person.Phone),
-                residentalAddress: Address,
                 defaultAdvertisementPickupAddress: PickupAddress,
                 defaultAdvertisementContactInfoEmail: Email.Create(faker.Person.Email),
                 defaultAdvertisementContactInfoPhoneNumber: PhoneNumber.Create(faker.Person.Phone)
@@ -138,7 +136,6 @@ public class CatTests
                 nickname: Nickname.Create(faker.Person.FirstName),
                 email: Email.Create(faker.Person.Email),
                 phoneNumber: PhoneNumber.Create(faker.Person.Phone),
-                residentalAddress: Address,
                 defaultAdvertisementPickupAddress: PickupAddress,
                 defaultAdvertisementContactInfoEmail: Email.Create(faker.Person.Email),
                 defaultAdvertisementContactInfoPhoneNumber: PhoneNumber.Create(faker.Person.Phone)

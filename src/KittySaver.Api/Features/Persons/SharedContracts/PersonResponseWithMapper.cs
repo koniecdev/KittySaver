@@ -13,7 +13,6 @@ public sealed class PersonResponse
     public required string PhoneNumber { get; init; }
     public required string DefaultAdvertisementsContactInfoEmail { get; init; }
     public required string DefaultAdvertisementsContactInfoPhoneNumber { get; init; }
-    public required AddressDto ResidentalAddress { get; init; }
     public required AddressDto DefaultAdvertisementsPickupAddress { get; init; }
 
     public sealed class AddressDto
@@ -39,15 +38,6 @@ public static class PersonResponseMapper
             PhoneNumber = entity.PhoneNumber,
             DefaultAdvertisementsContactInfoEmail = entity.DefaultAdvertisementsContactInfoEmail,
             DefaultAdvertisementsContactInfoPhoneNumber = entity.DefaultAdvertisementsContactInfoPhoneNumber,
-            ResidentalAddress = new PersonResponse.AddressDto
-            {
-                Country = entity.ResidentalAddressCountry,
-                State = entity.ResidentalAddressState,
-                ZipCode = entity.ResidentalAddressZipCode,
-                City = entity.ResidentalAddressCity,
-                Street = entity.ResidentalAddressStreet,
-                BuildingNumber = entity.ResidentalAddressBuildingNumber
-            },
             DefaultAdvertisementsPickupAddress = new PersonResponse.AddressDto
             {
                 Country = entity.DefaultAdvertisementsPickupAddressCountry,

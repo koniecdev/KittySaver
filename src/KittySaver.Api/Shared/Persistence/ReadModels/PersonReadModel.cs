@@ -24,12 +24,6 @@ public sealed class PersonReadModel
     public required string Email { get; init; }
     public required string Nickname { get; init; }
     public required string PhoneNumber { get; init; }
-    public required string ResidentalAddressBuildingNumber { get; init; }
-    public required string ResidentalAddressCity { get; init; }
-    public required string ResidentalAddressCountry { get; init; }
-    public required string? ResidentalAddressState { get; init; }
-    public required string ResidentalAddressStreet { get; init; }
-    public required string ResidentalAddressZipCode { get; init; }
     public ICollection<CatReadModel> Cats { get; } = new List<CatReadModel>();
     public ICollection<AdvertisementReadModel> Advertisements { get; } = new List<AdvertisementReadModel>();
 }

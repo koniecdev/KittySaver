@@ -51,7 +51,6 @@ public class AdvertisementTests
                 nickname: Nickname.Create(faker.Person.FirstName),
                 email: Email.Create(faker.Person.Email),
                 phoneNumber: PhoneNumber.Create(faker.Person.Phone),
-                residentalAddress: Address,
                 defaultAdvertisementPickupAddress: PickupAddressGenerator.Generate(),
                 defaultAdvertisementContactInfoEmail: ContactInfoEmailGenerator.Generate(),
                 defaultAdvertisementContactInfoPhoneNumber: ContactInfoPhoneNumberGenerator.Generate()
@@ -328,7 +327,6 @@ public class AdvertisementTests
                 nickname: Nickname.Create(faker.Person.FirstName),
                 email: Email.Create(faker.Person.Email),
                 phoneNumber: PhoneNumber.Create(faker.Person.Phone),
-                residentalAddress: Address,
                 defaultAdvertisementPickupAddress: Address,
                 defaultAdvertisementContactInfoEmail: Email.Create(faker.Person.Email),
                 defaultAdvertisementContactInfoPhoneNumber: PhoneNumber.Create(faker.Person.Phone)

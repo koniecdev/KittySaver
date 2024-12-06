@@ -51,7 +51,6 @@ public class NicknameTests
             nickname: nickname,
             email: _defaultProperEmail,
             phoneNumber: _defaultProperPhone,
-            residentalAddress: Address,
             defaultAdvertisementPickupAddress: Address,
             defaultAdvertisementContactInfoEmail: _defaultProperEmail,
             defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone

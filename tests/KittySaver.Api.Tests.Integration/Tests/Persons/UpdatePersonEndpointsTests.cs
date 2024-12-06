@@ -35,12 +35,6 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     UserIdentityId: Guid.NewGuid(),
-                    AddressCountry: faker.Address.Country(),
-                    AddressZipCode: faker.Address.ZipCode(),
-                    AddressCity: faker.Address.City(),
-                    AddressStreet: faker.Address.StreetName(),
-                    AddressBuildingNumber: faker.Address.BuildingNumber(),
-                    AddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressCountry: faker.Address.Country(),
                     DefaultAdvertisementPickupAddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
@@ -69,12 +63,6 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
-                    AddressCountry: faker.Address.Country(),
-                    AddressZipCode: faker.Address.ZipCode(),
-                    AddressCity: faker.Address.City(),
-                    AddressStreet: faker.Address.StreetName(),
-                    AddressBuildingNumber: faker.Address.BuildingNumber(),
-                    AddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressCountry: faker.Address.Country(),
                     DefaultAdvertisementPickupAddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
@@ -98,13 +86,6 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         personAfterUpdate.Nickname.Should().Be(request.Nickname);
         personAfterUpdate.Email.Should().Be(request.Email);
         personAfterUpdate.PhoneNumber.Should().Be(request.PhoneNumber);
-        personAfterUpdate.ResidentalAddress.Country.Should().Be(request.AddressCountry);
-        personAfterUpdate.ResidentalAddress.State.Should().Be(request.AddressState);
-        personAfterUpdate.ResidentalAddress.ZipCode.Should().Be(request.AddressZipCode);
-        personAfterUpdate.ResidentalAddress.City.Should().Be(request.AddressCity);
-        personAfterUpdate.ResidentalAddress.Street.Should().Be(request.AddressStreet);
-        personAfterUpdate.ResidentalAddress.City.Should().Be(request.AddressCity);
-        personAfterUpdate.ResidentalAddress.BuildingNumber.Should().Be(request.AddressBuildingNumber);
     }
 
     [Fact]
@@ -125,12 +106,6 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
                     Nickname: person.Nickname,
                     Email: person.Email,
                     PhoneNumber: person.PhoneNumber,
-                    AddressCountry: person.ResidentalAddress.Country,
-                    AddressZipCode: person.ResidentalAddress.ZipCode,
-                    AddressCity: person.ResidentalAddress.City,
-                    AddressStreet: person.ResidentalAddress.Street,
-                    AddressBuildingNumber: faker.Address.BuildingNumber(),
-                    AddressState: person.ResidentalAddress.State,
                     DefaultAdvertisementPickupAddressCountry: faker.Address.Country(),
                     DefaultAdvertisementPickupAddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
@@ -154,13 +129,6 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         personAfterUpdate.Nickname.Should().Be(request.Nickname);
         personAfterUpdate.Email.Should().Be(request.Email);
         personAfterUpdate.PhoneNumber.Should().Be(request.PhoneNumber);
-        personAfterUpdate.ResidentalAddress.Country.Should().Be(request.AddressCountry);
-        personAfterUpdate.ResidentalAddress.State.Should().Be(request.AddressState);
-        personAfterUpdate.ResidentalAddress.ZipCode.Should().Be(request.AddressZipCode);
-        personAfterUpdate.ResidentalAddress.City.Should().Be(request.AddressCity);
-        personAfterUpdate.ResidentalAddress.Street.Should().Be(request.AddressStreet);
-        personAfterUpdate.ResidentalAddress.City.Should().Be(request.AddressCity);
-        personAfterUpdate.ResidentalAddress.BuildingNumber.Should().Be(request.AddressBuildingNumber);
     }
 
     [Fact]
@@ -176,12 +144,6 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
-                    AddressCountry: faker.Address.Country(),
-                    AddressZipCode: faker.Address.ZipCode(),
-                    AddressCity: faker.Address.City(),
-                    AddressStreet: faker.Address.StreetName(),
-                    AddressBuildingNumber: faker.Address.BuildingNumber(),
-                    AddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressCountry: faker.Address.Country(),
                     DefaultAdvertisementPickupAddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
@@ -215,12 +177,6 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
             Nickname: "",
             Email: "",
             PhoneNumber: "",
-            AddressCountry: "",
-            AddressState: "",
-            AddressZipCode: "",
-            AddressCity: "",
-            AddressStreet: "",
-            AddressBuildingNumber: "",
             DefaultAdvertisementPickupAddressCountry: "",
             DefaultAdvertisementPickupAddressState: "",
             DefaultAdvertisementPickupAddressZipCode: "",
@@ -239,24 +195,19 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
             await updateResponse.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         validationProblemDetails.Should().NotBeNull();
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
-        validationProblemDetails.Errors.Count.Should().Be(13);
+        validationProblemDetails.Errors.Count.Should().Be(8);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(
             nameof(UpdatePerson.UpdatePersonRequest.Nickname),
             nameof(UpdatePerson.UpdatePersonRequest.Email),
             nameof(UpdatePerson.UpdatePersonRequest.PhoneNumber),
             nameof(UpdatePerson.UpdatePersonRequest.DefaultAdvertisementContactInfoEmail),
             nameof(UpdatePerson.UpdatePersonRequest.DefaultAdvertisementContactInfoPhoneNumber),
-            nameof(UpdatePerson.UpdatePersonRequest.AddressCountry),
-            nameof(UpdatePerson.UpdatePersonRequest.AddressZipCode),
-            nameof(UpdatePerson.UpdatePersonRequest.AddressCity),
-            nameof(UpdatePerson.UpdatePersonRequest.AddressStreet),
-            nameof(UpdatePerson.UpdatePersonRequest.AddressBuildingNumber),
             nameof(UpdatePerson.UpdatePersonRequest.DefaultAdvertisementPickupAddressCountry),
             nameof(UpdatePerson.UpdatePersonRequest.DefaultAdvertisementPickupAddressZipCode),
             nameof(UpdatePerson.UpdatePersonRequest.DefaultAdvertisementPickupAddressCity)
         );
 
-        validationProblemDetails.Errors.Values.Count.Should().Be(13);
+        validationProblemDetails.Errors.Values.Count.Should().Be(8);
 
         validationProblemDetails.Errors[nameof(UpdatePerson.UpdatePersonRequest.Nickname)][0]
             .Should()
@@ -279,27 +230,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
                 nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoPhoneNumber)][0]
             .Should()
             .Be("'Default Advertisement Contact Info Phone Number' must not be empty.");
-
-        validationProblemDetails.Errors[nameof(UpdatePerson.UpdatePersonRequest.AddressCountry)][0]
-            .Should()
-            .Be("'Address Country' must not be empty.");
-
-        validationProblemDetails.Errors[nameof(UpdatePerson.UpdatePersonRequest.AddressZipCode)][0]
-            .Should()
-            .Be("'Address Zip Code' must not be empty.");
-
-        validationProblemDetails.Errors[nameof(UpdatePerson.UpdatePersonRequest.AddressCity)][0]
-            .Should()
-            .Be("'Address City' must not be empty.");
-
-        validationProblemDetails.Errors[nameof(UpdatePerson.UpdatePersonRequest.AddressStreet)][0]
-            .Should()
-            .Be("'Address Street' must not be empty.");
-
-        validationProblemDetails.Errors[nameof(UpdatePerson.UpdatePersonRequest.AddressBuildingNumber)][0]
-            .Should()
-            .Be("'Address Building Number' must not be empty.");
-
+        
         validationProblemDetails.Errors[
                 nameof(UpdatePerson.UpdatePersonRequest.DefaultAdvertisementPickupAddressCountry)][0]
             .Should()
@@ -332,13 +263,6 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
                     Nickname: faker.Person.FirstName.ClampLength(Nickname.MaxLength + 1),
                     Email: faker.Person.Email.ClampLength(Email.MaxLength + 1),
                     PhoneNumber: faker.Person.Phone.ClampLength(PhoneNumber.MaxLength + 1),
-                    AddressCountry: faker.Address.Country().ClampLength(Address.CountryMaxLength + 1),
-                    AddressZipCode: faker.Address.ZipCode().ClampLength(Address.ZipCodeMaxLength + 1),
-                    AddressCity: faker.Address.City().ClampLength(Address.CityMaxLength + 1),
-                    AddressStreet: faker.Address.StreetName().ClampLength(Address.StreetMaxLength + 1),
-                    AddressBuildingNumber: faker.Address.BuildingNumber()
-                        .ClampLength(Address.BuildingNumberMaxLength + 1),
-                    AddressState: faker.Address.State().ClampLength(Address.StateMaxLength + 1),
                     DefaultAdvertisementPickupAddressCountry: faker.Address.Country()
                         .ClampLength(Address.CountryMaxLength + 1),
                     DefaultAdvertisementPickupAddressState: faker.Address.ZipCode()
@@ -366,17 +290,11 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
             await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         validationProblemDetails.Should().NotBeNull();
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
-        validationProblemDetails.Errors.Count.Should().Be(17);
+        validationProblemDetails.Errors.Count.Should().Be(11);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(
             nameof(CreatePerson.CreatePersonRequest.Nickname),
             nameof(CreatePerson.CreatePersonRequest.Email),
             nameof(CreatePerson.CreatePersonRequest.PhoneNumber),
-            nameof(CreatePerson.CreatePersonRequest.AddressCountry),
-            nameof(CreatePerson.CreatePersonRequest.AddressState),
-            nameof(CreatePerson.CreatePersonRequest.AddressZipCode),
-            nameof(CreatePerson.CreatePersonRequest.AddressCity),
-            nameof(CreatePerson.CreatePersonRequest.AddressStreet),
-            nameof(CreatePerson.CreatePersonRequest.AddressBuildingNumber),
             nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressCountry),
             nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressState),
             nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressZipCode),
@@ -386,7 +304,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
             nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoEmail),
             nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoPhoneNumber)
         );
-        validationProblemDetails.Errors.Values.Count.Should().Be(17);
+        validationProblemDetails.Errors.Values.Count.Should().Be(11);
 
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.Nickname)][0]
             .Should()
@@ -412,37 +330,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
             .Should()
             .StartWith(
                 $"The length of 'Default Advertisement Contact Info Email' must be {Email.MaxLength} characters or fewer. You entered");
-
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.AddressCountry)][0]
-            .Should()
-            .StartWith(
-                $"The length of 'Address Country' must be {Address.CountryMaxLength} characters or fewer. You entered");
-
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.AddressState)][0]
-            .Should()
-            .StartWith(
-                $"The length of 'Address State' must be {Address.StateMaxLength} characters or fewer. You entered");
-
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.AddressZipCode)][0]
-            .Should()
-            .StartWith(
-                $"The length of 'Address Zip Code' must be {Address.ZipCodeMaxLength} characters or fewer. You entered");
-
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.AddressCity)][0]
-            .Should()
-            .StartWith(
-                $"The length of 'Address City' must be {Address.CityMaxLength} characters or fewer. You entered");
-
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.AddressStreet)][0]
-            .Should()
-            .StartWith(
-                $"The length of 'Address Street' must be {Address.StreetMaxLength} characters or fewer. You entered");
-
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.AddressBuildingNumber)][0]
-            .Should()
-            .StartWith(
-                $"The length of 'Address Building Number' must be {Address.BuildingNumberMaxLength} characters or fewer. You entered");
-
+        
         validationProblemDetails.Errors[
                 nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressCountry)][0]
             .Should()
@@ -498,12 +386,6 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
             Nickname: person.Nickname,
             Email: email,
             PhoneNumber: person.PhoneNumber,
-            AddressCountry: person.ResidentalAddress.Country,
-            AddressState: person.ResidentalAddress.State,
-            AddressZipCode: person.ResidentalAddress.ZipCode,
-            AddressCity: person.ResidentalAddress.City,
-            AddressStreet: person.ResidentalAddress.Street,
-            AddressBuildingNumber: person.ResidentalAddress.BuildingNumber,
             DefaultAdvertisementPickupAddressCountry: person.DefaultAdvertisementsPickupAddress.Country,
             DefaultAdvertisementPickupAddressState: person.DefaultAdvertisementsPickupAddress.State,
             DefaultAdvertisementPickupAddressZipCode: person.DefaultAdvertisementsPickupAddress.ZipCode,
@@ -559,12 +441,6 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
             Nickname: firstUser.Nickname,
             Email: secondPersonCreateRequest.Email,
             PhoneNumber: secondPersonCreateRequest.PhoneNumber,
-            AddressCountry: firstUser.ResidentalAddress.Country,
-            AddressState: firstUser.ResidentalAddress.State,
-            AddressZipCode: firstUser.ResidentalAddress.ZipCode,
-            AddressCity: firstUser.ResidentalAddress.City,
-            AddressStreet: firstUser.ResidentalAddress.Street,
-            AddressBuildingNumber: firstUser.ResidentalAddress.BuildingNumber,
             DefaultAdvertisementPickupAddressCountry: firstUser.DefaultAdvertisementsPickupAddress.Country,
             DefaultAdvertisementPickupAddressState: firstUser.DefaultAdvertisementsPickupAddress.State,
             DefaultAdvertisementPickupAddressZipCode: firstUser.DefaultAdvertisementsPickupAddress.ZipCode,
