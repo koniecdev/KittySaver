@@ -28,17 +28,10 @@ public class DeleteAdvertisementEndpointsTests : IAsyncLifetime
         new Faker<CreatePerson.CreatePersonRequest>()
             .CustomInstantiator(faker =>
                 new CreatePerson.CreatePersonRequest(
-                    FirstName: faker.Person.FirstName,
-                    LastName: faker.Person.LastName,
+                    Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     UserIdentityId: Guid.NewGuid(),
-                    AddressCountry: faker.Address.Country(),
-                    AddressState: faker.Address.State(),
-                    AddressZipCode: faker.Address.ZipCode(),
-                    AddressCity: faker.Address.City(),
-                    AddressStreet: faker.Address.StreetName(),
-                    AddressBuildingNumber: faker.Address.BuildingNumber(),
                     DefaultAdvertisementPickupAddressCountry: faker.Address.Country(),
                     DefaultAdvertisementPickupAddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),

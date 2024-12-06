@@ -13,6 +13,7 @@ public class GetPersonsEndpointsTests : IAsyncLifetime
 {
     private readonly HttpClient _httpClient;
     private readonly CleanupHelper _cleanup;
+
     public GetPersonsEndpointsTests(KittySaverApiFactory appFactory)
     {
         _httpClient = appFactory.CreateClient();
@@ -21,19 +22,12 @@ public class GetPersonsEndpointsTests : IAsyncLifetime
 
     private readonly Faker<CreatePerson.CreatePersonRequest> _createPersonRequestGenerator =
         new Faker<CreatePerson.CreatePersonRequest>()
-            .CustomInstantiator( faker =>
+            .CustomInstantiator(faker =>
                 new CreatePerson.CreatePersonRequest(
-                    FirstName: faker.Person.FirstName,
-                    LastName: faker.Person.LastName,
+                    Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     UserIdentityId: Guid.NewGuid(),
-                    AddressCountry: faker.Address.Country(),
-                    AddressZipCode: faker.Address.ZipCode(),
-                    AddressCity: faker.Address.City(),
-                    AddressStreet: faker.Address.StreetName(),
-                    AddressBuildingNumber: faker.Address.BuildingNumber(),
-                    AddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressCountry: faker.Address.Country(),
                     DefaultAdvertisementPickupAddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
@@ -43,7 +37,7 @@ public class GetPersonsEndpointsTests : IAsyncLifetime
                     DefaultAdvertisementContactInfoEmail: faker.Person.Email,
                     DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 ));
-    
+
     [Fact]
     public async Task GetPersons_ShouldReturnUser_WhenUserExist()
     {
@@ -59,19 +53,11 @@ public class GetPersonsEndpointsTests : IAsyncLifetime
         persons!.Count.Should().BeGreaterThan(0);
         PersonResponse registeredPerson = persons.First();
         registeredPerson.Id.Should().NotBeEmpty();
-        registeredPerson.FirstName.Should().Be(createRequest.FirstName);
-        registeredPerson.LastName.Should().Be(createRequest.LastName);
-        registeredPerson.FullName.Should().Be($"{createRequest.FirstName} {createRequest.LastName}");
+        registeredPerson.Nickname.Should().Be(createRequest.Nickname);
         registeredPerson.Email.Should().Be(createRequest.Email);
         registeredPerson.PhoneNumber.Should().Be(createRequest.PhoneNumber);
-        registeredPerson.ResidentalAddress.Country.Should().Be(createRequest.AddressCountry);
-        registeredPerson.ResidentalAddress.State.Should().Be(createRequest.AddressState);
-        registeredPerson.ResidentalAddress.ZipCode.Should().Be(createRequest.AddressZipCode);
-        registeredPerson.ResidentalAddress.City.Should().Be(createRequest.AddressCity);
-        registeredPerson.ResidentalAddress.Street.Should().Be(createRequest.AddressStreet);
-        registeredPerson.ResidentalAddress.BuildingNumber.Should().Be(createRequest.AddressBuildingNumber);
     }
-    
+
     [Fact]
     public async Task GetPersons_ShouldReturnEmptyList_WhenNoUsersExist()
     {

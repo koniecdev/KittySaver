@@ -17,27 +17,21 @@ public class GetPersonEndpointsTests : IAsyncLifetime
 {
     private readonly HttpClient _httpClient;
     private readonly CleanupHelper _cleanup;
+
     public GetPersonEndpointsTests(KittySaverApiFactory appFactory)
     {
         _httpClient = appFactory.CreateClient();
         _cleanup = new CleanupHelper(_httpClient);
     }
-    
+
     private readonly Faker<CreatePerson.CreatePersonRequest> _createPersonRequestGenerator =
         new Faker<CreatePerson.CreatePersonRequest>()
-            .CustomInstantiator( faker =>
+            .CustomInstantiator(faker =>
                 new CreatePerson.CreatePersonRequest(
-                    FirstName: faker.Person.FirstName,
-                    LastName: faker.Person.LastName,
+                    Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     UserIdentityId: Guid.NewGuid(),
-                    AddressCountry: faker.Address.Country(),
-                    AddressZipCode: faker.Address.ZipCode(),
-                    AddressCity: faker.Address.City(),
-                    AddressStreet: faker.Address.StreetName(),
-                    AddressBuildingNumber: faker.Address.BuildingNumber(),
-                    AddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressCountry: faker.Address.Country(),
                     DefaultAdvertisementPickupAddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
@@ -64,16 +58,9 @@ public class GetPersonEndpointsTests : IAsyncLifetime
         PersonResponse person = await response.Content.ReadFromJsonAsync<PersonResponse>() ?? throw new JsonException();
         person.Id.Should().Be(registerResponse.Id);
         person.Email.Should().Be(request.Email);
-        person.FullName.Should().Be($"{request.FirstName} {request.LastName}");
         person.PhoneNumber.Should().Be(request.PhoneNumber);
-        person.ResidentalAddress.Country.Should().Be(request.AddressCountry);
-        person.ResidentalAddress.State.Should().Be(request.AddressState);
-        person.ResidentalAddress.ZipCode.Should().Be(request.AddressZipCode);
-        person.ResidentalAddress.City.Should().Be(request.AddressCity);
-        person.ResidentalAddress.Street.Should().Be(request.AddressStreet);
-        person.ResidentalAddress.BuildingNumber.Should().Be(request.AddressBuildingNumber);
     }
-    
+
     [Fact]
     public async Task GetPerson_ShouldReturnNotFound_WhenNoPersonExist()
     {

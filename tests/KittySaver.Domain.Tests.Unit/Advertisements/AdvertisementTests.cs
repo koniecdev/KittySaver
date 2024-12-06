@@ -48,11 +48,9 @@ public class AdvertisementTests
         .CustomInstantiator(faker =>
             Person.Create(
                 userIdentityId: Guid.NewGuid(),
-                firstName: FirstName.Create(faker.Person.FirstName),
-                lastName: LastName.Create(faker.Person.LastName),
+                nickname: Nickname.Create(faker.Person.FirstName),
                 email: Email.Create(faker.Person.Email),
                 phoneNumber: PhoneNumber.Create(faker.Person.Phone),
-                residentalAddress: Address,
                 defaultAdvertisementPickupAddress: PickupAddressGenerator.Generate(),
                 defaultAdvertisementContactInfoEmail: ContactInfoEmailGenerator.Generate(),
                 defaultAdvertisementContactInfoPhoneNumber: ContactInfoPhoneNumberGenerator.Generate()
@@ -326,11 +324,9 @@ public class AdvertisementTests
         .CustomInstantiator(faker =>
             Person.Create(
                 userIdentityId: Guid.NewGuid(),
-                firstName: FirstName.Create(faker.Person.FirstName),
-                lastName: LastName.Create(faker.Person.LastName),
+                nickname: Nickname.Create(faker.Person.FirstName),
                 email: Email.Create(faker.Person.Email),
                 phoneNumber: PhoneNumber.Create(faker.Person.Phone),
-                residentalAddress: Address,
                 defaultAdvertisementPickupAddress: Address,
                 defaultAdvertisementContactInfoEmail: Email.Create(faker.Person.Email),
                 defaultAdvertisementContactInfoPhoneNumber: PhoneNumber.Create(faker.Person.Phone)
