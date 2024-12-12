@@ -191,9 +191,9 @@ public class RefreshAdvertisementEndpointsTests : IAsyncLifetime
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
         validationProblemDetails.Errors.Count.Should().Be(1);
         validationProblemDetails.Errors.Keys.Should()
-            .BeEquivalentTo(nameof(RefreshAdvertisement.RefreshAdvertisementCommand.Id));
+            .BeEquivalentTo(nameof(RefreshAdvertisement.RefreshAdvertisementCommand.AdvertisementId));
         validationProblemDetails.Errors.Values.Count.Should().Be(1);
-        validationProblemDetails.Errors[nameof(RefreshAdvertisement.RefreshAdvertisementCommand.Id)][0]
+        validationProblemDetails.Errors[nameof(RefreshAdvertisement.RefreshAdvertisementCommand.AdvertisementId)][0]
             .Should().Be("'Id' must not be empty.");
     }
 

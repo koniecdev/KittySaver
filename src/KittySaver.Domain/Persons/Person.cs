@@ -345,9 +345,10 @@ internal sealed class PersonConfiguration : IEntityTypeConfiguration<Person>
             .OnDelete(DeleteBehavior.Cascade)
             .IsRequired();
 
-        builder.HasMany<Advertisement>()
+        builder.HasMany(person => person.Advertisements)
             .WithOne()
             .HasForeignKey(advertisement => advertisement.PersonId)
+            .OnDelete(DeleteBehavior.Cascade)
             .IsRequired();
 
         builder.ComplexProperty(x => x.DefaultAdvertisementsPickupAddress, complexPropertyBuilder =>

@@ -182,9 +182,9 @@ public class CloseAdvertisementEndpointsTests : IAsyncLifetime
         validationProblemDetails.Should().NotBeNull();
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
         validationProblemDetails.Errors.Count.Should().Be(1);
-        validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(nameof(DeleteAdvertisement.DeleteAdvertisementCommand.Id));
+        validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(nameof(DeleteAdvertisement.DeleteAdvertisementCommand.AdvertisementId));
         validationProblemDetails.Errors.Values.Count.Should().Be(1);
-        validationProblemDetails.Errors[nameof(DeleteAdvertisement.DeleteAdvertisementCommand.Id)][0]
+        validationProblemDetails.Errors[nameof(DeleteAdvertisement.DeleteAdvertisementCommand.AdvertisementId)][0]
             .Should().Be("'Id' must not be empty.");
     }
     

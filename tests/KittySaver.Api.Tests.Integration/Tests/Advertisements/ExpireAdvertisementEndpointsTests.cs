@@ -191,9 +191,9 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
         validationProblemDetails.Errors.Count.Should().Be(1);
         validationProblemDetails.Errors.Keys.Should()
-            .BeEquivalentTo(nameof(ExpireAdvertisement.ExpireAdvertisementCommand.Id));
+            .BeEquivalentTo(nameof(ExpireAdvertisement.ExpireAdvertisementCommand.AdvertisementId));
         validationProblemDetails.Errors.Values.Count.Should().Be(1);
-        validationProblemDetails.Errors[nameof(ExpireAdvertisement.ExpireAdvertisementCommand.Id)][0]
+        validationProblemDetails.Errors[nameof(ExpireAdvertisement.ExpireAdvertisementCommand.AdvertisementId)][0]
             .Should().Be("'Id' must not be empty.");
     }
 

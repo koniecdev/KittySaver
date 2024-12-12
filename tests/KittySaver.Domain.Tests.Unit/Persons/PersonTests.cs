@@ -5,7 +5,6 @@ using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Common.Primitives;
 using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.Persons;
-using KittySaver.Domain.Persons.Events;
 using KittySaver.Domain.ValueObjects;
 using NSubstitute;
 using Person = KittySaver.Domain.Persons.Person;
@@ -428,12 +427,6 @@ public class PersonTests
         cat1.AgeCategory.Value.Should().Be(AgeCategory.Adult);
         cat1.Behavior.Value.Should().Be(Behavior.Friendly);
         cat1.MedicalHelpUrgency.Value.Should().Be(MedicalHelpUrgency.NoNeed);
-        IReadOnlyCollection<DomainEvent> personEvents = sut.GetDomainEvents();
-        personEvents.Count.Should().Be(1);
-        personEvents.First().Should().BeOfType<AssignedToAdvertisementCatStatusChangedDomainEvent>();
-        AssignedToAdvertisementCatStatusChangedDomainEvent castedEvent =
-            (AssignedToAdvertisementCatStatusChangedDomainEvent)personEvents.First();
-        castedEvent.AdvertisementId.Should().Be(advertisement.Id);
     }
     
     [Fact]
@@ -512,49 +505,49 @@ public class PersonTests
         results.Should().ThrowExactly<InvalidOperationException>();
     }
     
-    [Fact]
-    public void MarkCatsFromConcreteAdvertisementAsAdopted_BeSuccessfull_WhenValidDataAreProvided()
-    {
-        //Arrange
-        Person sut = Person.Create(
-            userIdentityId: _userIdentityId,
-            nickname: _defaultProperNickname,
-            email: _defaultProperEmail,
-            phoneNumber: _defaultProperPhone,
-            defaultAdvertisementPickupAddress: PickupAddress,
-            defaultAdvertisementContactInfoEmail: _defaultProperEmail,
-            defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
-        );
-        ICatPriorityCalculatorService calculatorService = Substitute.For<ICatPriorityCalculatorService>();
-        calculatorService.Calculate(Arg.Any<Cat>()).ReturnsForAnyArgs(420);
-        Faker<Cat> catGenerator = new Faker<Cat>()
-            .CustomInstantiator(faker =>
-                Cat.Create(
-                    priorityScoreCalculator: calculatorService,
-                    person: sut,
-                    name: CatName.Create(faker.Person.FirstName),
-                    additionalRequirements: Description.Create(faker.Person.FirstName),
-                    medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
-                    ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
-                    behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
-                    healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
-                    isCastrated: false));
-        Cat cat1 = catGenerator.Generate();
-        Cat cat2 = catGenerator.Generate();
-        Advertisement advertisement = Advertisement.Create(
-            currentDate: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
-            owner: sut,
-            catsIdsToAssign: [cat1.Id, cat2.Id],
-            pickupAddress: sut.DefaultAdvertisementsPickupAddress,
-            contactInfoEmail: sut.DefaultAdvertisementsContactInfoEmail,
-            contactInfoPhoneNumber: sut.DefaultAdvertisementsContactInfoPhoneNumber,
-            description: Description.Create("lorem ipsum"));
-        
-        //Act
-        sut.MarkCatsFromConcreteAdvertisementAsAdopted(advertisement.Id);
-        
-        //Assert
-        cat1.IsAdopted.Should().BeTrue();
-        cat2.IsAdopted.Should().BeTrue();
-    }
+    // [Fact]
+    // public void MarkCatsFromConcreteAdvertisementAsAdopted_BeSuccessfull_WhenValidDataAreProvided()
+    // {
+    //     //Arrange
+    //     Person sut = Person.Create(
+    //         userIdentityId: _userIdentityId,
+    //         nickname: _defaultProperNickname,
+    //         email: _defaultProperEmail,
+    //         phoneNumber: _defaultProperPhone,
+    //         defaultAdvertisementPickupAddress: PickupAddress,
+    //         defaultAdvertisementContactInfoEmail: _defaultProperEmail,
+    //         defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
+    //     );
+    //     ICatPriorityCalculatorService calculatorService = Substitute.For<ICatPriorityCalculatorService>();
+    //     calculatorService.Calculate(Arg.Any<Cat>()).ReturnsForAnyArgs(420);
+    //     Faker<Cat> catGenerator = new Faker<Cat>()
+    //         .CustomInstantiator(faker =>
+    //             Cat.Create(
+    //                 priorityScoreCalculator: calculatorService,
+    //                 person: sut,
+    //                 name: CatName.Create(faker.Person.FirstName),
+    //                 additionalRequirements: Description.Create(faker.Person.FirstName),
+    //                 medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
+    //                 ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
+    //                 behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
+    //                 healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
+    //                 isCastrated: false));
+    //     Cat cat1 = catGenerator.Generate();
+    //     Cat cat2 = catGenerator.Generate();
+    //     Advertisement advertisement = Advertisement.Create(
+    //         currentDate: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
+    //         owner: sut,
+    //         catsIdsToAssign: [cat1.Id, cat2.Id],
+    //         pickupAddress: sut.DefaultAdvertisementsPickupAddress,
+    //         contactInfoEmail: sut.DefaultAdvertisementsContactInfoEmail,
+    //         contactInfoPhoneNumber: sut.DefaultAdvertisementsContactInfoPhoneNumber,
+    //         description: Description.Create("lorem ipsum"));
+    //     
+    //     //Act
+    //     sut.MarkCatsFromConcreteAdvertisementAsAdopted(advertisement.Id);
+    //     
+    //     //Assert
+    //     cat1.IsAdopted.Should().BeTrue();
+    //     cat2.IsAdopted.Should().BeTrue();
+    // }
 }

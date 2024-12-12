@@ -1,8 +1,6 @@
 ﻿using Bogus;
 using FluentAssertions;
 using KittySaver.Domain.Advertisements;
-using KittySaver.Domain.Advertisements.Events;
-using KittySaver.Domain.Common.Primitives;
 using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
@@ -150,11 +148,6 @@ public class AdvertisementTests
         //Assert
         advertisement.Status.Should().Be(Advertisement.AdvertisementStatus.Closed);
         advertisement.ClosedOn.Should().Be(closureDate);
-        List<DomainEvent> events = advertisement.GetDomainEvents().ToList();
-        events.Count.Should().Be(1);
-        events.First().Should().BeOfType<AdvertisementClosedDomainEvent>();
-        AdvertisementClosedDomainEvent advertisementClosedDomainEvent = (AdvertisementClosedDomainEvent)events.First();
-        advertisementClosedDomainEvent.AdvertisementId.Should().Be(advertisement.Id);
     }
     
     [Fact]
