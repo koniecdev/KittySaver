@@ -27,7 +27,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICurrentEnvironmentService, CurrentEnvironmentService>();
         services.AddScoped<IDateTimeService, DefaultDateTimeService>();
         services.AddScoped<IPersonRepository, PersonRepository>();
-        services.AddScoped<IAdvertisementRepository, AdvertisementRepository>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<ICatPriorityCalculatorService, DefaultCatPriorityCalculatorService>();
         services.AddValidatorsFromAssembly(assembly);
