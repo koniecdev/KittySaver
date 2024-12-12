@@ -13,6 +13,7 @@ public sealed class Person : AggregateRoot
 {
     private readonly Guid _userIdentityId;
     private readonly List<Cat> _cats = [];
+    private readonly List<Advertisement> _advertisements = [];
 
     /// <remarks>
     /// Required by EF Core, and should never be used by programmer as it bypasses business rules.
@@ -143,6 +144,33 @@ public sealed class Person : AggregateRoot
         _cats.Remove(cat);
     }
     
+    public void AddAdvertisement(Advertisement advertisement)
+    {
+        _advertisements.Add(advertisement);
+    }
+
+    public void RemoveAdvertisement(Guid advertisementId)
+    {
+        Advertisement advertisement = GetAdvertisementById(advertisementId);
+        _advertisements.Remove(advertisement);
+        IEnumerable<Cat> catsOfAdvertisementQuery = GetAssignedToConcreteAdvertisementCats(advertisement.Id);
+        foreach(Cat cat in catsOfAdvertisementQuery)
+        {
+            cat.UnassignAdvertisement();
+        }
+    }
+
+    public void CloseAdvertisement(Guid advertisementId, DateTimeOffset currentDate)
+    {
+        Advertisement advertisement = GetAdvertisementById(advertisementId);
+        advertisement.Close(currentDate);
+        IEnumerable<Cat> catsOfClosedAdvertisementQuery = GetAssignedToConcreteAdvertisementCats(advertisementId);
+        foreach (Cat cat in catsOfClosedAdvertisementQuery)
+        {
+            cat.MarkAsAdopted();
+        }
+    }
+    
     public void AssignCatToAdvertisement(Guid advertisementId, Guid catId)
     {
         Cat cat = GetCatById(catId);
@@ -163,16 +191,7 @@ public sealed class Person : AggregateRoot
             cat.UnassignAdvertisement();
         }
     }
-
-    public void MarkCatsFromConcreteAdvertisementAsAdopted(Guid advertisementId)
-    {
-        IEnumerable<Cat> catsQuery = GetAssignedToConcreteAdvertisementCats(advertisementId);
-        foreach (Cat cat in catsQuery)
-        {
-            cat.MarkAsAdopted();
-        }
-    }
-
+    
     public void UpdateCat(
         Guid catId,
         ICatPriorityCalculatorService catPriorityCalculator,
@@ -242,6 +261,10 @@ public sealed class Person : AggregateRoot
     private Cat GetCatById(Guid catId) =>
         _cats.FirstOrDefault(c => c.Id == catId) ?? 
         throw new NotFoundExceptions.CatNotFoundException(catId);
+    
+    private Advertisement GetAdvertisementById(Guid advertisementId) =>
+        _advertisements.FirstOrDefault(c => c.Id == advertisementId) ?? 
+        throw new NotFoundExceptions.AdvertisementNotFoundException(advertisementId);
     
     private static class ErrorMessages
     {
