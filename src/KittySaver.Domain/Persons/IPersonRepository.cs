@@ -9,5 +9,4 @@ public interface IPersonRepository
     public Task<bool> IsUserIdentityIdUniqueAsync(Guid userIdentityId, CancellationToken cancellationToken);
     public void Insert(Person person);
     public void Remove(Person person);
-    public Task RemoveAllPersonAdvertisementsAsync(Guid personId, CancellationToken cancellationToken);
 }
