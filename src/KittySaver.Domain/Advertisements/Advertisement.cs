@@ -136,7 +136,7 @@ public sealed class Advertisement : AuditableEntity
         Status = AdvertisementStatus.Closed;
     }
 
-    public void Expire(DateTimeOffset currentDate)
+    internal void Expire(DateTimeOffset currentDate)
     {
         EnsureAdvertisementIsActive();
 
