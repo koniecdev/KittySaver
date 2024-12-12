@@ -96,6 +96,7 @@ public sealed class Person : AggregateRoot
     }
 
     public IReadOnlyList<Cat> Cats => _cats.ToList();
+    public IReadOnlyList<Advertisement> Advertisements => _advertisements.ToList();
 
     public void ChangeNickname(Nickname nickname)
     {
@@ -227,9 +228,7 @@ public sealed class Person : AggregateRoot
 
         return highestPriorityScore;
     }
-
-    public void AnnounceDeletion() => RaiseDomainEvent(new PersonDeletedDomainEvent(Id));
-
+    
     private IEnumerable<Cat> GetAssignedToConcreteAdvertisementCats(Guid advertisementId) 
         => _cats.Where(x => x.AdvertisementId == advertisementId);
     
