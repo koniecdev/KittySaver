@@ -144,7 +144,7 @@ public sealed class Advertisement : AuditableEntity
         }
     }
 
-    public void Refresh(DateTimeOffset currentDate)
+    internal void Refresh(DateTimeOffset currentDate)
     {
         if (Status is not (AdvertisementStatus.Active or AdvertisementStatus.Expired))
         {

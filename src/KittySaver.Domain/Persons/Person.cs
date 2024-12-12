@@ -231,6 +231,18 @@ public sealed class Person : AggregateRoot
             RaiseDomainEvent(new AssignedToAdvertisementCatStatusChangedDomainEvent(catToUpdate.AdvertisementId.Value));
         }
     }
+    public void UpdateAdvertisement(
+        Guid advertisementId,
+        Description description,
+        Address pickupAddress,
+        Email contactInfoEmail,
+        PhoneNumber contactInfoPhoneNumber)
+    {
+        Advertisement advertisementToUpdate = GetAdvertisementById(advertisementId);
+        advertisementToUpdate.ChangeDescription(description);
+        advertisementToUpdate.ChangePickupAddress(pickupAddress);
+        advertisementToUpdate.ChangeContactInfo(contactInfoEmail, contactInfoPhoneNumber);
+    }
     
     public double GetHighestPriorityScoreFromGivenCats(IEnumerable<Guid> catsIds)
     {
