@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using KittySaver.Domain.Advertisements.Events;
 using KittySaver.Domain.Common.Primitives;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
@@ -8,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace KittySaver.Domain.Advertisements;
 
-public sealed class Advertisement : AggregateRoot
+public sealed class Advertisement : AuditableEntity
 {
     public static Advertisement Create(
         DateTimeOffset currentDate,
@@ -129,14 +128,12 @@ public sealed class Advertisement : AggregateRoot
         ContactInfoPhoneNumber = contactInfoPhoneNumber;
     }
 
-    public void Close(DateTimeOffset currentDate)
+    internal void Close(DateTimeOffset currentDate)
     {
         EnsureAdvertisementIsActive();
 
         ClosedOn = currentDate;
         Status = AdvertisementStatus.Closed;
-        
-        RaiseDomainEvent(new AdvertisementClosedDomainEvent(Id));
     }
 
     public void Expire(DateTimeOffset currentDate)
@@ -163,8 +160,6 @@ public sealed class Advertisement : AggregateRoot
         }
     }
     
-    public void AnnounceDeletion() => RaiseDomainEvent(new AdvertisementDeletedDomainEvent(Id, PersonId));
-
     public void ValidateOwnership(Guid personId)
     {
         if (personId != PersonId)
