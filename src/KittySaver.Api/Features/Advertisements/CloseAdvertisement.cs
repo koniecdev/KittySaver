@@ -12,19 +12,19 @@ namespace KittySaver.Api.Features.Advertisements;
 
 public sealed class CloseAdvertisement : IEndpoint
 {
-    public sealed record CloseAdvertisementCommand(Guid AdvertisementId, Guid PersonId) : ICommand;
+    public sealed record CloseAdvertisementCommand(Guid PersonId, Guid AdvertisementId) : ICommand;
 
     public sealed class CloseAdvertisementCommandValidator
         : AbstractValidator<CloseAdvertisementCommand>
     {
         public CloseAdvertisementCommandValidator()
         {
-            RuleFor(x => x.AdvertisementId)
-                .NotEmpty()
-                .NotEqual(x => x.PersonId);
             RuleFor(x => x.PersonId)
                 .NotEmpty()
                 .NotEqual(x => x.AdvertisementId);
+            RuleFor(x => x.AdvertisementId)
+                .NotEmpty()
+                .NotEqual(x => x.PersonId);
         }
     }
 
@@ -50,7 +50,7 @@ public sealed class CloseAdvertisement : IEndpoint
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            CloseAdvertisementCommand command = new(AdvertisementId: advertisementId, PersonId: personId);
+            CloseAdvertisementCommand command = new(PersonId: personId, AdvertisementId: advertisementId);
             await sender.Send(command, cancellationToken);
             return Results.Ok();
         }).RequireAuthorization();
