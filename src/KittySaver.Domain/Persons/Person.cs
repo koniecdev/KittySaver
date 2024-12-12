@@ -2,7 +2,6 @@
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Common.Primitives;
 using KittySaver.Domain.Common.Primitives.Enums;
-using KittySaver.Domain.Persons.Events;
 using KittySaver.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -123,7 +122,7 @@ public sealed class Person : AggregateRoot
         DefaultAdvertisementsContactInfoPhoneNumber = defaultAdvertisementsContactInfoPhoneNumber;
     }
     
-    public IEnumerable<Guid> GetAssignedToConcreteAdvertisementCatIds(Guid advertisementId)
+    private IEnumerable<Guid> GetAssignedToConcreteAdvertisementCatIds(Guid advertisementId)
     {
         List<Guid> cats = Cats
             .Where(x => x.AdvertisementId == advertisementId)
@@ -147,10 +146,13 @@ public sealed class Person : AggregateRoot
     
     public void AddAdvertisement(Advertisement advertisement, IEnumerable<Guid> catsIdsToAssign)
     {
-        foreach (Guid catId in catsIdsToAssign)
+        List<Guid> catsIdsToAssignList = catsIdsToAssign.ToList();
+        foreach (Guid catId in catsIdsToAssignList)
         {
             AssignCatToAdvertisement(advertisement.Id, catId);
         }
+        double catsToAssignToAdvertisementHighestPriorityScore = GetHighestPriorityScoreFromGivenCats(catsIdsToAssignList);
+        advertisement.PriorityScore = catsToAssignToAdvertisementHighestPriorityScore;
         _advertisements.Add(advertisement);
     }
 
@@ -188,13 +190,13 @@ public sealed class Person : AggregateRoot
         advertisement.Refresh(currentDate);
     }
     
-    public void AssignCatToAdvertisement(Guid advertisementId, Guid catId)
+    private void AssignCatToAdvertisement(Guid advertisementId, Guid catId)
     {
         Cat cat = GetCatById(catId);
         cat.AssignAdvertisement(advertisementId);
     }
 
-    public void UnassignCatFromAdvertisement(Guid catId)
+    private void UnassignCatFromAdvertisement(Guid catId)
     {
         Cat cat = GetCatById(catId);
         cat.UnassignAdvertisement();
@@ -228,7 +230,7 @@ public sealed class Person : AggregateRoot
         
         if (catToUpdate.AdvertisementId.HasValue)
         {
-            RaiseDomainEvent(new AssignedToAdvertisementCatStatusChangedDomainEvent(catToUpdate.AdvertisementId.Value));
+            UpdateAdvertisementPriorityScore(catToUpdate.AdvertisementId.Value);
         }
     }
     public void UpdateAdvertisement(
@@ -257,6 +259,32 @@ public sealed class Person : AggregateRoot
         return highestPriorityScore;
     }
     
+    public void ReplaceCatsOfAdvertisement(Guid advertisementId, IEnumerable<Guid> catsToAssignIds)
+    {
+        List<Guid> catsToAssignIdsList = catsToAssignIds.ToList();
+
+        foreach (Guid catId in GetAssignedToConcreteAdvertisementCatIds(advertisementId))
+        {
+            UnassignCatFromAdvertisement(catId);
+        }
+
+        foreach (Guid catId in catsToAssignIdsList)
+        {
+            AssignCatToAdvertisement(advertisementId, catId);
+        }
+        
+        UpdateAdvertisementPriorityScore(advertisementId);
+    }
+
+    private void UpdateAdvertisementPriorityScore(Guid advertisementId)
+    {
+        IEnumerable<Cat> catsQuery = GetAssignedToConcreteAdvertisementCats(advertisementId);
+        double catsToAssignToAdvertisementHighestPriorityScore = GetHighestPriorityScoreFromGivenCats(catsQuery.Select(x=>x.Id));
+
+        Advertisement advertisement = GetAdvertisementById(advertisementId);
+        advertisement.PriorityScore = catsToAssignToAdvertisementHighestPriorityScore;
+    }
+
     private IEnumerable<Cat> GetAssignedToConcreteAdvertisementCats(Guid advertisementId) 
         => _cats.Where(x => x.AdvertisementId == advertisementId);
     

@@ -36,9 +36,6 @@ public sealed class Advertisement : AuditableEntity
         
         owner.AddAdvertisement(advertisement, catsIdsToAssignList);
         
-        double catsToAssignToAdvertisementHighestPriorityScore = owner.GetHighestPriorityScoreFromGivenCats(catsIdsToAssignList);
-        advertisement.PriorityScore = catsToAssignToAdvertisementHighestPriorityScore;
-        
         advertisement.Status = AdvertisementStatus.Active;
         return advertisement;
     }
