@@ -19,7 +19,6 @@ public sealed class ApplicationWriteDbContext(
     : DbContext(options), IUnitOfWork
 {
     public DbSet<Person> Persons => Set<Person>();
-    public DbSet<Advertisement> Advertisements => Set<Advertisement>();
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
