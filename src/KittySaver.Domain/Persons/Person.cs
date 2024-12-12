@@ -182,6 +182,12 @@ public sealed class Person : AggregateRoot
         advertisement.Expire(currentDate);
     }
     
+    public void RefreshAdvertisement(Guid advertisementId, DateTimeOffset currentDate)
+    {
+        Advertisement advertisement = GetAdvertisementById(advertisementId);
+        advertisement.Refresh(currentDate);
+    }
+    
     public void AssignCatToAdvertisement(Guid advertisementId, Guid catId)
     {
         Cat cat = GetCatById(catId);
