@@ -193,7 +193,7 @@ public class CatTests
         );
         Advertisement.Create(
             currentDate: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
-            person: Person,
+            owner: Person,
             catsIdsToAssign: [sut.Id],
             pickupAddress: Person.DefaultAdvertisementsPickupAddress,
             contactInfoEmail: Person.DefaultAdvertisementsContactInfoEmail,

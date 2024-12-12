@@ -81,7 +81,7 @@ public class AdvertisementServiceTests
 
         Advertisement advertisement = Advertisement.Create(
             currentDate: Date,
-            person: Person,
+            owner: Person,
             catsIdsToAssign: cats.Select(x=>x.Id),
             pickupAddress: pickupAddress,
             contactInfoEmail: contactInfoEmail,
@@ -137,7 +137,7 @@ public class AdvertisementServiceTests
 
         Advertisement advertisement = Advertisement.Create(
             currentDate: Date,
-            person: Person,
+            owner: Person,
             catsIdsToAssign: [cat.Id],
             pickupAddress: pickupAddress,
             contactInfoEmail: contactInfoEmail,

@@ -145,8 +145,12 @@ public sealed class Person : AggregateRoot
         _cats.Remove(cat);
     }
     
-    public void AddAdvertisement(Advertisement advertisement)
+    public void AddAdvertisement(Advertisement advertisement, IEnumerable<Guid> catsIdsToAssign)
     {
+        foreach (Guid catId in catsIdsToAssign)
+        {
+            AssignCatToAdvertisement(advertisement.Id, catId);
+        }
         _advertisements.Add(advertisement);
     }
 

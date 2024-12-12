@@ -11,7 +11,7 @@ public sealed class Advertisement : AuditableEntity
 {
     public static Advertisement Create(
         DateTimeOffset currentDate,
-        Person person,
+        Person owner,
         IEnumerable<Guid> catsIdsToAssign,
         Address pickupAddress,
         Email contactInfoEmail,
@@ -27,18 +27,16 @@ public sealed class Advertisement : AuditableEntity
         DateTimeOffset expiresOn = currentDate + ExpiringPeriodInDays;
         
         Advertisement advertisement = new(
-            personId: person.Id,
+            personId: owner.Id,
             pickupAddress: pickupAddress,
             contactInfoEmail: contactInfoEmail,
             contactInfoPhoneNumber: contactInfoPhoneNumber,
             description: description,
             expiresOn: expiresOn);
         
-        foreach (Guid catId in catsIdsToAssignList)
-        {
-            person.AssignCatToAdvertisement(advertisement.Id, catId);
-        }
-        double catsToAssignToAdvertisementHighestPriorityScore = person.GetHighestPriorityScoreFromGivenCats(catsIdsToAssignList);
+        owner.AddAdvertisement(advertisement, catsIdsToAssignList);
+        
+        double catsToAssignToAdvertisementHighestPriorityScore = owner.GetHighestPriorityScoreFromGivenCats(catsIdsToAssignList);
         advertisement.PriorityScore = catsToAssignToAdvertisementHighestPriorityScore;
         
         advertisement.Status = AdvertisementStatus.Active;

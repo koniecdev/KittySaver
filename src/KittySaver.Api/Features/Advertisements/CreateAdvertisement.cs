@@ -88,14 +88,13 @@ public class CreateAdvertisement : IEndpoint
 
     internal sealed class CreateAdvertisementCommandHandler(
         IPersonRepository personRepository,
-        IAdvertisementRepository advertisementRepository,
         IUnitOfWork unitOfWork,
         IDateTimeService dateTimeService)
         : IRequestHandler<CreateAdvertisementCommand, Guid>
     {
         public async Task<Guid> Handle(CreateAdvertisementCommand request, CancellationToken cancellationToken)
         {
-            Person person = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
+            Person owner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
 
             Address pickupAddress = Address.Create(
                 country: request.PickupAddressCountry,
@@ -110,14 +109,13 @@ public class CreateAdvertisement : IEndpoint
             
             Advertisement advertisement = Advertisement.Create(
                 currentDate: dateTimeService.Now,
-                person: person,
+                owner: owner,
                 catsIdsToAssign: request.CatsIdsToAssign,
                 pickupAddress: pickupAddress,
                 contactInfoEmail: contactInfoEmail,
                 contactInfoPhoneNumber: contactInfoPhoneNumber,
                 description: description);
 
-            advertisementRepository.Insert(advertisement);
             await unitOfWork.SaveChangesAsync(cancellationToken);
             return advertisement.Id;
         }

@@ -83,7 +83,7 @@ public class AdvertisementTests
         //Act
         Advertisement advertisement = Advertisement.Create(
             currentDate: Date,
-            person: Person,
+            owner: Person,
             catsIdsToAssign: cats.Select(x=>x.Id),
             pickupAddress: pickupAddress,
             contactInfoEmail: contactInfoEmail,
@@ -116,7 +116,7 @@ public class AdvertisementTests
         {
             Advertisement.Create(
                 currentDate: Date,
-                person: Person,
+                owner: Person,
                 catsIdsToAssign: [],
                 pickupAddress: pickupAddress,
                 contactInfoEmail: contactInfoEmail,
@@ -136,7 +136,7 @@ public class AdvertisementTests
         //Arrange
         Advertisement advertisement = Advertisement.Create(
                 currentDate: Date,
-                person: Person,
+                owner: Person,
                 catsIdsToAssign: [CatGenerator.Generate().Id],
                 pickupAddress: PickupAddressGenerator.Generate(),
                 contactInfoEmail: ContactInfoEmailGenerator.Generate(),
@@ -163,7 +163,7 @@ public class AdvertisementTests
         //Arrange
         Advertisement advertisement = Advertisement.Create(
             currentDate: Date,
-            person: Person,
+            owner: Person,
             catsIdsToAssign: [CatGenerator.Generate().Id],
             pickupAddress: PickupAddressGenerator.Generate(),
             contactInfoEmail: ContactInfoEmailGenerator.Generate(),
@@ -187,7 +187,7 @@ public class AdvertisementTests
 
         Advertisement advertisement = Advertisement.Create(
             currentDate: Date,
-            person: Person,
+            owner: Person,
             catsIdsToAssign: [cat.Id],
             pickupAddress: PickupAddressGenerator,
             contactInfoEmail: ContactInfoEmailGenerator.Generate(),
@@ -208,7 +208,7 @@ public class AdvertisementTests
         //Arrange
         Advertisement advertisement = Advertisement.Create(
             currentDate: Date,
-            person: Person,
+            owner: Person,
             catsIdsToAssign: [CatGenerator.Generate().Id],
             pickupAddress: PickupAddressGenerator.Generate(),
             contactInfoEmail: ContactInfoEmailGenerator.Generate(),
@@ -232,7 +232,7 @@ public class AdvertisementTests
 
         Advertisement advertisement = Advertisement.Create(
             currentDate: Date,
-            person: Person,
+            owner: Person,
             catsIdsToAssign: [cat.Id],
             pickupAddress: PickupAddressGenerator,
             contactInfoEmail: ContactInfoEmailGenerator.Generate(),
@@ -256,7 +256,7 @@ public class AdvertisementTests
         //Arrange
         Advertisement advertisement = Advertisement.Create(
             currentDate: Date,
-            person: Person,
+            owner: Person,
             catsIdsToAssign: [CatGenerator.Generate().Id],
             pickupAddress: PickupAddressGenerator.Generate(),
             contactInfoEmail: ContactInfoEmailGenerator.Generate(),
@@ -281,7 +281,7 @@ public class AdvertisementTests
 
         Advertisement advertisement = Advertisement.Create(
             currentDate: Date,
-            person: Person,
+            owner: Person,
             catsIdsToAssign: [cat.Id],
             pickupAddress: PickupAddressGenerator,
             contactInfoEmail: ContactInfoEmailGenerator.Generate(),
@@ -301,7 +301,7 @@ public class AdvertisementTests
         //Arrange
         Advertisement advertisement = Advertisement.Create(
             currentDate: Date,
-            person: Person,
+            owner: Person,
             catsIdsToAssign: [CatGenerator.Generate().Id],
             pickupAddress: PickupAddressGenerator.Generate(),
             contactInfoEmail: ContactInfoEmailGenerator.Generate(),
@@ -355,7 +355,7 @@ public class AdvertisementTests
         {
             Advertisement.Create(
                 currentDate: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
-                person: person,
+                owner: person,
                 catsIdsToAssign: [cat.Id],
                 pickupAddress: person.DefaultAdvertisementsPickupAddress,
                 contactInfoEmail: person.DefaultAdvertisementsContactInfoEmail,

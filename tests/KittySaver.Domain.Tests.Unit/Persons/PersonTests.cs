@@ -401,7 +401,7 @@ public class PersonTests
                     isCastrated: false)).Generate();
         Advertisement advertisement = Advertisement.Create(
             currentDate: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
-            person: sut,
+            owner: sut,
             catsIdsToAssign: [cat1.Id],
             pickupAddress: sut.DefaultAdvertisementsPickupAddress,
             contactInfoEmail: sut.DefaultAdvertisementsContactInfoEmail,
@@ -498,7 +498,7 @@ public class PersonTests
                     isCastrated: false)).Generate();
         Advertisement.Create(
             currentDate: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
-            person: sut,
+            owner: sut,
             catsIdsToAssign: [cat1.Id],
             pickupAddress: sut.DefaultAdvertisementsPickupAddress,
             contactInfoEmail: sut.DefaultAdvertisementsContactInfoEmail,
@@ -543,7 +543,7 @@ public class PersonTests
         Cat cat2 = catGenerator.Generate();
         Advertisement advertisement = Advertisement.Create(
             currentDate: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
-            person: sut,
+            owner: sut,
             catsIdsToAssign: [cat1.Id, cat2.Id],
             pickupAddress: sut.DefaultAdvertisementsPickupAddress,
             contactInfoEmail: sut.DefaultAdvertisementsContactInfoEmail,
