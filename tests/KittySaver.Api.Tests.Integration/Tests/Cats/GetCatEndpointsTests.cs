@@ -111,7 +111,6 @@ public class GetCatEndpointsTests : IAsyncLifetime
             new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
                     new CreateAdvertisement.CreateAdvertisementRequest(
-                        PersonId: personRegisterResponse.Id,
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.Country(),
@@ -124,7 +123,7 @@ public class GetCatEndpointsTests : IAsyncLifetime
                         ContactInfoPhoneNumber: faker.Person.Phone
                     ));
 
-        await _httpClient.PostAsJsonAsync("api/v1/advertisements", request);
+        await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
 
         //Act
         HttpResponseMessage response =
@@ -157,7 +156,6 @@ public class GetCatEndpointsTests : IAsyncLifetime
             new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
                     new CreateAdvertisement.CreateAdvertisementRequest(
-                        PersonId: personRegisterResponse.Id,
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.Country(),
@@ -171,7 +169,7 @@ public class GetCatEndpointsTests : IAsyncLifetime
                     ));
 
         HttpResponseMessage advertisementResponseMessage =
-            await _httpClient.PostAsJsonAsync("api/v1/advertisements", request);
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
         ApiResponses.CreatedWithIdResponse advertisementResponse =
             await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
         CreateCat.CreateCatRequest anotherCatCreateRequest =
@@ -196,7 +194,7 @@ public class GetCatEndpointsTests : IAsyncLifetime
             anotherCatCreateResponse.Id
         ]);
 
-        await _httpClient.PutAsJsonAsync($"api/v1/advertisements/{advertisementResponse.Id}/cats", reassignCatsRequest);
+        await _httpClient.PutAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}/cats", reassignCatsRequest);
 
         //Act
         HttpResponseMessage response =

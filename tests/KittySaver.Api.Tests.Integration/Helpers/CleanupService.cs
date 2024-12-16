@@ -10,27 +10,9 @@ public class CleanupHelper(HttpClient httpClient)
 {
     public async Task Cleanup()
     {
-        await CleanupAdvertisements();
         await CleanupPersons();
     }
-
-    private async Task CleanupAdvertisements()
-    {
-        ICollection<AdvertisementResponse>? advertisements = 
-            await httpClient.GetFromJsonAsync<ICollection<AdvertisementResponse>>("api/v1/advertisements");
-        if (advertisements is null)
-        {
-            return;
-        }
-        foreach (AdvertisementResponse advertisement in advertisements)
-        {
-            var msg1 = await httpClient.DeleteAsync($"api/v1/advertisements/{advertisement.Id}");
-            if (!msg1.IsSuccessStatusCode)
-            {
-                ProblemDetails msg1ProblemDetail = await msg1.Content.ReadFromJsonAsync<ProblemDetails>() ?? throw new Exception();
-            }
-        }
-    }
+    
     private async Task CleanupPersons()
     {
         ICollection<PersonResponse>? persons = await httpClient.GetFromJsonAsync<ICollection<PersonResponse>>("api/v1/persons");

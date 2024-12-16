@@ -76,7 +76,6 @@ public class RefreshAdvertisementEndpointsTests : IAsyncLifetime
             new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
                     new CreateAdvertisement.CreateAdvertisementRequest(
-                        PersonId: personRegisterResponse.Id,
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.Country(),
@@ -90,14 +89,14 @@ public class RefreshAdvertisementEndpointsTests : IAsyncLifetime
                     ));
 
         HttpResponseMessage advertisementResponseMessage =
-            await _httpClient.PostAsJsonAsync("api/v1/advertisements", request);
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
         ApiResponses.CreatedWithIdResponse advertisementResponse =
             await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
-        await _httpClient.PostAsync($"api/v1/advertisements/{advertisementResponse.Id}/expire", null);
+        await _httpClient.PostAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}/expire", null);
 
         //Act
         HttpResponseMessage refreshResponseMessage =
-            await _httpClient.PostAsync($"api/v1/advertisements/{advertisementResponse.Id}/refresh", null);
+            await _httpClient.PostAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}/refresh", null);
 
         //Assert
         refreshResponseMessage.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -126,7 +125,6 @@ public class RefreshAdvertisementEndpointsTests : IAsyncLifetime
             new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
                     new CreateAdvertisement.CreateAdvertisementRequest(
-                        PersonId: personRegisterResponse.Id,
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.Country(),
@@ -140,13 +138,13 @@ public class RefreshAdvertisementEndpointsTests : IAsyncLifetime
                     ));
 
         HttpResponseMessage advertisementResponseMessage =
-            await _httpClient.PostAsJsonAsync("api/v1/advertisements", request);
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
         ApiResponses.CreatedWithIdResponse advertisementResponse =
             await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
 
         //Act
         HttpResponseMessage refreshResponseMessage =
-            await _httpClient.PostAsync($"api/v1/advertisements/{advertisementResponse.Id}/refresh", null);
+            await _httpClient.PostAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}/refresh", null);
 
         //Assert
         refreshResponseMessage.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -157,14 +155,38 @@ public class RefreshAdvertisementEndpointsTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task RefreshAdvertisement_ShouldReturnNotFound_WhenInvaliIdIsProvided()
+    public async Task RefreshAdvertisement_ShouldReturnNotFound_WhenInvalidPersonIdIsProvided()
     {
         //Arrange
-        Guid randomId = Guid.NewGuid();
+        Guid randomPersonId = Guid.NewGuid();
+        Guid randomAdvertisementId = Guid.NewGuid();
 
         //Act
         HttpResponseMessage refreshResponseMessage =
-            await _httpClient.PostAsync($"api/v1/advertisements/{randomId}/refresh", null);
+            await _httpClient.PostAsync($"api/v1/persons/{randomPersonId}/advertisements/{randomAdvertisementId}/refresh", null);
+
+        //Assert
+        refreshResponseMessage.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        ProblemDetails notFoundProblemDetails = await refreshResponseMessage.Content.ReadFromJsonAsync<ProblemDetails>()
+                                                ?? throw new JsonException();
+        notFoundProblemDetails.Status.Should().Be(StatusCodes.Status404NotFound);
+    }
+    
+    [Fact]
+    public async Task RefreshAdvertisement_ShouldReturnNotFound_WhenInvalidAdvertisementIdIsProvided()
+    {
+        //Arrange
+        CreatePerson.CreatePersonRequest personRegisterRequest = _createPersonRequestGenerator.Generate();
+        HttpResponseMessage personRegisterResponseMessage =
+            await _httpClient.PostAsJsonAsync("api/v1/persons", personRegisterRequest);
+        ApiResponses.CreatedWithIdResponse personRegisterResponse =
+            await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
+            ?? throw new JsonException();
+        Guid randomAdvertisementId = Guid.NewGuid();
+
+        //Act
+        HttpResponseMessage refreshResponseMessage =
+            await _httpClient.PostAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{randomAdvertisementId}/refresh", null);
 
         //Assert
         refreshResponseMessage.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -177,11 +199,12 @@ public class RefreshAdvertisementEndpointsTests : IAsyncLifetime
     public async Task RefreshAdvertisement_ShouldReturnBadRequest_WhenEmptyDataAreProvided()
     {
         //Arrange
-        Guid randomId = Guid.Empty;
+        Guid randomPersonId = Guid.NewGuid();
+        Guid emptyAdvertisementId = Guid.Empty;
 
         //Act
         HttpResponseMessage refreshResponse =
-            await _httpClient.PostAsync($"api/v1/advertisements/{randomId}/refresh", null);
+            await _httpClient.PostAsync($"api/v1/persons/{randomPersonId}/advertisements/{emptyAdvertisementId}/refresh", null);
 
         //Assert
         refreshResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -194,7 +217,7 @@ public class RefreshAdvertisementEndpointsTests : IAsyncLifetime
             .BeEquivalentTo(nameof(RefreshAdvertisement.RefreshAdvertisementCommand.AdvertisementId));
         validationProblemDetails.Errors.Values.Count.Should().Be(1);
         validationProblemDetails.Errors[nameof(RefreshAdvertisement.RefreshAdvertisementCommand.AdvertisementId)][0]
-            .Should().Be("'Id' must not be empty.");
+            .Should().Be("'Advertisement Id' must not be empty.");
     }
 
     public Task InitializeAsync()

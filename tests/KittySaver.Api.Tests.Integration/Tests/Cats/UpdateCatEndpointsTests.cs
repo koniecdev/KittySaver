@@ -133,7 +133,6 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
 
         CreateAdvertisement.CreateAdvertisementRequest createAdvertisementRequest =
             new CreateAdvertisement.CreateAdvertisementRequest(
-                PersonId: createPersonResponse.Id,
                 CatsIdsToAssign: [createCatResponse.Id],
                 Description: _createCatRequest.AdditionalRequirements,
                 PickupAddressCountry: _createPersonRequest.DefaultAdvertisementPickupAddressCountry,
@@ -146,7 +145,7 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                 ContactInfoPhoneNumber: _createPersonRequest.DefaultAdvertisementContactInfoPhoneNumber);
 
         HttpResponseMessage createAdvertisementResponseMessage =
-            await _httpClient.PostAsJsonAsync($"api/v1/advertisements", createAdvertisementRequest);
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{createPersonResponse.Id}/advertisements", createAdvertisementRequest);
         ApiResponses.CreatedWithIdResponse createAdvertisementResponse =
             await createAdvertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
 

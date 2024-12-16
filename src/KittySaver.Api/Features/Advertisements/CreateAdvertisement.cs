@@ -15,7 +15,6 @@ namespace KittySaver.Api.Features.Advertisements;
 public class CreateAdvertisement : IEndpoint
 {
     public sealed record CreateAdvertisementRequest(
-        Guid PersonId,
         IEnumerable<Guid> CatsIdsToAssign,
         string? Description,
         string PickupAddressCountry,
@@ -123,14 +122,15 @@ public class CreateAdvertisement : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapPost("advertisements", async
-        (CreateAdvertisementRequest request,
+        endpointRouteBuilder.MapPost("persons/{personId:guid}/advertisements", async (
+            Guid personId,
+            CreateAdvertisementRequest request,
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            CreateAdvertisementCommand command = request.MapToCreateAdvertisementCommand();
+            CreateAdvertisementCommand command = request.MapToCreateAdvertisementCommand(personId);
             Guid advertisementId = await sender.Send(command, cancellationToken);
-            return Results.Created($"/api/v1/advertisements/{advertisementId}", new { Id = advertisementId });
+            return Results.Created($"/api/v1/persons/{personId}/advertisements/{advertisementId}", new { Id = advertisementId });
         }).RequireAuthorization();
     }
 }
@@ -139,5 +139,6 @@ public class CreateAdvertisement : IEndpoint
 public static partial class CreateAdvertisementMapper
 {
     public static partial CreateAdvertisement.CreateAdvertisementCommand MapToCreateAdvertisementCommand(
-        this CreateAdvertisement.CreateAdvertisementRequest request);
+        this CreateAdvertisement.CreateAdvertisementRequest request,
+        Guid personId);
 }

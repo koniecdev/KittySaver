@@ -73,7 +73,6 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
             new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
                     new CreateAdvertisement.CreateAdvertisementRequest(
-                        PersonId: personRegisterResponse.Id,
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.Country(),
@@ -87,7 +86,7 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
                     ));
 
         HttpResponseMessage createAdvertisementResponseMessage =
-            await _httpClient.PostAsJsonAsync("api/v1/advertisements", request);
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
         ApiResponses.CreatedWithIdResponse createAdvertisementResponse =
             await createAdvertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
 
@@ -104,7 +103,7 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
         ]);
 
         HttpResponseMessage reassignCatsResponseMessage =
-            await _httpClient.PutAsJsonAsync($"api/v1/advertisements/{createAdvertisementResponse.Id}/cats",
+            await _httpClient.PutAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{createAdvertisementResponse.Id}/cats",
                 reassignCatsRequest);
 
         //Assert
@@ -157,7 +156,6 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
             new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
                     new CreateAdvertisement.CreateAdvertisementRequest(
-                        PersonId: personRegisterResponse.Id,
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.Country(),
@@ -171,7 +169,7 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
                     ));
 
         HttpResponseMessage createAdvertisementResponseMessage =
-            await _httpClient.PostAsJsonAsync("api/v1/advertisements", request);
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
         ApiResponses.CreatedWithIdResponse createAdvertisementResponse =
             await createAdvertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
 
@@ -180,7 +178,7 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
             new([anotherCatCreateResponse.Id]);
 
         HttpResponseMessage reassignCatsResponseMessage =
-            await _httpClient.PutAsJsonAsync($"api/v1/advertisements/{createAdvertisementResponse.Id}/cats",
+            await _httpClient.PutAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{createAdvertisementResponse.Id}/cats",
                 reassignCatsRequest);
 
         //Assert

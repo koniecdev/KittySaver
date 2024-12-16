@@ -76,7 +76,6 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
             new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
                     new CreateAdvertisement.CreateAdvertisementRequest(
-                        PersonId: personRegisterResponse.Id,
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.Country(),
@@ -90,13 +89,13 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
                     ));
 
         HttpResponseMessage advertisementResponseMessage =
-            await _httpClient.PostAsJsonAsync("api/v1/advertisements", request);
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
         ApiResponses.CreatedWithIdResponse advertisementResponse =
             await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
 
         //Act
         HttpResponseMessage expireResponseMessage =
-            await _httpClient.PostAsync($"api/v1/advertisements/{advertisementResponse.Id}/expire", null);
+            await _httpClient.PostAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}/expire", null);
 
         //Assert
         expireResponseMessage.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -125,7 +124,6 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
             new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
                     new CreateAdvertisement.CreateAdvertisementRequest(
-                        PersonId: personRegisterResponse.Id,
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.Country(),
@@ -139,14 +137,14 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
                     ));
 
         HttpResponseMessage advertisementResponseMessage =
-            await _httpClient.PostAsJsonAsync("api/v1/advertisements", request);
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
         ApiResponses.CreatedWithIdResponse advertisementResponse =
             await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
-        await _httpClient.PostAsync($"api/v1/advertisements/{advertisementResponse.Id}/expire", null);
+        await _httpClient.PostAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}/expire", null);
 
         //Act
         HttpResponseMessage duplicatedExpireResponseMessage =
-            await _httpClient.PostAsync($"api/v1/advertisements/{advertisementResponse.Id}/expire", null);
+            await _httpClient.PostAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}/expire", null);
 
         //Assert
         duplicatedExpireResponseMessage.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -157,14 +155,38 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task ExpireAdvertisement_ShouldReturnNotFound_WhenInvaliIdIsProvided()
+    public async Task ExpireAdvertisement_ShouldReturnNotFound_WhenInvalidPersonIdIsProvided()
     {
         //Arrange
-        Guid randomId = Guid.NewGuid();
+        Guid randomPersonId = Guid.NewGuid();
+        Guid randomAdvertisementId = Guid.NewGuid();
 
         //Act
         HttpResponseMessage expireResponseMessage =
-            await _httpClient.PostAsync($"api/v1/advertisements/{randomId}/expire", null);
+            await _httpClient.PostAsync($"api/v1/persons/{randomPersonId}/advertisements/{randomAdvertisementId}/expire", null);
+
+        //Assert
+        expireResponseMessage.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        ProblemDetails notFoundProblemDetails = await expireResponseMessage.Content.ReadFromJsonAsync<ProblemDetails>()
+                                                ?? throw new JsonException();
+        notFoundProblemDetails.Status.Should().Be(StatusCodes.Status404NotFound);
+    }
+    
+    [Fact]
+    public async Task ExpireAdvertisement_ShouldReturnNotFound_WhenInvalidAdvertisementIdIsProvided()
+    {
+        //Arrange
+        CreatePerson.CreatePersonRequest personRegisterRequest = _createPersonRequestGenerator.Generate();
+        HttpResponseMessage personRegisterResponseMessage =
+            await _httpClient.PostAsJsonAsync("api/v1/persons", personRegisterRequest);
+        ApiResponses.CreatedWithIdResponse personRegisterResponse =
+            await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
+            ?? throw new JsonException();
+        Guid randomAdvertisementId = Guid.NewGuid();
+
+        //Act
+        HttpResponseMessage expireResponseMessage =
+            await _httpClient.PostAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{randomAdvertisementId}/expire", null);
 
         //Assert
         expireResponseMessage.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -177,11 +199,12 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
     public async Task ExpireAdvertisement_ShouldReturnBadRequest_WhenEmptyDataAreProvided()
     {
         //Arrange
-        Guid randomId = Guid.Empty;
+        Guid emptyAdvertisementId = Guid.Empty;
+        Guid randomPersonId = Guid.NewGuid();
 
         //Act
         HttpResponseMessage expireResponse =
-            await _httpClient.PostAsync($"api/v1/advertisements/{randomId}/expire", null);
+            await _httpClient.PostAsync($"api/v1/persons/{randomPersonId}/advertisements/{emptyAdvertisementId}/expire", null);
 
         //Assert
         expireResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -194,7 +217,7 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
             .BeEquivalentTo(nameof(ExpireAdvertisement.ExpireAdvertisementCommand.AdvertisementId));
         validationProblemDetails.Errors.Values.Count.Should().Be(1);
         validationProblemDetails.Errors[nameof(ExpireAdvertisement.ExpireAdvertisementCommand.AdvertisementId)][0]
-            .Should().Be("'Id' must not be empty.");
+            .Should().Be("'Advertisement Id' must not be empty.");
     }
 
     public Task InitializeAsync()
