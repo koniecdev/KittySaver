@@ -1,7 +1,7 @@
 using FluentAssertions;
 using KittySaver.Domain.ValueObjects;
 
-namespace KittySaver.Domain.Tests.Unit.Persons;
+namespace KittySaver.Domain.Tests.Unit.Tests.Persons;
 
 public class PhoneNumberTests
 {

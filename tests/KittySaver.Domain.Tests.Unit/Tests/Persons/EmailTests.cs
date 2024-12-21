@@ -2,7 +2,7 @@ using FluentAssertions;
 using KittySaver.Domain.ValueObjects;
 using Shared;
 
-namespace KittySaver.Domain.Tests.Unit.Persons;
+namespace KittySaver.Domain.Tests.Unit.Tests.Persons;
 
 public class EmailTests
 {

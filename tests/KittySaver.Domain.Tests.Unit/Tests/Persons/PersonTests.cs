@@ -2,14 +2,13 @@ using Bogus;
 using FluentAssertions;
 using KittySaver.Domain.Advertisements;
 using KittySaver.Domain.Common.Exceptions;
-using KittySaver.Domain.Common.Primitives;
 using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
 using NSubstitute;
 using Person = KittySaver.Domain.Persons.Person;
 
-namespace KittySaver.Domain.Tests.Unit.Persons;
+namespace KittySaver.Domain.Tests.Unit.Tests.Persons;
 
 public class PersonTests
 {

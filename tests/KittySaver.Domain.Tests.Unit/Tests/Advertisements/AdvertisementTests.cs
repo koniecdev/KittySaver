@@ -6,7 +6,7 @@ using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
 using Person = KittySaver.Domain.Persons.Person;
 
-namespace KittySaver.Domain.Tests.Unit.Advertisements;
+namespace KittySaver.Domain.Tests.Unit.Tests.Advertisements;
 
 using Person = Person;
 
