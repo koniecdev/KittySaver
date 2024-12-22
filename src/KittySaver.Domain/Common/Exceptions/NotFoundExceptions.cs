@@ -1,5 +1,4 @@
-﻿using KittySaver.Domain.Advertisements;
-using KittySaver.Domain.Persons;
+﻿using KittySaver.Domain.Persons;
 
 namespace KittySaver.Domain.Common.Exceptions;
 

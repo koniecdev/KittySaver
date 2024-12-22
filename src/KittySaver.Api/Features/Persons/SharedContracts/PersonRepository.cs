@@ -1,5 +1,4 @@
 ﻿using KittySaver.Api.Shared.Persistence;
-using KittySaver.Domain.Advertisements;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Persons;
 using Microsoft.EntityFrameworkCore;

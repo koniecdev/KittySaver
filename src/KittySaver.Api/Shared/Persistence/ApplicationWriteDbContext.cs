@@ -1,7 +1,6 @@
 ﻿using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence.ReadModels;
 using KittySaver.Domain;
-using KittySaver.Domain.Advertisements;
 using KittySaver.Domain.Common.Primitives;
 using KittySaver.Domain.Persons;
 using MediatR;

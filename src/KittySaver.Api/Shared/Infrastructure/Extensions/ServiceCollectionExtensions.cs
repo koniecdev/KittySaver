@@ -8,7 +8,6 @@ using KittySaver.Api.Shared.Behaviours;
 using KittySaver.Api.Shared.Infrastructure.Security;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
-using KittySaver.Domain.Advertisements;
 using KittySaver.Domain.Persons;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

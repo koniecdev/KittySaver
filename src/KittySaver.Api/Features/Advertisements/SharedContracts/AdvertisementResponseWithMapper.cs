@@ -1,5 +1,5 @@
 ﻿using KittySaver.Api.Shared.Persistence.ReadModels;
-using KittySaver.Domain.Advertisements;
+using KittySaver.Domain.Persons;
 using Riok.Mapperly.Abstractions;
 
 namespace KittySaver.Api.Features.Advertisements.SharedContracts;

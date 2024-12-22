@@ -18,7 +18,7 @@
 //     private static readonly Address Address = new Faker<Address>()
 //         .CustomInstantiator(faker =>
 //             Address.Create(
-//                 country: faker.Address.Country(),
+//                 country: faker.Address.CountryCode(),
 //                 state: faker.Address.State(),
 //                 zipCode: faker.Address.ZipCode(),
 //                 city: faker.Address.City(),
@@ -29,7 +29,7 @@
 //     private static readonly Faker<Address> PickupAddressGenerator = new Faker<Address>()
 //         .CustomInstantiator(faker =>
 //             Address.Create(
-//                 country: faker.Address.Country(),
+//                 country: faker.Address.CountryCode(),
 //                 state: faker.Address.State(),
 //                 zipCode: faker.Address.ZipCode(),
 //                 city: faker.Address.City(),

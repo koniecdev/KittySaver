@@ -39,7 +39,7 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     UserIdentityId: Guid.NewGuid(),
-                    DefaultAdvertisementPickupAddressCountry: faker.Address.Country(),
+                    DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
                     DefaultAdvertisementPickupAddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
                     DefaultAdvertisementPickupAddressCity: faker.Address.City(),

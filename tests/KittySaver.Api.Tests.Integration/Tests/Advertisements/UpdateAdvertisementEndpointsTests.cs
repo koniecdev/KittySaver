@@ -35,7 +35,7 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     UserIdentityId: Guid.NewGuid(),
-                    DefaultAdvertisementPickupAddressCountry: faker.Address.Country(),
+                    DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
                     DefaultAdvertisementPickupAddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
                     DefaultAdvertisementPickupAddressCity: faker.Address.City(),
@@ -84,7 +84,7 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
                     new CreateAdvertisement.CreateAdvertisementRequest(
                         CatsIdsToAssign: [createCatResponse.Id],
                         Description: faker.Lorem.Lines(2),
-                        PickupAddressCountry: faker.Address.Country(),
+                        PickupAddressCountry: faker.Address.CountryCode(),
                         PickupAddressState: faker.Address.State(),
                         PickupAddressZipCode: faker.Address.ZipCode(),
                         PickupAddressCity: faker.Address.City(),
@@ -105,7 +105,7 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
                 .CustomInstantiator(faker =>
                     new UpdateAdvertisement.UpdateAdvertisementRequest(
                         Description: faker.Lorem.Lines(2),
-                        PickupAddressCountry: faker.Address.Country(),
+                        PickupAddressCountry: faker.Address.CountryCode(),
                         PickupAddressState: faker.Address.State(),
                         PickupAddressZipCode: faker.Address.ZipCode(),
                         PickupAddressCity: faker.Address.City(),
@@ -142,7 +142,7 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
                     new CreateAdvertisement.CreateAdvertisementRequest(
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
-                        PickupAddressCountry: faker.Address.Country(),
+                        PickupAddressCountry: faker.Address.CountryCode(),
                         PickupAddressState: faker.Address.State(),
                         PickupAddressZipCode: faker.Address.ZipCode(),
                         PickupAddressCity: faker.Address.City(),
@@ -252,7 +252,7 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
                 .CustomInstantiator(faker =>
                     new UpdateAdvertisement.UpdateAdvertisementRequest(
                         Description: faker.Lorem.Lines(2),
-                        PickupAddressCountry: faker.Address.Country(),
+                        PickupAddressCountry: faker.Address.CountryCode(),
                         PickupAddressState: faker.Address.State(),
                         PickupAddressZipCode: faker.Address.ZipCode(),
                         PickupAddressCity: faker.Address.City(),

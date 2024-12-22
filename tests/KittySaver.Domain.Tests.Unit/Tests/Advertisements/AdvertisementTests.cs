@@ -1,9 +1,10 @@
 ﻿using Bogus;
+using Bogus.DataSets;
 using FluentAssertions;
-using KittySaver.Domain.Advertisements;
 using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
+using Address = KittySaver.Domain.ValueObjects.Address;
 using Person = KittySaver.Domain.Persons.Person;
 
 namespace KittySaver.Domain.Tests.Unit.Tests.Advertisements;
@@ -17,7 +18,7 @@ public class AdvertisementTests
     private static readonly Address Address = new Faker<Address>()
         .CustomInstantiator(faker =>
             Address.Create(
-                country: faker.Address.Country(),
+                country: faker.Address.CountryCode(),
                 state: faker.Address.State(),
                 zipCode: faker.Address.ZipCode(),
                 city: faker.Address.City(),
@@ -28,7 +29,7 @@ public class AdvertisementTests
     private static readonly Faker<Address> PickupAddressGenerator = new Faker<Address>()
         .CustomInstantiator(faker =>
             Address.Create(
-                country: faker.Address.Country(),
+                country: faker.Address.CountryCode(),
                 state: faker.Address.State(),
                 zipCode: faker.Address.ZipCode(),
                 city: faker.Address.City(),
