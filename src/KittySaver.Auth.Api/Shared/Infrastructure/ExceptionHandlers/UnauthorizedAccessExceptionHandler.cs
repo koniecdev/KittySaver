@@ -17,8 +17,8 @@ internal sealed class UnauthorizedAccessExceptionHandler(ILogger<UnauthorizedAcc
         
         ProblemDetails problemDetails = new()
         {
-            Status = StatusCodes.Status401Unauthorized,
-            Title = "Provided credentials are not valid"
+            Status = StatusCodes.Status403Forbidden,
+            Title = "You do not have permission to modify resource that do not belong to You."
         };
 
         logger.LogError(

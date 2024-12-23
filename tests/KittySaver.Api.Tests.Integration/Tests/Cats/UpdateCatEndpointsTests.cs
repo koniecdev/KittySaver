@@ -39,7 +39,7 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     UserIdentityId: Guid.NewGuid(),
-                    DefaultAdvertisementPickupAddressCountry: faker.Address.Country(),
+                    DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
                     DefaultAdvertisementPickupAddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
                     DefaultAdvertisementPickupAddressCity: faker.Address.City(),
@@ -133,7 +133,6 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
 
         CreateAdvertisement.CreateAdvertisementRequest createAdvertisementRequest =
             new CreateAdvertisement.CreateAdvertisementRequest(
-                PersonId: createPersonResponse.Id,
                 CatsIdsToAssign: [createCatResponse.Id],
                 Description: _createCatRequest.AdditionalRequirements,
                 PickupAddressCountry: _createPersonRequest.DefaultAdvertisementPickupAddressCountry,
@@ -146,7 +145,7 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                 ContactInfoPhoneNumber: _createPersonRequest.DefaultAdvertisementContactInfoPhoneNumber);
 
         HttpResponseMessage createAdvertisementResponseMessage =
-            await _httpClient.PostAsJsonAsync($"api/v1/advertisements", createAdvertisementRequest);
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{createPersonResponse.Id}/advertisements", createAdvertisementRequest);
         ApiResponses.CreatedWithIdResponse createAdvertisementResponse =
             await createAdvertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
 

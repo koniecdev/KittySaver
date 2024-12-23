@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
+using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Persons;
@@ -37,7 +38,7 @@ public sealed class UpdatePerson : IEndpoint
         string DefaultAdvertisementPickupAddressStreet,
         string DefaultAdvertisementPickupAddressBuildingNumber,
         string DefaultAdvertisementContactInfoEmail,
-        string DefaultAdvertisementContactInfoPhoneNumber) : ICommand;
+        string DefaultAdvertisementContactInfoPhoneNumber) : IPersonCommand;
 
     public sealed class UpdatePersonCommandValidator
         : AbstractValidator<UpdatePersonCommand>, IAsyncValidator
@@ -97,13 +98,15 @@ public sealed class UpdatePerson : IEndpoint
         }
     }
 
-    internal sealed class UpdatePersonCommandHandler(IPersonRepository personRepository, IUnitOfWork unitOfWork)
+    internal sealed class UpdatePersonCommandHandler(
+        IPersonRepository personRepository,
+        IUnitOfWork unitOfWork)
         : IRequestHandler<UpdatePersonCommand>
     {
         public async Task Handle(UpdatePersonCommand request, CancellationToken cancellationToken)
         {
             Person person = await personRepository.GetPersonByIdOrIdentityIdAsync(request.IdOrUserIdentityId, cancellationToken);
-
+            
             Nickname nickname = Nickname.Create(request.Nickname);
             Email email = Email.Create(request.Email);
             PhoneNumber phoneNumber = PhoneNumber.Create(request.PhoneNumber);

@@ -4,6 +4,7 @@ using KittySaver.Auth.Api.Shared.Domain.Entites;
 using KittySaver.Auth.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Auth.Api.Shared.Infrastructure.Clients;
 using KittySaver.Auth.Api.Shared.Infrastructure.Endpoints;
+using KittySaver.Auth.Api.Shared.Infrastructure.Services;
 using KittySaver.Auth.Api.Shared.Persistence;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -16,18 +17,32 @@ namespace KittySaver.Auth.Api.Features.ApplicationUsers;
 public sealed class Register : IEndpoint
 {
     public sealed record RegisterRequest(
-        string FirstName,
-        string LastName,
+        string UserName,
         string Email,
         string PhoneNumber,
-        string Password);
-    
+        string Password,
+        string DefaultAdvertisementPickupAddressCountry,
+        string DefaultAdvertisementPickupAddressState,
+        string DefaultAdvertisementPickupAddressZipCode,
+        string DefaultAdvertisementPickupAddressCity,
+        string DefaultAdvertisementPickupAddressStreet,
+        string DefaultAdvertisementPickupAddressBuildingNumber,
+        string DefaultAdvertisementContactInfoEmail,
+        string DefaultAdvertisementContactInfoPhoneNumber);
+
     public sealed record RegisterCommand(
-        string FirstName,
-        string LastName,
+        string UserName,
         string Email,
         string PhoneNumber,
-        string Password) : ICommand<Guid>;
+        string Password,
+        string DefaultAdvertisementPickupAddressCountry,
+        string DefaultAdvertisementPickupAddressState,
+        string DefaultAdvertisementPickupAddressZipCode,
+        string DefaultAdvertisementPickupAddressCity,
+        string DefaultAdvertisementPickupAddressStreet,
+        string DefaultAdvertisementPickupAddressBuildingNumber,
+        string DefaultAdvertisementContactInfoEmail,
+        string DefaultAdvertisementContactInfoPhoneNumber) : ICommand<Guid>;
 
     public sealed class RegisterCommandValidator
         : AbstractValidator<RegisterCommand>, IAsyncValidator
@@ -44,8 +59,7 @@ public sealed class Register : IEndpoint
                 .Matches("[A-Z]+").WithMessage("'Password' is not in the correct format. Your password must contain at least one uppercase letter.")
                 .Matches("[a-z]+").WithMessage("'Password' is not in the correct format. Your password must contain at least one lowercase letter.")
                 .Matches("[0-9]+").WithMessage("'Password' is not in the correct format. Your password must contain at least one number.");
-            RuleFor(x => x.FirstName).NotEmpty();
-            RuleFor(x => x.LastName).NotEmpty();
+            RuleFor(x => x.UserName).NotEmpty();
             RuleFor(x => x.PhoneNumber).NotEmpty();
             RuleFor(x => x.Email)
                 .NotEmpty()
@@ -53,6 +67,15 @@ public sealed class Register : IEndpoint
             RuleFor(x => x.Email)
                 .MustAsync(async (email, ct) => await IsEmailUniqueAsync(email, ct))
                 .WithMessage("Email is already used by another user.");
+            RuleFor(x => x.DefaultAdvertisementPickupAddressCountry).NotEmpty();
+            RuleFor(x => x.DefaultAdvertisementPickupAddressState).NotEmpty();
+            RuleFor(x => x.DefaultAdvertisementPickupAddressZipCode).NotEmpty();
+            RuleFor(x => x.DefaultAdvertisementPickupAddressCity).NotEmpty();
+            RuleFor(x => x.DefaultAdvertisementPickupAddressStreet).NotEmpty();
+            RuleFor(x => x.DefaultAdvertisementPickupAddressBuildingNumber).NotEmpty();
+            RuleFor(x => x.DefaultAdvertisementContactInfoEmail).NotEmpty().EmailAddress();
+            RuleFor(x => x.DefaultAdvertisementContactInfoPhoneNumber).NotEmpty();
+
         }
         
         private async Task<bool> IsEmailUniqueAsync(string email, CancellationToken ct) 
@@ -61,24 +84,42 @@ public sealed class Register : IEndpoint
                 .AnyAsync(x=>x.Email == email, ct);
     }
     
-    internal sealed class RegisterCommandHandler(UserManager<ApplicationUser> userManager, IKittySaverApiClient client)
+    internal sealed class RegisterCommandHandler(
+        SignInManager<ApplicationUser> signInManager,
+        IKittySaverApiClient client,
+        IJwtTokenService jwtTokenService)
         : IRequestHandler<RegisterCommand, Guid>
     {
         public async Task<Guid> Handle(RegisterCommand request, CancellationToken cancellationToken)
         {
             ApplicationUser user = request.ToEntity();
-            await userManager.CreateAsync(user, request.Password);
-            
+            await signInManager.UserManager.CreateAsync(user, request.Password);
             try
             {
-                await client.CreatePerson(new IKittySaverApiClient.CreatePersonDto(
-                    user.FirstName, user.LastName, user.Email!, user.PhoneNumber!, user.Id));
+                ApplicationUser? applicationUser = await signInManager.UserManager.FindByEmailAsync(request.Email);
+                if (applicationUser is null)
+                {
+                    throw new Exception();
+                }
+                (string token, DateTimeOffset _) tokenResults = await jwtTokenService.GenerateTokenAsync(applicationUser);
+                await client.CreatePerson(tokenResults.token, new IKittySaverApiClient.CreatePersonDto(
+                    Nickname: user.UserName!, 
+                    Email: user.Email!, 
+                    PhoneNumber: user.PhoneNumber!, 
+                    UserIdentityId: user.Id,
+                    DefaultAdvertisementPickupAddressCountry: user.DefaultAdvertisementPickupAddressCountry,
+                    DefaultAdvertisementPickupAddressState: user.DefaultAdvertisementPickupAddressState,
+                    DefaultAdvertisementPickupAddressZipCode: user.DefaultAdvertisementPickupAddressZipCode,
+                    DefaultAdvertisementPickupAddressCity: user.DefaultAdvertisementPickupAddressCity,
+                    DefaultAdvertisementPickupAddressStreet: user.DefaultAdvertisementPickupAddressStreet,
+                    DefaultAdvertisementPickupAddressBuildingNumber: user.DefaultAdvertisementPickupAddressBuildingNumber,
+                    DefaultAdvertisementContactInfoEmail: user.DefaultAdvertisementContactInfoEmail,
+                    DefaultAdvertisementContactInfoPhoneNumber: user.DefaultAdvertisementContactInfoPhoneNumber));
                 return user.Id;
             }
-            catch (Exception)
+            finally
             {
-                await userManager.DeleteAsync(user);
-                throw;
+                await signInManager.UserManager.DeleteAsync(user);
             }
         }
     }

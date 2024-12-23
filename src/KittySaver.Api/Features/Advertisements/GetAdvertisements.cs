@@ -9,7 +9,7 @@ namespace KittySaver.Api.Features.Advertisements;
 
 public sealed class GetAdvertisements : IEndpoint
 {
-    public sealed record GetAdvertisementsQuery : IQuery<ICollection<AdvertisementResponse>>;
+    public sealed record GetAdvertisementsQuery : IAdvertisementQuery<ICollection<AdvertisementResponse>>;
 
     internal sealed class GetAdvertisementsQueryHandler(ApplicationReadDbContext db)
         : IRequestHandler<GetAdvertisementsQuery, ICollection<AdvertisementResponse>>

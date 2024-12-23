@@ -1,7 +1,6 @@
 ﻿using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence.ReadModels;
 using KittySaver.Domain;
-using KittySaver.Domain.Advertisements;
 using KittySaver.Domain.Common.Primitives;
 using KittySaver.Domain.Persons;
 using MediatR;
@@ -19,7 +18,6 @@ public sealed class ApplicationWriteDbContext(
     : DbContext(options), IUnitOfWork
 {
     public DbSet<Person> Persons => Set<Person>();
-    public DbSet<Advertisement> Advertisements => Set<Advertisement>();
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -42,11 +40,11 @@ public sealed class ApplicationWriteDbContext(
             {
                 case EntityState.Added:
                     entity.Entity.CreatedOn = dateTimeProvider.Now;
-                    entity.Entity.CreatedBy = currentUserService.UserId;
+                    entity.Entity.CreatedBy = currentUserService.GetCurrentUserIdentityId().ToString();
                     break;
                 case EntityState.Modified:
                     entity.Entity.LastModificationOn = dateTimeProvider.Now;
-                    entity.Entity.LastModificationBy = currentUserService.UserId;
+                    entity.Entity.LastModificationBy = currentUserService.GetCurrentUserIdentityId().ToString();
                     break;
                 case EntityState.Detached:
                 case EntityState.Unchanged:

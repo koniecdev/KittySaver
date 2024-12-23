@@ -9,35 +9,61 @@ namespace KittySaver.Domain.Persons;
 
 public sealed class Cat : AuditableEntity
 {
+    // 1. Private fields
     private readonly Guid _personId;
     private Guid? _advertisementId;
     private double _priorityScore;
 
-    public static Cat Create(
-        ICatPriorityCalculatorService priorityScoreCalculator,
-        Person person,
-        CatName name,
-        MedicalHelpUrgency medicalHelpUrgency,
-        AgeCategory ageCategory,
-        Behavior behavior,
-        HealthStatus healthStatus,
-        Description additionalRequirements,
-        bool isCastrated = false)
+    // 2. Public properties
+    public Guid PersonId
     {
-        Cat cat = new(
-            personId: person.Id,
-            name: name,
-            medicalHelpUrgency: medicalHelpUrgency,
-            ageCategory: ageCategory,
-            behavior: behavior,
-            healthStatus: healthStatus,
-            isCastrated: isCastrated,
-            additionalRequirements: additionalRequirements);
-        cat.RecalculatePriorityScore(priorityScoreCalculator);
-        person.AddCat(cat);
-        return cat;
+        get => _personId;
+        private init
+        {
+            if (value == Guid.Empty)
+            {
+                throw new ArgumentException(ErrorMessages.EmptyPersonId, nameof(PersonId));
+            }
+            _personId = value;
+        }
     }
 
+    public Guid? AdvertisementId
+    {
+        get => _advertisementId;
+        private set
+        {
+            if (value == Guid.Empty)
+            {
+                throw new ArgumentException(ErrorMessages.EmptyAdvertisementId, nameof(AdvertisementId));
+            }
+            _advertisementId = value;
+        }
+    }
+
+    public double PriorityScore
+    {
+        get => _priorityScore;
+        private set
+        {
+            if (value == 0)
+            {
+                throw new ArgumentException(ErrorMessages.ZeroPriorityScore, nameof(PriorityScore));
+            }
+            _priorityScore = value;
+        }
+    }
+
+    public CatName Name { get; private set; }
+    public Description AdditionalRequirements { get; private set; }
+    public MedicalHelpUrgency MedicalHelpUrgency { get; private set; }
+    public AgeCategory AgeCategory { get; private set; }
+    public Behavior Behavior { get; private set; }
+    public HealthStatus HealthStatus { get; private set; }
+    public bool IsCastrated { get; private set; }
+    public bool IsAdopted { get; private set; }
+
+    // 3. Constructors
     /// <remarks>
     /// Required by EF Core, and should never be used by programmer as it bypasses business rules.
     /// </remarks>
@@ -71,54 +97,34 @@ public sealed class Cat : AuditableEntity
         IsCastrated = isCastrated;
         AdditionalRequirements = additionalRequirements;
     }
-    
-    public Guid PersonId
+
+    // 4. Public factory methods
+    public static Cat Create(
+        ICatPriorityCalculatorService priorityScoreCalculator,
+        Person person,
+        CatName name,
+        MedicalHelpUrgency medicalHelpUrgency,
+        AgeCategory ageCategory,
+        Behavior behavior,
+        HealthStatus healthStatus,
+        Description additionalRequirements,
+        bool isCastrated = false)
     {
-        get => _personId;
-        private init
-        {
-            if (value == Guid.Empty)
-            {
-                throw new ArgumentException(ErrorMessages.EmptyPersonId, nameof(PersonId));
-            }
-            _personId = value;
-        }
+        Cat cat = new(
+            personId: person.Id,
+            name: name,
+            medicalHelpUrgency: medicalHelpUrgency,
+            ageCategory: ageCategory,
+            behavior: behavior,
+            healthStatus: healthStatus,
+            isCastrated: isCastrated,
+            additionalRequirements: additionalRequirements);
+        cat.RecalculatePriorityScore(priorityScoreCalculator);
+        person.AddCat(cat);
+        return cat;
     }
 
-    public Guid? AdvertisementId
-    {
-        get => _advertisementId;
-        private set
-        {
-            if (value == Guid.Empty)
-            {
-                throw new ArgumentException(ErrorMessages.EmptyAdvertisementId, nameof(AdvertisementId));
-            }
-            _advertisementId = value;
-        }
-    }
-    public CatName Name { get; private set; }
-    public Description AdditionalRequirements { get; private set; }
-    public MedicalHelpUrgency MedicalHelpUrgency { get; private set; }
-    public AgeCategory AgeCategory { get; private set; }
-    public Behavior Behavior { get; private set; }
-    public HealthStatus HealthStatus { get; private set; }
-    public bool IsCastrated { get; private set; }
-    public bool IsAdopted { get; private set; }
-
-    public double PriorityScore
-    {
-        get => _priorityScore;
-        private set
-        {
-            if (value == 0)
-            {
-                throw new ArgumentException(ErrorMessages.ZeroPriorityScore, nameof(PriorityScore));
-            }
-            _priorityScore = value;
-        }
-    }
-    
+    // 5. Internal methods - Basic property changes
     internal void ChangeName(CatName catName)
     {
         Name = catName;
@@ -148,20 +154,12 @@ public sealed class Cat : AuditableEntity
         RecalculatePriorityScore(priorityScoreCalculator);
     }
 
+    // 6. Internal methods - Status management
     internal void MarkAsAdopted()
     {
         IsAdopted = true;
     }
-    
-    /// <remarks>
-    /// Only for use within Person aggregate
-    /// </remarks>
-    private void RecalculatePriorityScore(ICatPriorityCalculatorService calculator)
-    {
-        double priority = calculator.Calculate(this);
-        PriorityScore = priority;
-    }
-    
+
     /// <remarks>
     /// Only for use within Person aggregate
     /// </remarks>
@@ -185,7 +183,18 @@ public sealed class Cat : AuditableEntity
         }
         AdvertisementId = null;
     }
-    
+
+    // 7. Private helper methods
+    /// <remarks>
+    /// Only for use within Person aggregate
+    /// </remarks>
+    private void RecalculatePriorityScore(ICatPriorityCalculatorService calculator)
+    {
+        double priority = calculator.Calculate(this);
+        PriorityScore = priority;
+    }
+
+    // 8. Private constants/error messages
     private static class ErrorMessages
     {
         public const string EmptyPersonId = "Provided person id is empty";
@@ -194,7 +203,6 @@ public sealed class Cat : AuditableEntity
         public const string AlreadyAssignedToAdvertisement = "Cannot assign advertisement to cat that is already assigned to another advertisement.";
         public const string NotAssignedToAdvertisement = "Cannot unassign advertisement from cat that has no advertisement assigned.";
     }
-
 }
 
 internal sealed class CatConfiguration : IEntityTypeConfiguration<Cat>

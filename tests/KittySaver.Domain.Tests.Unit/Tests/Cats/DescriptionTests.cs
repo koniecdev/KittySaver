@@ -2,7 +2,7 @@ using FluentAssertions;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
 
-namespace KittySaver.Domain.Tests.Unit.Cats;
+namespace KittySaver.Domain.Tests.Unit.Tests.Cats;
 
 public class DescriptionTests
 {

@@ -32,7 +32,7 @@ public sealed class UpdateCat : IEndpoint
         string AgeCategory,
         string Behavior,
         string HealthStatus,
-        string? AdditionalRequirements = null) : ICommand;
+        string? AdditionalRequirements = null) : ICatCommand;
 
     public sealed class UpdateCatCommandValidator
         : AbstractValidator<UpdateCatCommand>

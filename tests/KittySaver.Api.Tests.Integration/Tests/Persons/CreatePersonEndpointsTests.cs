@@ -35,7 +35,7 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     UserIdentityId: Guid.NewGuid(),
-                    DefaultAdvertisementPickupAddressCountry: faker.Address.Country(),
+                    DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
                     DefaultAdvertisementPickupAddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
                     DefaultAdvertisementPickupAddressCity: faker.Address.City(),
@@ -81,7 +81,7 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     UserIdentityId: Guid.NewGuid(),
-                    DefaultAdvertisementPickupAddressCountry: faker.Address.Country(),
+                    DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
                     DefaultAdvertisementPickupAddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
                     DefaultAdvertisementPickupAddressCity: faker.Address.City(),
@@ -114,7 +114,7 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
                     Email: faker.Person.Email.ClampLength(Email.MaxLength + 1),
                     PhoneNumber: faker.Person.Phone.ClampLength(PhoneNumber.MaxLength + 1),
                     UserIdentityId: Guid.NewGuid(),
-                    DefaultAdvertisementPickupAddressCountry: faker.Address.Country()
+                    DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode()
                         .ClampLength(Address.CountryMaxLength + 1),
                     DefaultAdvertisementPickupAddressState: faker.Address.ZipCode()
                         .ClampLength(Address.StateMaxLength + 1),
@@ -314,7 +314,7 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
                     Email: email,
                     PhoneNumber: faker.Person.Phone,
                     UserIdentityId: Guid.NewGuid(),
-                    DefaultAdvertisementPickupAddressCountry: faker.Address.Country(),
+                    DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
                     DefaultAdvertisementPickupAddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
                     DefaultAdvertisementPickupAddressCity: faker.Address.City(),

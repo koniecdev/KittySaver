@@ -33,7 +33,7 @@ public class GetAdvertisementEndpointsTests : IAsyncLifetime
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     UserIdentityId: Guid.NewGuid(),
-                    DefaultAdvertisementPickupAddressCountry: faker.Address.Country(),
+                    DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
                     DefaultAdvertisementPickupAddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
                     DefaultAdvertisementPickupAddressCity: faker.Address.City(),
@@ -74,10 +74,9 @@ public class GetAdvertisementEndpointsTests : IAsyncLifetime
             new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
                     new CreateAdvertisement.CreateAdvertisementRequest(
-                        PersonId: createPersonResponse.Id,
                         CatsIdsToAssign: [createCatResponse.Id],
                         Description: faker.Lorem.Lines(2),
-                        PickupAddressCountry: faker.Address.Country(),
+                        PickupAddressCountry: faker.Address.CountryCode(),
                         PickupAddressState: faker.Address.State(),
                         PickupAddressZipCode: faker.Address.ZipCode(),
                         PickupAddressCity: faker.Address.City(),
@@ -88,7 +87,7 @@ public class GetAdvertisementEndpointsTests : IAsyncLifetime
                     )).Generate();
 
         HttpResponseMessage createAdvertisementResponseMessage =
-            await _httpClient.PostAsJsonAsync("api/v1/advertisements", createAdvertisementRequest);
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{createPersonResponse.Id}/advertisements", createAdvertisementRequest);
         ApiResponses.CreatedWithIdResponse createAdvertisementResponse =
             await createAdvertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
 
@@ -143,10 +142,9 @@ public class GetAdvertisementEndpointsTests : IAsyncLifetime
             new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
                     new CreateAdvertisement.CreateAdvertisementRequest(
-                        PersonId: createPersonResponse.Id,
                         CatsIdsToAssign: [createCatResponse.Id],
                         Description: faker.Lorem.Lines(2),
-                        PickupAddressCountry: faker.Address.Country(),
+                        PickupAddressCountry: faker.Address.CountryCode(),
                         PickupAddressState: faker.Address.State(),
                         PickupAddressZipCode: faker.Address.ZipCode(),
                         PickupAddressCity: faker.Address.City(),
@@ -157,7 +155,7 @@ public class GetAdvertisementEndpointsTests : IAsyncLifetime
                     )).Generate();
 
         HttpResponseMessage createAdvertisementResponseMessage =
-            await _httpClient.PostAsJsonAsync("api/v1/advertisements", createAdvertisementRequest);
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{createPersonResponse.Id}/advertisements", createAdvertisementRequest);
         ApiResponses.CreatedWithIdResponse createAdvertisementResponse =
             await createAdvertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
 
@@ -166,7 +164,7 @@ public class GetAdvertisementEndpointsTests : IAsyncLifetime
                 .CustomInstantiator(faker =>
                     new UpdateAdvertisement.UpdateAdvertisementRequest(
                         Description: faker.Lorem.Lines(2),
-                        PickupAddressCountry: faker.Address.Country(),
+                        PickupAddressCountry: faker.Address.CountryCode(),
                         PickupAddressState: faker.Address.State(),
                         PickupAddressZipCode: faker.Address.ZipCode(),
                         PickupAddressCity: faker.Address.City(),
@@ -176,7 +174,7 @@ public class GetAdvertisementEndpointsTests : IAsyncLifetime
                         ContactInfoPhoneNumber: faker.Person.Phone
                     )).Generate();
 
-        await _httpClient.PutAsJsonAsync($"api/v1/advertisements/{createAdvertisementResponse.Id}",
+        await _httpClient.PutAsJsonAsync($"api/v1/persons/{createPersonResponse.Id}/advertisements/{createAdvertisementResponse.Id}",
             updateAdvertisementRequest);
 
         //Act
@@ -243,10 +241,9 @@ public class GetAdvertisementEndpointsTests : IAsyncLifetime
             new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
                     new CreateAdvertisement.CreateAdvertisementRequest(
-                        PersonId: personRegisterResponse.Id,
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
-                        PickupAddressCountry: faker.Address.Country(),
+                        PickupAddressCountry: faker.Address.CountryCode(),
                         PickupAddressState: faker.Address.State(),
                         PickupAddressZipCode: faker.Address.ZipCode(),
                         PickupAddressCity: faker.Address.City(),
@@ -257,10 +254,10 @@ public class GetAdvertisementEndpointsTests : IAsyncLifetime
                     ));
 
         HttpResponseMessage advertisementResponseMessage =
-            await _httpClient.PostAsJsonAsync("api/v1/advertisements", request);
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
         ApiResponses.CreatedWithIdResponse advertisementResponse =
             await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
-        await _httpClient.DeleteAsync($"api/v1/advertisements/{advertisementResponse.Id}");
+        await _httpClient.DeleteAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}");
 
         //Act
         HttpResponseMessage response = await _httpClient.GetAsync($"api/v1/advertisements/{advertisementResponse.Id}");

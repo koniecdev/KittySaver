@@ -32,7 +32,7 @@ public class DeleteAdvertisementEndpointsTests : IAsyncLifetime
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     UserIdentityId: Guid.NewGuid(),
-                    DefaultAdvertisementPickupAddressCountry: faker.Address.Country(),
+                    DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
                     DefaultAdvertisementPickupAddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
                     DefaultAdvertisementPickupAddressCity: faker.Address.City(),
@@ -76,10 +76,9 @@ public class DeleteAdvertisementEndpointsTests : IAsyncLifetime
             new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
                     new CreateAdvertisement.CreateAdvertisementRequest(
-                        PersonId: personRegisterResponse.Id,
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
-                        PickupAddressCountry: faker.Address.Country(),
+                        PickupAddressCountry: faker.Address.CountryCode(),
                         PickupAddressState: faker.Address.State(),
                         PickupAddressZipCode: faker.Address.ZipCode(),
                         PickupAddressCity: faker.Address.City(),
@@ -89,11 +88,13 @@ public class DeleteAdvertisementEndpointsTests : IAsyncLifetime
                         ContactInfoPhoneNumber: faker.Person.Phone
                     ));
 
-        HttpResponseMessage advertisementResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/advertisements", request);
+        HttpResponseMessage advertisementResponseMessage = 
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
         ApiResponses.CreatedWithIdResponse advertisementResponse = await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
         
         //Act
-        HttpResponseMessage deleteResponseMessage = await _httpClient.DeleteAsync($"api/v1/advertisements/{advertisementResponse.Id}");
+        HttpResponseMessage deleteResponseMessage = 
+            await _httpClient.DeleteAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}");
         
         //Assert
         deleteResponseMessage.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -128,10 +129,9 @@ public class DeleteAdvertisementEndpointsTests : IAsyncLifetime
             new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
                     new CreateAdvertisement.CreateAdvertisementRequest(
-                        PersonId: personRegisterResponse.Id,
                         CatsIdsToAssign: [catCreateResponse.Id, secondCatCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
-                        PickupAddressCountry: faker.Address.Country(),
+                        PickupAddressCountry: faker.Address.CountryCode(),
                         PickupAddressState: faker.Address.State(),
                         PickupAddressZipCode: faker.Address.ZipCode(),
                         PickupAddressCity: faker.Address.City(),
@@ -141,42 +141,72 @@ public class DeleteAdvertisementEndpointsTests : IAsyncLifetime
                         ContactInfoPhoneNumber: faker.Person.Phone
                     ));
     
-        HttpResponseMessage responseMessage = await _httpClient.PostAsJsonAsync("api/v1/advertisements", request);
+        HttpResponseMessage responseMessage = 
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
         ApiResponses.CreatedWithIdResponse advertisementResponse =
             await responseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
         
         //Act
-        HttpResponseMessage deleteResponseMessage = await _httpClient.DeleteAsync($"api/v1/advertisements/{advertisementResponse.Id}");
+        HttpResponseMessage deleteResponseMessage =
+            await _httpClient.DeleteAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}");
         
         //Assert
         deleteResponseMessage.StatusCode.Should().Be(HttpStatusCode.NoContent);
     }
     
     [Fact]
-    public async Task DeleteAdvertisement_ShouldReturnNotFound_WhenInvaliIdIsProvided()
+    public async Task DeleteAdvertisement_ShouldReturnNotFound_WhenInvalidPersonIdIsProvided()
     {
         //Arrange
-        Guid randomId = Guid.NewGuid();
+        Guid randomPersonId = Guid.NewGuid();
+        Guid randomAdvertisementId = Guid.NewGuid();
         
         //Act
-        HttpResponseMessage deleteResponse = await _httpClient.DeleteAsync($"api/v1/advertisements/{randomId}");
+        HttpResponseMessage deleteResponse = await _httpClient.DeleteAsync($"api/v1/persons/{randomPersonId}/advertisements/{randomAdvertisementId}");
         
         //Assert
         deleteResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
         ProblemDetails? notFoundProblemDetails = await deleteResponse.Content.ReadFromJsonAsync<ProblemDetails>();
         notFoundProblemDetails.Should().NotBeNull();
         notFoundProblemDetails!.Status.Should().Be(StatusCodes.Status404NotFound);
+        notFoundProblemDetails.Detail.Should().Contain("Person");
     }
     
     [Fact]
-    public async Task DeleteAdvertisement_ShouldReturnBadRequest_WhenEmptyDataAreProvided()
+    public async Task DeleteAdvertisement_ShouldReturnNotFound_WhenInvalidAdvertisementIdIsProvided()
     {
         //Arrange
-        Guid randomId = Guid.Empty;
+        CreatePerson.CreatePersonRequest personRegisterRequest = _createPersonRequestGenerator.Generate();
+        HttpResponseMessage personRegisterResponseMessage =
+            await _httpClient.PostAsJsonAsync("api/v1/persons", personRegisterRequest);
+        ApiResponses.CreatedWithIdResponse personRegisterResponse =
+            await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
+            ?? throw new JsonException();
+        Guid randomAdvertisementId = Guid.NewGuid();
         
         //Act
-        HttpResponseMessage deleteResponse = await _httpClient.DeleteAsync($"api/v1/advertisements/{randomId}");
+        HttpResponseMessage deleteResponse = await _httpClient.DeleteAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{randomAdvertisementId}");
+        
+        //Assert
+        deleteResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        ProblemDetails? notFoundProblemDetails = await deleteResponse.Content.ReadFromJsonAsync<ProblemDetails>();
+        notFoundProblemDetails.Should().NotBeNull();
+        notFoundProblemDetails!.Status.Should().Be(StatusCodes.Status404NotFound);
+        notFoundProblemDetails.Detail.Should().Contain("Advertisement");
+    }
+    
+    
+    
+    [Fact]
+    public async Task DeleteAdvertisement_ShouldReturnBadRequest_WhenEmptyAdvertisementIdIsProvided()
+    {
+        //Arrange
+        Guid randomId = Guid.NewGuid();
+        Guid emptyId = Guid.Empty;
+        
+        //Act
+        HttpResponseMessage deleteResponse = await _httpClient.DeleteAsync($"api/v1/persons/{randomId}/advertisements/{emptyId}");
         
         //Assert
         deleteResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -185,10 +215,11 @@ public class DeleteAdvertisementEndpointsTests : IAsyncLifetime
         validationProblemDetails.Should().NotBeNull();
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
         validationProblemDetails.Errors.Count.Should().Be(1);
-        validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(nameof(DeleteAdvertisement.DeleteAdvertisementCommand.Id));
+        validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(
+            nameof(DeleteAdvertisement.DeleteAdvertisementCommand.AdvertisementId));
         validationProblemDetails.Errors.Values.Count.Should().Be(1);
-        validationProblemDetails.Errors[nameof(DeleteAdvertisement.DeleteAdvertisementCommand.Id)][0]
-            .Should().Be("'Id' must not be empty.");
+        validationProblemDetails.Errors[nameof(DeleteAdvertisement.DeleteAdvertisementCommand.AdvertisementId)][0]
+            .Should().Be("'Advertisement Id' must not be empty.");
     }
     
     public Task InitializeAsync()

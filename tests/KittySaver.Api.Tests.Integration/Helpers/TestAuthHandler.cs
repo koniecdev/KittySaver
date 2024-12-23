@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Shared;
+namespace KittySaver.Api.Tests.Integration.Helpers;
 
 public class TestAuthHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,
@@ -16,9 +16,9 @@ public class TestAuthHandler(
     {
         // Here we set up the claims that your application needs
         Claim[] claims = [
-            new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString()),
-            new Claim(ClaimTypes.Role, "SuperAdmin"),
-            new Claim(ClaimTypes.Email, "defaultadmin@koniec.dev")
+            new(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString()),
+            new(ClaimTypes.Role, "SuperAdmin"),
+            new(ClaimTypes.Email, "defaultadmin@koniec.dev")
         ];
 
         ClaimsIdentity identity = new ClaimsIdentity(claims, "TestAuthType");

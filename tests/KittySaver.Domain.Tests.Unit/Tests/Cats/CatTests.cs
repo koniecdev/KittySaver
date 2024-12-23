@@ -1,20 +1,19 @@
 using Bogus;
 using FluentAssertions;
-using KittySaver.Domain.Advertisements;
 using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
 using NSubstitute;
 using Person = KittySaver.Domain.Persons.Person;
 
-namespace KittySaver.Domain.Tests.Unit.Cats;
+namespace KittySaver.Domain.Tests.Unit.Tests.Cats;
 
 public class CatTests
 {
     private static readonly Address Address = new Faker<Address>()
         .CustomInstantiator(faker =>
             Address.Create(
-                country: faker.Address.Country(),
+                country: faker.Address.CountryCode(),
                 state: faker.Address.State(),
                 zipCode: faker.Address.ZipCode(),
                 city: faker.Address.City(),
@@ -25,7 +24,7 @@ public class CatTests
     private static readonly Address PickupAddress = new Faker<Address>()
         .CustomInstantiator(faker =>
             Address.Create(
-                country: faker.Address.Country(),
+                country: faker.Address.CountryCode(),
                 state: faker.Address.State(),
                 zipCode: faker.Address.ZipCode(),
                 city: faker.Address.City(),
@@ -193,7 +192,7 @@ public class CatTests
         );
         Advertisement.Create(
             currentDate: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
-            person: Person,
+            owner: Person,
             catsIdsToAssign: [sut.Id],
             pickupAddress: Person.DefaultAdvertisementsPickupAddress,
             contactInfoEmail: Person.DefaultAdvertisementsContactInfoEmail,
@@ -271,5 +270,145 @@ public class CatTests
         
         //Assert
         results.Should().ThrowExactly<ArgumentException>().WithMessage("PriorityScore cannot be zero, probably something went wrong. (Parameter 'PriorityScore')");
+    }
+    
+    [Fact]
+    public void MarkAsAdopted_ShouldSetIsAdoptedToTrue()
+    {
+        // Arrange
+        ICatPriorityCalculatorService? calculator = Substitute.For<ICatPriorityCalculatorService>();
+        calculator.Calculate(Arg.Any<Cat>()).Returns(420);
+        
+        CatName name = CatName.Create("Whiskers");
+        Description additionalRequirements = Description.Create("Lorem ipsum");
+        MedicalHelpUrgency medicalHelpUrgency = MedicalHelpUrgency.NoNeed;
+        AgeCategory ageCategory = AgeCategory.Adult;
+        Behavior behavior = Behavior.Friendly;
+        HealthStatus healthStatus = HealthStatus.Good;
+        const bool isCastrated = true;
+        
+        //Act
+        Cat cat = Cat.Create(
+            priorityScoreCalculator: calculator,
+            person: Person,
+            name: name,
+            medicalHelpUrgency: medicalHelpUrgency,
+            ageCategory: ageCategory,
+            behavior: behavior,
+            healthStatus: healthStatus,
+            additionalRequirements: additionalRequirements,
+            isCastrated: isCastrated
+        );
+
+        // Act
+        cat.MarkAsAdopted();
+
+        // Assert
+        cat.IsAdopted.Should().BeTrue();
+    }
+    
+    [Fact]
+    public void AssignAdvertisement_WhenCatNotAssignedToAnyAdvertisement_ShouldAssignAdvertisementId()
+    {
+        // Arrange
+        ICatPriorityCalculatorService? calculator = Substitute.For<ICatPriorityCalculatorService>();
+        calculator.Calculate(Arg.Any<Cat>()).Returns(420);
+        
+        CatName name = CatName.Create("Whiskers");
+        Description additionalRequirements = Description.Create("Lorem ipsum");
+        MedicalHelpUrgency medicalHelpUrgency = MedicalHelpUrgency.NoNeed;
+        AgeCategory ageCategory = AgeCategory.Adult;
+        Behavior behavior = Behavior.Friendly;
+        HealthStatus healthStatus = HealthStatus.Good;
+        const bool isCastrated = true;
+        
+        Cat cat = Cat.Create(
+            priorityScoreCalculator: calculator,
+            person: Person,
+            name: name,
+            medicalHelpUrgency: medicalHelpUrgency,
+            ageCategory: ageCategory,
+            behavior: behavior,
+            healthStatus: healthStatus,
+            additionalRequirements: additionalRequirements,
+            isCastrated: isCastrated
+        );
+        Guid advertisementId = Guid.NewGuid();
+
+        // Act
+        cat.AssignAdvertisement(advertisementId);
+
+        // Assert
+        advertisementId.Should().Be(cat.AdvertisementId!.Value);
+    }
+
+    [Fact]
+    public void AssignAdvertisement_WhenCatAlreadyAssignedToAdvertisement_ShouldThrowInvalidOperationException()
+    {
+        // Arrange
+        ICatPriorityCalculatorService? calculator = Substitute.For<ICatPriorityCalculatorService>();
+        calculator.Calculate(Arg.Any<Cat>()).Returns(420);
+        
+        CatName name = CatName.Create("Whiskers");
+        Description additionalRequirements = Description.Create("Lorem ipsum");
+        MedicalHelpUrgency medicalHelpUrgency = MedicalHelpUrgency.NoNeed;
+        AgeCategory ageCategory = AgeCategory.Adult;
+        Behavior behavior = Behavior.Friendly;
+        HealthStatus healthStatus = HealthStatus.Good;
+        const bool isCastrated = true;
+        
+        Cat cat = Cat.Create(
+            priorityScoreCalculator: calculator,
+            person: Person,
+            name: name,
+            medicalHelpUrgency: medicalHelpUrgency,
+            ageCategory: ageCategory,
+            behavior: behavior,
+            healthStatus: healthStatus,
+            additionalRequirements: additionalRequirements,
+            isCastrated: isCastrated
+        );
+        Guid firstAdvertisementId = Guid.NewGuid();
+        cat.AssignAdvertisement(firstAdvertisementId);
+
+        // Act
+        Action action = () => cat.AssignAdvertisement(Guid.NewGuid()); 
+        
+        //Assert
+        action.Should().Throw<InvalidOperationException>();
+    }
+
+    [Fact]
+    public void AssignAdvertisement_WithEmptyGuid_ShouldAssignEmptyGuid()
+    {
+        // Arrange
+        ICatPriorityCalculatorService? calculator = Substitute.For<ICatPriorityCalculatorService>();
+        calculator.Calculate(Arg.Any<Cat>()).Returns(420);
+        
+        CatName name = CatName.Create("Whiskers");
+        Description additionalRequirements = Description.Create("Lorem ipsum");
+        MedicalHelpUrgency medicalHelpUrgency = MedicalHelpUrgency.NoNeed;
+        AgeCategory ageCategory = AgeCategory.Adult;
+        Behavior behavior = Behavior.Friendly;
+        HealthStatus healthStatus = HealthStatus.Good;
+        const bool isCastrated = true;
+        
+        Cat cat = Cat.Create(
+            priorityScoreCalculator: calculator,
+            person: Person,
+            name: name,
+            medicalHelpUrgency: medicalHelpUrgency,
+            ageCategory: ageCategory,
+            behavior: behavior,
+            healthStatus: healthStatus,
+            additionalRequirements: additionalRequirements,
+            isCastrated: isCastrated
+        );
+
+        // Act
+        Action action = () => cat.AssignAdvertisement(Guid.Empty);
+        
+        //Assert
+        action.Should().Throw<ArgumentException>();
     }
 }

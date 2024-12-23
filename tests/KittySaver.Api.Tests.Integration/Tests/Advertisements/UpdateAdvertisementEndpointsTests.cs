@@ -35,7 +35,7 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     UserIdentityId: Guid.NewGuid(),
-                    DefaultAdvertisementPickupAddressCountry: faker.Address.Country(),
+                    DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
                     DefaultAdvertisementPickupAddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
                     DefaultAdvertisementPickupAddressCity: faker.Address.City(),
@@ -82,10 +82,9 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
             new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
                     new CreateAdvertisement.CreateAdvertisementRequest(
-                        PersonId: createPersonResponse.Id,
                         CatsIdsToAssign: [createCatResponse.Id],
                         Description: faker.Lorem.Lines(2),
-                        PickupAddressCountry: faker.Address.Country(),
+                        PickupAddressCountry: faker.Address.CountryCode(),
                         PickupAddressState: faker.Address.State(),
                         PickupAddressZipCode: faker.Address.ZipCode(),
                         PickupAddressCity: faker.Address.City(),
@@ -96,7 +95,7 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
                     ));
 
         HttpResponseMessage createAdvertisementResponseMessage =
-            await _httpClient.PostAsJsonAsync("api/v1/advertisements", createAdvertisementRequest);
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{createPersonResponse.Id}/advertisements", createAdvertisementRequest);
         ApiResponses.CreatedWithIdResponse advertisementResponse =
             await createAdvertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
 
@@ -106,7 +105,7 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
                 .CustomInstantiator(faker =>
                     new UpdateAdvertisement.UpdateAdvertisementRequest(
                         Description: faker.Lorem.Lines(2),
-                        PickupAddressCountry: faker.Address.Country(),
+                        PickupAddressCountry: faker.Address.CountryCode(),
                         PickupAddressState: faker.Address.State(),
                         PickupAddressZipCode: faker.Address.ZipCode(),
                         PickupAddressCity: faker.Address.City(),
@@ -117,7 +116,7 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
                     )).Generate();
 
         HttpResponseMessage updateResponse =
-            await _httpClient.PutAsJsonAsync($"api/v1/advertisements/{advertisementResponse.Id}", request);
+            await _httpClient.PutAsJsonAsync($"api/v1/persons/{createPersonResponse.Id}/advertisements/{advertisementResponse.Id}", request);
 
         //Assert
         updateResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -141,10 +140,9 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
             new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
                     new CreateAdvertisement.CreateAdvertisementRequest(
-                        PersonId: personRegisterResponse.Id,
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
-                        PickupAddressCountry: faker.Address.Country(),
+                        PickupAddressCountry: faker.Address.CountryCode(),
                         PickupAddressState: faker.Address.State(),
                         PickupAddressZipCode: faker.Address.ZipCode(),
                         PickupAddressCity: faker.Address.City(),
@@ -154,7 +152,7 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
                         ContactInfoPhoneNumber: faker.Person.Phone
                     ));
         HttpResponseMessage createAdvertisementResponseMessage =
-            await _httpClient.PostAsJsonAsync("api/v1/advertisements", createAdvertisementRequest);
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", createAdvertisementRequest);
         ApiResponses.CreatedWithIdResponse createAdvertisementResponse =
             await createAdvertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
 
@@ -172,7 +170,7 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
         );
 
         HttpResponseMessage responseMessage =
-            await _httpClient.PutAsJsonAsync($"api/v1/advertisements/{createAdvertisementResponse.Id}", request);
+            await _httpClient.PutAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{createAdvertisementResponse.Id}", request);
 
         //Assert
         responseMessage.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -245,7 +243,8 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
     public async Task UpdateAdvertisement_ShouldReturnNotFound_WhenNonRegisteredUserIdProvided()
     {
         //Arrange
-        Guid randomId = Guid.NewGuid();
+        Guid randomPersonId = Guid.NewGuid();
+        Guid randomAdvertisementId = Guid.NewGuid();
 
         //Act
         UpdateAdvertisement.UpdateAdvertisementRequest request =
@@ -253,7 +252,7 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
                 .CustomInstantiator(faker =>
                     new UpdateAdvertisement.UpdateAdvertisementRequest(
                         Description: faker.Lorem.Lines(2),
-                        PickupAddressCountry: faker.Address.Country(),
+                        PickupAddressCountry: faker.Address.CountryCode(),
                         PickupAddressState: faker.Address.State(),
                         PickupAddressZipCode: faker.Address.ZipCode(),
                         PickupAddressCity: faker.Address.City(),
@@ -264,7 +263,7 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
                     )).Generate();
 
         HttpResponseMessage updateResponse =
-            await _httpClient.PutAsJsonAsync($"api/v1/advertisements/{randomId}", request);
+            await _httpClient.PutAsJsonAsync($"api/v1/persons/{randomPersonId}/advertisements/{randomAdvertisementId}", request);
 
         //Assert
         updateResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -277,7 +276,8 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
     public async Task UpdateAdvertisement_ShouldReturnBadRequest_WhenEmptyDataAreProvided()
     {
         //Arrange
-        Guid fakeId = Guid.NewGuid();
+        Guid fakePersonId = Guid.NewGuid();
+        Guid fakeAdvertisementId = Guid.NewGuid();
         //Act
         UpdateAdvertisement.UpdateAdvertisementRequest request = new(
             Description: "",
@@ -292,7 +292,7 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
         );
 
         HttpResponseMessage responseMessage =
-            await _httpClient.PutAsJsonAsync($"api/v1/advertisements/{fakeId}", request);
+            await _httpClient.PutAsJsonAsync($"api/v1/persons/{fakePersonId}/advertisements/{fakeAdvertisementId}", request);
 
         //Assert
         responseMessage.StatusCode.Should().Be(HttpStatusCode.BadRequest);

@@ -10,7 +10,7 @@ namespace KittySaver.Api.Features.Advertisements;
 
 public class GetAdvertisement : IEndpoint
 {
-    public sealed record GetAdvertisementQuery(Guid Id) : IQuery<AdvertisementResponse>;
+    public sealed record GetAdvertisementQuery(Guid Id) : IAdvertisementQuery<AdvertisementResponse>;
 
     internal sealed class GetAdvertisementQueryHandler(ApplicationReadDbContext db)
         : IRequestHandler<GetAdvertisementQuery, AdvertisementResponse>

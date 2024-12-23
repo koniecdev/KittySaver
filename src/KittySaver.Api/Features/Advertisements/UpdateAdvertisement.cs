@@ -1,8 +1,8 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
-using KittySaver.Domain.Advertisements;
 using KittySaver.Domain.Common.Exceptions;
+using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +24,8 @@ public sealed class UpdateAdvertisement : IEndpoint
         string ContactInfoPhoneNumber);
 
     public sealed record UpdateAdvertisementCommand(
-        Guid Id,
+        Guid AdvertisementId,
+        Guid PersonId,
         string? Description,
         string PickupAddressCountry,
         string? PickupAddressState,
@@ -33,14 +34,20 @@ public sealed class UpdateAdvertisement : IEndpoint
         string PickupAddressStreet,
         string PickupAddressBuildingNumber,
         string ContactInfoEmail,
-        string ContactInfoPhoneNumber) : ICommand;
+        string ContactInfoPhoneNumber) : IAdvertisementCommand;
 
     public sealed class UpdateAdvertisementCommandValidator
         : AbstractValidator<UpdateAdvertisementCommand>
     {
         public UpdateAdvertisementCommandValidator()
         {
-            RuleFor(x => x.Id).NotEmpty();
+            RuleFor(x => x.PersonId)
+                .NotEmpty()
+                .NotEqual(x => x.AdvertisementId);
+            
+            RuleFor(x => x.AdvertisementId)
+                .NotEmpty()
+                .NotEqual(x => x.PersonId);
             
             RuleFor(x => x.Description).MaximumLength(Description.MaxLength);
             
@@ -79,14 +86,14 @@ public sealed class UpdateAdvertisement : IEndpoint
     }
 
     internal sealed class UpdateAdvertisementCommandHandler(
-        IAdvertisementRepository advertisementRepository,
+        IPersonRepository personRepository,
         IUnitOfWork unitOfWork)
         : IRequestHandler<UpdateAdvertisementCommand>
     {
         public async Task Handle(UpdateAdvertisementCommand request, CancellationToken cancellationToken)
         {
-            Advertisement advertisement = await advertisementRepository.GetAdvertisementByIdAsync(request.Id, cancellationToken);
-            
+            Person owner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
+
             Address pickupAddress = Address.Create(
                 country: request.PickupAddressCountry,
                 state: request.PickupAddressState,
@@ -98,9 +105,12 @@ public sealed class UpdateAdvertisement : IEndpoint
             PhoneNumber contactInfoPhoneNumber = PhoneNumber.Create(request.ContactInfoPhoneNumber);
             Description description = Description.Create(request.Description);
             
-            advertisement.ChangeDescription(description);
-            advertisement.ChangePickupAddress(pickupAddress);
-            advertisement.ChangeContactInfo(contactInfoEmail, contactInfoPhoneNumber);
+            owner.UpdateAdvertisement(
+                advertisementId: request.AdvertisementId,
+                description: description,
+                pickupAddress: pickupAddress,
+                contactInfoEmail: contactInfoEmail,
+                contactInfoPhoneNumber: contactInfoPhoneNumber);
             
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }
@@ -108,13 +118,14 @@ public sealed class UpdateAdvertisement : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapPut("advertisements/{id:guid}", async (
-            Guid id,
+        endpointRouteBuilder.MapPut("persons/{personId:guid}/advertisements/{advertisementId:guid}", async (
+            Guid personId,
+            Guid advertisementId,
             UpdateAdvertisementRequest request,
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            UpdateAdvertisementCommand command = request.MapToUpdateAdvertisementCommand(id);
+            UpdateAdvertisementCommand command = request.MapToUpdateAdvertisementCommand(personId, advertisementId);
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
         });
@@ -126,5 +137,6 @@ public static partial class UpdateAdvertisementMapper
 {
     public static partial UpdateAdvertisement.UpdateAdvertisementCommand MapToUpdateAdvertisementCommand(
         this UpdateAdvertisement.UpdateAdvertisementRequest request,
-        Guid id);
+        Guid personId,
+        Guid advertisementId);
 }

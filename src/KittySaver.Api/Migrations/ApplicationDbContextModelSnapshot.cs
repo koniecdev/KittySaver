@@ -339,7 +339,7 @@ namespace KittySaver.Api.Migrations
             modelBuilder.Entity("KittySaver.Domain.Advertisements.Advertisement", b =>
                 {
                     b.HasOne("KittySaver.Domain.Persons.Person", null)
-                        .WithMany()
+                        .WithMany("Advertisements")
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -361,6 +361,8 @@ namespace KittySaver.Api.Migrations
 
             modelBuilder.Entity("KittySaver.Domain.Persons.Person", b =>
                 {
+                    b.Navigation("Advertisements");
+
                     b.Navigation("Cats");
                 });
 #pragma warning restore 612, 618

@@ -35,6 +35,46 @@ namespace KittySaver.Auth.Api.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("DefaultAdvertisementContactInfoEmail")
+                        .IsRequired()
+                        .HasMaxLength(254)
+                        .HasColumnType("nvarchar(254)");
+
+                    b.Property<string>("DefaultAdvertisementContactInfoPhoneNumber")
+                        .IsRequired()
+                        .HasMaxLength(31)
+                        .HasColumnType("nvarchar(31)");
+
+                    b.Property<string>("DefaultAdvertisementPickupAddressBuildingNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("DefaultAdvertisementPickupAddressCity")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("DefaultAdvertisementPickupAddressCountry")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("DefaultAdvertisementPickupAddressState")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("DefaultAdvertisementPickupAddressStreet")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("DefaultAdvertisementPickupAddressZipCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(254)
@@ -42,16 +82,6 @@ namespace KittySaver.Auth.Api.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -89,8 +119,8 @@ namespace KittySaver.Auth.Api.Migrations
 
                     b.Property<string>("UserName")
                         .IsRequired()
-                        .HasMaxLength(254)
-                        .HasColumnType("nvarchar(254)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
@@ -115,20 +145,26 @@ namespace KittySaver.Auth.Api.Migrations
                         {
                             Id = new Guid("c4ff57f4-2d8c-4c66-b62d-333ad2e3c424"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "7919206e-3c54-4acd-9e26-247cfe62f3f9",
+                            ConcurrencyStamp = "17484491-9ad4-47b7-92cb-e0f954050844",
+                            DefaultAdvertisementContactInfoEmail = "defaultadmin@koniec.dev",
+                            DefaultAdvertisementContactInfoPhoneNumber = "XXXXXXXXX",
+                            DefaultAdvertisementPickupAddressBuildingNumber = "1",
+                            DefaultAdvertisementPickupAddressCity = "DefaultCity",
+                            DefaultAdvertisementPickupAddressCountry = "DefaultCountry",
+                            DefaultAdvertisementPickupAddressState = "DefaultState",
+                            DefaultAdvertisementPickupAddressStreet = "DefaultStreet",
+                            DefaultAdvertisementPickupAddressZipCode = "00000",
                             Email = "defaultadmin@koniec.dev",
                             EmailConfirmed = true,
-                            FirstName = "Default",
-                            LastName = "Admin",
                             LockoutEnabled = false,
                             NormalizedEmail = "DEFAULTADMIN@KONIEC.DEV",
                             NormalizedUserName = "DEFAULTADMIN@KONIEC.DEV",
-                            PasswordHash = "AQAAAAIAAYagAAAAEGjIleXwF0TtJ+tZU+yimF24NhElOX/ariLon66C4b8sT+/EZLybTY7utONZXFR4rQ==",
+                            PasswordHash = "AQAAAAIAAYagAAAAECtrfSbwydETfnrc9jKMiZbUZTQyFEH+mqI6SUW/+h3hTrC0gWRbS8vHlD7BHzURrw==",
                             PhoneNumber = "XXXXXXXXX",
                             PhoneNumberConfirmed = true,
                             SecurityStamp = "34d18c72-0a52-4bbe-9b00-754a02e2293e",
                             TwoFactorEnabled = false,
-                            UserName = "defaultadmin@koniec.dev"
+                            UserName = "DefaultAdmin"
                         });
                 });
 

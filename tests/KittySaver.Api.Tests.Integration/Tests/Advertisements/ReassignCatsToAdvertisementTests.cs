@@ -31,7 +31,7 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     UserIdentityId: Guid.NewGuid(),
-                    DefaultAdvertisementPickupAddressCountry: faker.Address.Country(),
+                    DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
                     DefaultAdvertisementPickupAddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
                     DefaultAdvertisementPickupAddressCity: faker.Address.City(),
@@ -73,10 +73,9 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
             new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
                     new CreateAdvertisement.CreateAdvertisementRequest(
-                        PersonId: personRegisterResponse.Id,
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
-                        PickupAddressCountry: faker.Address.Country(),
+                        PickupAddressCountry: faker.Address.CountryCode(),
                         PickupAddressState: faker.Address.State(),
                         PickupAddressZipCode: faker.Address.ZipCode(),
                         PickupAddressCity: faker.Address.City(),
@@ -87,7 +86,7 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
                     ));
 
         HttpResponseMessage createAdvertisementResponseMessage =
-            await _httpClient.PostAsJsonAsync("api/v1/advertisements", request);
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
         ApiResponses.CreatedWithIdResponse createAdvertisementResponse =
             await createAdvertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
 
@@ -104,7 +103,7 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
         ]);
 
         HttpResponseMessage reassignCatsResponseMessage =
-            await _httpClient.PutAsJsonAsync($"api/v1/advertisements/{createAdvertisementResponse.Id}/cats",
+            await _httpClient.PutAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{createAdvertisementResponse.Id}/cats",
                 reassignCatsRequest);
 
         //Assert
@@ -157,10 +156,9 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
             new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
                     new CreateAdvertisement.CreateAdvertisementRequest(
-                        PersonId: personRegisterResponse.Id,
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
-                        PickupAddressCountry: faker.Address.Country(),
+                        PickupAddressCountry: faker.Address.CountryCode(),
                         PickupAddressState: faker.Address.State(),
                         PickupAddressZipCode: faker.Address.ZipCode(),
                         PickupAddressCity: faker.Address.City(),
@@ -171,7 +169,7 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
                     ));
 
         HttpResponseMessage createAdvertisementResponseMessage =
-            await _httpClient.PostAsJsonAsync("api/v1/advertisements", request);
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
         ApiResponses.CreatedWithIdResponse createAdvertisementResponse =
             await createAdvertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
 
@@ -180,7 +178,7 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
             new([anotherCatCreateResponse.Id]);
 
         HttpResponseMessage reassignCatsResponseMessage =
-            await _httpClient.PutAsJsonAsync($"api/v1/advertisements/{createAdvertisementResponse.Id}/cats",
+            await _httpClient.PutAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{createAdvertisementResponse.Id}/cats",
                 reassignCatsRequest);
 
         //Assert

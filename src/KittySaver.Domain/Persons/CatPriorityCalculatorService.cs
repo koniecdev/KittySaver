@@ -7,25 +7,26 @@ public interface ICatPriorityCalculatorService
 
 public class DefaultCatPriorityCalculatorService : ICatPriorityCalculatorService
 {
+    private static class Weights
+    {
+        public const double Health = 2.0;
+        public const double MedicalUrgency = 2.0;
+        public const double Behavior = 1.5;
+        public const double Age = 1.2;
+        public const double BaseScore = 0.1;
+    }
+
     public double Calculate(Cat cat)
     {
-        const double healthWeight = 2.0;
-        const double medicalHelpUrgencyWeight = 2.0;
-        const double behaviorWeight = 1.5;
-        const double ageWeight = 1.2;
-    
         int healthStatusPoints = cat.HealthStatus.MaxScorePoints - cat.HealthStatus.ScorePoints;
         int behaviourPoints = cat.Behavior.MaxScorePoints - cat.Behavior.ScorePoints;
-        int medicalHelpUrgencyPoints =  cat.MedicalHelpUrgency.MaxScorePoints - cat.MedicalHelpUrgency.ScorePoints;
+        int medicalHelpUrgencyPoints = cat.MedicalHelpUrgency.MaxScorePoints - cat.MedicalHelpUrgency.ScorePoints;
         int ageCategoryPoints = cat.AgeCategory.MaxScorePoints - cat.AgeCategory.ScorePoints;
 
-        double priority =
-            healthStatusPoints * healthWeight
-            + medicalHelpUrgencyPoints * medicalHelpUrgencyWeight
-            + behaviourPoints * behaviorWeight
-            + ageCategoryPoints * ageWeight
-            + 0.1;
-        
-        return priority;
+        return healthStatusPoints * Weights.Health
+               + medicalHelpUrgencyPoints * Weights.MedicalUrgency
+               + behaviourPoints * Weights.Behavior
+               + ageCategoryPoints * Weights.Age
+               + Weights.BaseScore;
     }
 }

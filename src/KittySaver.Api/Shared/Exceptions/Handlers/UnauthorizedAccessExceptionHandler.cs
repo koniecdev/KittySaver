@@ -17,9 +17,9 @@ internal sealed class UnauthorizedAccessExceptionHandler(ILogger<UnauthorizedAcc
         
         var problemDetails = new ProblemDetails
         {
-            Status = StatusCodes.Status401Unauthorized,
-            Type = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401",
-            Title = "Provided credentials are not valid"
+            Status = StatusCodes.Status403Forbidden,
+            Type = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403",
+            Title = "You do not have permission to modify resource that do not belong to You."
         };
 
         logger.LogError(

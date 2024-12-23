@@ -34,7 +34,7 @@ public class CloseAdvertisementEndpointsTests : IAsyncLifetime
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
                     UserIdentityId: Guid.NewGuid(),
-                    DefaultAdvertisementPickupAddressCountry: faker.Address.Country(),
+                    DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
                     DefaultAdvertisementPickupAddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
                     DefaultAdvertisementPickupAddressCity: faker.Address.City(),
@@ -74,10 +74,9 @@ public class CloseAdvertisementEndpointsTests : IAsyncLifetime
             new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
                     new CreateAdvertisement.CreateAdvertisementRequest(
-                        PersonId: personRegisterResponse.Id,
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
-                        PickupAddressCountry: faker.Address.Country(),
+                        PickupAddressCountry: faker.Address.CountryCode(),
                         PickupAddressState: faker.Address.State(),
                         PickupAddressZipCode: faker.Address.ZipCode(),
                         PickupAddressCity: faker.Address.City(),
@@ -87,11 +86,13 @@ public class CloseAdvertisementEndpointsTests : IAsyncLifetime
                         ContactInfoPhoneNumber: faker.Person.Phone
                     ));
 
-        HttpResponseMessage advertisementResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/advertisements", request);
+        HttpResponseMessage advertisementResponseMessage =
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
         ApiResponses.CreatedWithIdResponse advertisementResponse = await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
         
         //Act
-        HttpResponseMessage closeResponseMessage = await _httpClient.PostAsync($"api/v1/advertisements/{advertisementResponse.Id}/close", null);
+        HttpResponseMessage closeResponseMessage = 
+            await _httpClient.PostAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}/close", null);
         
         //Assert
         closeResponseMessage.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -122,10 +123,9 @@ public class CloseAdvertisementEndpointsTests : IAsyncLifetime
             new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
                     new CreateAdvertisement.CreateAdvertisementRequest(
-                        PersonId: personRegisterResponse.Id,
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
-                        PickupAddressCountry: faker.Address.Country(),
+                        PickupAddressCountry: faker.Address.CountryCode(),
                         PickupAddressState: faker.Address.State(),
                         PickupAddressZipCode: faker.Address.ZipCode(),
                         PickupAddressCity: faker.Address.City(),
@@ -135,12 +135,14 @@ public class CloseAdvertisementEndpointsTests : IAsyncLifetime
                         ContactInfoPhoneNumber: faker.Person.Phone
                     ));
 
-        HttpResponseMessage advertisementResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/advertisements", request);
+        HttpResponseMessage advertisementResponseMessage =
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
         ApiResponses.CreatedWithIdResponse advertisementResponse = await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
-        await _httpClient.PostAsync($"api/v1/advertisements/{advertisementResponse.Id}/close", null);
+        await _httpClient.PostAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}/close", null);
         
         //Act
-        HttpResponseMessage duplicatedCloseResponseMessage = await _httpClient.PostAsync($"api/v1/advertisements/{advertisementResponse.Id}/close", null);
+        HttpResponseMessage duplicatedCloseResponseMessage = 
+            await _httpClient.PostAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}/close", null);
         
         //Assert
         duplicatedCloseResponseMessage.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -150,20 +152,49 @@ public class CloseAdvertisementEndpointsTests : IAsyncLifetime
     }
     
     [Fact]
-    public async Task CloseAdvertisement_ShouldReturnNotFound_WhenInvaliIdIsProvided()
+    public async Task CloseAdvertisement_ShouldReturnBadRequest_WhenSameIdsAreProvided()
     {
         //Arrange
         Guid randomId = Guid.NewGuid();
         
         //Act
         HttpResponseMessage closeResponseMessage =
-            await _httpClient.PostAsync($"api/v1/advertisements/{randomId}/close", null);
+            await _httpClient.PostAsync($"api/v1/persons/{randomId}/advertisements/{randomId}/close", null);
+        
+        //Assert
+        closeResponseMessage.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        ValidationProblemDetails? validationProblemDetails =
+            await closeResponseMessage.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        validationProblemDetails.Should().NotBeNull();
+        validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
+        validationProblemDetails.Errors.Count.Should().Be(2);
+        validationProblemDetails.Errors.Keys.Should()
+            .BeEquivalentTo(nameof(CloseAdvertisement.CloseAdvertisementCommand.PersonId),
+                nameof(CloseAdvertisement.CloseAdvertisementCommand.AdvertisementId));
+        validationProblemDetails.Errors.Values.Count.Should().Be(2);
+        validationProblemDetails.Errors[nameof(CloseAdvertisement.CloseAdvertisementCommand.AdvertisementId)][0]
+            .Should().Be($"'Advertisement Id' must not be equal to '{randomId}'.");
+        validationProblemDetails.Errors[nameof(CloseAdvertisement.CloseAdvertisementCommand.PersonId)][0]
+            .Should().Be($"'Person Id' must not be equal to '{randomId}'.");
+    }
+    
+    [Fact]
+    public async Task CloseAdvertisement_ShouldReturnNotFound_WhenInvaliIdIsProvided()
+    {
+        //Arrange
+        Guid randomPersonId = Guid.NewGuid();
+        Guid randomAdvertisementId = Guid.NewGuid();
+        
+        //Act
+        HttpResponseMessage closeResponseMessage =
+            await _httpClient.PostAsync($"api/v1/persons/{randomPersonId}/advertisements/{randomAdvertisementId}/close", null);
         
         //Assert
         closeResponseMessage.StatusCode.Should().Be(HttpStatusCode.NotFound);
         ProblemDetails notFoundProblemDetails = await closeResponseMessage.Content.ReadFromJsonAsync<ProblemDetails>()
                                                  ?? throw new JsonException();
         notFoundProblemDetails.Status.Should().Be(StatusCodes.Status404NotFound);
+        notFoundProblemDetails.Detail.Should().Be($"'Person' with identifier '{randomPersonId}' was not found.");
     }
     
     [Fact]
@@ -171,9 +202,13 @@ public class CloseAdvertisementEndpointsTests : IAsyncLifetime
     {
         //Arrange
         Guid randomId = Guid.Empty;
+        // CreatePerson.CreatePersonRequest? owner = _createPersonRequestGenerator.Generate();
+        // HttpResponseMessage ownerResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/persons", owner);
+        // ApiResponses.CreatedWithIdResponse ownerResponse = await ownerResponseMessage.GetIdResponseFromResponseMessageAsync();
         
         //Act
-        HttpResponseMessage closeResponse = await _httpClient.PostAsync($"api/v1/advertisements/{randomId}/close", null);
+        HttpResponseMessage closeResponse = 
+            await _httpClient.PostAsync($"api/v1/persons/{randomId}/advertisements/{randomId}/close", null);
         
         //Assert
         closeResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -181,11 +216,15 @@ public class CloseAdvertisementEndpointsTests : IAsyncLifetime
             await closeResponse.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         validationProblemDetails.Should().NotBeNull();
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
-        validationProblemDetails.Errors.Count.Should().Be(1);
-        validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(nameof(DeleteAdvertisement.DeleteAdvertisementCommand.Id));
-        validationProblemDetails.Errors.Values.Count.Should().Be(1);
-        validationProblemDetails.Errors[nameof(DeleteAdvertisement.DeleteAdvertisementCommand.Id)][0]
-            .Should().Be("'Id' must not be empty.");
+        validationProblemDetails.Errors.Count.Should().Be(2);
+        validationProblemDetails.Errors.Keys.Should()
+            .BeEquivalentTo(nameof(CloseAdvertisement.CloseAdvertisementCommand.PersonId),
+                nameof(CloseAdvertisement.CloseAdvertisementCommand.AdvertisementId));
+        validationProblemDetails.Errors.Values.Count.Should().Be(2);
+        validationProblemDetails.Errors[nameof(CloseAdvertisement.CloseAdvertisementCommand.AdvertisementId)][0]
+            .Should().Be("'Advertisement Id' must not be empty.");
+        validationProblemDetails.Errors[nameof(CloseAdvertisement.CloseAdvertisementCommand.PersonId)][0]
+            .Should().Be("'Person Id' must not be empty.");
     }
     
     public Task InitializeAsync()

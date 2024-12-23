@@ -2,7 +2,6 @@
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
-using KittySaver.Domain.Advertisements;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
@@ -15,7 +14,6 @@ namespace KittySaver.Api.Features.Advertisements;
 public class CreateAdvertisement : IEndpoint
 {
     public sealed record CreateAdvertisementRequest(
-        Guid PersonId,
         IEnumerable<Guid> CatsIdsToAssign,
         string? Description,
         string PickupAddressCountry,
@@ -39,7 +37,7 @@ public class CreateAdvertisement : IEndpoint
         string PickupAddressStreet,
         string PickupAddressBuildingNumber,
         string ContactInfoEmail,
-        string ContactInfoPhoneNumber) : ICommand<Guid>;
+        string ContactInfoPhoneNumber) : IAdvertisementCommand<Guid>;
 
     public sealed class CreateAdvertisementCommandValidator
         : AbstractValidator<CreateAdvertisementCommand>
@@ -88,14 +86,13 @@ public class CreateAdvertisement : IEndpoint
 
     internal sealed class CreateAdvertisementCommandHandler(
         IPersonRepository personRepository,
-        IAdvertisementRepository advertisementRepository,
         IUnitOfWork unitOfWork,
         IDateTimeService dateTimeService)
         : IRequestHandler<CreateAdvertisementCommand, Guid>
     {
         public async Task<Guid> Handle(CreateAdvertisementCommand request, CancellationToken cancellationToken)
         {
-            Person person = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
+            Person owner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
 
             Address pickupAddress = Address.Create(
                 country: request.PickupAddressCountry,
@@ -110,14 +107,13 @@ public class CreateAdvertisement : IEndpoint
             
             Advertisement advertisement = Advertisement.Create(
                 currentDate: dateTimeService.Now,
-                person: person,
+                owner: owner,
                 catsIdsToAssign: request.CatsIdsToAssign,
                 pickupAddress: pickupAddress,
                 contactInfoEmail: contactInfoEmail,
                 contactInfoPhoneNumber: contactInfoPhoneNumber,
                 description: description);
 
-            advertisementRepository.Insert(advertisement);
             await unitOfWork.SaveChangesAsync(cancellationToken);
             return advertisement.Id;
         }
@@ -125,14 +121,15 @@ public class CreateAdvertisement : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapPost("advertisements", async
-        (CreateAdvertisementRequest request,
+        endpointRouteBuilder.MapPost("persons/{personId:guid}/advertisements", async (
+            Guid personId,
+            CreateAdvertisementRequest request,
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            CreateAdvertisementCommand command = request.MapToCreateAdvertisementCommand();
+            CreateAdvertisementCommand command = request.MapToCreateAdvertisementCommand(personId);
             Guid advertisementId = await sender.Send(command, cancellationToken);
-            return Results.Created($"/api/v1/advertisements/{advertisementId}", new { Id = advertisementId });
+            return Results.Created($"/api/v1/persons/{personId}/advertisements/{advertisementId}", new { Id = advertisementId });
         }).RequireAuthorization();
     }
 }
@@ -141,5 +138,6 @@ public class CreateAdvertisement : IEndpoint
 public static partial class CreateAdvertisementMapper
 {
     public static partial CreateAdvertisement.CreateAdvertisementCommand MapToCreateAdvertisementCommand(
-        this CreateAdvertisement.CreateAdvertisementRequest request);
+        this CreateAdvertisement.CreateAdvertisementRequest request,
+        Guid personId);
 }

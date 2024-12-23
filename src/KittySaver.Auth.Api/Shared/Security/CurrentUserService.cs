@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.Security.Authentication;
+using System.Security.Claims;
 using KittySaver.Auth.Api.Shared.Infrastructure.Services;
 
 namespace KittySaver.Auth.Api.Shared.Security;
@@ -26,7 +27,7 @@ public sealed class CurrentUserService(IHttpContextAccessor httpContextAccessor,
             
             if (!currentEnvironmentService.IsDevelopmentTheCurrentEnvironment())
             {
-                throw new UnauthorizedAccessException();
+                throw new AuthenticationException();
             }
             
             userId = NotLoggedInValueForDevelopment;

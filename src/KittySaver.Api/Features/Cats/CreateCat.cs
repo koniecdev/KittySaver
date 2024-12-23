@@ -31,7 +31,7 @@ public sealed class CreateCat : IEndpoint
         string AgeCategory,
         string Behavior,
         string HealthStatus,
-        string? AdditionalRequirements = null) : ICommand<Guid>;
+        string? AdditionalRequirements = null) : ICatCommand<Guid>;
 
     public sealed class CreateCatCommandValidator : AbstractValidator<CreateCatCommand>
     {
@@ -64,7 +64,7 @@ public sealed class CreateCat : IEndpoint
         public async Task<Guid> Handle(CreateCatCommand request, CancellationToken cancellationToken)
         {
             Person person = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
-
+        
             CatName catName = CatName.Create(request.Name);
             Description additionalRequirements = Description.Create(request.AdditionalRequirements);
 

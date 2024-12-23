@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
+using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
@@ -24,7 +25,7 @@ public sealed class CreatePerson : IEndpoint
         string DefaultAdvertisementContactInfoEmail,
         string DefaultAdvertisementContactInfoPhoneNumber);
     
-    public sealed record CreatePersonCommand(
+    public sealed record IPersonCommand(
         string Nickname,
         string Email,
         string PhoneNumber,
@@ -36,10 +37,10 @@ public sealed class CreatePerson : IEndpoint
         string DefaultAdvertisementPickupAddressStreet,
         string DefaultAdvertisementPickupAddressBuildingNumber,
         string DefaultAdvertisementContactInfoEmail,
-        string DefaultAdvertisementContactInfoPhoneNumber) : ICommand<Guid>;
+        string DefaultAdvertisementContactInfoPhoneNumber) : IPersonCommand<Guid>;
 
     public sealed class CreatePersonCommandValidator 
-        : AbstractValidator<CreatePersonCommand>, IAsyncValidator
+        : AbstractValidator<IPersonCommand>, IAsyncValidator
     {
         public CreatePersonCommandValidator(IPersonRepository personRepository)
         {
@@ -99,10 +100,12 @@ public sealed class CreatePerson : IEndpoint
         }
     }
     
-    internal sealed class CreatePersonCommandHandler(IPersonRepository personRepository, IUnitOfWork unitOfWork)
-        : IRequestHandler<CreatePersonCommand, Guid>
+    internal sealed class CreatePersonCommandHandler(
+        IPersonRepository personRepository,
+        IUnitOfWork unitOfWork)
+        : IRequestHandler<IPersonCommand, Guid>
     {
-        public async Task<Guid> Handle(CreatePersonCommand request, CancellationToken cancellationToken)
+        public async Task<Guid> Handle(IPersonCommand request, CancellationToken cancellationToken)
         {
             Nickname nickname = Nickname.Create(request.Nickname);
             Email email = Email.Create(request.Email);
@@ -141,7 +144,7 @@ public sealed class CreatePerson : IEndpoint
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            CreatePersonCommand command = request.MapToCreatePersonCommand();
+            IPersonCommand command = request.MapToCreatePersonCommand();
             Guid personId = await sender.Send(command, cancellationToken);
             return Results.Created($"/api/v1/persons/{personId}", new { Id = personId });
         }).RequireAuthorization();
@@ -151,7 +154,7 @@ public sealed class CreatePerson : IEndpoint
 [Mapper]
 public static partial class CreatePersonMapper
 {
-    public static partial CreatePerson.CreatePersonCommand MapToCreatePersonCommand(
+    public static partial CreatePerson.IPersonCommand MapToCreatePersonCommand(
         this CreatePerson.CreatePersonRequest request);
 }
     

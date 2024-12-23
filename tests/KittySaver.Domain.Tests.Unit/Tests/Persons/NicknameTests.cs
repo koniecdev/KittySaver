@@ -4,7 +4,7 @@ using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
 using Person = KittySaver.Domain.Persons.Person;
 
-namespace KittySaver.Domain.Tests.Unit.Persons;
+namespace KittySaver.Domain.Tests.Unit.Tests.Persons;
 
 public class NicknameTests
 {
@@ -15,7 +15,7 @@ public class NicknameTests
     private static readonly Address Address = new Faker<Address>()
         .CustomInstantiator(faker =>
             Address.Create(
-                country: faker.Address.Country(),
+                country: faker.Address.CountryCode(),
                 state: faker.Address.State(),
                 zipCode: faker.Address.ZipCode(),
                 city: faker.Address.City(),
@@ -24,28 +24,28 @@ public class NicknameTests
             )).Generate();
    
     [Fact]
-    public void FirstNameCreate_ShouldCreateSuccessfully_WhenCorrectValueIsProvided()
+    public void NicknameCreate_ShouldCreateSuccessfully_WhenCorrectValueIsProvided()
     {
         //Assign
-        const string properFirstName = "ProperfirstName";
+        const string properNickname = "Propernickname";
         
         //Act
-        Nickname nickname = Nickname.Create(properFirstName);
-        string firstNameAsString = nickname.ToString();
+        Nickname nickname = Nickname.Create(properNickname);
+        string nicknameAsString = nickname.ToString();
         
         //Assert
-        nickname.Value.Should().Be(properFirstName);
-        firstNameAsString.Should().Be(properFirstName);
+        nickname.Value.Should().Be(properNickname);
+        nicknameAsString.Should().Be(properNickname);
     }
 
     
     [Theory]
     [InlineData("artur")]
     [InlineData("Artur")]
-    public void FirstNameCreate_ShouldCapitalizeFirstLetter_WhenNotEmptyValueIsProvided(string firstNameValue)
+    public void NicknameCreate_ShouldCapitalizeFirstLetter_WhenNotEmptyValueIsProvided(string nicknameValue)
     {
         //Act
-        Nickname nickname = Nickname.Create(firstNameValue);
+        Nickname nickname = Nickname.Create(nicknameValue);
         Person sut = Person.Create(
             userIdentityId: _userIdentityId,
             nickname: nickname,
@@ -60,13 +60,13 @@ public class NicknameTests
     }
 
     [Fact]
-    public void FirstNameCreate_ShouldThrowArgumentOutOfRangeException_WhenValueExceedsMaxLength()
+    public void NicknameCreate_ShouldThrowArgumentOutOfRangeException_WhenValueExceedsMaxLength()
     {
         //Arrange
-        string longFirstNameValue = new('A', Nickname.MaxLength + 1);
+        string longNicknameValue = new('A', Nickname.MaxLength + 1);
         
         //Act
-        Action creation = () => Nickname.Create(longFirstNameValue);
+        Action creation = () => Nickname.Create(longNicknameValue);
 
         //Assert
         creation.Should().Throw<ArgumentOutOfRangeException>();

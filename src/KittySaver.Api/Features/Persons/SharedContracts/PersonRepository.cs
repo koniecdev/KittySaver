@@ -1,5 +1,4 @@
 ﻿using KittySaver.Api.Shared.Persistence;
-using KittySaver.Domain.Advertisements;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Persons;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +11,7 @@ public class PersonRepository(ApplicationWriteDbContext writeDb) : IPersonReposi
         => await writeDb.Persons
             .Where(person => person.Id == id)
             .Include(person => person.Cats)
+            .Include(person => person.Advertisements)
             .FirstOrDefaultAsync(cancellationToken) 
             ?? throw new NotFoundExceptions.PersonNotFoundException(id);
     
@@ -19,6 +19,7 @@ public class PersonRepository(ApplicationWriteDbContext writeDb) : IPersonReposi
         => await writeDb.Persons
                .Where(person => person.Id == idOrUserIdentityId || person.UserIdentityId == idOrUserIdentityId)
                .Include(person => person.Cats)
+               .Include(person => person.Advertisements)
                .FirstOrDefaultAsync(cancellationToken)
                ?? throw new NotFoundExceptions.PersonNotFoundException(idOrUserIdentityId);
     
@@ -27,18 +28,6 @@ public class PersonRepository(ApplicationWriteDbContext writeDb) : IPersonReposi
     public void Remove(Person person)
     {
         writeDb.Persons.Remove(person);
-        person.AnnounceDeletion();
-    }
-
-    public async Task RemoveAllPersonAdvertisementsAsync(Guid personId, CancellationToken cancellationToken)
-    {
-        List<Advertisement> advertisementsToRemove = await writeDb.Advertisements
-            .Where(x => x.PersonId == personId)
-            .ToListAsync(cancellationToken);
-        if (advertisementsToRemove.Count > 0)
-        {
-            writeDb.Advertisements.RemoveRange(advertisementsToRemove);
-        }
     }
 
     public async Task<bool> IsPhoneNumberUniqueAsync(string phone, Guid? userToExcludeIdOrIdentityId, CancellationToken cancellationToken) 

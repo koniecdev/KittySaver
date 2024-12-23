@@ -9,7 +9,7 @@ namespace KittySaver.Api.Features.Cats;
 
 public sealed class GetCat : IEndpoint
 {
-    public sealed record GetCatQuery(Guid PersonId, Guid Id) : IQuery<CatResponse>;
+    public sealed record GetCatQuery(Guid PersonId, Guid Id) : ICatQuery<CatResponse>;
 
     internal sealed class GetCatQueryHandler(ApplicationReadDbContext db)
         : IRequestHandler<GetCatQuery, CatResponse>

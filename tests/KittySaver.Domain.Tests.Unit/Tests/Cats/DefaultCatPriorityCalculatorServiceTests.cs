@@ -5,14 +5,14 @@ using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
 using Person = KittySaver.Domain.Persons.Person;
 
-namespace KittySaver.Domain.Tests.Unit.Cats;
+namespace KittySaver.Domain.Tests.Unit.Tests.Cats;
 
 public class DefaultCatPriorityCalculatorServiceTests
 {
     private static readonly Address Address = new Faker<Address>()
         .CustomInstantiator(faker =>
             Address.Create(
-                country: faker.Address.Country(),
+                country: faker.Address.CountryCode(),
                 state: faker.Address.State(),
                 zipCode: faker.Address.ZipCode(),
                 city: faker.Address.City(),
@@ -23,7 +23,7 @@ public class DefaultCatPriorityCalculatorServiceTests
     private static readonly Address PickupAddress = new Faker<Address>()
         .CustomInstantiator(faker =>
             Address.Create(
-                country: faker.Address.Country(),
+                country: faker.Address.CountryCode(),
                 state: faker.Address.State(),
                 zipCode: faker.Address.ZipCode(),
                 city: faker.Address.City(),

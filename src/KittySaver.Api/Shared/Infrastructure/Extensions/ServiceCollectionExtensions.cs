@@ -8,12 +8,12 @@ using KittySaver.Api.Shared.Behaviours;
 using KittySaver.Api.Shared.Infrastructure.Security;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
-using KittySaver.Domain.Advertisements;
 using KittySaver.Domain.Persons;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace KittySaver.Api.Shared.Infrastructure.Extensions;
@@ -24,37 +24,37 @@ public static class ServiceCollectionExtensions
     {
         Assembly assembly = Assembly.GetExecutingAssembly();
         services.AddHttpContextAccessor();
+        services.AddDbContext<ApplicationReadDbContext>(o => o
+            .UseSqlServer(configuration.GetConnectionString("Database") ?? throw new Exceptions.Database.MissingConnectionStringException())
+            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
         services.AddScoped<ICurrentEnvironmentService, CurrentEnvironmentService>();
         services.AddScoped<IDateTimeService, DefaultDateTimeService>();
         services.AddScoped<IPersonRepository, PersonRepository>();
-        services.AddScoped<IAdvertisementRepository, AdvertisementRepository>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<ICatPriorityCalculatorService, DefaultCatPriorityCalculatorService>();
         services.AddValidatorsFromAssembly(assembly);
-        services.AddMediatR(cfg =>
-        {
-            cfg.RegisterServicesFromAssembly(assembly);
-            cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
-        });
         
         AddAuth();
         
         services.AddDbContext<ApplicationWriteDbContext>(o =>
             o.UseSqlServer(configuration.GetConnectionString("Database") ?? throw new Exceptions.Database.MissingConnectionStringException()));
         
-        services.AddDbContext<ApplicationReadDbContext>(o => o
-            .UseSqlServer(configuration.GetConnectionString("Database") ?? throw new Exceptions.Database.MissingConnectionStringException())
-            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
-        
         services.AddScoped<IUnitOfWork>(serviceProvider => serviceProvider.GetRequiredService<ApplicationWriteDbContext>());
         
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(assembly);
+            cfg.AddOpenBehavior(typeof(AuthorizationBehaviour<,>));
+            cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+        });
         return services;
         
         void AddAuth()
         {
             if (environment.IsDevelopment())
             {
-                AddDevSchemeAuth();
+                // AddDevSchemeAuth();
+                AddJwtAuth();
             }
             else
             {
@@ -88,7 +88,7 @@ public static class ServiceCollectionExtensions
                         ValidateAudience = false,
                         ValidateIssuer = false,
                         IssuerSigningKey =
-                            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["AppSettings:Token"]!))
+                            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["AppSettings:Token"] ?? throw new InvalidConfigurationException("JWT Token not found in appsettings!!")))
                     };
                 });
             services.AddAuthorization();
