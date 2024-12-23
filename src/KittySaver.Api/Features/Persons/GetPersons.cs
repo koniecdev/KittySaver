@@ -8,7 +8,7 @@ namespace KittySaver.Api.Features.Persons;
 
 public sealed class GetPersons : IEndpoint
 {
-    public sealed class GetPersonsQuery : IQuery<ICollection<PersonResponse>>;
+    public sealed class GetPersonsQuery : IAdminOnlyQuery<ICollection<PersonResponse>>;
 
     internal sealed class GetPersonsQueryHandler(ApplicationReadDbContext db)
         : IRequestHandler<GetPersonsQuery, ICollection<PersonResponse>>

@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
+using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
 using MediatR;
@@ -8,7 +9,7 @@ namespace KittySaver.Api.Features.Persons;
 
 public sealed class DeletePerson : IEndpoint
 {
-    public sealed record DeletePersonCommand(Guid IdOrUserIdentityId) : ICommand;
+    public sealed record DeletePersonCommand(Guid IdOrUserIdentityId) : IPersonCommand;
 
     public sealed class DeletePersonCommandValidator
         : AbstractValidator<DeletePersonCommand>
@@ -19,13 +20,15 @@ public sealed class DeletePerson : IEndpoint
         }
     }
 
-    internal sealed class DeletePersonCommandHandler(IPersonRepository personRepository, IUnitOfWork unitOfWork)
+    internal sealed class DeletePersonCommandHandler(
+        IPersonRepository personRepository,
+        IUnitOfWork unitOfWork)
         : IRequestHandler<DeletePersonCommand>
     {
         public async Task Handle(DeletePersonCommand request, CancellationToken cancellationToken)
         {
             Person person = await personRepository.GetPersonByIdOrIdentityIdAsync(request.IdOrUserIdentityId, cancellationToken);
-
+            
             personRepository.Remove(person);
             
             await unitOfWork.SaveChangesAsync(cancellationToken);

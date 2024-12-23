@@ -41,16 +41,22 @@ public class AdminConfiguration : IEntityTypeConfiguration<ApplicationUser>
         ApplicationUser admin = new()
         {
             Id = FixedIdsHelper.AdminId,
-            UserName = "defaultadmin@koniec.dev",
             NormalizedUserName = "DEFAULTADMIN@KONIEC.DEV",
-            FirstName = "Default",
-            LastName = "Admin",
+            UserName = "DefaultAdmin",
             Email = "defaultadmin@koniec.dev",
             NormalizedEmail = "DEFAULTADMIN@KONIEC.DEV",
             PhoneNumber = "XXXXXXXXX",
             EmailConfirmed = true,
             PhoneNumberConfirmed = true,
-            SecurityStamp = FixedIdsHelper.AdminStamp.ToString()
+            SecurityStamp = FixedIdsHelper.AdminStamp.ToString(),
+            DefaultAdvertisementPickupAddressCountry = "DefaultCountry",
+            DefaultAdvertisementPickupAddressState = "DefaultState",
+            DefaultAdvertisementPickupAddressZipCode = "00000",
+            DefaultAdvertisementPickupAddressCity = "DefaultCity",
+            DefaultAdvertisementPickupAddressStreet = "DefaultStreet",
+            DefaultAdvertisementPickupAddressBuildingNumber = "1",
+            DefaultAdvertisementContactInfoEmail = "defaultadmin@koniec.dev",
+            DefaultAdvertisementContactInfoPhoneNumber = "XXXXXXXXX"
         };
 
         admin.PasswordHash = PassGenerate(admin);

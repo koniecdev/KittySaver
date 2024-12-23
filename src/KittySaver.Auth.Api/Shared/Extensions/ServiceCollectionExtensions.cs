@@ -25,6 +25,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICurrentEnvironmentService, CurrentEnvironmentService>();
         services.AddScoped<IDateTimeProvider, DefaultDateTimeProvider>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddValidatorsFromAssembly(assembly);
         services.AddMediatR(cfg =>
         {
@@ -44,7 +45,9 @@ public static class ServiceCollectionExtensions
         {
             if (environment.IsDevelopment())
             {
-                AddDevSchemeAuth();
+                // AddDevSchemeAuth();
+                AddJwtAuth();
+
             }
             else
             {
@@ -100,6 +103,7 @@ public static class ServiceCollectionExtensions
                 x.Password.RequireUppercase = true;
                 x.Password.RequiredUniqueChars = 0;
             }).AddRoles<IdentityRole<Guid>>()
+            .AddSignInManager()
             .AddEntityFrameworkStores<ApplicationDbContext>();
         return services;
     }

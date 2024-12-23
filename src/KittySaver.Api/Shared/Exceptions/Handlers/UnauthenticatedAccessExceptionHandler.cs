@@ -1,25 +1,26 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
+﻿using System.Security.Authentication;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KittySaver.Api.Shared.Exceptions.Handlers;
 
-internal sealed class UnauthorizedAccessExceptionHandler(ILogger<UnauthorizedAccessExceptionHandler> logger) : IExceptionHandler
+internal sealed class UnauthenticatedAccessExceptionHandler(ILogger<UnauthenticatedAccessExceptionHandler> logger) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
         Exception exception,
         CancellationToken cancellationToken)
     {
-        if (exception is not UnauthorizedAccessException)
+        if (exception is not AuthenticationException)
         {
             return false;
         }
         
         var problemDetails = new ProblemDetails
         {
-            Status = StatusCodes.Status403Forbidden,
-            Type = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403",
-            Title = "You do not have permission to modify resource that do not belong to You."
+            Status = StatusCodes.Status401Unauthorized,
+            Type = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401",
+            Title = "You have to log in first."
         };
 
         logger.LogError(

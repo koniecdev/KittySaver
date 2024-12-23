@@ -10,7 +10,7 @@ namespace KittySaver.Api.Features.Cats;
 
 public sealed class DeleteCat : IEndpoint
 {
-    public sealed record DeleteCatCommand(Guid PersonId, Guid Id) : ICommand;
+    public sealed record DeleteCatCommand(Guid PersonId, Guid Id) : ICatCommand;
 
     public sealed class DeleteCatCommandValidator
         : AbstractValidator<DeleteCatCommand>

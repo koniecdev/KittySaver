@@ -1,4 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Authentication;
 using System.Security.Claims;
 using System.Text;
 using FluentValidation;
@@ -47,8 +48,7 @@ public sealed class Login : IEndpoint
 
     internal sealed class LoginCommandHandler(
         UserManager<ApplicationUser> userManager,
-        IConfiguration configuration,
-        IDateTimeProvider dateTimeProvider)
+        IJwtTokenService jwtTokenService)
         : IRequestHandler<LoginCommand, LoginResponse>
     {
         public async Task<LoginResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -62,53 +62,23 @@ public sealed class Login : IEndpoint
 
             if (!areUserCredentialsValid)
             {
-                throw new UnauthorizedAccessException();
+                throw new AuthenticationException();
             }
-
-            IList<string> roles = await userManager.GetRolesAsync(user);
-
-            (string token, DateTimeOffset expiresAt) tokenResults = CreateToken(user, roles);
-            LoginResponse response = new()
+            
+            (string token, DateTimeOffset expiresAt) = await jwtTokenService.GenerateTokenAsync(user);
+            
+            return new LoginResponse
             {
-                AccessToken = tokenResults.token,
-                AccessTokenExpiresAt = tokenResults.expiresAt
+                AccessToken = token,
+                AccessTokenExpiresAt = expiresAt
             };
-            return response;
-        }
-
-        private (string token, DateTimeOffset expiresAt) CreateToken(ApplicationUser user, ICollection<string> roles)
-        {
-            List<Claim> claims =
-            [
-                new Claim(ClaimTypes.Email, user.Email!),
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
-            ];
-
-            foreach (string role in roles)
-            {
-                Claim roleClaim = new Claim(ClaimTypes.Role, role);
-                claims.Add(roleClaim);
-            }
-
-            SymmetricSecurityKey key =
-                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["AppSettings:Token"]!));
-
-            SigningCredentials credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
-            DateTimeOffset expiresAt =
-                dateTimeProvider.Now.AddMinutes(int.Parse(configuration["AppSettings:MinutesTokenExpiresIn"]!));
-            JwtSecurityToken token = new JwtSecurityToken(
-                claims: claims,
-                expires: expiresAt.DateTime,
-                signingCredentials: credentials);
-            string jwt = new JwtSecurityTokenHandler().WriteToken(token);
-            return (jwt, expiresAt);
         }
     }
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapPost("application-users/login", async
-        (LoginRequest request,
+        endpointRouteBuilder.MapPost("application-users/login", async (
+            LoginRequest request,
             ISender sender,
             CancellationToken cancellationToken) =>
         {

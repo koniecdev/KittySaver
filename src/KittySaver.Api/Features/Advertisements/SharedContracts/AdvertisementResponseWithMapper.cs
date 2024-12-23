@@ -36,7 +36,6 @@ public sealed class AdvertisementResponse
     
     public enum AdvertisementStatus
     {
-        Draft,
         Active,
         Closed,
         Expired

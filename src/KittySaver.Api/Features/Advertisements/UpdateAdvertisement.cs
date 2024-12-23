@@ -34,7 +34,7 @@ public sealed class UpdateAdvertisement : IEndpoint
         string PickupAddressStreet,
         string PickupAddressBuildingNumber,
         string ContactInfoEmail,
-        string ContactInfoPhoneNumber) : ICommand;
+        string ContactInfoPhoneNumber) : IAdvertisementCommand;
 
     public sealed class UpdateAdvertisementCommandValidator
         : AbstractValidator<UpdateAdvertisementCommand>

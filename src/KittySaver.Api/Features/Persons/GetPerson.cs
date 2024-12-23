@@ -9,7 +9,7 @@ namespace KittySaver.Api.Features.Persons;
 
 public sealed class GetPerson : IEndpoint
 {
-    public sealed record GetPersonQuery(Guid IdOrUserIdentityId) : IQuery<PersonResponse>;
+    public sealed record GetPersonQuery(Guid IdOrUserIdentityId) : IPersonQuery<PersonResponse>;
 
     internal sealed class GetPersonQueryHandler(ApplicationReadDbContext db)
         : IRequestHandler<GetPersonQuery, PersonResponse>

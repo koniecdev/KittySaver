@@ -11,7 +11,7 @@ namespace KittySaver.Api.Features.Advertisements;
 
 public sealed class DeleteAdvertisement : IEndpoint
 {
-    public sealed record DeleteAdvertisementCommand(Guid PersonId, Guid AdvertisementId) : ICommand;
+    public sealed record DeleteAdvertisementCommand(Guid PersonId, Guid AdvertisementId) : IAdvertisementCommand;
 
     public sealed class DeleteAdvertisementCommandValidator
         : AbstractValidator<DeleteAdvertisementCommand>

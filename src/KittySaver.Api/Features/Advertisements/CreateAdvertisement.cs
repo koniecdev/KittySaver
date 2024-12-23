@@ -37,7 +37,7 @@ public class CreateAdvertisement : IEndpoint
         string PickupAddressStreet,
         string PickupAddressBuildingNumber,
         string ContactInfoEmail,
-        string ContactInfoPhoneNumber) : ICommand<Guid>;
+        string ContactInfoPhoneNumber) : IAdvertisementCommand<Guid>;
 
     public sealed class CreateAdvertisementCommandValidator
         : AbstractValidator<CreateAdvertisementCommand>

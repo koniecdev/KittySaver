@@ -11,7 +11,7 @@ namespace KittySaver.Api.Features.Advertisements;
 
 public sealed class CloseAdvertisement : IEndpoint
 {
-    public sealed record CloseAdvertisementCommand(Guid PersonId, Guid AdvertisementId) : ICommand;
+    public sealed record CloseAdvertisementCommand(Guid PersonId, Guid AdvertisementId) : IAdvertisementCommand;
 
     public sealed class CloseAdvertisementCommandValidator
         : AbstractValidator<CloseAdvertisementCommand>

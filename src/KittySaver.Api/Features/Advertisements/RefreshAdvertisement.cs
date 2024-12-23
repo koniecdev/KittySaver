@@ -11,7 +11,7 @@ namespace KittySaver.Api.Features.Advertisements;
 
 public sealed class RefreshAdvertisement : IEndpoint
 {
-    public sealed record RefreshAdvertisementCommand(Guid PersonId, Guid AdvertisementId) : ICommand;
+    public sealed record RefreshAdvertisementCommand(Guid PersonId, Guid AdvertisementId) : IAdvertisementCommand;
 
     public sealed class RefreshAdvertisementCommandValidator
         : AbstractValidator<RefreshAdvertisementCommand>

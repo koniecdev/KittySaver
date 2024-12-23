@@ -40,11 +40,11 @@ public sealed class ApplicationWriteDbContext(
             {
                 case EntityState.Added:
                     entity.Entity.CreatedOn = dateTimeProvider.Now;
-                    entity.Entity.CreatedBy = currentUserService.UserId;
+                    entity.Entity.CreatedBy = currentUserService.GetCurrentUserIdentityId().ToString();
                     break;
                 case EntityState.Modified:
                     entity.Entity.LastModificationOn = dateTimeProvider.Now;
-                    entity.Entity.LastModificationBy = currentUserService.UserId;
+                    entity.Entity.LastModificationBy = currentUserService.GetCurrentUserIdentityId().ToString();
                     break;
                 case EntityState.Detached:
                 case EntityState.Unchanged:

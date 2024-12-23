@@ -14,7 +14,7 @@ public sealed class ReassignCatsToAdvertisement : IEndpoint
     public sealed record ReassignCatsToAdvertisementCommand(
         Guid PersonId,
         Guid AdvertisementId,
-        IEnumerable<Guid> CatIds) : ICommand;
+        IEnumerable<Guid> CatIds) : IAdvertisementCommand;
 
     public sealed class AssignCatToAdvertisementCommandValidator : AbstractValidator<ReassignCatsToAdvertisementCommand>
     {

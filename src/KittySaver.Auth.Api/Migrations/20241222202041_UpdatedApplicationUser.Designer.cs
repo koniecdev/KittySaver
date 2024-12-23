@@ -4,6 +4,7 @@ using KittySaver.Auth.Api.Shared.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KittySaver.Auth.Api.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241222202041_UpdatedApplicationUser")]
+    partial class UpdatedApplicationUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,46 +37,6 @@ namespace KittySaver.Auth.Api.Migrations
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DefaultAdvertisementContactInfoEmail")
-                        .IsRequired()
-                        .HasMaxLength(254)
-                        .HasColumnType("nvarchar(254)");
-
-                    b.Property<string>("DefaultAdvertisementContactInfoPhoneNumber")
-                        .IsRequired()
-                        .HasMaxLength(31)
-                        .HasColumnType("nvarchar(31)");
-
-                    b.Property<string>("DefaultAdvertisementPickupAddressBuildingNumber")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("DefaultAdvertisementPickupAddressCity")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("DefaultAdvertisementPickupAddressCountry")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("DefaultAdvertisementPickupAddressState")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("DefaultAdvertisementPickupAddressStreet")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("DefaultAdvertisementPickupAddressZipCode")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -145,21 +108,13 @@ namespace KittySaver.Auth.Api.Migrations
                         {
                             Id = new Guid("c4ff57f4-2d8c-4c66-b62d-333ad2e3c424"),
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "17484491-9ad4-47b7-92cb-e0f954050844",
-                            DefaultAdvertisementContactInfoEmail = "defaultadmin@koniec.dev",
-                            DefaultAdvertisementContactInfoPhoneNumber = "XXXXXXXXX",
-                            DefaultAdvertisementPickupAddressBuildingNumber = "1",
-                            DefaultAdvertisementPickupAddressCity = "DefaultCity",
-                            DefaultAdvertisementPickupAddressCountry = "DefaultCountry",
-                            DefaultAdvertisementPickupAddressState = "DefaultState",
-                            DefaultAdvertisementPickupAddressStreet = "DefaultStreet",
-                            DefaultAdvertisementPickupAddressZipCode = "00000",
+                            ConcurrencyStamp = "5f2f707f-0f0d-479e-aaf1-111119a3f9ad",
                             Email = "defaultadmin@koniec.dev",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
                             NormalizedEmail = "DEFAULTADMIN@KONIEC.DEV",
                             NormalizedUserName = "DEFAULTADMIN@KONIEC.DEV",
-                            PasswordHash = "AQAAAAIAAYagAAAAECtrfSbwydETfnrc9jKMiZbUZTQyFEH+mqI6SUW/+h3hTrC0gWRbS8vHlD7BHzURrw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEMrQlexH/LlM+GONZMRdEc7361FKfkve7lBuOkriuCFG7Qu7kjd1xJSLyfm3hHN4Hg==",
                             PhoneNumber = "XXXXXXXXX",
                             PhoneNumberConfirmed = true,
                             SecurityStamp = "34d18c72-0a52-4bbe-9b00-754a02e2293e",
