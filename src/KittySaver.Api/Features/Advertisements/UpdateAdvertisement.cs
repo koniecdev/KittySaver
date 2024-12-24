@@ -18,8 +18,8 @@ public sealed class UpdateAdvertisement : IEndpoint
         string? PickupAddressState,
         string PickupAddressZipCode,
         string PickupAddressCity,
-        string PickupAddressStreet,
-        string PickupAddressBuildingNumber,
+        string? PickupAddressStreet,
+        string? PickupAddressBuildingNumber,
         string ContactInfoEmail,
         string ContactInfoPhoneNumber);
 
@@ -31,8 +31,8 @@ public sealed class UpdateAdvertisement : IEndpoint
         string? PickupAddressState,
         string PickupAddressZipCode,
         string PickupAddressCity,
-        string PickupAddressStreet,
-        string PickupAddressBuildingNumber,
+        string? PickupAddressStreet,
+        string? PickupAddressBuildingNumber,
         string ContactInfoEmail,
         string ContactInfoPhoneNumber) : IAdvertisementCommand;
 
@@ -76,11 +76,9 @@ public sealed class UpdateAdvertisement : IEndpoint
                 .MaximumLength(Address.CityMaxLength);
             
             RuleFor(x => x.PickupAddressStreet)
-                .NotEmpty()
                 .MaximumLength(Address.StreetMaxLength);
             
             RuleFor(x => x.PickupAddressBuildingNumber)
-                .NotEmpty()
                 .MaximumLength(Address.BuildingNumberMaxLength);
         }
     }

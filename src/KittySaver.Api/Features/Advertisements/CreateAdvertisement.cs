@@ -20,8 +20,8 @@ public class CreateAdvertisement : IEndpoint
         string? PickupAddressState,
         string PickupAddressZipCode,
         string PickupAddressCity,
-        string PickupAddressStreet,
-        string PickupAddressBuildingNumber,
+        string? PickupAddressStreet,
+        string? PickupAddressBuildingNumber,
         string ContactInfoEmail,
         string ContactInfoPhoneNumber
     );
@@ -34,8 +34,8 @@ public class CreateAdvertisement : IEndpoint
         string? PickupAddressState,
         string PickupAddressZipCode,
         string PickupAddressCity,
-        string PickupAddressStreet,
-        string PickupAddressBuildingNumber,
+        string? PickupAddressStreet,
+        string? PickupAddressBuildingNumber,
         string ContactInfoEmail,
         string ContactInfoPhoneNumber) : IAdvertisementCommand<Guid>;
 
@@ -75,11 +75,9 @@ public class CreateAdvertisement : IEndpoint
                 .MaximumLength(Address.CityMaxLength);
 
             RuleFor(x => x.PickupAddressStreet)
-                .NotEmpty()
                 .MaximumLength(Address.StreetMaxLength);
 
             RuleFor(x => x.PickupAddressBuildingNumber)
-                .NotEmpty()
                 .MaximumLength(Address.BuildingNumberMaxLength);
         }
     }
