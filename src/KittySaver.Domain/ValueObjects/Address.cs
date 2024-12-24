@@ -10,8 +10,8 @@ public sealed class Address : ValueObject
     private readonly string _country = null!;
     private readonly string _zipCode = null!;
     private readonly string _city = null!;
-    private readonly string _street = null!;
-    private readonly string _buildingNumber = null!;
+    private readonly string? _street = null!;
+    private readonly string? _buildingNumber = null!;
     
     public const int StateMaxLength = 100;
     public const int CountryMaxLength = 60;
@@ -43,7 +43,7 @@ public sealed class Address : ValueObject
     private static bool IsValidCountryCode(string countryCode) => 
         ValidCountryCodes.Contains(countryCode);
 
-    public static Address Create(string country, string? state, string zipCode, string city, string street, string buildingNumber)
+    public static Address Create(string country, string? state, string zipCode, string city, string? street, string? buildingNumber)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(country, nameof(country));
         
@@ -57,7 +57,7 @@ public sealed class Address : ValueObject
         return new Address(country, state, zipCode, city, street, buildingNumber);
     }
 
-    private Address(string country, string? state, string zipCode, string city, string street, string buildingNumber)
+    private Address(string country, string? state, string zipCode, string city, string? street, string? buildingNumber)
     {
         Country = country;
         State = state;
@@ -137,13 +137,12 @@ public sealed class Address : ValueObject
         }
     }
 
-    public string Street
+    public string? Street
     {
         get => _street;
         private init
         {
-            ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(Street));
-            if (value.Length > StreetMaxLength)
+            if (value?.Length > StreetMaxLength)
             {
                 throw new ArgumentOutOfRangeException(nameof(Street), value,
                     $"Maximum allowed length is: {StreetMaxLength}");
@@ -152,13 +151,12 @@ public sealed class Address : ValueObject
         }
     }
 
-    public string BuildingNumber
+    public string? BuildingNumber
     {
         get => _buildingNumber;
         private init
         {
-            ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(BuildingNumber));
-            if (value.Length > BuildingNumberMaxLength)
+            if (value?.Length > BuildingNumberMaxLength)
             {
                 throw new ArgumentOutOfRangeException(nameof(BuildingNumber), value,
                     $"Maximum allowed length is: {BuildingNumberMaxLength}");
@@ -173,7 +171,7 @@ public sealed class Address : ValueObject
         yield return State ?? "";
         yield return ZipCode;
         yield return City;
-        yield return Street;
-        yield return BuildingNumber;
+        yield return Street ?? "";
+        yield return BuildingNumber ?? "";
     }
 }
