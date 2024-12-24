@@ -9,19 +9,16 @@ namespace KittySaver.Domain.Persons;
 
 public sealed class Person : AggregateRoot
 {
-    // 1. Private fields
     private readonly Guid _userIdentityId;
     private readonly List<Cat> _cats = [];
     private readonly List<Advertisement> _advertisements = [];
 
-    // 2. Public enums
     public enum Role
     {
         Regular,
         Admin
     }
 
-    // 3. Public properties
     public Role CurrentRole { get; private init; } = Role.Regular;
     public Guid UserIdentityId
     {
@@ -45,7 +42,6 @@ public sealed class Person : AggregateRoot
     public IReadOnlyList<Cat> Cats => _cats.ToList();
     public IReadOnlyList<Advertisement> Advertisements => _advertisements.ToList();
 
-    // 4. Constructors
     /// <remarks>
     /// Required by EF Core, and should never be used by programmer as it bypasses business rules.
     /// </remarks>
@@ -77,7 +73,6 @@ public sealed class Person : AggregateRoot
         DefaultAdvertisementsContactInfoPhoneNumber = defaultAdvertisementContactInfoPhone;
     }
 
-    // 5. Public factory methods
     public static Person Create(
         Guid userIdentityId,
         Nickname nickname,
@@ -99,7 +94,6 @@ public sealed class Person : AggregateRoot
         return person;
     }
 
-    // 6. Public methods - Cat management
     public void AddCat(Cat cat)
     {
         ThrowIfCatAlreadyExists(cat.Id);
@@ -136,7 +130,6 @@ public sealed class Person : AggregateRoot
         }
     }
 
-    // 7. Public methods - Advertisement management
     public void AddAdvertisement(Advertisement advertisement, IEnumerable<Guid> catsIdsToAssign)
     {
         List<Guid> catsIdsToAssignList = catsIdsToAssign.ToList();
@@ -215,7 +208,6 @@ public sealed class Person : AggregateRoot
         UpdateAdvertisementPriorityScore(advertisementId);
     }
 
-    // 8. Public methods - Person data management
     public void ChangeNickname(Nickname nickname)
     {
         Nickname = nickname;
@@ -241,7 +233,6 @@ public sealed class Person : AggregateRoot
         DefaultAdvertisementsContactInfoPhoneNumber = defaultAdvertisementsContactInfoPhoneNumber;
     }
 
-    // 9. Public utility methods
     public double GetHighestPriorityScoreFromGivenCats(IEnumerable<Guid> catsIds)
     {
         List<Guid> catsIdsList = catsIds.ToList();
@@ -255,7 +246,6 @@ public sealed class Person : AggregateRoot
         return highestPriorityScore;
     }
 
-    // 10. Private helper methods
     private void AssignCatToAdvertisement(Guid advertisementId, Guid catId)
     {
         Cat cat = GetCatById(catId);
@@ -276,7 +266,7 @@ public sealed class Person : AggregateRoot
         Advertisement advertisement = GetAdvertisementById(advertisementId);
         advertisement.PriorityScore = catsToAssignToAdvertisementHighestPriorityScore;
     }
-
+    
     private IEnumerable<Cat> GetAssignedToConcreteAdvertisementCats(Guid advertisementId) 
         => _cats.Where(x => x.AdvertisementId == advertisementId);
     

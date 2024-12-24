@@ -24,8 +24,8 @@ public sealed class AdvertisementResponse
         public required string? State { get; init; }
         public required string ZipCode { get; init; }
         public required string City { get; init; }
-        public required string Street { get; init; }
-        public required string BuildingNumber { get; init; }
+        public required string? Street { get; init; }
+        public required string? BuildingNumber { get; init; }
     }
 
     public sealed class CatDto

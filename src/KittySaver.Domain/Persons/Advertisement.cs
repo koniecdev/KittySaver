@@ -8,23 +8,18 @@ namespace KittySaver.Domain.Persons;
 
 public sealed class Advertisement : AuditableEntity
 {
-    // 1. Static constants
     public static readonly TimeSpan ExpiringPeriodInDays = new(days: 30, hours: 0, minutes: 0, seconds: 0);
 
-    // 2. Private fields
     private readonly Guid _personId;
     private double _priorityScore;
 
-    // 3. Public enums
     public enum AdvertisementStatus
     {
-        Draft,
         Active,
         Closed,
         Expired //TODO: Background running task every day
     }
 
-    // 4. Public properties
     public required Guid PersonId
     {
         get => _personId;
@@ -46,7 +41,7 @@ public sealed class Advertisement : AuditableEntity
             : value;
     }
 
-    public AdvertisementStatus Status { get; private set; } = AdvertisementStatus.Draft;
+    public AdvertisementStatus Status { get; private set; }
     public DateTimeOffset? ClosedOn { get; private set; }
     public DateTimeOffset ExpiresOn { get; private set; }
     public Description Description { get; private set; }
@@ -54,7 +49,6 @@ public sealed class Advertisement : AuditableEntity
     public Email ContactInfoEmail { get; private set; }
     public PhoneNumber ContactInfoPhoneNumber { get; private set; }
 
-    // 5. Constructors
     /// <remarks>
     /// Required by EF Core, and should never be used by programmer as it bypasses business rules.
     /// </remarks>
@@ -83,7 +77,6 @@ public sealed class Advertisement : AuditableEntity
         ExpiresOn = expiresOn;
     }
 
-    // 6. Public factory methods
     public static Advertisement Create(
         DateTimeOffset currentDate,
         Person owner,
@@ -110,12 +103,9 @@ public sealed class Advertisement : AuditableEntity
             expiresOn: expiresOn);
         
         owner.AddAdvertisement(advertisement, catsIdsToAssignList);
-        
-        advertisement.Status = AdvertisementStatus.Active;
         return advertisement;
     }
 
-    // 7. Public methods - Property changes
     public void ChangeDescription(Description description)
     {
         Description = description;
@@ -132,7 +122,6 @@ public sealed class Advertisement : AuditableEntity
         ContactInfoPhoneNumber = contactInfoPhoneNumber;
     }
 
-    // 8. Public validation methods
     public void ValidateOwnership(Guid personId)
     {
         if (personId != PersonId)
@@ -141,7 +130,6 @@ public sealed class Advertisement : AuditableEntity
         }
     }
 
-    // 9. Internal methods - Status management
     internal void Close(DateTimeOffset currentDate)
     {
         EnsureAdvertisementIsActive();
@@ -174,7 +162,6 @@ public sealed class Advertisement : AuditableEntity
         }
     }
 
-    // 10. Private helper methods
     private void EnsureAdvertisementIsActive()
     {
         if (Status is not AdvertisementStatus.Active)
@@ -183,7 +170,6 @@ public sealed class Advertisement : AuditableEntity
         }
     }
 
-    // 11. Private constants/error messages
     private static class ErrorMessages
     {
         public const string EmptyCatsList = "Advertisement cats list must not be empty.";
