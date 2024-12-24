@@ -53,12 +53,13 @@ public static class ServiceCollectionExtensions
         {
             if (environment.IsDevelopment())
             {
-                // AddDevSchemeAuth();
-                AddJwtAuth();
+                AddDevSchemeAuth();
+                // AddJwtAuth();
             }
             else
             {
-                AddJwtAuth();
+                AddDevSchemeAuth();
+                // AddJwtAuth();
             }
         }
         

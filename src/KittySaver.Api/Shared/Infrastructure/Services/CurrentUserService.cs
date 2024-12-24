@@ -69,11 +69,11 @@ public sealed class CurrentUserService(
         
         if (currentEnvironmentService.IsDevelopmentTheCurrentEnvironment())
         {
-            // return new CurrentlyLoggedUser
-            // {
-            //     Id = Guid.NewGuid(),
-            //     Role = Person.Role.Admin
-            // };
+            return new CurrentlyLoggedUser
+            {
+                Id = Guid.NewGuid(),
+                Role = Person.Role.Admin
+            };
         }
         
         bool success = Guid.TryParse(

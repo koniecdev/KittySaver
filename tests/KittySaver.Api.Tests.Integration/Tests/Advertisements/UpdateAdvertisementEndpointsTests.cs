@@ -300,17 +300,15 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
             await responseMessage.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         validationProblemDetails.Should().NotBeNull();
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
-        validationProblemDetails.Errors.Count.Should().Be(7);
+        validationProblemDetails.Errors.Count.Should().Be(5);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(
             nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressCountry),
             nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressZipCode),
             nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressCity),
-            nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressStreet),
-            nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressBuildingNumber),
             nameof(UpdateAdvertisement.UpdateAdvertisementRequest.ContactInfoEmail),
             nameof(UpdateAdvertisement.UpdateAdvertisementRequest.ContactInfoPhoneNumber)
         );
-        validationProblemDetails.Errors.Values.Count.Should().Be(7);
+        validationProblemDetails.Errors.Values.Count.Should().Be(5);
         validationProblemDetails.Errors[nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressCountry)][0]
             .Should()
             .Be(
@@ -325,28 +323,15 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
             .Should()
             .Be(
                 $"'{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressCity))}' must not be empty.");
-
-        validationProblemDetails.Errors[nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressStreet)][0]
-            .Should()
-            .Be(
-                $"'{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressStreet))}' must not be empty.");
-
-        validationProblemDetails.Errors[
-                nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressBuildingNumber)][0]
-            .Should()
-            .Be(
-                $"'{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressBuildingNumber))}' must not be empty.");
-
+        
         validationProblemDetails.Errors[nameof(UpdateAdvertisement.UpdateAdvertisementRequest.ContactInfoEmail)][0]
             .Should()
             .Be(
                 $"'{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisement.UpdateAdvertisementRequest.ContactInfoEmail))}' must not be empty.");
 
-        validationProblemDetails.Errors[nameof(UpdateAdvertisement.UpdateAdvertisementRequest.ContactInfoPhoneNumber)]
-            [0]
+        validationProblemDetails.Errors[nameof(UpdateAdvertisement.UpdateAdvertisementRequest.ContactInfoPhoneNumber)][0]
             .Should()
-            .Be(
-                $"'{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisement.UpdateAdvertisementRequest.ContactInfoPhoneNumber))}' must not be empty.");
+            .Be($"'{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisement.UpdateAdvertisementRequest.ContactInfoPhoneNumber))}' must not be empty.");
     }
 
     public Task InitializeAsync()

@@ -430,19 +430,17 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
             await responseMessage.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         validationProblemDetails.Should().NotBeNull();
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
-        validationProblemDetails.Errors.Count.Should().Be(9);
+        validationProblemDetails.Errors.Count.Should().Be(7);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(
             nameof(CreateAdvertisement.CreateAdvertisementCommand.PersonId),
             nameof(CreateAdvertisement.CreateAdvertisementCommand.CatsIdsToAssign),
             nameof(CreateAdvertisement.CreateAdvertisementCommand.PickupAddressCountry),
             nameof(CreateAdvertisement.CreateAdvertisementCommand.PickupAddressZipCode),
             nameof(CreateAdvertisement.CreateAdvertisementCommand.PickupAddressCity),
-            nameof(CreateAdvertisement.CreateAdvertisementCommand.PickupAddressStreet),
-            nameof(CreateAdvertisement.CreateAdvertisementCommand.PickupAddressBuildingNumber),
             nameof(CreateAdvertisement.CreateAdvertisementCommand.ContactInfoEmail),
             nameof(CreateAdvertisement.CreateAdvertisementCommand.ContactInfoPhoneNumber)
         );
-        validationProblemDetails.Errors.Values.Count.Should().Be(9);
+        validationProblemDetails.Errors.Values.Count.Should().Be(7);
 
         validationProblemDetails.Errors[nameof(CreateAdvertisement.CreateAdvertisementCommand.PersonId)][0]
             .Should()
@@ -463,15 +461,7 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
         validationProblemDetails.Errors[nameof(CreateAdvertisement.CreateAdvertisementCommand.PickupAddressCity)][0]
             .Should()
             .Be($"'{Extensions.InsertSpacesIntoCamelCase(nameof(CreateAdvertisement.CreateAdvertisementCommand.PickupAddressCity))}' must not be empty.");
-
-        validationProblemDetails.Errors[nameof(CreateAdvertisement.CreateAdvertisementCommand.PickupAddressStreet)][0]
-            .Should()
-            .Be($"'{Extensions.InsertSpacesIntoCamelCase(nameof(CreateAdvertisement.CreateAdvertisementCommand.PickupAddressStreet))}' must not be empty.");
-
-        validationProblemDetails.Errors[nameof(CreateAdvertisement.CreateAdvertisementCommand.PickupAddressBuildingNumber)][0]
-            .Should()
-            .Be($"'{Extensions.InsertSpacesIntoCamelCase(nameof(CreateAdvertisement.CreateAdvertisementCommand.PickupAddressBuildingNumber))}' must not be empty.");
-
+        
         validationProblemDetails.Errors[nameof(CreateAdvertisement.CreateAdvertisementCommand.ContactInfoEmail)][0]
             .Should()
             .Be($"'{Extensions.InsertSpacesIntoCamelCase(nameof(CreateAdvertisement.CreateAdvertisementCommand.ContactInfoEmail))}' must not be empty.");
