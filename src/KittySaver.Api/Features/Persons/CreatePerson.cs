@@ -20,8 +20,8 @@ public sealed class CreatePerson : IEndpoint
         string? DefaultAdvertisementPickupAddressState,
         string DefaultAdvertisementPickupAddressZipCode,
         string DefaultAdvertisementPickupAddressCity,
-        string DefaultAdvertisementPickupAddressStreet,
-        string DefaultAdvertisementPickupAddressBuildingNumber,
+        string? DefaultAdvertisementPickupAddressStreet,
+        string? DefaultAdvertisementPickupAddressBuildingNumber,
         string DefaultAdvertisementContactInfoEmail,
         string DefaultAdvertisementContactInfoPhoneNumber);
     
@@ -34,8 +34,8 @@ public sealed class CreatePerson : IEndpoint
         string? DefaultAdvertisementPickupAddressState,
         string DefaultAdvertisementPickupAddressZipCode,
         string DefaultAdvertisementPickupAddressCity,
-        string DefaultAdvertisementPickupAddressStreet,
-        string DefaultAdvertisementPickupAddressBuildingNumber,
+        string? DefaultAdvertisementPickupAddressStreet,
+        string? DefaultAdvertisementPickupAddressBuildingNumber,
         string DefaultAdvertisementContactInfoEmail,
         string DefaultAdvertisementContactInfoPhoneNumber) : IPersonCommand<Guid>;
 
