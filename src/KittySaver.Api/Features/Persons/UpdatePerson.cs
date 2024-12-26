@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
@@ -43,7 +44,7 @@ public sealed class UpdatePerson : IEndpoint
     public sealed class UpdatePersonCommandValidator
         : AbstractValidator<UpdatePersonCommand>, IAsyncValidator
     {
-        public UpdatePersonCommandValidator(IPersonRepository personRepository)
+        public UpdatePersonCommandValidator(IPersonUniquenessChecksRepository personRepository)
         {
             RuleFor(x => x.IdOrUserIdentityId).NotEmpty();
 

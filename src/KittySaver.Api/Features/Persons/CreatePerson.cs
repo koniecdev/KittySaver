@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
@@ -42,7 +43,7 @@ public sealed class CreatePerson : IEndpoint
     public sealed class CreatePersonCommandValidator 
         : AbstractValidator<IPersonCommand>, IAsyncValidator
     {
-        public CreatePersonCommandValidator(IPersonRepository personRepository)
+        public CreatePersonCommandValidator(IPersonUniquenessChecksRepository personRepository)
         {
             RuleFor(x => x.Nickname)
                 .NotEmpty()
