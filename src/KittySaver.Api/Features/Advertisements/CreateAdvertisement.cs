@@ -103,14 +103,13 @@ public class CreateAdvertisement : IEndpoint
             PhoneNumber contactInfoPhoneNumber = PhoneNumber.Create(request.ContactInfoPhoneNumber);
             Description description = Description.Create(request.Description);
             
-            Advertisement advertisement = Advertisement.Create(
-                currentDate: dateTimeService.Now,
-                owner: owner,
-                catsIdsToAssign: request.CatsIdsToAssign,
-                pickupAddress: pickupAddress,
-                contactInfoEmail: contactInfoEmail,
-                contactInfoPhoneNumber: contactInfoPhoneNumber,
-                description: description);
+            Advertisement advertisement = owner.AddAdvertisement(
+                dateTimeService.Now,
+                request.CatsIdsToAssign,
+                pickupAddress,
+                contactInfoEmail,
+                contactInfoPhoneNumber,
+                description);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
             return advertisement.Id;

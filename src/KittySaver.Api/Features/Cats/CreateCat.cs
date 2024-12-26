@@ -73,9 +73,8 @@ public sealed class CreateCat : IEndpoint
             Behavior behavior = Behavior.FromName(request.Behavior, true);
             HealthStatus healthStatus = HealthStatus.FromName(request.HealthStatus, true);
             
-            Cat cat = Cat.Create(
+            Cat cat = person.AddCat(
                 priorityScoreCalculator: calculator,
-                person: person,
                 name: catName,
                 medicalHelpUrgency: medicalHelpUrgency,
                 ageCategory: ageCategory,
