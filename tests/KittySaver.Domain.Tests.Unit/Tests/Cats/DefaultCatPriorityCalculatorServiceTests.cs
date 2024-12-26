@@ -50,9 +50,8 @@ public class DefaultCatPriorityCalculatorServiceTests
         DefaultCatPriorityCalculatorService calculator = new DefaultCatPriorityCalculatorService(); 
         
         //Act
-        Cat catThatDontNeedThatMuchHelp = Cat.Create(
+        Cat catThatDontNeedThatMuchHelp = Person.AddCat(
             priorityScoreCalculator: calculator,
-            person: Person,
             name: CatName.Create("Whiskers"),
             medicalHelpUrgency: MedicalHelpUrgency.NoNeed,
             ageCategory: AgeCategory.Baby, 
@@ -62,9 +61,8 @@ public class DefaultCatPriorityCalculatorServiceTests
             isCastrated: false
         );
         
-        Cat catThatNeedLittleMoreHelp = Cat.Create(
+        Cat catThatNeedLittleMoreHelp = Person.AddCat(
             priorityScoreCalculator: calculator,
-            person: Person,
             name: CatName.Create("Cutie"),
             medicalHelpUrgency: MedicalHelpUrgency.NoNeed,
             ageCategory: AgeCategory.Senior, 
@@ -74,9 +72,8 @@ public class DefaultCatPriorityCalculatorServiceTests
             isCastrated: false
         );
         
-        Cat catThatNeedMuchHelp = Cat.Create(
+        Cat catThatNeedMuchHelp = Person.AddCat(
             priorityScoreCalculator: calculator,
-            person: Person,
             name: CatName.Create("Patootie"),
             medicalHelpUrgency: MedicalHelpUrgency.HaveToSeeVet,
             ageCategory: AgeCategory.Senior, 

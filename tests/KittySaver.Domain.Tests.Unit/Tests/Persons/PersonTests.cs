@@ -152,9 +152,8 @@ public class PersonTests
         //Act
         Cat cat = new Faker<Cat>()
             .CustomInstantiator( faker =>
-                Cat.Create(
+                sut.AddCat(
                     priorityScoreCalculator: calculatorService,
-                    person: sut,
                     name: CatName.Create(faker.Person.FirstName), 
                     medicalHelpUrgency: MedicalHelpUrgency.NoNeed,
                     ageCategory: AgeCategory.Baby,
@@ -185,9 +184,8 @@ public class PersonTests
         calculatorService.Calculate(Arg.Any<Cat>()).ReturnsForAnyArgs(420);
         Cat cat = new Faker<Cat>()
             .CustomInstantiator( faker =>
-                Cat.Create(
+                sut.AddCat(
                     priorityScoreCalculator: calculatorService,
-                    person: sut,
                     name: CatName.Create(faker.Person.FirstName), 
                     medicalHelpUrgency: MedicalHelpUrgency.NoNeed,
                     ageCategory: AgeCategory.Baby,
@@ -202,42 +200,6 @@ public class PersonTests
 
         //Assert
         sut.Cats.Should().NotContain(cat);
-    }
-
-    [Fact]
-    public void AddCat_ShouldThrowInvalidOperationException_WhenTheSameCatIsProvided()
-    {
-        //Arrange
-        Person sut = Person.Create(
-            userIdentityId: _userIdentityId,
-            nickname: _defaultProperNickname,
-            email: _defaultProperEmail,
-            phoneNumber: _defaultProperPhone,
-            defaultAdvertisementPickupAddress: PickupAddress,
-            defaultAdvertisementContactInfoEmail: _defaultProperEmail,
-            defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
-        );
-        ICatPriorityCalculatorService calculatorService = Substitute.For<ICatPriorityCalculatorService>();
-        calculatorService.Calculate(Arg.Any<Cat>()).ReturnsForAnyArgs(420);
-        Cat cat = new Faker<Cat>()
-            .CustomInstantiator( faker =>
-                Cat.Create(
-                    priorityScoreCalculator: calculatorService,
-                    person: sut,
-                    name: CatName.Create(faker.Person.FirstName), 
-                    medicalHelpUrgency: MedicalHelpUrgency.NoNeed,
-                    ageCategory: AgeCategory.Baby,
-                    behavior: Behavior.Friendly, 
-                    healthStatus: HealthStatus.Good,
-                    additionalRequirements: Description.Create(faker.Lorem.Lines(2)),
-                    isCastrated: false))
-            .Generate();
-        
-        //Act
-        Action operation = () => sut.AddCat(cat);
-        
-        //Assert
-        operation.Should().ThrowExactly<InvalidOperationException>();
     }
     
     [Fact]
@@ -257,9 +219,8 @@ public class PersonTests
         calculatorService.Calculate(Arg.Any<Cat>()).ReturnsForAnyArgs(420);
         Cat cat = new Faker<Cat>()
             .CustomInstantiator( faker =>
-                Cat.Create(
+                sut.AddCat(
                     priorityScoreCalculator: calculatorService,
-                    person: sut,
                     name: CatName.Create(faker.Person.FirstName), 
                     medicalHelpUrgency: MedicalHelpUrgency.NoNeed,
                     ageCategory: AgeCategory.Baby,
@@ -294,9 +255,8 @@ public class PersonTests
         calculatorService.Calculate(Arg.Any<Cat>()).ReturnsForAnyArgs(420);
         Faker<Cat> catGenerator = new Faker<Cat>()
             .CustomInstantiator(faker =>
-                Cat.Create(
+                sut.AddCat(
                     priorityScoreCalculator: calculatorService,
-                    person: sut,
                     name: CatName.Create(faker.Person.FirstName),
                     additionalRequirements: Description.Create(faker.Person.FirstName),
                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
@@ -340,9 +300,8 @@ public class PersonTests
         calculatorService.Calculate(Arg.Any<Cat>()).ReturnsForAnyArgs(420);
         Cat cat1 = new Faker<Cat>()
             .CustomInstantiator(faker =>
-                Cat.Create(
+                sut.AddCat(
                     priorityScoreCalculator: calculatorService,
-                    person: sut,
                     name: CatName.Create(faker.Person.FirstName),
                     additionalRequirements: Description.Create(faker.Person.FirstName),
                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
@@ -352,9 +311,8 @@ public class PersonTests
                     isCastrated: false)).Generate();
         Cat cat2 = new Faker<Cat>()
             .CustomInstantiator(faker =>
-                Cat.Create(
+                anotherPerson.AddCat(
                     priorityScoreCalculator: calculatorService,
-                    person: anotherPerson,
                     name: CatName.Create(faker.Person.FirstName),
                     additionalRequirements: Description.Create(faker.Person.FirstName),
                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
@@ -387,9 +345,8 @@ public class PersonTests
         calculatorService.Calculate(Arg.Any<Cat>()).ReturnsForAnyArgs(420);
         Cat cat1 = new Faker<Cat>()
             .CustomInstantiator(faker =>
-                Cat.Create(
+                sut.AddCat(
                     priorityScoreCalculator: calculatorService,
-                    person: sut,
                     name: CatName.Create(faker.Person.FirstName),
                     additionalRequirements: Description.Create(faker.Person.FirstName),
                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
@@ -397,9 +354,8 @@ public class PersonTests
                     behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
                     healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
                     isCastrated: false)).Generate();
-        Advertisement.Create(
-            currentDate: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
-            owner: sut,
+        sut.AddAdvertisement(
+            dateOfCreation: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
             catsIdsToAssign: [cat1.Id],
             pickupAddress: sut.DefaultAdvertisementsPickupAddress,
             contactInfoEmail: sut.DefaultAdvertisementsContactInfoEmail,
@@ -478,9 +434,8 @@ public class PersonTests
         calculatorService.Calculate(Arg.Any<Cat>()).ReturnsForAnyArgs(420);
         Cat cat1 = new Faker<Cat>()
             .CustomInstantiator(faker =>
-                Cat.Create(
+                sut.AddCat(
                     priorityScoreCalculator: calculatorService,
-                    person: sut,
                     name: CatName.Create(faker.Person.FirstName),
                     additionalRequirements: Description.Create(faker.Person.FirstName),
                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
@@ -488,9 +443,8 @@ public class PersonTests
                     behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
                     healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
                     isCastrated: false)).Generate();
-        Advertisement.Create(
-            currentDate: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
-            owner: sut,
+        sut.AddAdvertisement(
+            dateOfCreation: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
             catsIdsToAssign: [cat1.Id],
             pickupAddress: sut.DefaultAdvertisementsPickupAddress,
             contactInfoEmail: sut.DefaultAdvertisementsContactInfoEmail,
@@ -521,9 +475,8 @@ public class PersonTests
         calculatorService.Calculate(Arg.Any<Cat>()).ReturnsForAnyArgs(420);
         Cat cat = new Faker<Cat>()
             .CustomInstantiator(faker =>
-                Cat.Create(
+                sut.AddCat(
                     priorityScoreCalculator: calculatorService,
-                    person: sut,
                     name: CatName.Create(faker.Person.FirstName),
                     additionalRequirements: Description.Create(faker.Person.FirstName),
                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
@@ -533,9 +486,8 @@ public class PersonTests
                     isCastrated: false)).Generate();
         
         //Act
-        Advertisement advertisement = Advertisement.Create(
-            currentDate: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
-            owner: sut,
+        Advertisement advertisement = sut.AddAdvertisement(
+            dateOfCreation: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
             catsIdsToAssign: [cat.Id],
             pickupAddress: sut.DefaultAdvertisementsPickupAddress,
             contactInfoEmail: sut.DefaultAdvertisementsContactInfoEmail,
@@ -564,9 +516,8 @@ public class PersonTests
         calculatorService.Calculate(Arg.Any<Cat>()).ReturnsForAnyArgs(420);
         Cat cat = new Faker<Cat>()
             .CustomInstantiator(faker =>
-                Cat.Create(
+                sut.AddCat(
                     priorityScoreCalculator: calculatorService,
-                    person: sut,
                     name: CatName.Create(faker.Person.FirstName),
                     additionalRequirements: Description.Create(faker.Person.FirstName),
                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
@@ -575,9 +526,8 @@ public class PersonTests
                     healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
                     isCastrated: false)).Generate();
         
-        Advertisement advertisement = Advertisement.Create(
-            currentDate: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
-            owner: sut,
+        Advertisement advertisement = sut.AddAdvertisement(
+            dateOfCreation: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
             catsIdsToAssign: [cat.Id],
             pickupAddress: sut.DefaultAdvertisementsPickupAddress,
             contactInfoEmail: sut.DefaultAdvertisementsContactInfoEmail,
@@ -628,9 +578,8 @@ public class PersonTests
         calculatorService.Calculate(Arg.Any<Cat>()).ReturnsForAnyArgs(420);
         Cat cat = new Faker<Cat>()
             .CustomInstantiator(faker =>
-                Cat.Create(
+                sut.AddCat(
                     priorityScoreCalculator: calculatorService,
-                    person: sut,
                     name: CatName.Create(faker.Person.FirstName),
                     additionalRequirements: Description.Create(faker.Person.FirstName),
                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
@@ -640,9 +589,8 @@ public class PersonTests
                     isCastrated: false)).Generate();
         
         //Act
-        Advertisement advertisement = Advertisement.Create(
-            currentDate: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
-            owner: sut,
+        Advertisement advertisement = sut.AddAdvertisement(
+            dateOfCreation: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
             catsIdsToAssign: [cat.Id],
             pickupAddress: sut.DefaultAdvertisementsPickupAddress,
             contactInfoEmail: sut.DefaultAdvertisementsContactInfoEmail,
@@ -687,9 +635,8 @@ public class PersonTests
         calculatorService.Calculate(Arg.Any<Cat>()).ReturnsForAnyArgs(420);
         Cat cat = new Faker<Cat>()
             .CustomInstantiator(faker =>
-                Cat.Create(
+                sut.AddCat(
                     priorityScoreCalculator: calculatorService,
-                    person: sut,
                     name: CatName.Create(faker.Person.FirstName),
                     additionalRequirements: Description.Create(faker.Person.FirstName),
                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
@@ -699,9 +646,8 @@ public class PersonTests
                     isCastrated: false)).Generate();
         
         //Act
-        Advertisement advertisement = Advertisement.Create(
-            currentDate: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
-            owner: sut,
+        Advertisement advertisement = sut.AddAdvertisement(
+            dateOfCreation: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
             catsIdsToAssign: [cat.Id],
             pickupAddress: sut.DefaultAdvertisementsPickupAddress,
             contactInfoEmail: sut.DefaultAdvertisementsContactInfoEmail,
@@ -735,9 +681,8 @@ public class PersonTests
         calculatorService.Calculate(Arg.Any<Cat>()).ReturnsForAnyArgs(420);
         Cat cat = new Faker<Cat>()
             .CustomInstantiator(faker =>
-                Cat.Create(
+                sut.AddCat(
                     priorityScoreCalculator: calculatorService,
-                    person: sut,
                     name: CatName.Create(faker.Person.FirstName),
                     additionalRequirements: Description.Create(faker.Person.FirstName),
                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
@@ -747,9 +692,8 @@ public class PersonTests
                     isCastrated: false)).Generate();
         
         //Act
-        Advertisement advertisement = Advertisement.Create(
-            currentDate: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
-            owner: sut,
+        Advertisement advertisement = sut.AddAdvertisement(
+            dateOfCreation: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
             catsIdsToAssign: [cat.Id],
             pickupAddress: sut.DefaultAdvertisementsPickupAddress,
             contactInfoEmail: sut.DefaultAdvertisementsContactInfoEmail,
@@ -782,9 +726,8 @@ public class PersonTests
         calculatorService.Calculate(Arg.Any<Cat>()).ReturnsForAnyArgs(420);
         Cat cat = new Faker<Cat>()
             .CustomInstantiator(faker =>
-                Cat.Create(
+                sut.AddCat(
                     priorityScoreCalculator: calculatorService,
-                    person: sut,
                     name: CatName.Create(faker.Person.FirstName),
                     additionalRequirements: Description.Create(faker.Person.FirstName),
                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
@@ -794,9 +737,8 @@ public class PersonTests
                     isCastrated: false)).Generate();
         
         //Act
-        Advertisement advertisement = Advertisement.Create(
-            currentDate: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
-            owner: sut,
+        Advertisement advertisement = sut.AddAdvertisement(
+            dateOfCreation: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
             catsIdsToAssign: [cat.Id],
             pickupAddress: sut.DefaultAdvertisementsPickupAddress,
             contactInfoEmail: sut.DefaultAdvertisementsContactInfoEmail,
@@ -829,9 +771,8 @@ public class PersonTests
         calculatorService.Calculate(Arg.Any<Cat>()).ReturnsForAnyArgs(420);
         Cat cat1 = new Faker<Cat>()
             .CustomInstantiator(faker =>
-                Cat.Create(
+                sut.AddCat(
                     priorityScoreCalculator: calculatorService,
-                    person: sut,
                     name: CatName.Create(faker.Person.FirstName),
                     additionalRequirements: Description.Create(faker.Person.FirstName),
                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
@@ -841,9 +782,8 @@ public class PersonTests
                     isCastrated: false)).Generate();
         Cat cat2 = new Faker<Cat>()
             .CustomInstantiator(faker =>
-                Cat.Create(
+                sut.AddCat(
                     priorityScoreCalculator: calculatorService,
-                    person: sut,
                     name: CatName.Create(faker.Person.FirstName),
                     additionalRequirements: Description.Create(faker.Person.FirstName),
                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
@@ -853,9 +793,8 @@ public class PersonTests
                     isCastrated: false)).Generate();
         
         //Act
-        Advertisement advertisement = Advertisement.Create(
-            currentDate: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
-            owner: sut,
+        Advertisement advertisement = sut.AddAdvertisement(
+            dateOfCreation: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
             catsIdsToAssign: [cat1.Id],
             pickupAddress: sut.DefaultAdvertisementsPickupAddress,
             contactInfoEmail: sut.DefaultAdvertisementsContactInfoEmail,
