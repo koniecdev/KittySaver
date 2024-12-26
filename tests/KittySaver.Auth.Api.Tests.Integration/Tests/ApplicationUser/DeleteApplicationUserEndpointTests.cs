@@ -18,11 +18,18 @@ public class DeleteApplicationUserEndpointTests(KittySaverAuthApiFactory appFact
         new Faker<Register.RegisterRequest>()
             .CustomInstantiator( faker =>
                 new Register.RegisterRequest(
-                    FirstName: faker.Person.FirstName,
-                    LastName: faker.Person.LastName,
+                    UserName: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
-                    Password: "Default1234%"
+                    Password: "Default1234%",
+                    DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
+                    DefaultAdvertisementPickupAddressState: faker.Address.State(),
+                    DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
+                    DefaultAdvertisementPickupAddressCity: faker.Address.City(),
+                    DefaultAdvertisementPickupAddressStreet: faker.Address.StreetName(),
+                    DefaultAdvertisementPickupAddressBuildingNumber: faker.Address.BuildingNumber(),
+                    DefaultAdvertisementContactInfoEmail: faker.Person.Email,
+                    DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 ));
     
     [Fact]

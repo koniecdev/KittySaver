@@ -15,9 +15,6 @@ public sealed class UpdateApplicationUser : IEndpoint
 {
     public sealed record UpdateApplicationUserRequest(
         string UserName,
-        string Email,
-        string PhoneNumber,
-        string Password,
         string DefaultAdvertisementPickupAddressCountry,
         string DefaultAdvertisementPickupAddressState,
         string DefaultAdvertisementPickupAddressZipCode,
@@ -30,9 +27,6 @@ public sealed class UpdateApplicationUser : IEndpoint
     public sealed record UpdateApplicationUserCommand(
         Guid Id,
         string UserName,
-        string Email,
-        string PhoneNumber,
-        string Password,
         string DefaultAdvertisementPickupAddressCountry,
         string DefaultAdvertisementPickupAddressState,
         string DefaultAdvertisementPickupAddressZipCode,
@@ -49,9 +43,6 @@ public sealed class UpdateApplicationUser : IEndpoint
         {
             RuleFor(x => x.Id).NotEmpty();
             RuleFor(x => x.UserName).NotEmpty();
-            RuleFor(x => x.Email).NotEmpty().EmailAddress();
-            RuleFor(x => x.PhoneNumber).NotEmpty();
-            RuleFor(x => x.Password).NotEmpty();
             RuleFor(x => x.DefaultAdvertisementPickupAddressCountry).NotEmpty();
             RuleFor(x => x.DefaultAdvertisementPickupAddressState).NotEmpty();
             RuleFor(x => x.DefaultAdvertisementPickupAddressZipCode).NotEmpty();
