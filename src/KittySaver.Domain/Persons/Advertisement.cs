@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using KittySaver.Domain.Common.Primitives;
 using KittySaver.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
@@ -67,7 +68,8 @@ public sealed class Advertisement : AuditableEntity
         Email contactInfoEmail,
         PhoneNumber contactInfoPhoneNumber,
         Description description,
-        DateTimeOffset expiresOn)
+        DateTimeOffset expiresOn,
+        double priorityScore)
     {
         PersonId = personId;
         PickupAddress = pickupAddress;
@@ -75,59 +77,44 @@ public sealed class Advertisement : AuditableEntity
         ContactInfoPhoneNumber = contactInfoPhoneNumber;
         Description = description;
         ExpiresOn = expiresOn;
+        PriorityScore = priorityScore;
     }
 
-    public static Advertisement Create(
-        DateTimeOffset currentDate,
-        Person owner,
-        IEnumerable<Guid> catsIdsToAssign,
+    internal static Advertisement Create(
+        DateTimeOffset dateOfCreation,
+        Guid ownerId,
         Address pickupAddress,
         Email contactInfoEmail,
         PhoneNumber contactInfoPhoneNumber,
-        Description description)
+        Description description,
+        double priorityScore)
     {
-        List<Guid> catsIdsToAssignList = catsIdsToAssign.ToList();
-        if (catsIdsToAssignList.Count == 0)
-        {
-            throw new ArgumentException(ErrorMessages.EmptyCatsList, nameof(catsIdsToAssign));
-        }
-        
-        DateTimeOffset expiresOn = currentDate + ExpiringPeriodInDays;
-        
+        DateTimeOffset expiresOn = dateOfCreation + ExpiringPeriodInDays;
         Advertisement advertisement = new(
-            personId: owner.Id,
+            personId: ownerId,
             pickupAddress: pickupAddress,
             contactInfoEmail: contactInfoEmail,
             contactInfoPhoneNumber: contactInfoPhoneNumber,
             description: description,
-            expiresOn: expiresOn);
-        
-        owner.AddAdvertisement(advertisement, catsIdsToAssignList);
+            expiresOn: expiresOn,
+            priorityScore: priorityScore);
         return advertisement;
     }
 
-    public void ChangeDescription(Description description)
+    internal void ChangeDescription(Description description)
     {
         Description = description;
     }
     
-    public void ChangePickupAddress(Address pickupAddress)
+    internal void ChangePickupAddress(Address pickupAddress)
     {
         PickupAddress = pickupAddress;
     }
 
-    public void ChangeContactInfo(Email contactInfoEmail, PhoneNumber contactInfoPhoneNumber)
+    internal void ChangeContactInfo(Email contactInfoEmail, PhoneNumber contactInfoPhoneNumber)
     {
         ContactInfoEmail = contactInfoEmail;
         ContactInfoPhoneNumber = contactInfoPhoneNumber;
-    }
-
-    public void ValidateOwnership(Guid personId)
-    {
-        if (personId != PersonId)
-        {
-            throw new ArgumentException(ErrorMessages.InvalidPersonId, nameof(personId));
-        }
     }
 
     internal void Close(DateTimeOffset currentDate)
@@ -172,10 +159,8 @@ public sealed class Advertisement : AuditableEntity
 
     private static class ErrorMessages
     {
-        public const string EmptyCatsList = "Advertisement cats list must not be empty.";
         public const string ZeroPriorityScore = "PriorityScore cannot be zero, probably something went wrong.";
         public const string EmptyPersonId = "Provided person id is empty.";
-        public const string InvalidPersonId = "Provided person id is not id of advertisement owner.";
         public const string InvalidStatusOperation = "Active advertisement status is required for that operation.";
         public const string InvalidRefreshOperation = "You cannot refresh an advertisement that is not active/expired.";
     }
