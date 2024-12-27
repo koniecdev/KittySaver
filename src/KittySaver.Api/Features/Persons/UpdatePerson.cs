@@ -57,14 +57,14 @@ public sealed class UpdatePerson : IEndpoint
                 .NotEmpty()
                 .MaximumLength(Email.MaxLength)
                 .Matches(Email.RegexPattern)
-                .MustAsync(async (command, email, ct) => 
+                .MustAsync(async (command, email, ct) =>
                     await personRepository.IsEmailUniqueAsync(email, command.IdOrUserIdentityId, ct))
                 .WithMessage("'Email' is already used by another user.");
 
             RuleFor(x => x.PhoneNumber)
                 .NotEmpty()
                 .MaximumLength(PhoneNumber.MaxLength)
-                .MustAsync(async (command, phoneNumber, ct) => 
+                .MustAsync(async (command, phoneNumber, ct) =>
                     await personRepository.IsPhoneNumberUniqueAsync(phoneNumber, command.IdOrUserIdentityId, ct))
                 .WithMessage("'Phone Number' is already used by another user.");
 
@@ -107,12 +107,13 @@ public sealed class UpdatePerson : IEndpoint
     {
         public async Task Handle(UpdatePersonCommand request, CancellationToken cancellationToken)
         {
-            Person person = await personRepository.GetPersonByIdOrIdentityIdAsync(request.IdOrUserIdentityId, cancellationToken);
-            
+            Person person =
+                await personRepository.GetPersonByIdOrIdentityIdAsync(request.IdOrUserIdentityId, cancellationToken);
+
             Nickname nickname = Nickname.Create(request.Nickname);
             Email email = Email.Create(request.Email);
             PhoneNumber phoneNumber = PhoneNumber.Create(request.PhoneNumber);
-            
+
             Address defaultAdvertisementPickupAddress = Address.Create(
                 country: request.DefaultAdvertisementPickupAddressCountry,
                 state: request.DefaultAdvertisementPickupAddressState,
@@ -120,9 +121,10 @@ public sealed class UpdatePerson : IEndpoint
                 city: request.DefaultAdvertisementPickupAddressCity,
                 street: request.DefaultAdvertisementPickupAddressStreet,
                 buildingNumber: request.DefaultAdvertisementPickupAddressBuildingNumber);
-            
+
             Email defaultAdvertisementContactInfoEmail = Email.Create(request.DefaultAdvertisementContactInfoEmail);
-            PhoneNumber defaultAdvertisementContactInfoPhoneNumber = PhoneNumber.Create(request.DefaultAdvertisementContactInfoPhoneNumber);
+            PhoneNumber defaultAdvertisementContactInfoPhoneNumber =
+                PhoneNumber.Create(request.DefaultAdvertisementContactInfoPhoneNumber);
 
             person.ChangeNickname(nickname);
             person.ChangeEmail(email);
