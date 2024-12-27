@@ -63,10 +63,9 @@ public sealed class Register : IEndpoint
             RuleFor(x => x.PhoneNumber).NotEmpty();
             RuleFor(x => x.Email)
                 .NotEmpty()
-                .Matches(ValidationPatterns.EmailPattern);
-            RuleFor(x => x.Email)
+                .Matches(ValidationPatterns.EmailPattern)
                 .MustAsync(async (email, ct) => await IsEmailUniqueAsync(email, ct))
-                .WithMessage("Email is already used by another user.");
+                .WithMessage("Email is already used by another user.");;
             RuleFor(x => x.DefaultAdvertisementPickupAddressCountry).NotEmpty();
             RuleFor(x => x.DefaultAdvertisementPickupAddressState).NotEmpty();
             RuleFor(x => x.DefaultAdvertisementPickupAddressZipCode).NotEmpty();
@@ -85,7 +84,7 @@ public sealed class Register : IEndpoint
     }
     
     internal sealed class RegisterCommandHandler(
-        SignInManager<ApplicationUser> signInManager,
+        UserManager<ApplicationUser> userManager,
         IKittySaverApiClient client,
         IJwtTokenService jwtTokenService)
         : IRequestHandler<RegisterCommand, Guid>
@@ -93,10 +92,10 @@ public sealed class Register : IEndpoint
         public async Task<Guid> Handle(RegisterCommand request, CancellationToken cancellationToken)
         {
             ApplicationUser user = request.ToEntity();
-            await signInManager.UserManager.CreateAsync(user, request.Password);
+            await userManager.CreateAsync(user, request.Password);
             try
             {
-                ApplicationUser? applicationUser = await signInManager.UserManager.FindByEmailAsync(request.Email);
+                ApplicationUser? applicationUser = await userManager.FindByEmailAsync(request.Email);
                 if (applicationUser is null)
                 {
                     throw new Exception();
@@ -115,12 +114,13 @@ public sealed class Register : IEndpoint
                     DefaultAdvertisementPickupAddressBuildingNumber: user.DefaultAdvertisementPickupAddressBuildingNumber,
                     DefaultAdvertisementContactInfoEmail: user.DefaultAdvertisementContactInfoEmail,
                     DefaultAdvertisementContactInfoPhoneNumber: user.DefaultAdvertisementContactInfoPhoneNumber));
-                return user.Id;
             }
-            finally
+            catch(Exception)
             {
-                await signInManager.UserManager.DeleteAsync(user);
+                await userManager.DeleteAsync(user);
+                throw;
             }
+            return user.Id;
         }
     }
     

@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Features.Advertisements.SharedContracts;
+using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
@@ -51,6 +52,8 @@ public sealed class DeleteAdvertisement : IEndpoint
             DeleteAdvertisementCommand command = new(PersonId: personId, AdvertisementId: advertisementId);
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
-        }).RequireAuthorization();
+        }).RequireAuthorization()
+        .WithName(EndpointNames.DeleteAdvertisement.EndpointName)
+        .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
     }
 }

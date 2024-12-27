@@ -18,11 +18,18 @@ public class RegisterApplicationUserEndpointTests(KittySaverAuthApiFactory appFa
         new Faker<Register.RegisterRequest>()
             .CustomInstantiator( faker =>
                 new Register.RegisterRequest(
-                    FirstName: faker.Person.FirstName,
-                    LastName: faker.Person.LastName,
+                    UserName: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
-                    Password: "Default1234%"
+                    Password: "Default1234%",
+                    DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
+                    DefaultAdvertisementPickupAddressState: faker.Address.State(),
+                    DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
+                    DefaultAdvertisementPickupAddressCity: faker.Address.City(),
+                    DefaultAdvertisementPickupAddressStreet: faker.Address.StreetName(),
+                    DefaultAdvertisementPickupAddressBuildingNumber: faker.Address.BuildingNumber(),
+                    DefaultAdvertisementContactInfoEmail: faker.Person.Email,
+                    DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 ));
 
     [Fact]
@@ -50,11 +57,18 @@ public class RegisterApplicationUserEndpointTests(KittySaverAuthApiFactory appFa
         Register.RegisterRequest request = new Faker<Register.RegisterRequest>()
             .CustomInstantiator( faker =>
                 new Register.RegisterRequest(
-                    FirstName: faker.Person.FirstName,
-                    LastName: faker.Person.LastName,
+                    UserName: faker.Person.FirstName,
                     Email: email,
                     PhoneNumber: faker.Person.Phone,
-                    Password: "Default1234%"
+                    Password: "Default1234%",
+                    DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
+                    DefaultAdvertisementPickupAddressState: faker.Address.State(),
+                    DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
+                    DefaultAdvertisementPickupAddressCity: faker.Address.City(),
+                    DefaultAdvertisementPickupAddressStreet: faker.Address.StreetName(),
+                    DefaultAdvertisementPickupAddressBuildingNumber: faker.Address.BuildingNumber(),
+                    DefaultAdvertisementContactInfoEmail: faker.Person.Email,
+                    DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 ));
         
         //Act
@@ -73,11 +87,18 @@ public class RegisterApplicationUserEndpointTests(KittySaverAuthApiFactory appFa
     {
         //Arrange
         Register.RegisterRequest request = new(
-            FirstName: "",
-            LastName: "",
+            UserName: "",
             Email: "",
             PhoneNumber: "",
-            Password: ""
+            Password: "",
+            DefaultAdvertisementPickupAddressCountry: "",
+            DefaultAdvertisementPickupAddressState: "",
+            DefaultAdvertisementPickupAddressZipCode: "",
+            DefaultAdvertisementPickupAddressCity: "",
+            DefaultAdvertisementPickupAddressStreet: "",
+            DefaultAdvertisementPickupAddressBuildingNumber: "",
+            DefaultAdvertisementContactInfoEmail: "",
+            DefaultAdvertisementContactInfoPhoneNumber: ""
         );
         
         //Act
@@ -88,8 +109,7 @@ public class RegisterApplicationUserEndpointTests(KittySaverAuthApiFactory appFa
         ValidationProblemDetails? validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         validationProblemDetails.Should().NotBeNull();
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
-        validationProblemDetails.Errors["FirstName"][0].Should().Be("'First Name' must not be empty.");
-        validationProblemDetails.Errors["LastName"][0].Should().Be("'Last Name' must not be empty.");
+        validationProblemDetails.Errors["UserName"][0].Should().Be("'User Name' must not be empty.");
         validationProblemDetails.Errors["PhoneNumber"][0].Should().Be("'Phone Number' must not be empty.");
         validationProblemDetails.Errors["Email"][0].Should().Be("'Email' must not be empty.");
         validationProblemDetails.Errors["Password"][0].Should().Be("'Password' must not be empty.");
@@ -108,11 +128,18 @@ public class RegisterApplicationUserEndpointTests(KittySaverAuthApiFactory appFa
         Register.RegisterRequest request = new Faker<Register.RegisterRequest>()
             .CustomInstantiator( faker =>
                 new Register.RegisterRequest(
-                    FirstName: faker.Person.FirstName,
-                    LastName: faker.Person.LastName,
+                    UserName: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
-                    Password: password
+                    Password: password,
+                    DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
+                    DefaultAdvertisementPickupAddressState: faker.Address.State(),
+                    DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
+                    DefaultAdvertisementPickupAddressCity: faker.Address.City(),
+                    DefaultAdvertisementPickupAddressStreet: faker.Address.StreetName(),
+                    DefaultAdvertisementPickupAddressBuildingNumber: faker.Address.BuildingNumber(),
+                    DefaultAdvertisementContactInfoEmail: faker.Person.Email,
+                    DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 ));
         
         //Act

@@ -1,11 +1,10 @@
-﻿namespace KittySaver.Api.Shared.Infrastructure.ApiComponents;
+﻿namespace KittySaver.Api.Shared.Abstractions;
 
 public interface IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app);
 }
 public interface IAsyncValidator;
-
 
 public interface IPersonAggregateAuthorizationRequiredRequest;
 

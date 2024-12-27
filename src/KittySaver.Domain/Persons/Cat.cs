@@ -9,12 +9,10 @@ namespace KittySaver.Domain.Persons;
 
 public sealed class Cat : AuditableEntity
 {
-    // 1. Private fields
     private readonly Guid _personId;
     private Guid? _advertisementId;
     private double _priorityScore;
 
-    // 2. Public properties
     public Guid PersonId
     {
         get => _personId;
@@ -63,7 +61,6 @@ public sealed class Cat : AuditableEntity
     public bool IsCastrated { get; private set; }
     public bool IsAdopted { get; private set; }
 
-    // 3. Constructors
     /// <remarks>
     /// Required by EF Core, and should never be used by programmer as it bypasses business rules.
     /// </remarks>
@@ -98,20 +95,19 @@ public sealed class Cat : AuditableEntity
         AdditionalRequirements = additionalRequirements;
     }
 
-    // 4. Public factory methods
-    public static Cat Create(
+    internal static Cat Create(
         ICatPriorityCalculatorService priorityScoreCalculator,
-        Person person,
+        Guid personId,
         CatName name,
         MedicalHelpUrgency medicalHelpUrgency,
         AgeCategory ageCategory,
         Behavior behavior,
         HealthStatus healthStatus,
         Description additionalRequirements,
-        bool isCastrated = false)
+        bool isCastrated)
     {
         Cat cat = new(
-            personId: person.Id,
+            personId: personId,
             name: name,
             medicalHelpUrgency: medicalHelpUrgency,
             ageCategory: ageCategory,
@@ -120,26 +116,36 @@ public sealed class Cat : AuditableEntity
             isCastrated: isCastrated,
             additionalRequirements: additionalRequirements);
         cat.RecalculatePriorityScore(priorityScoreCalculator);
-        person.AddCat(cat);
         return cat;
     }
 
-    // 5. Internal methods - Basic property changes
+    /// <remarks>
+    /// Only for use within Person aggregate
+    /// </remarks>
     internal void ChangeName(CatName catName)
     {
         Name = catName;
     }
     
+    /// <remarks>
+    /// Only for use within Person aggregate
+    /// </remarks>
     internal void ChangeAdditionalRequirements(Description additionalRequirements)
     {
         AdditionalRequirements = additionalRequirements;
     }
 
+    /// <remarks>
+    /// Only for use within Person aggregate
+    /// </remarks>
     internal void ChangeIsCastratedFlag(bool isCastrated)
     {
         IsCastrated = isCastrated;
     }
     
+    /// <remarks>
+    /// Only for use within Person aggregate
+    /// </remarks>
     internal void ChangePriorityCompounds(
         ICatPriorityCalculatorService priorityScoreCalculator,
         HealthStatus healthStatus,
@@ -154,7 +160,9 @@ public sealed class Cat : AuditableEntity
         RecalculatePriorityScore(priorityScoreCalculator);
     }
 
-    // 6. Internal methods - Status management
+    /// <remarks>
+    /// Only for use within Person aggregate
+    /// </remarks>
     internal void MarkAsAdopted()
     {
         IsAdopted = true;
@@ -183,18 +191,13 @@ public sealed class Cat : AuditableEntity
         }
         AdvertisementId = null;
     }
-
-    // 7. Private helper methods
-    /// <remarks>
-    /// Only for use within Person aggregate
-    /// </remarks>
+    
     private void RecalculatePriorityScore(ICatPriorityCalculatorService calculator)
     {
         double priority = calculator.Calculate(this);
         PriorityScore = priority;
     }
 
-    // 8. Private constants/error messages
     private static class ErrorMessages
     {
         public const string EmptyPersonId = "Provided person id is empty";

@@ -57,9 +57,8 @@ public class AdvertisementTests
 
     private static readonly Faker<Cat> CatGenerator = new Faker<Cat>()
         .CustomInstantiator(faker =>
-            Cat.Create(
+            Person.AddCat(
                 priorityScoreCalculator: new DefaultCatPriorityCalculatorService(),
-                person: Person,
                 name: CatName.Create(faker.Person.FirstName),
                 medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet,
                     MedicalHelpUrgency.HaveToSeeVet),
@@ -80,9 +79,8 @@ public class AdvertisementTests
         PhoneNumber contactInfoPhoneNumber = ContactInfoPhoneNumberGenerator.Generate();
 
         //Act
-        Advertisement advertisement = Advertisement.Create(
-            currentDate: Date,
-            owner: Person,
+        Advertisement advertisement = Person.AddAdvertisement(
+            dateOfCreation: Date,
             catsIdsToAssign: cats.Select(x=>x.Id),
             pickupAddress: pickupAddress,
             contactInfoEmail: contactInfoEmail,
@@ -113,9 +111,8 @@ public class AdvertisementTests
         //Act
         Action creation = () =>
         {
-            Advertisement.Create(
-                currentDate: Date,
-                owner: Person,
+            Person.AddAdvertisement(
+                dateOfCreation: Date,
                 catsIdsToAssign: [],
                 pickupAddress: pickupAddress,
                 contactInfoEmail: contactInfoEmail,
@@ -133,9 +130,8 @@ public class AdvertisementTests
     public void Close_ShouldCloseSuccessfully_WhenValidDataAreProvided()
     {
         //Arrange
-        Advertisement advertisement = Advertisement.Create(
-                currentDate: Date,
-                owner: Person,
+        Advertisement advertisement = Person.AddAdvertisement(
+                dateOfCreation: Date,
                 catsIdsToAssign: [CatGenerator.Generate().Id],
                 pickupAddress: PickupAddressGenerator.Generate(),
                 contactInfoEmail: ContactInfoEmailGenerator.Generate(),
@@ -155,9 +151,8 @@ public class AdvertisementTests
     public void Close_ShouldThrowInvalidOperationException_WhenNotActiveAdvertisementIsProvided()
     {
         //Arrange
-        Advertisement advertisement = Advertisement.Create(
-            currentDate: Date,
-            owner: Person,
+        Advertisement advertisement = Person.AddAdvertisement(
+            dateOfCreation: Date,
             catsIdsToAssign: [CatGenerator.Generate().Id],
             pickupAddress: PickupAddressGenerator.Generate(),
             contactInfoEmail: ContactInfoEmailGenerator.Generate(),
@@ -179,9 +174,8 @@ public class AdvertisementTests
         //Arrange
         Cat cat = CatGenerator.Generate();
 
-        Advertisement advertisement = Advertisement.Create(
-            currentDate: Date,
-            owner: Person,
+        Advertisement advertisement = Person.AddAdvertisement(
+            dateOfCreation: Date,
             catsIdsToAssign: [cat.Id],
             pickupAddress: PickupAddressGenerator,
             contactInfoEmail: ContactInfoEmailGenerator.Generate(),
@@ -200,9 +194,8 @@ public class AdvertisementTests
     public void Expire_ShouldThrowInvalidOperationException_WhenNotActiveAdvertisementIsProvided()
     {
         //Arrange
-        Advertisement advertisement = Advertisement.Create(
-            currentDate: Date,
-            owner: Person,
+        Advertisement advertisement = Person.AddAdvertisement(
+            dateOfCreation: Date,
             catsIdsToAssign: [CatGenerator.Generate().Id],
             pickupAddress: PickupAddressGenerator.Generate(),
             contactInfoEmail: ContactInfoEmailGenerator.Generate(),
@@ -224,9 +217,8 @@ public class AdvertisementTests
         //Arrange
         Cat cat = CatGenerator.Generate();
 
-        Advertisement advertisement = Advertisement.Create(
-            currentDate: Date,
-            owner: Person,
+        Advertisement advertisement = Person.AddAdvertisement(
+            dateOfCreation: Date,
             catsIdsToAssign: [cat.Id],
             pickupAddress: PickupAddressGenerator,
             contactInfoEmail: ContactInfoEmailGenerator.Generate(),
@@ -248,9 +240,8 @@ public class AdvertisementTests
     public void Refresh_ShouldThrowInvalidOperationException_WhenNotActiveAdvertisementIsProvided()
     {
         //Arrange
-        Advertisement advertisement = Advertisement.Create(
-            currentDate: Date,
-            owner: Person,
+        Advertisement advertisement = Person.AddAdvertisement(
+            dateOfCreation: Date,
             catsIdsToAssign: [CatGenerator.Generate().Id],
             pickupAddress: PickupAddressGenerator.Generate(),
             contactInfoEmail: ContactInfoEmailGenerator.Generate(),
@@ -265,50 +256,6 @@ public class AdvertisementTests
 
         //Assert
         action.Should().ThrowExactly<InvalidOperationException>();
-    }
-    
-    [Fact]
-    public void ValidateOwnership_ShouldBeSuccessfull_WhenValidDataAreProvided()
-    {
-        //Arrange
-        Cat cat = CatGenerator.Generate();
-
-        Advertisement advertisement = Advertisement.Create(
-            currentDate: Date,
-            owner: Person,
-            catsIdsToAssign: [cat.Id],
-            pickupAddress: PickupAddressGenerator,
-            contactInfoEmail: ContactInfoEmailGenerator.Generate(),
-            contactInfoPhoneNumber: ContactInfoPhoneNumberGenerator.Generate(),
-            description: Description.Create("lorem ipsum"));
-        
-        //Act
-        Action validation = () => advertisement.ValidateOwnership(Person.Id);
-        
-        //Assert
-        validation.Should().NotThrow();
-    }
-    
-    [Fact]
-    public void ValidateOwnership_ShouldThrowArgumentException_WhenPersonDifferentThanOwnerIsProvided()
-    {
-        //Arrange
-        Advertisement advertisement = Advertisement.Create(
-            currentDate: Date,
-            owner: Person,
-            catsIdsToAssign: [CatGenerator.Generate().Id],
-            pickupAddress: PickupAddressGenerator.Generate(),
-            contactInfoEmail: ContactInfoEmailGenerator.Generate(),
-            contactInfoPhoneNumber: ContactInfoPhoneNumberGenerator.Generate(),
-            description: Description.Create("lorem ipsum"));
-        DateTimeOffset closureDate = advertisement.ExpiresOn.AddDays(1);
-        advertisement.Close(closureDate);
-        
-        //Act
-        Action validation = () => advertisement.ValidateOwnership(Guid.NewGuid());
-
-        //Assert
-        validation.Should().ThrowExactly<ArgumentException>();
     }
     
     [Fact]
@@ -328,9 +275,8 @@ public class AdvertisementTests
 
         Cat cat = new Faker<Cat>()
             .CustomInstantiator(faker =>
-                Cat.Create(
+                person.AddCat(
                     priorityScoreCalculator: new DefaultCatPriorityCalculatorService(),
-                    person: person,
                     name: CatName.Create(faker.Person.FirstName),
                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed,
                         MedicalHelpUrgency.ShouldSeeVet,
@@ -347,9 +293,8 @@ public class AdvertisementTests
         //Act
         Action createAdvertisement = () =>
         {
-            Advertisement.Create(
-                currentDate: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
-                owner: person,
+            person.AddAdvertisement(
+                dateOfCreation: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
                 catsIdsToAssign: [cat.Id],
                 pickupAddress: person.DefaultAdvertisementsPickupAddress,
                 contactInfoEmail: person.DefaultAdvertisementsContactInfoEmail,

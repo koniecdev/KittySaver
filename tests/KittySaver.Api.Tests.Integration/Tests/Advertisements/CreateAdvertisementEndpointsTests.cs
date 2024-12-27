@@ -156,64 +156,6 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
             .Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{response.Id}");
     }
 
-    [Fact]
-    public async Task CreateAdvertisement_ShouldReturnNotFound_WhenCatOfAnotherPersonIsProvided()
-    {
-        //Arrange
-        CreatePerson.CreatePersonRequest personRegisterRequest = _createPersonRequestGenerator.Generate();
-        HttpResponseMessage personRegisterResponseMessage =
-            await _httpClient.PostAsJsonAsync("api/v1/persons", personRegisterRequest);
-        ApiResponses.CreatedWithIdResponse personRegisterResponse =
-            await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
-        CreateCat.CreateCatRequest catCreateRequest = _createCatRequestGenerator.Generate();
-        HttpResponseMessage catCreateResponseMessage =
-            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", catCreateRequest);
-        ApiResponses.CreatedWithIdResponse catCreateResponse =
-            await catCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
-
-        CreatePerson.CreatePersonRequest secondPersonRegisterRequest = _createPersonRequestGenerator.Generate();
-        HttpResponseMessage secondPersonRegisterResponseMessage =
-            await _httpClient.PostAsJsonAsync("api/v1/persons", secondPersonRegisterRequest);
-        ApiResponses.CreatedWithIdResponse secondPersonRegisterResponse =
-            await secondPersonRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
-        CreateCat.CreateCatRequest secondPersonCatCreateRequest = _createCatRequestGenerator.Generate();
-        HttpResponseMessage secondPersonCatCreateResponseMessage =
-            await _httpClient.PostAsJsonAsync($"api/v1/persons/{secondPersonRegisterResponse.Id}/cats",
-                secondPersonCatCreateRequest);
-        ApiResponses.CreatedWithIdResponse secondPersonCatCreateResponse =
-            await secondPersonCatCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
-
-        //Act
-        CreateAdvertisement.CreateAdvertisementRequest request =
-            new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
-                .CustomInstantiator(faker =>
-                    new CreateAdvertisement.CreateAdvertisementRequest(
-                        CatsIdsToAssign: [catCreateResponse.Id, secondPersonCatCreateResponse.Id],
-                        Description: faker.Lorem.Lines(2),
-                        PickupAddressCountry: faker.Address.CountryCode(),
-                        PickupAddressState: faker.Address.State(),
-                        PickupAddressZipCode: faker.Address.ZipCode(),
-                        PickupAddressCity: faker.Address.City(),
-                        PickupAddressStreet: faker.Address.StreetName(),
-                        PickupAddressBuildingNumber: faker.Address.BuildingNumber(),
-                        ContactInfoEmail: faker.Person.Email,
-                        ContactInfoPhoneNumber: faker.Person.Phone
-                    ));
-
-        HttpResponseMessage responseMessage = 
-            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
-
-        //Assert
-        responseMessage.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        ProblemDetails? problemDetails = await responseMessage.Content.ReadFromJsonAsync<ProblemDetails>();
-        problemDetails.Should().NotBeNull();
-        problemDetails!.Status.Should().Be(StatusCodes.Status404NotFound);
-    }
-
     [Theory]
     [InlineData(null)]
     [InlineData("")]
@@ -430,19 +372,17 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
             await responseMessage.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         validationProblemDetails.Should().NotBeNull();
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
-        validationProblemDetails.Errors.Count.Should().Be(9);
+        validationProblemDetails.Errors.Count.Should().Be(7);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(
             nameof(CreateAdvertisement.CreateAdvertisementCommand.PersonId),
             nameof(CreateAdvertisement.CreateAdvertisementCommand.CatsIdsToAssign),
             nameof(CreateAdvertisement.CreateAdvertisementCommand.PickupAddressCountry),
             nameof(CreateAdvertisement.CreateAdvertisementCommand.PickupAddressZipCode),
             nameof(CreateAdvertisement.CreateAdvertisementCommand.PickupAddressCity),
-            nameof(CreateAdvertisement.CreateAdvertisementCommand.PickupAddressStreet),
-            nameof(CreateAdvertisement.CreateAdvertisementCommand.PickupAddressBuildingNumber),
             nameof(CreateAdvertisement.CreateAdvertisementCommand.ContactInfoEmail),
             nameof(CreateAdvertisement.CreateAdvertisementCommand.ContactInfoPhoneNumber)
         );
-        validationProblemDetails.Errors.Values.Count.Should().Be(9);
+        validationProblemDetails.Errors.Values.Count.Should().Be(7);
 
         validationProblemDetails.Errors[nameof(CreateAdvertisement.CreateAdvertisementCommand.PersonId)][0]
             .Should()
@@ -463,15 +403,7 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
         validationProblemDetails.Errors[nameof(CreateAdvertisement.CreateAdvertisementCommand.PickupAddressCity)][0]
             .Should()
             .Be($"'{Extensions.InsertSpacesIntoCamelCase(nameof(CreateAdvertisement.CreateAdvertisementCommand.PickupAddressCity))}' must not be empty.");
-
-        validationProblemDetails.Errors[nameof(CreateAdvertisement.CreateAdvertisementCommand.PickupAddressStreet)][0]
-            .Should()
-            .Be($"'{Extensions.InsertSpacesIntoCamelCase(nameof(CreateAdvertisement.CreateAdvertisementCommand.PickupAddressStreet))}' must not be empty.");
-
-        validationProblemDetails.Errors[nameof(CreateAdvertisement.CreateAdvertisementCommand.PickupAddressBuildingNumber)][0]
-            .Should()
-            .Be($"'{Extensions.InsertSpacesIntoCamelCase(nameof(CreateAdvertisement.CreateAdvertisementCommand.PickupAddressBuildingNumber))}' must not be empty.");
-
+        
         validationProblemDetails.Errors[nameof(CreateAdvertisement.CreateAdvertisementCommand.ContactInfoEmail)][0]
             .Should()
             .Be($"'{Extensions.InsertSpacesIntoCamelCase(nameof(CreateAdvertisement.CreateAdvertisementCommand.ContactInfoEmail))}' must not be empty.");

@@ -1,4 +1,5 @@
 ﻿using KittySaver.Api.Features.Cats.SharedContracts;
+using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
@@ -44,6 +45,8 @@ public sealed class GetCats : IEndpoint
             GetCatsQuery query = new(personId);
             ICollection<CatResponse> cats = await sender.Send(query, cancellationToken);
             return Results.Ok(cats);
-        });
+        }).RequireAuthorization()
+        .WithName(EndpointNames.GetCats.EndpointName)
+        .WithTags(EndpointNames.GroupNames.CatGroup);
     }
 }

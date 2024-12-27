@@ -25,39 +25,5 @@ public class PersonRepository(ApplicationWriteDbContext writeDb) : IPersonReposi
     
     public void Insert(Person person) => writeDb.Persons.Add(person);
 
-    public void Remove(Person person)
-    {
-        writeDb.Persons.Remove(person);
-    }
-
-    public async Task<bool> IsPhoneNumberUniqueAsync(string phone, Guid? userToExcludeIdOrIdentityId, CancellationToken cancellationToken) 
-        => userToExcludeIdOrIdentityId is null 
-            ? !await writeDb.Persons
-                .AsNoTracking()
-                .AnyAsync(person => person.PhoneNumber.Value == phone, cancellationToken)
-            : !await writeDb.Persons
-                .AsNoTracking()
-                .AnyAsync(x => 
-                    x.PhoneNumber.Value == phone 
-                    && x.Id != userToExcludeIdOrIdentityId 
-                    && x.UserIdentityId != userToExcludeIdOrIdentityId,
-                    cancellationToken);
-        
-    public async Task<bool> IsEmailUniqueAsync(string email, Guid? userToExcludeIdOrIdentityId, CancellationToken cancellationToken) 
-        => userToExcludeIdOrIdentityId is null 
-            ? !await writeDb.Persons
-                .AsNoTracking()
-                .AnyAsync(person => person.Email.Value == email, cancellationToken)
-            : !await writeDb.Persons
-                .AsNoTracking()
-                .AnyAsync(x =>
-                    x.Email.Value == email 
-                    && x.Id != userToExcludeIdOrIdentityId 
-                    && x.UserIdentityId != userToExcludeIdOrIdentityId,
-                    cancellationToken);
-
-    public async Task<bool> IsUserIdentityIdUniqueAsync(Guid userIdentityId, CancellationToken cancellationToken) 
-        => !await writeDb.Persons
-            .AsNoTracking()
-            .AnyAsync(person => person.UserIdentityId == userIdentityId, cancellationToken);
+    public void Remove(Person person) => writeDb.Persons.Remove(person);
 }

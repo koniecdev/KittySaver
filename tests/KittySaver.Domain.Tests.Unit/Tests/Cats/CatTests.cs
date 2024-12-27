@@ -60,9 +60,8 @@ public class CatTests
         const bool isCastrated = true;
         
         //Act
-        Cat cat = Cat.Create(
+        Cat cat = Person.AddCat(
             priorityScoreCalculator: calculator,
-            person: Person,
             name: name,
             medicalHelpUrgency: medicalHelpUrgency,
             ageCategory: ageCategory,
@@ -108,9 +107,8 @@ public class CatTests
         Action createCat = () =>
         {
             new Faker<Cat>()
-             .CustomInstantiator(faker => Cat.Create(
+             .CustomInstantiator(faker => person.AddCat(
                      priorityScoreCalculator: Substitute.For<ICatPriorityCalculatorService>(),
-                     person: person,
                      name: CatName.Create(faker.Person.FirstName),
                      additionalRequirements: Description.Create(faker.Person.FirstName),
                      medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
@@ -142,9 +140,8 @@ public class CatTests
         ICatPriorityCalculatorService priorityScoreCalculator = Substitute.For<ICatPriorityCalculatorService>();
         priorityScoreCalculator.Calculate(Arg.Any<Cat>()).Returns(420);
         Cat cat = new Faker<Cat>()
-         .CustomInstantiator(faker => Cat.Create(
+         .CustomInstantiator(faker => person.AddCat(
                  priorityScoreCalculator: priorityScoreCalculator,
-                 person: person,
                  name: CatName.Create(faker.Person.FirstName),
                  additionalRequirements: Description.Create(faker.Person.FirstName),
                  medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
@@ -179,9 +176,8 @@ public class CatTests
         HealthStatus healthStatus = HealthStatus.Good;
         const bool isCastrated = true;
         
-        Cat sut = Cat.Create(
+        Cat sut = Person.AddCat(
             priorityScoreCalculator: calculator,
-            person: Person,
             name: name,
             medicalHelpUrgency: medicalHelpUrgency,
             ageCategory: ageCategory,
@@ -190,9 +186,8 @@ public class CatTests
             additionalRequirements: additionalRequirements,
             isCastrated: isCastrated
         );
-        Advertisement.Create(
-            currentDate: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
-            owner: Person,
+        Person.AddAdvertisement(
+            dateOfCreation: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
             catsIdsToAssign: [sut.Id],
             pickupAddress: Person.DefaultAdvertisementsPickupAddress,
             contactInfoEmail: Person.DefaultAdvertisementsContactInfoEmail,
@@ -221,9 +216,8 @@ public class CatTests
         HealthStatus healthStatus = HealthStatus.Good;
         const bool isCastrated = true;
         
-        Cat cat = Cat.Create(
+        Cat cat = Person.AddCat(
             priorityScoreCalculator: calculator,
-            person: Person,
             name: name,
             medicalHelpUrgency: medicalHelpUrgency,
             ageCategory: ageCategory,
@@ -256,9 +250,8 @@ public class CatTests
         const bool isCastrated = true;
         
         //Act
-        Action results = () => Cat.Create(
+        Action results = () => Person.AddCat(
             priorityScoreCalculator: calculator,
-            person: Person,
             name: name,
             medicalHelpUrgency: medicalHelpUrgency,
             ageCategory: ageCategory,
@@ -288,9 +281,8 @@ public class CatTests
         const bool isCastrated = true;
         
         //Act
-        Cat cat = Cat.Create(
+        Cat cat = Person.AddCat(
             priorityScoreCalculator: calculator,
-            person: Person,
             name: name,
             medicalHelpUrgency: medicalHelpUrgency,
             ageCategory: ageCategory,
@@ -322,9 +314,8 @@ public class CatTests
         HealthStatus healthStatus = HealthStatus.Good;
         const bool isCastrated = true;
         
-        Cat cat = Cat.Create(
+        Cat cat = Person.AddCat(
             priorityScoreCalculator: calculator,
-            person: Person,
             name: name,
             medicalHelpUrgency: medicalHelpUrgency,
             ageCategory: ageCategory,
@@ -357,9 +348,8 @@ public class CatTests
         HealthStatus healthStatus = HealthStatus.Good;
         const bool isCastrated = true;
         
-        Cat cat = Cat.Create(
+        Cat cat = Person.AddCat(
             priorityScoreCalculator: calculator,
-            person: Person,
             name: name,
             medicalHelpUrgency: medicalHelpUrgency,
             ageCategory: ageCategory,
@@ -393,9 +383,8 @@ public class CatTests
         HealthStatus healthStatus = HealthStatus.Good;
         const bool isCastrated = true;
         
-        Cat cat = Cat.Create(
+        Cat cat = Person.AddCat(
             priorityScoreCalculator: calculator,
-            person: Person,
             name: name,
             medicalHelpUrgency: medicalHelpUrgency,
             ageCategory: ageCategory,

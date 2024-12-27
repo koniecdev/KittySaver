@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using NSubstitute;
 using Shared;
 using Testcontainers.MsSql;
 
@@ -54,6 +55,13 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
             services.RemoveAll(typeof(IDateTimeProvider));
             IDateTimeService dateTimeSub = new ApplicationDateTimeService();
             services.AddSingleton<IDateTimeService>(_ => dateTimeSub);
+            
+            services.RemoveAll(typeof(ICurrentUserService));
+            ICurrentUserService currentUserService = Substitute.For<ICurrentUserService>();
+            currentUserService.EnsureUserIsAdminAsync().Returns(Task.FromResult(true));
+            currentUserService.EnsureUserIsAuthorizedAsync(Arg.Any<Guid>()).Returns(Task.CompletedTask);
+            currentUserService.GetCurrentUserIdentityId().Returns(Guid.NewGuid());
+            services.AddSingleton<ICurrentUserService>(_ => currentUserService);
             
             services.RemoveAll(typeof(IAuthenticationService));
             services.RemoveAll(typeof(IAuthorizationHandler));

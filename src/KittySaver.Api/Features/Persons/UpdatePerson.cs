@@ -1,4 +1,6 @@
 ﻿using FluentValidation;
+using KittySaver.Api.Features.Persons.SharedContracts;
+using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
@@ -21,8 +23,8 @@ public sealed class UpdatePerson : IEndpoint
         string? DefaultAdvertisementPickupAddressState,
         string DefaultAdvertisementPickupAddressZipCode,
         string DefaultAdvertisementPickupAddressCity,
-        string DefaultAdvertisementPickupAddressStreet,
-        string DefaultAdvertisementPickupAddressBuildingNumber,
+        string? DefaultAdvertisementPickupAddressStreet,
+        string? DefaultAdvertisementPickupAddressBuildingNumber,
         string DefaultAdvertisementContactInfoEmail,
         string DefaultAdvertisementContactInfoPhoneNumber);
 
@@ -35,15 +37,15 @@ public sealed class UpdatePerson : IEndpoint
         string? DefaultAdvertisementPickupAddressState,
         string DefaultAdvertisementPickupAddressZipCode,
         string DefaultAdvertisementPickupAddressCity,
-        string DefaultAdvertisementPickupAddressStreet,
-        string DefaultAdvertisementPickupAddressBuildingNumber,
+        string? DefaultAdvertisementPickupAddressStreet,
+        string? DefaultAdvertisementPickupAddressBuildingNumber,
         string DefaultAdvertisementContactInfoEmail,
         string DefaultAdvertisementContactInfoPhoneNumber) : IPersonCommand;
 
     public sealed class UpdatePersonCommandValidator
         : AbstractValidator<UpdatePersonCommand>, IAsyncValidator
     {
-        public UpdatePersonCommandValidator(IPersonRepository personRepository)
+        public UpdatePersonCommandValidator(IPersonUniquenessChecksRepository personRepository)
         {
             RuleFor(x => x.IdOrUserIdentityId).NotEmpty();
 
@@ -55,14 +57,14 @@ public sealed class UpdatePerson : IEndpoint
                 .NotEmpty()
                 .MaximumLength(Email.MaxLength)
                 .Matches(Email.RegexPattern)
-                .MustAsync(async (command, email, ct) => 
+                .MustAsync(async (command, email, ct) =>
                     await personRepository.IsEmailUniqueAsync(email, command.IdOrUserIdentityId, ct))
                 .WithMessage("'Email' is already used by another user.");
 
             RuleFor(x => x.PhoneNumber)
                 .NotEmpty()
                 .MaximumLength(PhoneNumber.MaxLength)
-                .MustAsync(async (command, phoneNumber, ct) => 
+                .MustAsync(async (command, phoneNumber, ct) =>
                     await personRepository.IsPhoneNumberUniqueAsync(phoneNumber, command.IdOrUserIdentityId, ct))
                 .WithMessage("'Phone Number' is already used by another user.");
 
@@ -105,12 +107,13 @@ public sealed class UpdatePerson : IEndpoint
     {
         public async Task Handle(UpdatePersonCommand request, CancellationToken cancellationToken)
         {
-            Person person = await personRepository.GetPersonByIdOrIdentityIdAsync(request.IdOrUserIdentityId, cancellationToken);
-            
+            Person person =
+                await personRepository.GetPersonByIdOrIdentityIdAsync(request.IdOrUserIdentityId, cancellationToken);
+
             Nickname nickname = Nickname.Create(request.Nickname);
             Email email = Email.Create(request.Email);
             PhoneNumber phoneNumber = PhoneNumber.Create(request.PhoneNumber);
-            
+
             Address defaultAdvertisementPickupAddress = Address.Create(
                 country: request.DefaultAdvertisementPickupAddressCountry,
                 state: request.DefaultAdvertisementPickupAddressState,
@@ -118,9 +121,10 @@ public sealed class UpdatePerson : IEndpoint
                 city: request.DefaultAdvertisementPickupAddressCity,
                 street: request.DefaultAdvertisementPickupAddressStreet,
                 buildingNumber: request.DefaultAdvertisementPickupAddressBuildingNumber);
-            
+
             Email defaultAdvertisementContactInfoEmail = Email.Create(request.DefaultAdvertisementContactInfoEmail);
-            PhoneNumber defaultAdvertisementContactInfoPhoneNumber = PhoneNumber.Create(request.DefaultAdvertisementContactInfoPhoneNumber);
+            PhoneNumber defaultAdvertisementContactInfoPhoneNumber =
+                PhoneNumber.Create(request.DefaultAdvertisementContactInfoPhoneNumber);
 
             person.ChangeNickname(nickname);
             person.ChangeEmail(email);
@@ -137,15 +141,17 @@ public sealed class UpdatePerson : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
         endpointRouteBuilder.MapPut("persons/{id:guid}", async (
-            Guid id,
-            UpdatePersonRequest request,
-            ISender sender,
-            CancellationToken cancellationToken) =>
-        {
-            UpdatePersonCommand command = request.MapToUpdatePersonCommand(id);
-            await sender.Send(command, cancellationToken);
-            return Results.NoContent();
-        });
+                Guid id,
+                UpdatePersonRequest request,
+                ISender sender,
+                CancellationToken cancellationToken) =>
+            {
+                UpdatePersonCommand command = request.MapToUpdatePersonCommand(id);
+                await sender.Send(command, cancellationToken);
+                return Results.NoContent();
+            }).RequireAuthorization()
+            .WithName(EndpointNames.UpdatePerson.EndpointName)
+            .WithTags(EndpointNames.GroupNames.PersonGroup);
     }
 }
 

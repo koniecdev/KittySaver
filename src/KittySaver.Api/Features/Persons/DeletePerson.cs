@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
@@ -45,6 +46,8 @@ public sealed class DeletePerson : IEndpoint
             DeletePersonCommand command = new(id);
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
-        }).RequireAuthorization();
+        }).RequireAuthorization()
+        .WithName(EndpointNames.DeletePerson.EndpointName)
+        .WithTags(EndpointNames.GroupNames.PersonGroup);;
     }
 }

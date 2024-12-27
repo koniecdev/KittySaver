@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Features.Cats.SharedContracts;
+using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
@@ -108,7 +109,9 @@ public sealed class UpdateCat : IEndpoint
             UpdateCatCommand command = request.MapToUpdateCatCommand(personId, id);
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
-        });
+        }).RequireAuthorization()
+        .WithName(EndpointNames.UpdateCat.EndpointName)
+        .WithTags(EndpointNames.GroupNames.CatGroup);
     }
 }
 

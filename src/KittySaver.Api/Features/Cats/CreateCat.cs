@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Features.Cats.SharedContracts;
+using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
@@ -73,9 +74,8 @@ public sealed class CreateCat : IEndpoint
             Behavior behavior = Behavior.FromName(request.Behavior, true);
             HealthStatus healthStatus = HealthStatus.FromName(request.HealthStatus, true);
             
-            Cat cat = Cat.Create(
+            Cat cat = person.AddCat(
                 priorityScoreCalculator: calculator,
-                person: person,
                 name: catName,
                 medicalHelpUrgency: medicalHelpUrgency,
                 ageCategory: ageCategory,
@@ -100,7 +100,9 @@ public sealed class CreateCat : IEndpoint
             CreateCatCommand command = request.MapToCreateCatCommand(personId);
             Guid catId = await sender.Send(command, cancellationToken);
             return Results.Created($"/api/v1/persons/{personId}/cats/{catId}", new { Id = catId });
-        }).RequireAuthorization();
+        }).RequireAuthorization()
+        .WithName(EndpointNames.CreateCat.EndpointName)
+        .WithTags(EndpointNames.GroupNames.CatGroup);
     }
 }
 

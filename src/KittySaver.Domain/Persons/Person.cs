@@ -9,20 +9,18 @@ namespace KittySaver.Domain.Persons;
 
 public sealed class Person : AggregateRoot
 {
-    // 1. Private fields
     private readonly Guid _userIdentityId;
     private readonly List<Cat> _cats = [];
     private readonly List<Advertisement> _advertisements = [];
 
-    // 2. Public enums
     public enum Role
     {
         Regular,
         Admin
     }
 
-    // 3. Public properties
     public Role CurrentRole { get; private init; } = Role.Regular;
+
     public Guid UserIdentityId
     {
         get => _userIdentityId;
@@ -36,6 +34,7 @@ public sealed class Person : AggregateRoot
             _userIdentityId = value;
         }
     }
+
     public Nickname Nickname { get; private set; }
     public Email Email { get; private set; }
     public PhoneNumber PhoneNumber { get; private set; }
@@ -45,7 +44,6 @@ public sealed class Person : AggregateRoot
     public IReadOnlyList<Cat> Cats => _cats.ToList();
     public IReadOnlyList<Advertisement> Advertisements => _advertisements.ToList();
 
-    // 4. Constructors
     /// <remarks>
     /// Required by EF Core, and should never be used by programmer as it bypasses business rules.
     /// </remarks>
@@ -77,7 +75,6 @@ public sealed class Person : AggregateRoot
         DefaultAdvertisementsContactInfoPhoneNumber = defaultAdvertisementContactInfoPhone;
     }
 
-    // 5. Public factory methods
     public static Person Create(
         Guid userIdentityId,
         Nickname nickname,
@@ -99,11 +96,28 @@ public sealed class Person : AggregateRoot
         return person;
     }
 
-    // 6. Public methods - Cat management
-    public void AddCat(Cat cat)
+    public Cat AddCat(
+        ICatPriorityCalculatorService priorityScoreCalculator,
+        CatName name,
+        MedicalHelpUrgency medicalHelpUrgency,
+        AgeCategory ageCategory,
+        Behavior behavior,
+        HealthStatus healthStatus,
+        Description additionalRequirements,
+        bool isCastrated = false)
     {
-        ThrowIfCatAlreadyExists(cat.Id);
+        Cat cat = Cat.Create(
+            priorityScoreCalculator,
+            Id,
+            name,
+            medicalHelpUrgency,
+            ageCategory,
+            behavior,
+            healthStatus,
+            additionalRequirements,
+            isCastrated);
         _cats.Add(cat);
+        return cat;
     }
 
     public void RemoveCat(Guid catId)
@@ -128,25 +142,49 @@ public sealed class Person : AggregateRoot
         catToUpdate.ChangeName(name);
         catToUpdate.ChangeAdditionalRequirements(additionalRequirements);
         catToUpdate.ChangeIsCastratedFlag(isCastrated);
-        catToUpdate.ChangePriorityCompounds(catPriorityCalculator, healthStatus, ageCategory, behavior, medicalHelpUrgency);
-        
+        catToUpdate.ChangePriorityCompounds(catPriorityCalculator, healthStatus, ageCategory, behavior,
+            medicalHelpUrgency);
+
         if (catToUpdate.AdvertisementId.HasValue)
         {
             UpdateAdvertisementPriorityScore(catToUpdate.AdvertisementId.Value);
         }
     }
 
-    // 7. Public methods - Advertisement management
-    public void AddAdvertisement(Advertisement advertisement, IEnumerable<Guid> catsIdsToAssign)
+    public Advertisement AddAdvertisement(
+        DateTimeOffset dateOfCreation,
+        IEnumerable<Guid> catsIdsToAssign,
+        Address pickupAddress,
+        Email contactInfoEmail,
+        PhoneNumber contactInfoPhoneNumber,
+        Description description)
     {
         List<Guid> catsIdsToAssignList = catsIdsToAssign.ToList();
+        if (catsIdsToAssignList.Count == 0)
+        {
+            throw new ArgumentException(ErrorMessages.EmptyCatsList, nameof(catsIdsToAssign));
+        }
+        
+        double catsToAssignToAdvertisementHighestPriorityScore =
+            GetHighestPriorityScoreFromGivenCats(catsIdsToAssignList);
+        
+        Advertisement advertisement = Advertisement.Create(
+            dateOfCreation,
+            Id,
+            pickupAddress,
+            contactInfoEmail,
+            contactInfoPhoneNumber,
+            description,
+            catsToAssignToAdvertisementHighestPriorityScore);
+        
         foreach (Guid catId in catsIdsToAssignList)
         {
             AssignCatToAdvertisement(advertisement.Id, catId);
         }
-        double catsToAssignToAdvertisementHighestPriorityScore = GetHighestPriorityScoreFromGivenCats(catsIdsToAssignList);
-        advertisement.PriorityScore = catsToAssignToAdvertisementHighestPriorityScore;
+        
         _advertisements.Add(advertisement);
+        
+        return advertisement;
     }
 
     public void RemoveAdvertisement(Guid advertisementId)
@@ -154,7 +192,7 @@ public sealed class Person : AggregateRoot
         Advertisement advertisement = GetAdvertisementById(advertisementId);
         _advertisements.Remove(advertisement);
         IEnumerable<Cat> catsOfAdvertisementQuery = GetAssignedToConcreteAdvertisementCats(advertisement.Id);
-        foreach(Cat cat in catsOfAdvertisementQuery)
+        foreach (Cat cat in catsOfAdvertisementQuery)
         {
             cat.UnassignAdvertisement();
         }
@@ -201,7 +239,7 @@ public sealed class Person : AggregateRoot
         IEnumerable<Guid> catsIdsQuery = Cats
             .Where(x => x.AdvertisementId == advertisementId)
             .Select(x => x.Id);
-        
+
         foreach (Guid catId in catsIdsQuery)
         {
             UnassignCatFromAdvertisement(catId);
@@ -211,11 +249,10 @@ public sealed class Person : AggregateRoot
         {
             AssignCatToAdvertisement(advertisementId, catId);
         }
-        
+
         UpdateAdvertisementPriorityScore(advertisementId);
     }
 
-    // 8. Public methods - Person data management
     public void ChangeNickname(Nickname nickname)
     {
         Nickname = nickname;
@@ -225,12 +262,12 @@ public sealed class Person : AggregateRoot
     {
         Email = email;
     }
-    
+
     public void ChangePhoneNumber(PhoneNumber phoneNumber)
     {
         PhoneNumber = phoneNumber;
     }
-    
+
     public void ChangeDefaultsForAdvertisement(
         Address defaultAdvertisementsPickupAddress,
         Email defaultAdvertisementsContactInfoEmail,
@@ -241,7 +278,6 @@ public sealed class Person : AggregateRoot
         DefaultAdvertisementsContactInfoPhoneNumber = defaultAdvertisementsContactInfoPhoneNumber;
     }
 
-    // 9. Public utility methods
     public double GetHighestPriorityScoreFromGivenCats(IEnumerable<Guid> catsIds)
     {
         List<Guid> catsIdsList = catsIds.ToList();
@@ -255,7 +291,6 @@ public sealed class Person : AggregateRoot
         return highestPriorityScore;
     }
 
-    // 10. Private helper methods
     private void AssignCatToAdvertisement(Guid advertisementId, Guid catId)
     {
         Cat cat = GetCatById(catId);
@@ -271,15 +306,16 @@ public sealed class Person : AggregateRoot
     private void UpdateAdvertisementPriorityScore(Guid advertisementId)
     {
         IEnumerable<Cat> catsQuery = GetAssignedToConcreteAdvertisementCats(advertisementId);
-        double catsToAssignToAdvertisementHighestPriorityScore = GetHighestPriorityScoreFromGivenCats(catsQuery.Select(x=>x.Id));
+        double catsToAssignToAdvertisementHighestPriorityScore =
+            GetHighestPriorityScoreFromGivenCats(catsQuery.Select(x => x.Id));
 
         Advertisement advertisement = GetAdvertisementById(advertisementId);
         advertisement.PriorityScore = catsToAssignToAdvertisementHighestPriorityScore;
     }
 
-    private IEnumerable<Cat> GetAssignedToConcreteAdvertisementCats(Guid advertisementId) 
+    private IEnumerable<Cat> GetAssignedToConcreteAdvertisementCats(Guid advertisementId)
         => _cats.Where(x => x.AdvertisementId == advertisementId);
-    
+
     private void ValidateCatsOwnership(IEnumerable<Guid> catIds)
     {
         HashSet<Guid> catIdsFromPersonCats = Cats.Select(cat => cat.Id).ToHashSet();
@@ -288,37 +324,32 @@ public sealed class Person : AggregateRoot
             throw new ArgumentException(ErrorMessages.InvalidCatsOwnership, nameof(catIds));
         }
     }
-    
-    private void ThrowIfCatAlreadyExists(Guid catId)
-    {
-        if (_cats.Any(c => c.Id == catId))
-        {
-            throw new InvalidOperationException(string.Format(ErrorMessages.CatAlreadyAssignedToPerson, catId, Id));
-        }
-    }
 
     private static void ThrowIfCatIsAssignedToAdvertisement(Cat cat)
     {
         if (cat.AdvertisementId.HasValue)
         {
-            throw new InvalidOperationException(string.Format(ErrorMessages.CatIsAssignedToAdvertisement, cat.Id, cat.AdvertisementId));
+            throw new InvalidOperationException(string.Format(ErrorMessages.CatIsAssignedToAdvertisement, cat.Id,
+                cat.AdvertisementId));
         }
     }
-    
+
     private Cat GetCatById(Guid catId) =>
-        _cats.FirstOrDefault(c => c.Id == catId) ?? 
+        _cats.FirstOrDefault(c => c.Id == catId) ??
         throw new NotFoundExceptions.CatNotFoundException(catId);
-    
+
     private Advertisement GetAdvertisementById(Guid advertisementId) =>
-        _advertisements.FirstOrDefault(c => c.Id == advertisementId) ?? 
+        _advertisements.FirstOrDefault(c => c.Id == advertisementId) ??
         throw new NotFoundExceptions.AdvertisementNotFoundException(advertisementId);
 
     // 11. Private constants/error messages
     private static class ErrorMessages
     {
-        public const string CatAlreadyAssignedToPerson = "Cat with id: '{0}' is already assigned to Person with id {1}.";
-        public const string CatIsAssignedToAdvertisement = "Cat with id: '{0}' is assigned to advertisement with id: {1}, so it can not be removed.";
+        public const string CatIsAssignedToAdvertisement =
+            "Cat with id: '{0}' is assigned to advertisement with id: {1}, so it can not be removed.";
+
         public const string InvalidCatsOwnership = "One or more provided cats do not belong to provided person.";
+        public const string EmptyCatsList = "Advertisement cats list must not be empty.";
     }
 }
 
@@ -349,30 +380,36 @@ internal sealed class PersonConfiguration : IEntityTypeConfiguration<Person>
             complexPropertyBuilder.IsRequired();
 
             complexPropertyBuilder.Property(x => x.Country)
-                .HasColumnName($"{nameof(Person.DefaultAdvertisementsPickupAddress)}{nameof(Person.DefaultAdvertisementsPickupAddress.Country)}")
+                .HasColumnName(
+                    $"{nameof(Person.DefaultAdvertisementsPickupAddress)}{nameof(Person.DefaultAdvertisementsPickupAddress.Country)}")
                 .HasMaxLength(Address.CountryMaxLength)
                 .IsRequired();
 
             complexPropertyBuilder.Property(x => x.State)
-                .HasColumnName($"{nameof(Person.DefaultAdvertisementsPickupAddress)}{nameof(Person.DefaultAdvertisementsPickupAddress.State)}")
+                .HasColumnName(
+                    $"{nameof(Person.DefaultAdvertisementsPickupAddress)}{nameof(Person.DefaultAdvertisementsPickupAddress.State)}")
                 .HasMaxLength(Address.StateMaxLength);
 
             complexPropertyBuilder.Property(x => x.ZipCode)
-                .HasColumnName($"{nameof(Person.DefaultAdvertisementsPickupAddress)}{nameof(Person.DefaultAdvertisementsPickupAddress.ZipCode)}")
+                .HasColumnName(
+                    $"{nameof(Person.DefaultAdvertisementsPickupAddress)}{nameof(Person.DefaultAdvertisementsPickupAddress.ZipCode)}")
                 .HasMaxLength(Address.ZipCodeMaxLength)
                 .IsRequired();
 
             complexPropertyBuilder.Property(x => x.City)
-                .HasColumnName($"{nameof(Person.DefaultAdvertisementsPickupAddress)}{nameof(Person.DefaultAdvertisementsPickupAddress.City)}")
+                .HasColumnName(
+                    $"{nameof(Person.DefaultAdvertisementsPickupAddress)}{nameof(Person.DefaultAdvertisementsPickupAddress.City)}")
                 .HasMaxLength(Address.CityMaxLength)
                 .IsRequired();
 
             complexPropertyBuilder.Property(x => x.Street)
-                .HasColumnName($"{nameof(Person.DefaultAdvertisementsPickupAddress)}{nameof(Person.DefaultAdvertisementsPickupAddress.Street)}")
+                .HasColumnName(
+                    $"{nameof(Person.DefaultAdvertisementsPickupAddress)}{nameof(Person.DefaultAdvertisementsPickupAddress.Street)}")
                 .HasMaxLength(Address.StreetMaxLength);
 
             complexPropertyBuilder.Property(x => x.BuildingNumber)
-                .HasColumnName($"{nameof(Person.DefaultAdvertisementsPickupAddress)}{nameof(Person.DefaultAdvertisementsPickupAddress.BuildingNumber)}")
+                .HasColumnName(
+                    $"{nameof(Person.DefaultAdvertisementsPickupAddress)}{nameof(Person.DefaultAdvertisementsPickupAddress.BuildingNumber)}")
                 .HasMaxLength(Address.BuildingNumberMaxLength);
         });
 

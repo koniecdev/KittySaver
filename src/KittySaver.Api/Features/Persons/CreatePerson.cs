@@ -1,4 +1,6 @@
 ﻿using FluentValidation;
+using KittySaver.Api.Features.Persons.SharedContracts;
+using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
@@ -20,8 +22,8 @@ public sealed class CreatePerson : IEndpoint
         string? DefaultAdvertisementPickupAddressState,
         string DefaultAdvertisementPickupAddressZipCode,
         string DefaultAdvertisementPickupAddressCity,
-        string DefaultAdvertisementPickupAddressStreet,
-        string DefaultAdvertisementPickupAddressBuildingNumber,
+        string? DefaultAdvertisementPickupAddressStreet,
+        string? DefaultAdvertisementPickupAddressBuildingNumber,
         string DefaultAdvertisementContactInfoEmail,
         string DefaultAdvertisementContactInfoPhoneNumber);
     
@@ -34,15 +36,15 @@ public sealed class CreatePerson : IEndpoint
         string? DefaultAdvertisementPickupAddressState,
         string DefaultAdvertisementPickupAddressZipCode,
         string DefaultAdvertisementPickupAddressCity,
-        string DefaultAdvertisementPickupAddressStreet,
-        string DefaultAdvertisementPickupAddressBuildingNumber,
+        string? DefaultAdvertisementPickupAddressStreet,
+        string? DefaultAdvertisementPickupAddressBuildingNumber,
         string DefaultAdvertisementContactInfoEmail,
         string DefaultAdvertisementContactInfoPhoneNumber) : IPersonCommand<Guid>;
 
     public sealed class CreatePersonCommandValidator 
         : AbstractValidator<IPersonCommand>, IAsyncValidator
     {
-        public CreatePersonCommandValidator(IPersonRepository personRepository)
+        public CreatePersonCommandValidator(IPersonUniquenessChecksRepository personRepository)
         {
             RuleFor(x => x.Nickname)
                 .NotEmpty()
@@ -147,7 +149,9 @@ public sealed class CreatePerson : IEndpoint
             IPersonCommand command = request.MapToCreatePersonCommand();
             Guid personId = await sender.Send(command, cancellationToken);
             return Results.Created($"/api/v1/persons/{personId}", new { Id = personId });
-        }).RequireAuthorization();
+        }).RequireAuthorization()
+        .WithName(EndpointNames.CreatePerson.EndpointName)
+        .WithTags(EndpointNames.GroupNames.PersonGroup);
     }
 }
 

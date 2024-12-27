@@ -1,4 +1,5 @@
 ﻿using KittySaver.Api.Features.Persons.SharedContracts;
+using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
 using MediatR;
@@ -32,6 +33,8 @@ public sealed class GetPersons : IEndpoint
             GetPersonsQuery query = new();
             ICollection<PersonResponse> persons = await sender.Send(query, cancellationToken);
             return Results.Ok(persons);
-        });
+        }).RequireAuthorization()
+        .WithName(EndpointNames.GetPersons.EndpointName)
+        .WithTags(EndpointNames.GroupNames.PersonGroup);
     }
 }

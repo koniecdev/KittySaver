@@ -19,11 +19,18 @@ public class GetApplicationUserEndpointTests(KittySaverAuthApiFactory appFactory
         new Faker<Register.RegisterRequest>()
             .CustomInstantiator( faker =>
                 new Register.RegisterRequest(
-                    FirstName: faker.Person.FirstName,
-                    LastName: faker.Person.LastName,
+                    UserName: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
-                    Password: "Default1234%"
+                    Password: "Default1234%",
+                    DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
+                    DefaultAdvertisementPickupAddressState: faker.Address.State(),
+                    DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
+                    DefaultAdvertisementPickupAddressCity: faker.Address.City(),
+                    DefaultAdvertisementPickupAddressStreet: faker.Address.StreetName(),
+                    DefaultAdvertisementPickupAddressBuildingNumber: faker.Address.BuildingNumber(),
+                    DefaultAdvertisementContactInfoEmail: faker.Person.Email,
+                    DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 ));
     
     [Fact]
@@ -44,11 +51,17 @@ public class GetApplicationUserEndpointTests(KittySaverAuthApiFactory appFactory
         ApplicationUserResponse? applicationUser = await response.Content.ReadFromJsonAsync<ApplicationUserResponse>();
         applicationUser.Should().NotBeNull();
         applicationUser!.Id.Should().Be(registerResponse.Id);
-        applicationUser.FirstName.Should().Be(registerRequest.FirstName);
-        applicationUser.LastName.Should().Be(registerRequest.LastName);
+        applicationUser.UserName.Should().Be(registerRequest.UserName);
         applicationUser.Email.Should().Be(registerRequest.Email);
         applicationUser.PhoneNumber.Should().Be(registerRequest.PhoneNumber);
-        applicationUser.FullName.Should().Be($"{registerRequest.FirstName} {registerRequest.LastName}");
+        applicationUser.DefaultAdvertisementPickupAddressCountry.Should().Be(registerRequest.DefaultAdvertisementPickupAddressCountry);
+        applicationUser.DefaultAdvertisementPickupAddressState.Should().Be(registerRequest.DefaultAdvertisementPickupAddressState);
+        applicationUser.DefaultAdvertisementPickupAddressZipCode.Should().Be(registerRequest.DefaultAdvertisementPickupAddressZipCode);
+        applicationUser.DefaultAdvertisementPickupAddressCity.Should().Be(registerRequest.DefaultAdvertisementPickupAddressCity);
+        applicationUser.DefaultAdvertisementPickupAddressStreet.Should().Be(registerRequest.DefaultAdvertisementPickupAddressStreet);
+        applicationUser.DefaultAdvertisementPickupAddressBuildingNumber.Should().Be(registerRequest.DefaultAdvertisementPickupAddressBuildingNumber);
+        applicationUser.DefaultAdvertisementContactInfoEmail.Should().Be(registerRequest.DefaultAdvertisementContactInfoEmail);
+        applicationUser.DefaultAdvertisementContactInfoPhoneNumber.Should().Be(registerRequest.DefaultAdvertisementContactInfoPhoneNumber);
     }
     
     [Fact]

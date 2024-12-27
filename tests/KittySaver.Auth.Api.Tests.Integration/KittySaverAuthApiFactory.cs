@@ -1,7 +1,7 @@
 ﻿using KittySaver.Auth.Api.Shared.Infrastructure.Clients;
 using KittySaver.Auth.Api.Shared.Infrastructure.Services;
 using KittySaver.Auth.Api.Shared.Persistence;
-using KittySaver.Auth.Api.Tests.Integration.Helpers;
+using KittySaver.Auth.Api.Shared.Security;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
@@ -15,6 +15,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Shared;
 using Testcontainers.MsSql;
+using TestAuthHandler = KittySaver.Auth.Api.Tests.Integration.Helpers.TestAuthHandler;
 
 namespace KittySaver.Auth.Api.Tests.Integration;
 
@@ -53,12 +54,15 @@ public class KittySaverAuthApiFactory : WebApplicationFactory<IApiMarker>, IAsyn
         builder.ConfigureTestServices(services =>
         {
             services.RemoveAll(typeof(IDateTimeProvider));
+            services.RemoveAll(typeof(ICurrentUserService));
             IDateTimeProvider dateTimeSub = Substitute.For<IDateTimeProvider>();
+            ICurrentUserService currentUserService = Substitute.For<ICurrentUserService>();
+            currentUserService.UserId.Returns(Guid.NewGuid().ToString());
+            currentUserService.UserRoles.Returns(["Admin"]);
             
-            dateTimeSub
-                .Now
-                .Returns(FixedDateTime);
+            dateTimeSub.Now.Returns(FixedDateTime);
             services.AddScoped<IDateTimeProvider>(_ => dateTimeSub);
+            services.AddScoped<ICurrentUserService>(_ => currentUserService);
             
             services.RemoveAll(typeof(IAuthenticationService));
             services.RemoveAll(typeof(IAuthorizationHandler));

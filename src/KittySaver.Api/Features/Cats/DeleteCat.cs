@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
@@ -51,6 +52,8 @@ public sealed class DeleteCat : IEndpoint
             DeleteCatCommand command = new(personId, id);
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
-        }).RequireAuthorization();
+        }).RequireAuthorization()
+        .WithName(EndpointNames.DeleteCat.EndpointName)
+        .WithTags(EndpointNames.GroupNames.CatGroup);
     }
 }

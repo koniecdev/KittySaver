@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
@@ -58,6 +59,8 @@ public sealed class ReassignCatsToAdvertisement : IEndpoint
                 CatIds: request.CatIds);
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
-        }).RequireAuthorization();
+        }).RequireAuthorization()
+        .WithName(EndpointNames.ReassignCatsToAdvertisement.EndpointName)
+        .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
@@ -20,8 +21,8 @@ public class CreateAdvertisement : IEndpoint
         string? PickupAddressState,
         string PickupAddressZipCode,
         string PickupAddressCity,
-        string PickupAddressStreet,
-        string PickupAddressBuildingNumber,
+        string? PickupAddressStreet,
+        string? PickupAddressBuildingNumber,
         string ContactInfoEmail,
         string ContactInfoPhoneNumber
     );
@@ -34,8 +35,8 @@ public class CreateAdvertisement : IEndpoint
         string? PickupAddressState,
         string PickupAddressZipCode,
         string PickupAddressCity,
-        string PickupAddressStreet,
-        string PickupAddressBuildingNumber,
+        string? PickupAddressStreet,
+        string? PickupAddressBuildingNumber,
         string ContactInfoEmail,
         string ContactInfoPhoneNumber) : IAdvertisementCommand<Guid>;
 
@@ -75,11 +76,9 @@ public class CreateAdvertisement : IEndpoint
                 .MaximumLength(Address.CityMaxLength);
 
             RuleFor(x => x.PickupAddressStreet)
-                .NotEmpty()
                 .MaximumLength(Address.StreetMaxLength);
 
             RuleFor(x => x.PickupAddressBuildingNumber)
-                .NotEmpty()
                 .MaximumLength(Address.BuildingNumberMaxLength);
         }
     }
@@ -105,14 +104,13 @@ public class CreateAdvertisement : IEndpoint
             PhoneNumber contactInfoPhoneNumber = PhoneNumber.Create(request.ContactInfoPhoneNumber);
             Description description = Description.Create(request.Description);
             
-            Advertisement advertisement = Advertisement.Create(
-                currentDate: dateTimeService.Now,
-                owner: owner,
-                catsIdsToAssign: request.CatsIdsToAssign,
-                pickupAddress: pickupAddress,
-                contactInfoEmail: contactInfoEmail,
-                contactInfoPhoneNumber: contactInfoPhoneNumber,
-                description: description);
+            Advertisement advertisement = owner.AddAdvertisement(
+                dateTimeService.Now,
+                request.CatsIdsToAssign,
+                pickupAddress,
+                contactInfoEmail,
+                contactInfoPhoneNumber,
+                description);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
             return advertisement.Id;
@@ -130,7 +128,9 @@ public class CreateAdvertisement : IEndpoint
             CreateAdvertisementCommand command = request.MapToCreateAdvertisementCommand(personId);
             Guid advertisementId = await sender.Send(command, cancellationToken);
             return Results.Created($"/api/v1/persons/{personId}/advertisements/{advertisementId}", new { Id = advertisementId });
-        }).RequireAuthorization();
+        }).RequireAuthorization()
+        .WithName(EndpointNames.CreateAdvertisement.EndpointName)
+        .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
     }
 }
 

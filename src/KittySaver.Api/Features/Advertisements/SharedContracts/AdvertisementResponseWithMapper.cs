@@ -1,4 +1,6 @@
-﻿using KittySaver.Api.Shared.Persistence.ReadModels;
+﻿using KittySaver.Api.Shared.Abstractions;
+using KittySaver.Api.Shared.Infrastructure.ApiComponents;
+using KittySaver.Api.Shared.Persistence.ReadModels;
 using KittySaver.Domain.Persons;
 using Riok.Mapperly.Abstractions;
 
@@ -17,6 +19,7 @@ public sealed class AdvertisementResponse
     public required AdvertisementStatus Status { get; init; }
     public required ICollection<CatDto> Cats { get; set; } = new List<CatDto>();
     public required PickupAddressDto PickupAddress { get; init; }
+    public ICollection<Link> Links { get; } = new List<Link>();
     
     public sealed class PickupAddressDto
     {
@@ -24,8 +27,8 @@ public sealed class AdvertisementResponse
         public required string? State { get; init; }
         public required string ZipCode { get; init; }
         public required string City { get; init; }
-        public required string Street { get; init; }
-        public required string BuildingNumber { get; init; }
+        public required string? Street { get; init; }
+        public required string? BuildingNumber { get; init; }
     }
 
     public sealed class CatDto

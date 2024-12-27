@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
@@ -18,8 +19,8 @@ public sealed class UpdateAdvertisement : IEndpoint
         string? PickupAddressState,
         string PickupAddressZipCode,
         string PickupAddressCity,
-        string PickupAddressStreet,
-        string PickupAddressBuildingNumber,
+        string? PickupAddressStreet,
+        string? PickupAddressBuildingNumber,
         string ContactInfoEmail,
         string ContactInfoPhoneNumber);
 
@@ -31,8 +32,8 @@ public sealed class UpdateAdvertisement : IEndpoint
         string? PickupAddressState,
         string PickupAddressZipCode,
         string PickupAddressCity,
-        string PickupAddressStreet,
-        string PickupAddressBuildingNumber,
+        string? PickupAddressStreet,
+        string? PickupAddressBuildingNumber,
         string ContactInfoEmail,
         string ContactInfoPhoneNumber) : IAdvertisementCommand;
 
@@ -76,11 +77,9 @@ public sealed class UpdateAdvertisement : IEndpoint
                 .MaximumLength(Address.CityMaxLength);
             
             RuleFor(x => x.PickupAddressStreet)
-                .NotEmpty()
                 .MaximumLength(Address.StreetMaxLength);
             
             RuleFor(x => x.PickupAddressBuildingNumber)
-                .NotEmpty()
                 .MaximumLength(Address.BuildingNumberMaxLength);
         }
     }
@@ -128,7 +127,9 @@ public sealed class UpdateAdvertisement : IEndpoint
             UpdateAdvertisementCommand command = request.MapToUpdateAdvertisementCommand(personId, advertisementId);
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
-        });
+        }).RequireAuthorization()
+        .WithName(EndpointNames.UpdateAdvertisement.EndpointName)
+        .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
     }
 }
 
