@@ -53,6 +53,8 @@ public sealed class ExpireAdvertisement : IEndpoint
             ExpireAdvertisementCommand command = new(PersonId: personId, AdvertisementId: advertisementId);
             await sender.Send(command, cancellationToken);
             return Results.Ok();
-        }).RequireAuthorization();
+        }).RequireAuthorization()
+        .WithName(EndpointNames.ExpireAdvertisement.EndpointName)
+        .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
     }
 }

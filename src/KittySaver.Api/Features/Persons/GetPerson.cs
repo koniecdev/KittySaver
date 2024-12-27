@@ -37,6 +37,8 @@ public sealed class GetPerson : IEndpoint
             GetPersonQuery query = new(id);
             PersonResponse person = await sender.Send(query, cancellationToken);
             return Results.Ok(person);
-        });
+        }).RequireAuthorization()
+        .WithName(EndpointNames.GetPerson.EndpointName)
+        .WithTags(EndpointNames.GroupNames.PersonGroup);
     }
 }

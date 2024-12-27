@@ -127,7 +127,9 @@ public sealed class UpdateAdvertisement : IEndpoint
             UpdateAdvertisementCommand command = request.MapToUpdateAdvertisementCommand(personId, advertisementId);
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
-        });
+        }).RequireAuthorization()
+        .WithName(EndpointNames.UpdateAdvertisement.EndpointName)
+        .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
     }
 }
 

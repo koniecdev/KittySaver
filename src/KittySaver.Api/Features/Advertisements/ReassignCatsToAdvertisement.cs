@@ -59,6 +59,8 @@ public sealed class ReassignCatsToAdvertisement : IEndpoint
                 CatIds: request.CatIds);
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
-        }).RequireAuthorization();
+        }).RequireAuthorization()
+        .WithName(EndpointNames.ReassignCatsToAdvertisement.EndpointName)
+        .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
     }
 }

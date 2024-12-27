@@ -109,7 +109,9 @@ public sealed class UpdateCat : IEndpoint
             UpdateCatCommand command = request.MapToUpdateCatCommand(personId, id);
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
-        });
+        }).RequireAuthorization()
+        .WithName(EndpointNames.UpdateCat.EndpointName)
+        .WithTags(EndpointNames.GroupNames.CatGroup);
     }
 }
 

@@ -149,7 +149,9 @@ public sealed class CreatePerson : IEndpoint
             IPersonCommand command = request.MapToCreatePersonCommand();
             Guid personId = await sender.Send(command, cancellationToken);
             return Results.Created($"/api/v1/persons/{personId}", new { Id = personId });
-        }).RequireAuthorization();
+        }).RequireAuthorization()
+        .WithName(EndpointNames.CreatePerson.EndpointName)
+        .WithTags(EndpointNames.GroupNames.PersonGroup);
     }
 }
 

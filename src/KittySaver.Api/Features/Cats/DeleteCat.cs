@@ -52,6 +52,8 @@ public sealed class DeleteCat : IEndpoint
             DeleteCatCommand command = new(personId, id);
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
-        }).RequireAuthorization();
+        }).RequireAuthorization()
+        .WithName(EndpointNames.DeleteCat.EndpointName)
+        .WithTags(EndpointNames.GroupNames.CatGroup);
     }
 }

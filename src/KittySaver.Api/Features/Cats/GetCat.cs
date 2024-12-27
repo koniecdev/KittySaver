@@ -38,6 +38,8 @@ public sealed class GetCat : IEndpoint
             GetCatQuery query = new(personId, id);
             CatResponse cat = await sender.Send(query, cancellationToken);
             return Results.Ok(cat);
-        });
+        }).RequireAuthorization()
+        .WithName(EndpointNames.GetCat.EndpointName)
+        .WithTags(EndpointNames.GroupNames.CatGroup);
     }
 }

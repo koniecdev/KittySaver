@@ -30,14 +30,18 @@ public class GetAdvertisement : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapGet("advertisements/{id:guid}", async (
+        endpointRouteBuilder.MapGet("advertisements/{id:guid}", async(
             Guid id,
             ISender sender,
+            LinkGenerator linkGenerator,
+            HttpContext httpContext,
             CancellationToken cancellationToken) =>
         {
             GetAdvertisementQuery query = new(id);
-            AdvertisementResponse person = await sender.Send(query, cancellationToken);
-            return Results.Ok(person);
-        });
+            AdvertisementResponse advertisement = await sender.Send(query, cancellationToken);
+            return Results.Ok(advertisement);
+        }).AllowAnonymous()
+        .WithName(EndpointNames.GetAdvertisement.EndpointName)
+        .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
     }
 }

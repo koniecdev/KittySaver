@@ -53,6 +53,8 @@ public sealed class RefreshAdvertisement : IEndpoint
             RefreshAdvertisementCommand command = new(PersonId: personId, AdvertisementId: advertisementId);
             await sender.Send(command, cancellationToken);
             return Results.Ok();
-        }).RequireAuthorization();
+        }).RequireAuthorization()
+        .WithName(EndpointNames.RefreshAdvertisement.EndpointName)
+        .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
     }
 }

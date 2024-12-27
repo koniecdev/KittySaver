@@ -100,7 +100,9 @@ public sealed class CreateCat : IEndpoint
             CreateCatCommand command = request.MapToCreateCatCommand(personId);
             Guid catId = await sender.Send(command, cancellationToken);
             return Results.Created($"/api/v1/persons/{personId}/cats/{catId}", new { Id = catId });
-        }).RequireAuthorization();
+        }).RequireAuthorization()
+        .WithName(EndpointNames.CreateCat.EndpointName)
+        .WithTags(EndpointNames.GroupNames.CatGroup);
     }
 }
 

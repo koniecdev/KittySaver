@@ -128,7 +128,9 @@ public class CreateAdvertisement : IEndpoint
             CreateAdvertisementCommand command = request.MapToCreateAdvertisementCommand(personId);
             Guid advertisementId = await sender.Send(command, cancellationToken);
             return Results.Created($"/api/v1/persons/{personId}/advertisements/{advertisementId}", new { Id = advertisementId });
-        }).RequireAuthorization();
+        }).RequireAuthorization()
+        .WithName(EndpointNames.CreateAdvertisement.EndpointName)
+        .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
     }
 }
 

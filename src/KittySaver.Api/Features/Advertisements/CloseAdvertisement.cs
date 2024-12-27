@@ -53,6 +53,8 @@ public sealed class CloseAdvertisement : IEndpoint
             CloseAdvertisementCommand command = new(PersonId: personId, AdvertisementId: advertisementId);
             await sender.Send(command, cancellationToken);
             return Results.Ok();
-        }).RequireAuthorization();
+        }).RequireAuthorization()
+        .WithName(EndpointNames.CloseAdvertisement.EndpointName)
+        .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
     }
 }

@@ -28,12 +28,16 @@ public sealed class GetAdvertisements : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
         endpointRouteBuilder.MapGet("advertisements", async (
+            int? offset,
+            int? limit,
             ISender sender,
             CancellationToken cancellationToken) =>
         {
             GetAdvertisementsQuery query = new();
             ICollection<AdvertisementResponse> advertisements = await sender.Send(query, cancellationToken);
             return Results.Ok(advertisements);
-        });
+        }).AllowAnonymous()
+        .WithName(EndpointNames.GetAdvertisements.EndpointName)
+        .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
     }
 }

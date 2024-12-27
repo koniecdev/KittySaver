@@ -139,15 +139,17 @@ public sealed class UpdatePerson : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
         endpointRouteBuilder.MapPut("persons/{id:guid}", async (
-            Guid id,
-            UpdatePersonRequest request,
-            ISender sender,
-            CancellationToken cancellationToken) =>
-        {
-            UpdatePersonCommand command = request.MapToUpdatePersonCommand(id);
-            await sender.Send(command, cancellationToken);
-            return Results.NoContent();
-        });
+                Guid id,
+                UpdatePersonRequest request,
+                ISender sender,
+                CancellationToken cancellationToken) =>
+            {
+                UpdatePersonCommand command = request.MapToUpdatePersonCommand(id);
+                await sender.Send(command, cancellationToken);
+                return Results.NoContent();
+            }).RequireAuthorization()
+            .WithName(EndpointNames.UpdatePerson.EndpointName)
+            .WithTags(EndpointNames.GroupNames.PersonGroup);
     }
 }
 

@@ -46,6 +46,8 @@ public sealed class DeletePerson : IEndpoint
             DeletePersonCommand command = new(id);
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
-        }).RequireAuthorization();
+        }).RequireAuthorization()
+        .WithName(EndpointNames.DeletePerson.EndpointName)
+        .WithTags(EndpointNames.GroupNames.PersonGroup);;
     }
 }
