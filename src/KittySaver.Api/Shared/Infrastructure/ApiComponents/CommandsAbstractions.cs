@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using KittySaver.Api.Shared.Abstractions;
+using MediatR;
 
 namespace KittySaver.Api.Shared.Infrastructure.ApiComponents;
 

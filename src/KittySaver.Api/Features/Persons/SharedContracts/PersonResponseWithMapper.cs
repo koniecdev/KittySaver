@@ -1,4 +1,6 @@
-﻿using KittySaver.Api.Shared.Persistence.ReadModels;
+﻿using KittySaver.Api.Shared.Abstractions;
+using KittySaver.Api.Shared.Infrastructure.ApiComponents;
+using KittySaver.Api.Shared.Persistence.ReadModels;
 using KittySaver.Domain.Persons;
 using Riok.Mapperly.Abstractions;
 

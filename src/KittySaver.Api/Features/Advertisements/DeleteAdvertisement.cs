@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Features.Advertisements.SharedContracts;
+using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;

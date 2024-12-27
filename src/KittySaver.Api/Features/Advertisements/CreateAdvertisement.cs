@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;

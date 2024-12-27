@@ -4,6 +4,7 @@ using FluentValidation;
 using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Features.Persons.SharedContracts;
+using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Behaviours;
 using KittySaver.Api.Shared.Infrastructure.Security;
 using KittySaver.Api.Shared.Infrastructure.Services;
@@ -27,6 +28,7 @@ public static class ServiceCollectionExtensions
         services.AddDbContext<ApplicationReadDbContext>(o => o
             .UseSqlServer(configuration.GetConnectionString("Database") ?? throw new Exceptions.Database.MissingConnectionStringException())
             .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
+        services.AddScoped<ILinkService, LinkService>();
         services.AddScoped<ICurrentEnvironmentService, CurrentEnvironmentService>();
         services.AddScoped<IDateTimeService, DefaultDateTimeService>();
         services.AddScoped<IPersonRepository, PersonRepository>();
