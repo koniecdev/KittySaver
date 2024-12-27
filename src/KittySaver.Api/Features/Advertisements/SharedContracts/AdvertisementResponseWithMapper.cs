@@ -19,6 +19,7 @@ public sealed class AdvertisementResponse
     public required AdvertisementStatus Status { get; init; }
     public required ICollection<CatDto> Cats { get; set; } = new List<CatDto>();
     public required PickupAddressDto PickupAddress { get; init; }
+    public ICollection<Link> Links { get; } = new List<Link>();
     
     public sealed class PickupAddressDto
     {

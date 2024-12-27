@@ -16,6 +16,7 @@ public sealed class PersonResponse
     public required string DefaultAdvertisementsContactInfoEmail { get; init; }
     public required string DefaultAdvertisementsContactInfoPhoneNumber { get; init; }
     public required AddressDto DefaultAdvertisementsPickupAddress { get; init; }
+    public ICollection<Link> Links { get; } = new List<Link>();
 
     public sealed class AddressDto
     {
