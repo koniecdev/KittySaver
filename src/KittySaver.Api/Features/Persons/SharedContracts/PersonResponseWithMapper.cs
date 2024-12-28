@@ -16,7 +16,7 @@ public sealed class PersonResponse
     public required string DefaultAdvertisementsContactInfoEmail { get; init; }
     public required string DefaultAdvertisementsContactInfoPhoneNumber { get; init; }
     public required AddressDto DefaultAdvertisementsPickupAddress { get; init; }
-    public ICollection<Link> Links { get; } = new List<Link>();
+    public required ICollection<Link> Links { get; init; }
 
     public sealed class AddressDto
     {
@@ -31,7 +31,43 @@ public sealed class PersonResponse
 
 public static class PersonResponseMapper
 {
-    public static IQueryable<PersonResponse> ProjectToDto(this IQueryable<PersonReadModel> persons) =>
+    private static List<Link> AddLinks(PersonReadModel personResponse, ILinkService linkService)
+    {
+        List<Link> links =
+        [
+            linkService.Generate(
+                endpointInfo: EndpointNames.GetPerson,
+                routeValues: new { id = personResponse.Id },
+                isSelf: true),
+
+            linkService.Generate(
+                endpointInfo: EndpointNames.UpdatePerson,
+                routeValues: new { id = personResponse.Id }),
+
+            linkService.Generate(
+                endpointInfo: EndpointNames.DeletePerson,
+                routeValues: new { id = personResponse.Id }),
+            
+            linkService.Generate(
+                endpointInfo: EndpointNames.GetCats,
+                routeValues: new { personId = personResponse.Id }),
+            
+            linkService.Generate(
+                endpointInfo: EndpointNames.CreateCat,
+                routeValues: new { personId = personResponse.Id }),
+            
+            linkService.Generate(
+                endpointInfo: EndpointNames.GetPersonAdvertisements,
+                routeValues: new { personId = personResponse.Id }),
+
+            linkService.Generate(
+                endpointInfo: EndpointNames.CreateAdvertisement,
+                routeValues: new { personId = personResponse.Id })
+        ];
+
+        return links;
+    }
+    public static IQueryable<PersonResponse> ProjectToDto(this IQueryable<PersonReadModel> persons, ILinkService linkService) =>
         persons.Select(entity => new PersonResponse
         {
             Id = entity.Id,
@@ -49,6 +85,7 @@ public static class PersonResponseMapper
                 City = entity.DefaultAdvertisementsPickupAddressCity,
                 Street = entity.DefaultAdvertisementsPickupAddressStreet,
                 BuildingNumber = entity.DefaultAdvertisementsPickupAddressBuildingNumber
-            }
+            },
+            Links = AddLinks(entity, linkService)
         });
 }
