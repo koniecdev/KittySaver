@@ -22,7 +22,7 @@ public sealed class GetPerson : IEndpoint
             PersonResponse person =
                 await db.Persons
                     .Where(x => x.Id == request.IdOrUserIdentityId || x.UserIdentityId == request.IdOrUserIdentityId)
-                    .ProjectToDto()
+                    .ProjectToDto(linkService)
                     .FirstOrDefaultAsync(cancellationToken)
                 ?? throw new NotFoundExceptions.PersonNotFoundException(request.IdOrUserIdentityId);
             
@@ -33,43 +33,35 @@ public sealed class GetPerson : IEndpoint
 
         private void AddLinks(PersonResponse personResponse)
         {
-            personResponse.Links.Add(
-                linkService.Generate(
+            personResponse.Links.Add(linkService.Generate(
                     endpointInfo: EndpointNames.GetPerson,
                     routeValues: new { id = personResponse.Id },
                     isSelf: true));
             
-            personResponse.Links.Add(
-                linkService.Generate(
+            personResponse.Links.Add(linkService.Generate(
                     endpointInfo: EndpointNames.UpdatePerson,
                     routeValues: new { id = personResponse.Id }));
     
-            personResponse.Links.Add(
-                linkService.Generate(
+            personResponse.Links.Add(linkService.Generate(
                     endpointInfo: EndpointNames.DeletePerson,
                     routeValues: new { id = personResponse.Id }));
     
-            personResponse.Links.Add(
-                linkService.Generate(
+            personResponse.Links.Add(linkService.Generate(
                     endpointInfo: EndpointNames.GetCats,
                     routeValues: new { personId = personResponse.Id }));
             
-            personResponse.Links.Add(
-                linkService.Generate(
+            personResponse.Links.Add(linkService.Generate(
                     endpointInfo: EndpointNames.CreateCat,
                     routeValues: new { personId = personResponse.Id }));
 
-            personResponse.Links.Add(
-                linkService.Generate(
+            personResponse.Links.Add(linkService.Generate(
                     endpointInfo: EndpointNames.GetAdvertisements));
             
-            personResponse.Links.Add(
-                linkService.Generate(
+            personResponse.Links.Add(linkService.Generate(
                     endpointInfo: EndpointNames.GetPersonAdvertisements,
                     routeValues: new { personId = personResponse.Id }));
             
-            personResponse.Links.Add(
-                linkService.Generate(
+            personResponse.Links.Add(linkService.Generate(
                     endpointInfo: EndpointNames.CreateAdvertisement,
                     routeValues: new { personId = personResponse.Id }));
         }
