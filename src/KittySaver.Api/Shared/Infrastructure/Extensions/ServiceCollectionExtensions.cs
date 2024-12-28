@@ -29,6 +29,7 @@ public static class ServiceCollectionExtensions
             .UseSqlServer(configuration.GetConnectionString("Database") ?? throw new Exceptions.Database.MissingConnectionStringException())
             .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
         services.AddScoped<ILinkService, LinkService>();
+        services.AddScoped<IPaginationLinksService, PaginationLinksService>();
         services.AddScoped<ICurrentEnvironmentService, CurrentEnvironmentService>();
         services.AddScoped<IDateTimeService, DefaultDateTimeService>();
         services.AddScoped<IPersonRepository, PersonRepository>();
@@ -37,7 +38,19 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICatPriorityCalculatorService, DefaultCatPriorityCalculatorService>();
         services.AddValidatorsFromAssembly(assembly);
         
-        AddAuth();
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(x =>
+            {
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    IssuerSigningKey =
+                        new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["AppSettings:Token"] ?? throw new InvalidConfigurationException("JWT Token not found in appsettings!!")))
+                };
+            });
+        services.AddAuthorization();
         
         services.AddDbContext<ApplicationWriteDbContext>(o =>
             o.UseSqlServer(configuration.GetConnectionString("Database") ?? throw new Exceptions.Database.MissingConnectionStringException()));
@@ -51,52 +64,6 @@ public static class ServiceCollectionExtensions
             cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
         });
         return services;
-        
-        void AddAuth()
-        {
-            if (environment.IsDevelopment())
-            {
-                AddDevSchemeAuth();
-                // AddJwtAuth();
-            }
-            else
-            {
-                AddDevSchemeAuth();
-                // AddJwtAuth();
-            }
-        }
-        
-        void AddDevSchemeAuth()
-        {
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = "DevScheme";
-                options.DefaultChallengeScheme = "DevScheme";
-            }).AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("DevScheme", _ => { });
-            
-            services.AddAuthorizationBuilder()
-                .SetDefaultPolicy(new AuthorizationPolicyBuilder()
-                    .AddAuthenticationSchemes("DevScheme")
-                    .RequireAssertion(_ => true)
-                    .Build());
-        }
-
-        void AddJwtAuth()
-        {
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(x =>
-                {
-                    x.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuerSigningKey = true,
-                        ValidateAudience = false,
-                        ValidateIssuer = false,
-                        IssuerSigningKey =
-                            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["AppSettings:Token"] ?? throw new InvalidConfigurationException("JWT Token not found in appsettings!!")))
-                    };
-                });
-            services.AddAuthorization();
-        }
     }
 
     private static class Exceptions
