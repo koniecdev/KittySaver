@@ -54,7 +54,9 @@ public static partial class AdvertisementStatusMapper
 public static class AdvertisementMapper
 {
     private static List<Link> AddLinks(
-        AdvertisementReadModel advertisement,
+        Guid id,
+        Advertisement.AdvertisementStatus advertisementStatus,
+        Guid personId,
         ILinkService linkService,
         CurrentlyLoggedInPerson? currentlyLoggedInPerson)
     {
@@ -62,46 +64,46 @@ public static class AdvertisementMapper
         [
             linkService.Generate(
                 endpointInfo: EndpointNames.GetAdvertisement,
-                routeValues: new { id = advertisement.Id },
+                routeValues: new { id },
                 isSelf: true)
         ];
 
-        if (currentlyLoggedInPerson is null || currentlyLoggedInPerson.PersonId != advertisement.PersonId)
+        if (currentlyLoggedInPerson is null || currentlyLoggedInPerson.PersonId != personId)
         {
             return links;
         }
 
-        if ((Advertisement.AdvertisementStatus)advertisement.Status is Advertisement.AdvertisementStatus.Active)
+        if (advertisementStatus is Advertisement.AdvertisementStatus.Active)
         {
             links.Add(linkService.Generate(
                 endpointInfo: EndpointNames.UpdateAdvertisement,
-                routeValues: new { id = advertisement.Id, personId = advertisement.PersonId }));
+                routeValues: new { id, personId }));
 
             links.Add(linkService.Generate(
                 endpointInfo: EndpointNames.DeleteAdvertisement,
-                routeValues: new { id = advertisement.Id, personId = advertisement.PersonId }));
+                routeValues: new { id, personId }));
             
             links.Add(linkService.Generate(
                 endpointInfo: EndpointNames.ReassignCatsToAdvertisement,
-                routeValues: new { id = advertisement.Id, personId = advertisement.PersonId }));
+                routeValues: new { id, personId }));
             
             links.Add(linkService.Generate(
                 endpointInfo: EndpointNames.CloseAdvertisement,
-                routeValues: new { id = advertisement.Id, personId = advertisement.PersonId }));
+                routeValues: new { id, personId }));
             
             if (currentlyLoggedInPerson.Role is Person.Role.Job or Person.Role.Admin)
             {
                 links.Add(linkService.Generate(
                     endpointInfo: EndpointNames.ExpireAdvertisement,
-                    routeValues: new { id = advertisement.Id, personId = advertisement.PersonId }));
+                    routeValues: new { id, personId }));
             }
         }
 
-        if ((Advertisement.AdvertisementStatus)advertisement.Status is Advertisement.AdvertisementStatus.Expired)
+        if (advertisementStatus is Advertisement.AdvertisementStatus.Expired)
         {
             links.Add(linkService.Generate(
                 endpointInfo: EndpointNames.RefreshAdvertisement,
-                routeValues: new { id = advertisement.Id, personId = advertisement.PersonId }));
+                routeValues: new { id, personId }));
         }
         
         return links;
@@ -135,6 +137,6 @@ public static class AdvertisementMapper
                 Street = entity.PickupAddressStreet,
                 ZipCode = entity.PickupAddressZipCode
             },
-            Links = AddLinks(entity, linkService, currentlyLoggedInPerson)
+            Links = AddLinks(entity.Id, (Advertisement.AdvertisementStatus)entity.Status, entity.PersonId, linkService, currentlyLoggedInPerson)
         });
 }

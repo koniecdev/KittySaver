@@ -33,7 +33,7 @@ public sealed class PersonResponse
 public static class PersonResponseMapper
 {
     private static List<Link> AddLinks(
-        PersonReadModel person,
+        Guid personId,
         ILinkService linkService,
         CurrentlyLoggedInPerson? currentlyLoggedInPerson)
     {
@@ -41,7 +41,7 @@ public static class PersonResponseMapper
         [
             linkService.Generate(
                 endpointInfo: EndpointNames.GetPerson,
-                routeValues: new { id = person.Id },
+                routeValues: new { id = personId },
                 isSelf: true),
         ];
 
@@ -50,7 +50,7 @@ public static class PersonResponseMapper
             return links;
         }
         
-        bool isLoggedInPersonAnOwner = currentlyLoggedInPerson.PersonId == person.Id;
+        bool isLoggedInPersonAnOwner = currentlyLoggedInPerson.PersonId == personId;
         if (currentlyLoggedInPerson.Role is not Person.Role.Admin && isLoggedInPersonAnOwner)
         {
             return links;
@@ -58,27 +58,27 @@ public static class PersonResponseMapper
 
         links.Add(linkService.Generate(
             endpointInfo: EndpointNames.UpdatePerson,
-            routeValues: new { id = person.Id }));
+            routeValues: new { id = personId }));
 
         links.Add(linkService.Generate(
             endpointInfo: EndpointNames.DeletePerson,
-            routeValues: new { id = person.Id }));
+            routeValues: new { id = personId }));
 
         links.Add(linkService.Generate(
             endpointInfo: EndpointNames.GetCats,
-            routeValues: new { personId = person.Id }));
+            routeValues: new { personId }));
 
         links.Add(linkService.Generate(
             endpointInfo: EndpointNames.CreateCat,
-            routeValues: new { personId = person.Id }));
+            routeValues: new { personId }));
 
         links.Add(linkService.Generate(
             endpointInfo: EndpointNames.GetPersonAdvertisements,
-            routeValues: new { personId = person.Id }));
+            routeValues: new { personId }));
 
         links.Add(linkService.Generate(
             endpointInfo: EndpointNames.CreateAdvertisement,
-            routeValues: new { personId = person.Id }));
+            routeValues: new { personId }));
         
         return links;
     }
@@ -104,6 +104,6 @@ public static class PersonResponseMapper
                 Street = entity.DefaultAdvertisementsPickupAddressStreet,
                 BuildingNumber = entity.DefaultAdvertisementsPickupAddressBuildingNumber
             },
-            Links = AddLinks(entity, linkService, currentlyLoggedInPerson)
+            Links = AddLinks(entity.Id, linkService, currentlyLoggedInPerson)
         });
 }

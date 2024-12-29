@@ -24,7 +24,10 @@ public sealed class CatResponse
 
 public static class CatResponseMapper
 {
-    private static List<Link> AddLinks(CatReadModel cat,
+    public static List<Link> AddLinks(
+        Guid id,
+        Guid personId,
+        Guid? advertisementId,
         ILinkService linkService,
         CurrentlyLoggedInPerson? currentlyLoggedInPerson)
     {
@@ -32,7 +35,7 @@ public static class CatResponseMapper
         [
             linkService.Generate(
                 endpointInfo: EndpointNames.GetCat,
-                routeValues: new { id = cat.Id, personId = cat.PersonId },
+                routeValues: new { id, personId},
                 isSelf: true),
         ];
 
@@ -41,7 +44,7 @@ public static class CatResponseMapper
             return links;
         }
 
-        bool isLoggedInPersonAnOwner = currentlyLoggedInPerson.PersonId == cat.PersonId;
+        bool isLoggedInPersonAnOwner = currentlyLoggedInPerson.PersonId == personId;
         if (currentlyLoggedInPerson.Role is not Person.Role.Admin && isLoggedInPersonAnOwner)
         {
             return links;
@@ -49,17 +52,17 @@ public static class CatResponseMapper
         
         links.Add(linkService.Generate(
             endpointInfo: EndpointNames.UpdateCat,
-            routeValues: new { id = cat.Id, personId = cat.PersonId }));
+            routeValues: new { id, personId}));
 
         links.Add(linkService.Generate(
             endpointInfo: EndpointNames.DeleteCat,
-            routeValues: new { id = cat.Id, personId = cat.PersonId }));
+            routeValues: new { id, personId }));
             
-        if (cat.AdvertisementId is not null)
+        if (advertisementId is not null)
         {
             links.Add(linkService.Generate(
                 endpointInfo: EndpointNames.GetAdvertisement,
-                routeValues: new { id = cat.AdvertisementId }));
+                routeValues: new { id = advertisementId }));
         }
 
         return links;
@@ -81,7 +84,7 @@ public static class CatResponseMapper
                 HealthStatus = HealthStatus.FromValue(entity.HealthStatus).ToString(),
                 PriorityScore = entity.PriorityScore,
                 IsAssignedToAdvertisement = entity.AdvertisementId.HasValue,
-                Links = AddLinks(entity, linkService, currentlyLoggedInPerson)
+                Links = AddLinks(entity.Id, entity.PersonId, entity.AdvertisementId, linkService, currentlyLoggedInPerson)
             }
         );
 }
