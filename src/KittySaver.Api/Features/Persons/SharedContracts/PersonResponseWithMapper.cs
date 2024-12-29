@@ -67,7 +67,9 @@ public static class PersonResponseMapper
 
         return links;
     }
-    public static IQueryable<PersonResponse> ProjectToDto(this IQueryable<PersonReadModel> persons, ILinkService linkService) =>
+    public static IQueryable<PersonResponse> ProjectToDto(
+        this IQueryable<PersonReadModel> persons,
+        ILinkService linkService) =>
         persons.Select(entity => new PersonResponse
         {
             Id = entity.Id,
