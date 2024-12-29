@@ -12,7 +12,7 @@ namespace KittySaver.Api.Features.Advertisements;
 
 public sealed class ExpireAdvertisement : IEndpoint
 {
-    public sealed record ExpireAdvertisementCommand(Guid PersonId, Guid AdvertisementId) : IAdvertisementCommand;
+    public sealed record ExpireAdvertisementCommand(Guid PersonId, Guid AdvertisementId) : IJobOrAdminOnlyCommand;
 
     public sealed class ExpireAdvertisementCommandValidator
         : AbstractValidator<ExpireAdvertisementCommand>
