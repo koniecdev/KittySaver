@@ -22,3 +22,7 @@ public interface ICatCommand<out TResponse> : IPersonAggregateCommand<TResponse>
 public interface IAdvertisementCommand : IPersonAggregateCommand, IPersonAggregatePersonIdBase;
 public interface IAdvertisementCommand<out TResponse> : IPersonAggregateCommand<TResponse>, IPersonAggregatePersonIdBase;
 
+public interface IJobOrAdminOnlyCommandBase : IPersonAggregateAuthorizationRequiredRequest;
+public interface IJobOrAdminOnlyCommand : IAdvertisementCommand, IJobOrAdminOnlyCommandBase;
+public interface IJobOrAdminOnlyCommand<T> : IAdvertisementCommand<T>, IJobOrAdminOnlyCommandBase;
+

@@ -3,6 +3,7 @@ using FluentValidation.Results;
 using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Infrastructure.Services;
+using KittySaver.Domain.Persons;
 using MediatR;
 
 namespace KittySaver.Api.Shared.Behaviours;
@@ -16,7 +17,15 @@ public sealed class AuthorizationBehaviour<TRequest, TResponse>(ICurrentUserServ
         RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
     {
-        if (request is not IAdminOnlyQuery<TResponse>)
+        if (request is IJobOrAdminOnlyCommandBase)
+        {
+            CurrentlyLoggedInPerson? person = await currentUserService.GetCurrentlyLoggedInPersonAsync();
+            if (person is not { Role: Person.Role.Job or Person.Role.Admin })
+            {
+                throw new UnauthorizedAccessException();
+            }
+        }
+        else if (request is not IAdminOnlyQuery<TResponse>)
         {
             Guid personId = request switch
             {
