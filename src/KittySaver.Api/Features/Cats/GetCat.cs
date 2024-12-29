@@ -1,6 +1,7 @@
 ﻿using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
+using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using MediatR;
@@ -12,15 +13,19 @@ public sealed class GetCat : IEndpoint
 {
     public sealed record GetCatQuery(Guid PersonId, Guid Id) : ICatQuery<CatResponse>;
 
-    internal sealed class GetCatQueryHandler(ApplicationReadDbContext db, ILinkService linkService)
+    internal sealed class GetCatQueryHandler(
+        ApplicationReadDbContext db,
+        ILinkService linkService,
+        ICurrentUserService currentUserService)
         : IRequestHandler<GetCatQuery, CatResponse>
     {
         public async Task<CatResponse> Handle(GetCatQuery request, CancellationToken cancellationToken)
         {
+            CurrentlyLoggedInPerson? loggedInPerson = await currentUserService.GetCurrentlyLoggedInPersonAsync(cancellationToken);
             CatResponse cat =
                 await db.Cats
                     .Where(x => x.Id == request.Id && x.PersonId == request.PersonId)
-                    .ProjectToDto(linkService)
+                    .ProjectToDto(linkService, loggedInPerson)
                     .FirstOrDefaultAsync(cancellationToken)
                 ?? throw new NotFoundExceptions.CatNotFoundException(request.Id);
             return cat;

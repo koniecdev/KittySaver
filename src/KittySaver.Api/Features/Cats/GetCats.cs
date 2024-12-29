@@ -1,6 +1,7 @@
 ﻿using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
+using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Api.Shared.Persistence.ReadModels;
 using KittySaver.Domain.Common.Exceptions;
@@ -22,7 +23,8 @@ public sealed class GetCats : IEndpoint
     internal sealed class GetCatsQueryHandler(
         ApplicationReadDbContext db,
         ILinkService linkService,
-        IPaginationLinksService paginationLinksService)
+        IPaginationLinksService paginationLinksService,
+        ICurrentUserService currentUserService)
         : IRequestHandler<GetCatsQuery, PagedList<CatResponse>>
     {
         public async Task<PagedList<CatResponse>> Handle(GetCatsQuery request, CancellationToken cancellationToken)
@@ -48,10 +50,10 @@ public sealed class GetCats : IEndpoint
             {
                 query = query.Take(request.Limit.Value);
             }
-
+            CurrentlyLoggedInPerson? loggedInPerson = await currentUserService.GetCurrentlyLoggedInPersonAsync(cancellationToken);
             List<CatResponse> cats =
                 await query
-                    .ProjectToDto(linkService)
+                    .ProjectToDto(linkService, loggedInPerson)
                     .ToListAsync(cancellationToken);
             
             PagedList<CatResponse> response = new()

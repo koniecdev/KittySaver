@@ -1,6 +1,8 @@
 ﻿using KittySaver.Api.Shared.Abstractions;
+using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence.ReadModels;
 using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Domain.Persons;
 
 namespace KittySaver.Api.Features.Cats.SharedContracts;
 
@@ -22,36 +24,50 @@ public sealed class CatResponse
 
 public static class CatResponseMapper
 {
-    private static List<Link> AddLinks(CatReadModel catResponse, ILinkService linkService)
+    private static List<Link> AddLinks(CatReadModel cat,
+        ILinkService linkService,
+        CurrentlyLoggedInPerson? currentlyLoggedInPerson)
     {
         List<Link> links =
         [
             linkService.Generate(
                 endpointInfo: EndpointNames.GetCat,
-                routeValues: new { id = catResponse.Id, personId = catResponse.PersonId },
+                routeValues: new { id = cat.Id, personId = cat.PersonId },
                 isSelf: true),
-
-            linkService.Generate(
-                endpointInfo: EndpointNames.UpdateCat,
-                routeValues: new { id = catResponse.Id, personId = catResponse.PersonId }),
-
-            linkService.Generate(
-                endpointInfo: EndpointNames.DeleteCat,
-                routeValues: new { id = catResponse.Id, personId = catResponse.PersonId })
         ];
 
-        if (catResponse.AdvertisementId is not null)
+        if (currentlyLoggedInPerson is null)
+        {
+            return links;
+        }
+
+        bool isLoggedInPersonAnOwner = currentlyLoggedInPerson.PersonId == cat.PersonId;
+        if (currentlyLoggedInPerson.Role is not Person.Role.Admin && isLoggedInPersonAnOwner)
+        {
+            return links;
+        }
+        
+        links.Add(linkService.Generate(
+            endpointInfo: EndpointNames.UpdateCat,
+            routeValues: new { id = cat.Id, personId = cat.PersonId }));
+
+        links.Add(linkService.Generate(
+            endpointInfo: EndpointNames.DeleteCat,
+            routeValues: new { id = cat.Id, personId = cat.PersonId }));
+            
+        if (cat.AdvertisementId is not null)
         {
             links.Add(linkService.Generate(
                 endpointInfo: EndpointNames.GetAdvertisement,
-                routeValues: new { id = catResponse.AdvertisementId }));
+                routeValues: new { id = cat.AdvertisementId }));
         }
-        
+
         return links;
     }
     public static IQueryable<CatResponse> ProjectToDto(
         this IQueryable<CatReadModel> cats,
-        ILinkService linkService)
+        ILinkService linkService,
+        CurrentlyLoggedInPerson? currentlyLoggedInPerson)
         => cats.Select(entity => new CatResponse
             {
                 Id = entity.Id,
@@ -65,7 +81,7 @@ public static class CatResponseMapper
                 HealthStatus = HealthStatus.FromValue(entity.HealthStatus).ToString(),
                 PriorityScore = entity.PriorityScore,
                 IsAssignedToAdvertisement = entity.AdvertisementId.HasValue,
-                Links = AddLinks(entity, linkService)
+                Links = AddLinks(entity, linkService, currentlyLoggedInPerson)
             }
         );
 }
