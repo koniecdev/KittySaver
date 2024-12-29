@@ -13,14 +13,16 @@ public class GetAdvertisement : IEndpoint
 {
     public sealed record GetAdvertisementQuery(Guid Id) : IAdvertisementQuery<AdvertisementResponse>;
 
-    internal sealed class GetAdvertisementQueryHandler(ApplicationReadDbContext db)
+    internal sealed class GetAdvertisementQueryHandler(
+        ApplicationReadDbContext db,
+        ILinkService linkService)
         : IRequestHandler<GetAdvertisementQuery, AdvertisementResponse>
     {
         public async Task<AdvertisementResponse> Handle(GetAdvertisementQuery request, CancellationToken cancellationToken)
         {
             AdvertisementResponse advertisement = await db.Advertisements
-                .Where(x=>x.Id == request.Id)
-                .ProjectToDto()
+                .Where(x => x.Id == request.Id)
+                .ProjectToDto(linkService)
                 .FirstOrDefaultAsync(cancellationToken)
                 ?? throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);
 
@@ -33,8 +35,6 @@ public class GetAdvertisement : IEndpoint
         endpointRouteBuilder.MapGet("advertisements/{id:guid}", async(
             Guid id,
             ISender sender,
-            LinkGenerator linkGenerator,
-            HttpContext httpContext,
             CancellationToken cancellationToken) =>
         {
             GetAdvertisementQuery query = new(id);

@@ -19,7 +19,7 @@ public sealed class AdvertisementResponse
     public required AdvertisementStatus Status { get; init; }
     public required ICollection<CatDto> Cats { get; set; } = new List<CatDto>();
     public required PickupAddressDto PickupAddress { get; init; }
-    public ICollection<Link> Links { get; } = new List<Link>();
+    public required ICollection<Link> Links { get; init; }
     
     public sealed class PickupAddressDto
     {
@@ -53,7 +53,46 @@ public static partial class AdvertisementStatusMapper
 
 public static class AdvertisementMapper
 {
-    public static IQueryable<AdvertisementResponse> ProjectToDto(this IQueryable<AdvertisementReadModel> persons) =>
+    private static List<Link> AddLinks(AdvertisementReadModel advertisement, ILinkService linkService)
+    {
+        List<Link> links =
+        [
+            linkService.Generate(
+                endpointInfo: EndpointNames.GetAdvertisement,
+                routeValues: new { id = advertisement.Id },
+                isSelf: true),
+
+            linkService.Generate(
+                endpointInfo: EndpointNames.UpdateAdvertisement,
+                routeValues: new { id = advertisement.Id, personId = advertisement.PersonId }),
+
+            linkService.Generate(
+                endpointInfo: EndpointNames.DeleteAdvertisement,
+                routeValues: new { id = advertisement.Id, personId = advertisement.PersonId }),
+            
+            linkService.Generate(
+                endpointInfo: EndpointNames.ReassignCatsToAdvertisement,
+                routeValues: new { id = advertisement.Id, personId = advertisement.PersonId }),
+            
+            linkService.Generate(
+                endpointInfo: EndpointNames.CloseAdvertisement,
+                routeValues: new { id = advertisement.Id, personId = advertisement.PersonId }),
+            
+            linkService.Generate(
+                endpointInfo: EndpointNames.ExpireAdvertisement,
+                routeValues: new { id = advertisement.Id, personId = advertisement.PersonId }),
+            
+            linkService.Generate(
+                endpointInfo: EndpointNames.RefreshAdvertisement,
+                routeValues: new { id = advertisement.Id, personId = advertisement.PersonId })
+        ];
+        
+        return links;
+    }
+    
+    public static IQueryable<AdvertisementResponse> ProjectToDto(
+        this IQueryable<AdvertisementReadModel> persons,
+        ILinkService linkService) =>
         persons.Select(entity => new AdvertisementResponse
         {
             Id = entity.Id,
@@ -77,6 +116,7 @@ public static class AdvertisementMapper
                 State = entity.PickupAddressState,
                 Street = entity.PickupAddressStreet,
                 ZipCode = entity.PickupAddressZipCode
-            }
+            },
+            Links = AddLinks(entity, linkService)
         });
 }
