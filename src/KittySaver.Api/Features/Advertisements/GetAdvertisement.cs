@@ -1,6 +1,7 @@
 ﻿using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
+using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Persons;
@@ -15,14 +16,15 @@ public class GetAdvertisement : IEndpoint
 
     internal sealed class GetAdvertisementQueryHandler(
         ApplicationReadDbContext db,
-        ILinkService linkService)
+        ILinkService linkService,
+        ICurrentUserService currentUserService)
         : IRequestHandler<GetAdvertisementQuery, AdvertisementResponse>
     {
         public async Task<AdvertisementResponse> Handle(GetAdvertisementQuery request, CancellationToken cancellationToken)
         {
             AdvertisementResponse advertisement = await db.Advertisements
                 .Where(x => x.Id == request.Id)
-                .ProjectToDto(linkService)
+                .ProjectToDto(linkService, await currentUserService.GetCurrentlyLoggedInPersonAsync())
                 .FirstOrDefaultAsync(cancellationToken)
                 ?? throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);
 

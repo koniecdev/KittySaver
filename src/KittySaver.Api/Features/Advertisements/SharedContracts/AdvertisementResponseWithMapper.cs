@@ -1,5 +1,5 @@
 ﻿using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Infrastructure.ApiComponents;
+using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence.ReadModels;
 using KittySaver.Domain.Persons;
 using Riok.Mapperly.Abstractions;
@@ -17,7 +17,7 @@ public sealed class AdvertisementResponse
     public required string ContactInfoEmail { get; init; }
     public required string ContactInfoPhoneNumber { get; init; }
     public required AdvertisementStatus Status { get; init; }
-    public required ICollection<CatDto> Cats { get; set; } = new List<CatDto>();
+    public required ICollection<CatDto> Cats { get; init; }
     public required PickupAddressDto PickupAddress { get; init; }
     public required ICollection<Link> Links { get; init; }
     
@@ -53,46 +53,64 @@ public static partial class AdvertisementStatusMapper
 
 public static class AdvertisementMapper
 {
-    private static List<Link> AddLinks(AdvertisementReadModel advertisement, ILinkService linkService)
+    private static List<Link> AddLinks(
+        AdvertisementReadModel advertisement,
+        ILinkService linkService,
+        CurrentlyLoggedInPerson? currentlyLoggedInPerson)
     {
         List<Link> links =
         [
             linkService.Generate(
                 endpointInfo: EndpointNames.GetAdvertisement,
                 routeValues: new { id = advertisement.Id },
-                isSelf: true),
-
-            linkService.Generate(
-                endpointInfo: EndpointNames.UpdateAdvertisement,
-                routeValues: new { id = advertisement.Id, personId = advertisement.PersonId }),
-
-            linkService.Generate(
-                endpointInfo: EndpointNames.DeleteAdvertisement,
-                routeValues: new { id = advertisement.Id, personId = advertisement.PersonId }),
-            
-            linkService.Generate(
-                endpointInfo: EndpointNames.ReassignCatsToAdvertisement,
-                routeValues: new { id = advertisement.Id, personId = advertisement.PersonId }),
-            
-            linkService.Generate(
-                endpointInfo: EndpointNames.CloseAdvertisement,
-                routeValues: new { id = advertisement.Id, personId = advertisement.PersonId }),
-            
-            linkService.Generate(
-                endpointInfo: EndpointNames.ExpireAdvertisement,
-                routeValues: new { id = advertisement.Id, personId = advertisement.PersonId }),
-            
-            linkService.Generate(
-                endpointInfo: EndpointNames.RefreshAdvertisement,
-                routeValues: new { id = advertisement.Id, personId = advertisement.PersonId })
+                isSelf: true)
         ];
+
+        if (currentlyLoggedInPerson is null)
+        {
+            return links;
+        }
+
+        if ((Advertisement.AdvertisementStatus)advertisement.Status is Advertisement.AdvertisementStatus.Active)
+        {
+            links.Add(linkService.Generate(
+                endpointInfo: EndpointNames.UpdateAdvertisement,
+                routeValues: new { id = advertisement.Id, personId = advertisement.PersonId }));
+
+            links.Add(linkService.Generate(
+                endpointInfo: EndpointNames.DeleteAdvertisement,
+                routeValues: new { id = advertisement.Id, personId = advertisement.PersonId }));
+            
+            links.Add(linkService.Generate(
+                endpointInfo: EndpointNames.ReassignCatsToAdvertisement,
+                routeValues: new { id = advertisement.Id, personId = advertisement.PersonId }));
+            
+            links.Add(linkService.Generate(
+                endpointInfo: EndpointNames.CloseAdvertisement,
+                routeValues: new { id = advertisement.Id, personId = advertisement.PersonId }));
+            
+            if (currentlyLoggedInPerson.Role is Person.Role.Job or Person.Role.Admin)
+            {
+                links.Add(linkService.Generate(
+                    endpointInfo: EndpointNames.ExpireAdvertisement,
+                    routeValues: new { id = advertisement.Id, personId = advertisement.PersonId }));
+            }
+        }
+
+        if ((Advertisement.AdvertisementStatus)advertisement.Status is Advertisement.AdvertisementStatus.Expired)
+        {
+            links.Add(linkService.Generate(
+                endpointInfo: EndpointNames.RefreshAdvertisement,
+                routeValues: new { id = advertisement.Id, personId = advertisement.PersonId }));
+        }
         
         return links;
     }
     
     public static IQueryable<AdvertisementResponse> ProjectToDto(
         this IQueryable<AdvertisementReadModel> persons,
-        ILinkService linkService) =>
+        ILinkService linkService,
+        CurrentlyLoggedInPerson? currentlyLoggedInPerson) =>
         persons.Select(entity => new AdvertisementResponse
         {
             Id = entity.Id,
@@ -117,6 +135,6 @@ public static class AdvertisementMapper
                 Street = entity.PickupAddressStreet,
                 ZipCode = entity.PickupAddressZipCode
             },
-            Links = AddLinks(entity, linkService)
+            Links = AddLinks(entity, linkService, currentlyLoggedInPerson)
         });
 }

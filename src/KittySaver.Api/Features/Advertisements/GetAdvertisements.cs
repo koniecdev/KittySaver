@@ -1,6 +1,7 @@
 ﻿using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
+using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Api.Shared.Persistence.ReadModels;
 using KittySaver.Domain.Persons;
@@ -21,7 +22,8 @@ public sealed class GetAdvertisements : IEndpoint
     internal sealed class GetAdvertisementsQueryHandler(
         ApplicationReadDbContext db,
         ILinkService linkService,
-        IPaginationLinksService paginationLinksService)
+        IPaginationLinksService paginationLinksService,
+        ICurrentUserService currentUserService)
         : IRequestHandler<GetAdvertisementsQuery, PagedList<AdvertisementResponse>>
     {
         public async Task<PagedList<AdvertisementResponse>> Handle(GetAdvertisementsQuery request, CancellationToken cancellationToken)
@@ -41,7 +43,7 @@ public sealed class GetAdvertisements : IEndpoint
             
             List<AdvertisementResponse> advertisements =
                 await query
-                    .ProjectToDto(linkService)
+                    .ProjectToDto(linkService, await currentUserService.GetCurrentlyLoggedInPersonAsync())
                     .ToListAsync(cancellationToken);
 
             PagedList<AdvertisementResponse> response = new()
