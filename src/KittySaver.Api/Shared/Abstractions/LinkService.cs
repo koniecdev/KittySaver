@@ -21,7 +21,9 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
 {
     public Link Generate(EndpointInfo endpointInfo, object? routeValues = null, bool isSelf = false, bool isTemplated = false)
     {
-        string href = linkGenerator.GetUriByName(httpContextAccessor.HttpContext!, endpointInfo.EndpointName, routeValues)!;
+        string href = isTemplated 
+                ? $"{linkGenerator.GetUriByName(httpContextAccessor.HttpContext!, endpointInfo.EndpointName)!}"
+                : linkGenerator.GetUriByName(httpContextAccessor.HttpContext!, endpointInfo.EndpointName, routeValues)!;
         Link link = new Link(
             href: href,
             rel: isSelf ? EndpointNames.SelfRel : endpointInfo.Rel,
@@ -40,7 +42,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
             templated: isTemplated);
         return link;
     }
-
+    
     public List<Link> GeneratePaginationLinks(string endpointName, int? offset, int? limit)
     {
         List<Link> links = [];
