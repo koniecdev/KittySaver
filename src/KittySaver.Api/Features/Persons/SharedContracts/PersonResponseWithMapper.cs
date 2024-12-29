@@ -1,5 +1,6 @@
 ﻿using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
+using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence.ReadModels;
 using KittySaver.Domain.Persons;
 using Riok.Mapperly.Abstractions;
@@ -31,45 +32,60 @@ public sealed class PersonResponse
 
 public static class PersonResponseMapper
 {
-    private static List<Link> AddLinks(PersonReadModel personResponse, ILinkService linkService)
+    private static List<Link> AddLinks(
+        PersonReadModel person,
+        ILinkService linkService,
+        CurrentlyLoggedInPerson? currentlyLoggedInPerson)
     {
         List<Link> links =
         [
             linkService.Generate(
                 endpointInfo: EndpointNames.GetPerson,
-                routeValues: new { id = personResponse.Id },
+                routeValues: new { id = person.Id },
                 isSelf: true),
-
-            linkService.Generate(
-                endpointInfo: EndpointNames.UpdatePerson,
-                routeValues: new { id = personResponse.Id }),
-
-            linkService.Generate(
-                endpointInfo: EndpointNames.DeletePerson,
-                routeValues: new { id = personResponse.Id }),
-            
-            linkService.Generate(
-                endpointInfo: EndpointNames.GetCats,
-                routeValues: new { personId = personResponse.Id }),
-            
-            linkService.Generate(
-                endpointInfo: EndpointNames.CreateCat,
-                routeValues: new { personId = personResponse.Id }),
-            
-            linkService.Generate(
-                endpointInfo: EndpointNames.GetPersonAdvertisements,
-                routeValues: new { personId = personResponse.Id }),
-
-            linkService.Generate(
-                endpointInfo: EndpointNames.CreateAdvertisement,
-                routeValues: new { personId = personResponse.Id })
         ];
 
+        if (currentlyLoggedInPerson is null)
+        {
+            return links;
+        }
+        
+        bool isLoggedInPersonAnOwner = currentlyLoggedInPerson.PersonId == person.Id;
+        if (currentlyLoggedInPerson.Role is not Person.Role.Admin && isLoggedInPersonAnOwner)
+        {
+            return links;
+        }
+
+        links.Add(linkService.Generate(
+            endpointInfo: EndpointNames.UpdatePerson,
+            routeValues: new { id = person.Id }));
+
+        links.Add(linkService.Generate(
+            endpointInfo: EndpointNames.DeletePerson,
+            routeValues: new { id = person.Id }));
+
+        links.Add(linkService.Generate(
+            endpointInfo: EndpointNames.GetCats,
+            routeValues: new { personId = person.Id }));
+
+        links.Add(linkService.Generate(
+            endpointInfo: EndpointNames.CreateCat,
+            routeValues: new { personId = person.Id }));
+
+        links.Add(linkService.Generate(
+            endpointInfo: EndpointNames.GetPersonAdvertisements,
+            routeValues: new { personId = person.Id }));
+
+        links.Add(linkService.Generate(
+            endpointInfo: EndpointNames.CreateAdvertisement,
+            routeValues: new { personId = person.Id }));
+        
         return links;
     }
     public static IQueryable<PersonResponse> ProjectToDto(
         this IQueryable<PersonReadModel> persons,
-        ILinkService linkService) =>
+        ILinkService linkService,
+        CurrentlyLoggedInPerson? currentlyLoggedInPerson) =>
         persons.Select(entity => new PersonResponse
         {
             Id = entity.Id,
@@ -88,6 +104,6 @@ public static class PersonResponseMapper
                 Street = entity.DefaultAdvertisementsPickupAddressStreet,
                 BuildingNumber = entity.DefaultAdvertisementsPickupAddressBuildingNumber
             },
-            Links = AddLinks(entity, linkService)
+            Links = AddLinks(entity, linkService, currentlyLoggedInPerson)
         });
 }

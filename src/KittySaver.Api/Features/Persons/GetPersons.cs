@@ -1,6 +1,7 @@
 ﻿using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Infrastructure.ApiComponents;
+using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Api.Shared.Persistence.ReadModels;
 using MediatR;
@@ -19,7 +20,8 @@ public sealed class GetPersons : IEndpoint
     internal sealed class GetPersonsQueryHandler(
         ApplicationReadDbContext db,
         ILinkService linkService,
-        IPaginationLinksService paginationLinksService)
+        IPaginationLinksService paginationLinksService,
+        ICurrentUserService currentUserService)
         : IRequestHandler<GetPersonsQuery, PagedList<PersonResponse>>
     {
         public async Task<PagedList<PersonResponse>> Handle(GetPersonsQuery request, CancellationToken cancellationToken)
@@ -36,9 +38,10 @@ public sealed class GetPersons : IEndpoint
                 query = query.Take(request.Limit.Value);
             }
             
+            CurrentlyLoggedInPerson? currentlyLoggedInPerson = await currentUserService.GetCurrentlyLoggedInPersonAsync(cancellationToken);
             List<PersonResponse> persons = 
                 await query
-                    .ProjectToDto(linkService)
+                    .ProjectToDto(linkService, currentlyLoggedInPerson)
                     .ToListAsync(cancellationToken);
 
             PagedList<PersonResponse> response = new()
