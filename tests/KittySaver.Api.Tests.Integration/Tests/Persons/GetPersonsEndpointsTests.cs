@@ -4,6 +4,7 @@ using Bogus;
 using FluentAssertions;
 using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Features.Persons.SharedContracts;
+using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Tests.Integration.Helpers;
 
 namespace KittySaver.Api.Tests.Integration.Tests.Persons;
@@ -48,10 +49,10 @@ public class GetPersonsEndpointsTests : IAsyncLifetime
         HttpResponseMessage response = await _httpClient.GetAsync("/api/v1/persons");
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        ICollection<PersonResponse>? persons = await response.Content.ReadFromJsonAsync<ICollection<PersonResponse>>();
+        PagedList<PersonResponse>? persons = await response.Content.ReadFromJsonAsync<PagedList<PersonResponse>>();
         persons.Should().NotBeNull();
-        persons!.Count.Should().BeGreaterThan(0);
-        PersonResponse registeredPerson = persons.First();
+        persons!.Items.Count.Should().BeGreaterThan(0);
+        PersonResponse registeredPerson = persons.Items.First();
         registeredPerson.Id.Should().NotBeEmpty();
         registeredPerson.Nickname.Should().Be(createRequest.Nickname);
         registeredPerson.Email.Should().Be(createRequest.Email);
@@ -66,8 +67,8 @@ public class GetPersonsEndpointsTests : IAsyncLifetime
         HttpResponseMessage response = await _httpClient.GetAsync("/api/v1/persons");
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        ICollection<PersonResponse>? persons = await response.Content.ReadFromJsonAsync<ICollection<PersonResponse>>();
-        persons?.Count.Should().Be(0);
+        PagedList<PersonResponse>? persons = await response.Content.ReadFromJsonAsync<PagedList<PersonResponse>>();
+        persons?.Items.Count.Should().Be(0);
     }
 
     public Task InitializeAsync()

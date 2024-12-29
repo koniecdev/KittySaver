@@ -6,6 +6,7 @@ using FluentAssertions;
 using KittySaver.Api.Features.Advertisements;
 using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Features.Persons;
+using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
 using Shared;
@@ -127,12 +128,12 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        ICollection<AdvertisementResponse>? advertisements =
-            await response.Content.ReadFromJsonAsync<ICollection<AdvertisementResponse>>();
+        PagedList<AdvertisementResponse>? advertisements =
+            await response.Content.ReadFromJsonAsync<PagedList<AdvertisementResponse>>();
         advertisements.Should().NotBeNull();
-        advertisements!.Count.Should().Be(2);
+        advertisements!.Items.Count.Should().Be(2);
         AdvertisementResponse firstPersonAdvertisement =
-            advertisements.First(x => x.PersonId == personRegisterResponse.Id);
+            advertisements.Items.First(x => x.PersonId == personRegisterResponse.Id);
         firstPersonAdvertisement.Id.Should().NotBeEmpty();
         firstPersonAdvertisement.Cats.Count.Should().Be(1);
         firstPersonAdvertisement.Title.Should().Be(firstPersonAdvertisement.Cats.First().Name);
@@ -144,7 +145,7 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
         firstPersonAdvertisement.PickupAddress.BuildingNumber.Should().Be(request.PickupAddressBuildingNumber);
         firstPersonAdvertisement.PriorityScore.Should().BeGreaterThan(0);
         AdvertisementResponse secondPersonAdvertisement =
-            advertisements.First(x => x.PersonId == secondPersonRegisterResponse.Id);
+            advertisements.Items.First(x => x.PersonId == secondPersonRegisterResponse.Id);
         secondPersonAdvertisement.Id.Should().NotBeEmpty();
         secondPersonAdvertisement.Cats.Count.Should().Be(1);
         secondPersonAdvertisement.Title.Should().Be(secondPersonAdvertisement.Cats.First().Name);
@@ -165,10 +166,10 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        ICollection<AdvertisementResponse>? advertisement =
-            await response.Content.ReadFromJsonAsync<ICollection<AdvertisementResponse>>();
+        PagedList<AdvertisementResponse>? advertisement =
+            await response.Content.ReadFromJsonAsync<PagedList<AdvertisementResponse>>();
         advertisement.Should().NotBeNull();
-        advertisement!.Count.Should().Be(0);
+        advertisement!.Items.Count.Should().Be(0);
     }
 
     public Task InitializeAsync()
