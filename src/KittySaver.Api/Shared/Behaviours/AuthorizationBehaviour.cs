@@ -19,7 +19,7 @@ public sealed class AuthorizationBehaviour<TRequest, TResponse>(ICurrentUserServ
     {
         if (request is IJobOrAdminOnlyCommandBase)
         {
-            CurrentlyLoggedInPerson? person = await currentUserService.GetCurrentlyLoggedInPersonAsync();
+            CurrentlyLoggedInPerson? person = await currentUserService.GetCurrentlyLoggedInPersonAsync(cancellationToken);
             if (person is not { Role: Person.Role.Job or Person.Role.Admin })
             {
                 throw new UnauthorizedAccessException();
@@ -34,11 +34,11 @@ public sealed class AuthorizationBehaviour<TRequest, TResponse>(ICurrentUserServ
                 IIPersonAggregateIdOrUserIdentityIdBase x => x.IdOrUserIdentityId,
                 _ => throw new InvalidOperationException("Report it to admin, there is something wrong with behaviour.")
             };
-            await currentUserService.EnsureUserIsAuthorizedAsync(personId);
+            await currentUserService.EnsureUserIsAuthorizedAsync(personId, cancellationToken);
         }
         else
         {
-            await currentUserService.EnsureUserIsAdminAsync();
+            await currentUserService.EnsureUserIsAdminAsync(cancellationToken);
         }
         
         TResponse response = await next();

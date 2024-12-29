@@ -62,10 +62,10 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
             
             services.RemoveAll(typeof(ICurrentUserService));
             ICurrentUserService currentUserService = Substitute.For<ICurrentUserService>();
-            currentUserService.EnsureUserIsAdminAsync().Returns(Task.FromResult(true));
-            currentUserService.EnsureUserIsAuthorizedAsync(Arg.Any<Guid>()).Returns(Task.CompletedTask);
+            currentUserService.EnsureUserIsAdminAsync(Arg.Any<CancellationToken>()).Returns(Task.FromResult(true));
+            currentUserService.EnsureUserIsAuthorizedAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
             currentUserService.GetCurrentUserIdentityId().Returns(Guid.NewGuid());
-            currentUserService.GetCurrentlyLoggedInPersonAsync().Returns(
+            currentUserService.GetCurrentlyLoggedInPersonAsync(Arg.Any<CancellationToken>()).Returns(
                 Task.FromResult<CurrentlyLoggedInPerson?>
                     (new CurrentlyLoggedInPerson{ PersonId = Guid.NewGuid(), Role = Person.Role.Admin}));
             services.AddSingleton<ICurrentUserService>(_ => currentUserService);
