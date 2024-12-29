@@ -1,7 +1,6 @@
-﻿using KittySaver.Api.Shared.Persistence.ReadModels;
+﻿using KittySaver.Api.Shared.Abstractions;
+using KittySaver.Api.Shared.Persistence.ReadModels;
 using KittySaver.Domain.Common.Primitives.Enums;
-using KittySaver.Domain.Persons;
-using Riok.Mapperly.Abstractions;
 
 namespace KittySaver.Api.Features.Cats.SharedContracts;
 
@@ -18,24 +17,55 @@ public sealed class CatResponse
     public required string Behavior { get; init; }
     public required string HealthStatus { get; init; }
     public required double PriorityScore { get; init; }
+    public required List<Link> Links { get; init; }
 }
 
 public static class CatResponseMapper
 {
-    public static IQueryable<CatResponse> ProjectToDto(this IQueryable<CatReadModel> cats)
-        => cats.Select(x => new CatResponse
+    private static List<Link> AddLinks(CatReadModel catResponse, ILinkService linkService)
+    {
+        List<Link> links =
+        [
+            linkService.Generate(
+                endpointInfo: EndpointNames.GetCat,
+                routeValues: new { id = catResponse.Id, personId = catResponse.PersonId },
+                isSelf: true),
+
+            linkService.Generate(
+                endpointInfo: EndpointNames.UpdateCat,
+                routeValues: new { id = catResponse.Id, personId = catResponse.PersonId }),
+
+            linkService.Generate(
+                endpointInfo: EndpointNames.DeleteCat,
+                routeValues: new { id = catResponse.Id, personId = catResponse.PersonId })
+        ];
+
+        if (catResponse.AdvertisementId is not null)
+        {
+            links.Add(linkService.Generate(
+                endpointInfo: EndpointNames.GetAdvertisement,
+                routeValues: new { id = catResponse.AdvertisementId }));
+        }
+        
+        return links;
+    }
+    public static IQueryable<CatResponse> ProjectToDto(
+        this IQueryable<CatReadModel> cats,
+        ILinkService linkService)
+        => cats.Select(entity => new CatResponse
             {
-                Id = x.Id,
-                Name = x.Name,
-                AdditionalRequirements = x.AdditionalRequirements,
-                IsCastrated = x.IsCastrated,
-                IsAdopted = x.IsAdopted,
-                MedicalHelpUrgency = MedicalHelpUrgency.FromValue(x.MedicalHelpUrgency).ToString(),
-                AgeCategory = AgeCategory.FromValue(x.AgeCategory).ToString(),
-                Behavior = Behavior.FromValue(x.Behavior).ToString(),
-                HealthStatus = HealthStatus.FromValue(x.HealthStatus).ToString(),
-                PriorityScore = x.PriorityScore,
-                IsAssignedToAdvertisement = x.AdvertisementId.HasValue
+                Id = entity.Id,
+                Name = entity.Name,
+                AdditionalRequirements = entity.AdditionalRequirements,
+                IsCastrated = entity.IsCastrated,
+                IsAdopted = entity.IsAdopted,
+                MedicalHelpUrgency = MedicalHelpUrgency.FromValue(entity.MedicalHelpUrgency).ToString(),
+                AgeCategory = AgeCategory.FromValue(entity.AgeCategory).ToString(),
+                Behavior = Behavior.FromValue(entity.Behavior).ToString(),
+                HealthStatus = HealthStatus.FromValue(entity.HealthStatus).ToString(),
+                PriorityScore = entity.PriorityScore,
+                IsAssignedToAdvertisement = entity.AdvertisementId.HasValue,
+                Links = AddLinks(entity, linkService)
             }
         );
 }
