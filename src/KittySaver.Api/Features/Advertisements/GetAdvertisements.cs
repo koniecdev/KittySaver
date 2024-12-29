@@ -40,10 +40,12 @@ public sealed class GetAdvertisements : IEndpoint
             {
                 query = query.Take(request.Limit.Value);
             }
+
+            CurrentlyLoggedInPerson? loggedInPerson = await currentUserService.GetCurrentlyLoggedInPersonAsync(cancellationToken);
             
             List<AdvertisementResponse> advertisements =
                 await query
-                    .ProjectToDto(linkService, await currentUserService.GetCurrentlyLoggedInPersonAsync())
+                    .ProjectToDto(linkService, loggedInPerson)
                     .ToListAsync(cancellationToken);
 
             PagedList<AdvertisementResponse> response = new()

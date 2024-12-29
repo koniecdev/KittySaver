@@ -22,9 +22,10 @@ public class GetAdvertisement : IEndpoint
     {
         public async Task<AdvertisementResponse> Handle(GetAdvertisementQuery request, CancellationToken cancellationToken)
         {
+            CurrentlyLoggedInPerson? loggedInPerson = await currentUserService.GetCurrentlyLoggedInPersonAsync(cancellationToken);
             AdvertisementResponse advertisement = await db.Advertisements
                 .Where(x => x.Id == request.Id)
-                .ProjectToDto(linkService, await currentUserService.GetCurrentlyLoggedInPersonAsync())
+                .ProjectToDto(linkService, loggedInPerson)
                 .FirstOrDefaultAsync(cancellationToken)
                 ?? throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);
 

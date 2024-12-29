@@ -66,7 +66,7 @@ public static class AdvertisementMapper
                 isSelf: true)
         ];
 
-        if (currentlyLoggedInPerson is null)
+        if (currentlyLoggedInPerson is null || currentlyLoggedInPerson.PersonId != advertisement.PersonId)
         {
             return links;
         }
