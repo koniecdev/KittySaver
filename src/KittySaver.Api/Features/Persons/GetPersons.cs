@@ -19,9 +19,7 @@ public sealed class GetPersons : IEndpoint
 
     internal sealed class GetPersonsQueryHandler(
         ApplicationReadDbContext db,
-        ILinkService linkService,
-        IPaginationLinksService paginationLinksService,
-        ICurrentUserService currentUserService)
+        IPaginationLinksService paginationLinksService)
         : IRequestHandler<GetPersonsQuery, PagedList<PersonResponse>>
     {
         public async Task<PagedList<PersonResponse>> Handle(GetPersonsQuery request, CancellationToken cancellationToken)
@@ -38,10 +36,9 @@ public sealed class GetPersons : IEndpoint
                 query = query.Take(request.Limit.Value);
             }
             
-            CurrentlyLoggedInPerson? currentlyLoggedInPerson = await currentUserService.GetCurrentlyLoggedInPersonAsync(cancellationToken);
             List<PersonResponse> persons = 
                 await query
-                    .ProjectToDto(linkService, currentlyLoggedInPerson)
+                    .ProjectToDto()
                     .ToListAsync(cancellationToken);
 
             PagedList<PersonResponse> response = new()

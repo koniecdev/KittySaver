@@ -21,9 +21,7 @@ public sealed class GetAdvertisements : IEndpoint
 
     internal sealed class GetAdvertisementsQueryHandler(
         ApplicationReadDbContext db,
-        ILinkService linkService,
-        IPaginationLinksService paginationLinksService,
-        ICurrentUserService currentUserService)
+        IPaginationLinksService paginationLinksService)
         : IRequestHandler<GetAdvertisementsQuery, PagedList<AdvertisementResponse>>
     {
         public async Task<PagedList<AdvertisementResponse>> Handle(GetAdvertisementsQuery request, CancellationToken cancellationToken)
@@ -40,12 +38,10 @@ public sealed class GetAdvertisements : IEndpoint
             {
                 query = query.Take(request.Limit.Value);
             }
-
-            CurrentlyLoggedInPerson? loggedInPerson = await currentUserService.GetCurrentlyLoggedInPersonAsync(cancellationToken);
             
             List<AdvertisementResponse> advertisements =
                 await query
-                    .ProjectToDto(linkService, loggedInPerson)
+                    .ProjectToDto()
                     .ToListAsync(cancellationToken);
 
             PagedList<AdvertisementResponse> response = new()

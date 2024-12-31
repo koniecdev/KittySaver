@@ -14,18 +14,15 @@ public sealed class GetPerson : IEndpoint
     public sealed record GetPersonQuery(Guid IdOrUserIdentityId) : IPersonQuery<PersonResponse>;
 
     internal sealed class GetPersonQueryHandler(
-        ApplicationReadDbContext db,
-        ILinkService linkService,
-        ICurrentUserService currentUserService)
+        ApplicationReadDbContext db)
         : IRequestHandler<GetPersonQuery, PersonResponse>
     {
         public async Task<PersonResponse> Handle(GetPersonQuery request, CancellationToken cancellationToken)
         {
-            CurrentlyLoggedInPerson? currentlyLoggedInPerson = await currentUserService.GetCurrentlyLoggedInPersonAsync(cancellationToken);
             PersonResponse person =
                 await db.Persons
                     .Where(x => x.Id == request.IdOrUserIdentityId || x.UserIdentityId == request.IdOrUserIdentityId)
-                    .ProjectToDto(linkService, currentlyLoggedInPerson)
+                    .ProjectToDto()
                     .FirstOrDefaultAsync(cancellationToken)
                 ?? throw new NotFoundExceptions.PersonNotFoundException(request.IdOrUserIdentityId);
             

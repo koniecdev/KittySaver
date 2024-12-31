@@ -22,9 +22,7 @@ public sealed class GetCats : IEndpoint
 
     internal sealed class GetCatsQueryHandler(
         ApplicationReadDbContext db,
-        ILinkService linkService,
-        IPaginationLinksService paginationLinksService,
-        ICurrentUserService currentUserService)
+        IPaginationLinksService paginationLinksService)
         : IRequestHandler<GetCatsQuery, PagedList<CatResponse>>
     {
         public async Task<PagedList<CatResponse>> Handle(GetCatsQuery request, CancellationToken cancellationToken)
@@ -50,10 +48,9 @@ public sealed class GetCats : IEndpoint
             {
                 query = query.Take(request.Limit.Value);
             }
-            CurrentlyLoggedInPerson? loggedInPerson = await currentUserService.GetCurrentlyLoggedInPersonAsync(cancellationToken);
             List<CatResponse> cats =
                 await query
-                    .ProjectToDto(linkService, loggedInPerson)
+                    .ProjectToDto()
                     .ToListAsync(cancellationToken);
             
             PagedList<CatResponse> response = new()

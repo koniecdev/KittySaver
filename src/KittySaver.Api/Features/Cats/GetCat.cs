@@ -14,18 +14,15 @@ public sealed class GetCat : IEndpoint
     public sealed record GetCatQuery(Guid PersonId, Guid Id) : ICatQuery<CatResponse>;
 
     internal sealed class GetCatQueryHandler(
-        ApplicationReadDbContext db,
-        ILinkService linkService,
-        ICurrentUserService currentUserService)
+        ApplicationReadDbContext db)
         : IRequestHandler<GetCatQuery, CatResponse>
     {
         public async Task<CatResponse> Handle(GetCatQuery request, CancellationToken cancellationToken)
         {
-            CurrentlyLoggedInPerson? loggedInPerson = await currentUserService.GetCurrentlyLoggedInPersonAsync(cancellationToken);
             CatResponse cat =
                 await db.Cats
                     .Where(x => x.Id == request.Id && x.PersonId == request.PersonId)
-                    .ProjectToDto(linkService, loggedInPerson)
+                    .ProjectToDto()
                     .FirstOrDefaultAsync(cancellationToken)
                 ?? throw new NotFoundExceptions.CatNotFoundException(request.Id);
             return cat;

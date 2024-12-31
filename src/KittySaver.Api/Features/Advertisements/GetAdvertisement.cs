@@ -15,17 +15,14 @@ public class GetAdvertisement : IEndpoint
     public sealed record GetAdvertisementQuery(Guid Id) : IAdvertisementQuery<AdvertisementResponse>;
 
     internal sealed class GetAdvertisementQueryHandler(
-        ApplicationReadDbContext db,
-        ILinkService linkService,
-        ICurrentUserService currentUserService)
+        ApplicationReadDbContext db)
         : IRequestHandler<GetAdvertisementQuery, AdvertisementResponse>
     {
         public async Task<AdvertisementResponse> Handle(GetAdvertisementQuery request, CancellationToken cancellationToken)
         {
-            CurrentlyLoggedInPerson? loggedInPerson = await currentUserService.GetCurrentlyLoggedInPersonAsync(cancellationToken);
             AdvertisementResponse advertisement = await db.Advertisements
                 .Where(x => x.Id == request.Id)
-                .ProjectToDto(linkService, loggedInPerson)
+                .ProjectToDto()
                 .FirstOrDefaultAsync(cancellationToken)
                 ?? throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);
 

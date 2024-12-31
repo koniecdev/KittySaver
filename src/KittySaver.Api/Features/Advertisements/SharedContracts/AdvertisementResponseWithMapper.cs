@@ -19,7 +19,8 @@ public sealed class AdvertisementResponse
     public required AdvertisementStatus Status { get; init; }
     public required ICollection<CatDto> Cats { get; init; }
     public required PickupAddressDto PickupAddress { get; init; }
-    public required ICollection<Link> Links { get; init; }
+    public ICollection<Link> Links { get; set; } = new List<Link>();
+
     
     public sealed class PickupAddressDto
     {
@@ -53,66 +54,9 @@ public static partial class AdvertisementStatusMapper
 
 public static class AdvertisementMapper
 {
-    private static List<Link> AddLinks(
-        Guid id,
-        Advertisement.AdvertisementStatus advertisementStatus,
-        Guid personId,
-        ILinkService linkService,
-        CurrentlyLoggedInPerson? currentlyLoggedInPerson)
-    {
-        List<Link> links =
-        [
-            linkService.Generate(
-                endpointInfo: EndpointNames.GetAdvertisement,
-                routeValues: new { id },
-                isSelf: true)
-        ];
-
-        if (currentlyLoggedInPerson is null || currentlyLoggedInPerson.PersonId != personId)
-        {
-            return links;
-        }
-
-        if (advertisementStatus is Advertisement.AdvertisementStatus.Active)
-        {
-            links.Add(linkService.Generate(
-                endpointInfo: EndpointNames.UpdateAdvertisement,
-                routeValues: new { id, personId }));
-
-            links.Add(linkService.Generate(
-                endpointInfo: EndpointNames.DeleteAdvertisement,
-                routeValues: new { id, personId }));
-            
-            links.Add(linkService.Generate(
-                endpointInfo: EndpointNames.ReassignCatsToAdvertisement,
-                routeValues: new { id, personId }));
-            
-            links.Add(linkService.Generate(
-                endpointInfo: EndpointNames.CloseAdvertisement,
-                routeValues: new { id, personId }));
-            
-            if (currentlyLoggedInPerson.Role is Person.Role.Job or Person.Role.Admin)
-            {
-                links.Add(linkService.Generate(
-                    endpointInfo: EndpointNames.ExpireAdvertisement,
-                    routeValues: new { id, personId }));
-            }
-        }
-
-        if (advertisementStatus is Advertisement.AdvertisementStatus.Expired)
-        {
-            links.Add(linkService.Generate(
-                endpointInfo: EndpointNames.RefreshAdvertisement,
-                routeValues: new { id, personId }));
-        }
-        
-        return links;
-    }
     
     public static IQueryable<AdvertisementResponse> ProjectToDto(
-        this IQueryable<AdvertisementReadModel> persons,
-        ILinkService linkService,
-        CurrentlyLoggedInPerson? currentlyLoggedInPerson) =>
+        this IQueryable<AdvertisementReadModel> persons) =>
         persons.Select(entity => new AdvertisementResponse
         {
             Id = entity.Id,
@@ -136,7 +80,6 @@ public static class AdvertisementMapper
                 State = entity.PickupAddressState,
                 Street = entity.PickupAddressStreet,
                 ZipCode = entity.PickupAddressZipCode
-            },
-            Links = AddLinks(entity.Id, (Advertisement.AdvertisementStatus)entity.Status, entity.PersonId, linkService, currentlyLoggedInPerson)
+            }
         });
 }
