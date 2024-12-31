@@ -11,7 +11,7 @@ namespace KittySaver.Api.Features.Persons;
 
 public sealed class GetPersons : IEndpoint
 {
-    public sealed class GetPersonsQuery(int? offset, int? limit) : IAdminOnlyQuery<PagedList<PersonResponse>>
+    public sealed class GetPersonsQuery(int? offset, int? limit) : IAdminOnlyQuery<IPagedList<PersonResponse>>
     {
         public int? Offset { get; } = offset;
         public int? Limit { get; } = limit;
@@ -20,9 +20,9 @@ public sealed class GetPersons : IEndpoint
     internal sealed class GetPersonsQueryHandler(
         ApplicationReadDbContext db,
         IPaginationLinksService paginationLinksService)
-        : IRequestHandler<GetPersonsQuery, PagedList<PersonResponse>>
+        : IRequestHandler<GetPersonsQuery, IPagedList<PersonResponse>>
     {
-        public async Task<PagedList<PersonResponse>> Handle(GetPersonsQuery request, CancellationToken cancellationToken)
+        public async Task<IPagedList<PersonResponse>> Handle(GetPersonsQuery request, CancellationToken cancellationToken)
         {
             IQueryable<PersonReadModel> query = db.Persons;
             int totalRecords = await query.CountAsync(cancellationToken);
@@ -65,7 +65,7 @@ public sealed class GetPersons : IEndpoint
             CancellationToken cancellationToken) =>
         {
             GetPersonsQuery query = new(offset, limit);
-            PagedList<PersonResponse> persons = await sender.Send(query, cancellationToken);
+            IPagedList<PersonResponse> persons = await sender.Send(query, cancellationToken);
             return Results.Ok(persons);
         }).RequireAuthorization()
         .WithName(EndpointNames.GetPersons.EndpointName)

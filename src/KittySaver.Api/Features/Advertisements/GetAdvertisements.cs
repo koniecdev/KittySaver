@@ -13,7 +13,7 @@ namespace KittySaver.Api.Features.Advertisements;
 public sealed class GetAdvertisements : IEndpoint
 {
     public sealed class GetAdvertisementsQuery(int? offset, int? limit)
-        : IAdvertisementQuery<PagedList<AdvertisementResponse>>
+        : IAdvertisementQuery<IPagedList<AdvertisementResponse>>
     {
         public int? Offset { get; } = offset;
         public int? Limit { get; } = limit;
@@ -22,9 +22,9 @@ public sealed class GetAdvertisements : IEndpoint
     internal sealed class GetAdvertisementsQueryHandler(
         ApplicationReadDbContext db,
         IPaginationLinksService paginationLinksService)
-        : IRequestHandler<GetAdvertisementsQuery, PagedList<AdvertisementResponse>>
+        : IRequestHandler<GetAdvertisementsQuery, IPagedList<AdvertisementResponse>>
     {
-        public async Task<PagedList<AdvertisementResponse>> Handle(GetAdvertisementsQuery request, CancellationToken cancellationToken)
+        public async Task<IPagedList<AdvertisementResponse>> Handle(GetAdvertisementsQuery request, CancellationToken cancellationToken)
         {
             IQueryable<AdvertisementReadModel> query = db.Advertisements;
             int totalRecords = await query.CountAsync(cancellationToken);
@@ -68,7 +68,7 @@ public sealed class GetAdvertisements : IEndpoint
             CancellationToken cancellationToken) =>
         {
             GetAdvertisementsQuery query = new(offset, limit);
-            PagedList<AdvertisementResponse> advertisements = await sender.Send(query, cancellationToken);
+            IPagedList<AdvertisementResponse> advertisements = await sender.Send(query, cancellationToken);
             return Results.Ok(advertisements);
         }).AllowAnonymous()
         .WithName(EndpointNames.GetAdvertisements.EndpointName)

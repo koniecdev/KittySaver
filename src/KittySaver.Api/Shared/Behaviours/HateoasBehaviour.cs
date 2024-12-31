@@ -38,6 +38,4 @@ public sealed class HateoasBehaviour<TRequest, TResponse>(
 
         return response;
     }
-    
-    
 }

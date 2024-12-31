@@ -6,7 +6,7 @@ using Riok.Mapperly.Abstractions;
 
 namespace KittySaver.Api.Features.Advertisements.SharedContracts;
 
-public sealed class AdvertisementResponse
+public sealed class AdvertisementResponse : IHateoasAdvertisementResponse
 {
     public required Guid Id { get; init; }
     public required Guid PersonId { get; init; }

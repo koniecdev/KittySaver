@@ -63,6 +63,7 @@ public static class ServiceCollectionExtensions
             cfg.AddOpenBehavior(typeof(AuthorizationBehaviour<,>));
             cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
             cfg.AddOpenBehavior(typeof(HateoasBehaviour<,>));
+            cfg.AddOpenBehavior(typeof(PagedHateoasBehaviour<,>));
         });
         return services;
     }

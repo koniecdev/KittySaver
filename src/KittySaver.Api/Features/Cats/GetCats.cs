@@ -13,7 +13,7 @@ namespace KittySaver.Api.Features.Cats;
 public sealed class GetCats : IEndpoint
 {
     public sealed class GetCatsQuery(Guid personId, int? offset, int? limit)
-        : ICatQuery<PagedList<CatResponse>>
+        : ICatQuery<IPagedList<CatResponse>>
     {
         public Guid PersonId { get; } = personId;
         public int? Offset { get; } = offset;
@@ -23,9 +23,9 @@ public sealed class GetCats : IEndpoint
     internal sealed class GetCatsQueryHandler(
         ApplicationReadDbContext db,
         IPaginationLinksService paginationLinksService)
-        : IRequestHandler<GetCatsQuery, PagedList<CatResponse>>
+        : IRequestHandler<GetCatsQuery, IPagedList<CatResponse>>
     {
-        public async Task<PagedList<CatResponse>> Handle(GetCatsQuery request, CancellationToken cancellationToken)
+        public async Task<IPagedList<CatResponse>> Handle(GetCatsQuery request, CancellationToken cancellationToken)
         {
             bool personExists = await db.Persons
                 .AnyAsync(x => x.Id == request.PersonId, cancellationToken);
@@ -53,7 +53,7 @@ public sealed class GetCats : IEndpoint
                     .ProjectToDto()
                     .ToListAsync(cancellationToken);
             
-            PagedList<CatResponse> response = new()
+            PagedList<CatResponse> response = new PagedList<CatResponse>
             {
                 Items = cats,
                 Total = totalRecords,
@@ -78,7 +78,7 @@ public sealed class GetCats : IEndpoint
                 CancellationToken cancellationToken) =>
             {
                 GetCatsQuery query = new(personId, offset, limit);
-                PagedList<CatResponse> cats = await sender.Send(query, cancellationToken);
+                IPagedList<CatResponse> cats = await sender.Send(query, cancellationToken);
                 return Results.Ok(cats);
             }).RequireAuthorization()
             .WithName(EndpointNames.GetCats.EndpointName)
