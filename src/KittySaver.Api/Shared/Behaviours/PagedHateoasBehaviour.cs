@@ -2,7 +2,6 @@
 using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using MediatR;
 
@@ -12,21 +11,18 @@ public sealed class PagedHateoasBehaviour<TRequest, TResponse>(
     ICurrentUserService currentUserService,
     ILinkService linkService)
     : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : notnull
-    where TResponse : IQuery<IPagedList<IHateoasResponse>>
+    where TRequest : IPagedQuery
 {
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
-        TResponse genericResponse = await next();
+        TResponse response = await next();
 
         CurrentlyLoggedInPerson? issuingPerson = await currentUserService.GetCurrentlyLoggedInPersonAsync(cancellationToken);
 
-        var response = genericResponse as IPagedList<IHateoasResponse>;
-        
-        switch (response.Items)
+        switch (response)
         {
-            case ICollection<PersonResponse> personResponses:
-                foreach (PersonResponse personResponse in personResponses)
+            case IPagedList<PersonResponse> personPagedResponse:
+                foreach (PersonResponse personResponse in personPagedResponse.Items)
                 {
                     personResponse.Links = linkService.GeneratePersonRelatedLinks(
                         personResponse.Id,
@@ -34,8 +30,8 @@ public sealed class PagedHateoasBehaviour<TRequest, TResponse>(
                 }
                 break;
             
-            case ICollection<CatResponse> catResponses:
-                foreach (CatResponse catResponse in catResponses)
+            case IPagedList<CatResponse> catPagedResponse:
+                foreach (CatResponse catResponse in catPagedResponse.Items)
                 {
                     catResponse.Links = linkService.GenerateCatRelatedLinks(
                         catResponse.Id,
@@ -45,8 +41,8 @@ public sealed class PagedHateoasBehaviour<TRequest, TResponse>(
                 }
                 break;
             
-            case ICollection<AdvertisementResponse> advertisementResponses:
-                foreach (AdvertisementResponse advertisementResponse in advertisementResponses)
+            case IPagedList<AdvertisementResponse> advertisementPagedResponse:
+                foreach (AdvertisementResponse advertisementResponse in advertisementPagedResponse.Items)
                 {
                     advertisementResponse.Links = linkService.GenerateAdvertisementRelatedLinks(
                         advertisementResponse.Id,
@@ -57,6 +53,6 @@ public sealed class PagedHateoasBehaviour<TRequest, TResponse>(
                 break;
         }
 
-        return genericResponse;
+        return response;
     }
 }
