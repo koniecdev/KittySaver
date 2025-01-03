@@ -2,6 +2,7 @@
 using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Features.Persons.SharedContracts;
+using KittySaver.Api.Shared.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KittySaver.Api.Tests.Integration.Helpers;
@@ -15,17 +16,17 @@ public class CleanupHelper(HttpClient httpClient)
     
     private async Task CleanupPersons()
     {
-        ICollection<PersonResponse>? persons = await httpClient.GetFromJsonAsync<ICollection<PersonResponse>>("api/v1/persons");
+        PagedList<PersonResponse>? persons = await httpClient.GetFromJsonAsync<PagedList<PersonResponse>>("api/v1/persons");
         if (persons is null)
         {
             return;
         }
-        foreach (PersonResponse person in persons)
+        foreach (PersonResponse person in persons.Items)
         {
-            ICollection<CatResponse>? cats = await httpClient.GetFromJsonAsync<ICollection<CatResponse>>($"api/v1/persons/{person.Id}/cats");
+            PagedList<CatResponse>? cats = await httpClient.GetFromJsonAsync<PagedList<CatResponse>>($"api/v1/persons/{person.Id}/cats");
             if (cats is not null)
             {
-                foreach (CatResponse cat in cats)
+                foreach (CatResponse cat in cats.Items)
                 {
                     var msg2 = await httpClient.DeleteAsync($"api/v1/persons/{person.Id}/cats/{cat.Id}");
                     if (!msg2.IsSuccessStatusCode)

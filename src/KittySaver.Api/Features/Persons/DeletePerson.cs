@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
@@ -10,10 +9,9 @@ namespace KittySaver.Api.Features.Persons;
 
 public sealed class DeletePerson : IEndpoint
 {
-    public sealed record DeletePersonCommand(Guid IdOrUserIdentityId) : IPersonCommand;
+    public sealed record DeletePersonCommand(Guid IdOrUserIdentityId) : ICommand, IAuthorizedRequest, IPersonRequest;
 
-    public sealed class DeletePersonCommandValidator
-        : AbstractValidator<DeletePersonCommand>
+    public sealed class DeletePersonCommandValidator : AbstractValidator<DeletePersonCommand>
     {
         public DeletePersonCommandValidator()
         {
@@ -48,6 +46,6 @@ public sealed class DeletePerson : IEndpoint
             return Results.NoContent();
         }).RequireAuthorization()
         .WithName(EndpointNames.DeletePerson.EndpointName)
-        .WithTags(EndpointNames.GroupNames.PersonGroup);;
+        .WithTags(EndpointNames.GroupNames.PersonGroup);
     }
 }

@@ -10,6 +10,7 @@ namespace KittySaver.Domain.Persons;
 public sealed class Advertisement : AuditableEntity
 {
     public static readonly TimeSpan ExpiringPeriodInDays = new(days: 30, hours: 0, minutes: 0, seconds: 0);
+    public static readonly TimeSpan ShelterExpiringPeriodInDays = new(days: 365, hours: 0, minutes: 0, seconds: 0);
 
     private readonly Guid _personId;
     private double _priorityScore;
@@ -83,13 +84,14 @@ public sealed class Advertisement : AuditableEntity
     internal static Advertisement Create(
         DateTimeOffset dateOfCreation,
         Guid ownerId,
+        Person.Role ownerRole,
         Address pickupAddress,
         Email contactInfoEmail,
         PhoneNumber contactInfoPhoneNumber,
         Description description,
         double priorityScore)
     {
-        DateTimeOffset expiresOn = dateOfCreation + ExpiringPeriodInDays;
+        DateTimeOffset expiresOn = dateOfCreation + (ownerRole == Person.Role.Shelter ? ShelterExpiringPeriodInDays : ExpiringPeriodInDays);
         Advertisement advertisement = new(
             personId: ownerId,
             pickupAddress: pickupAddress,

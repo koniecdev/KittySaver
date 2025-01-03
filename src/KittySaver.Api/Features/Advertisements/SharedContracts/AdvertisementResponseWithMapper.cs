@@ -1,12 +1,12 @@
 ﻿using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Infrastructure.ApiComponents;
+using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence.ReadModels;
 using KittySaver.Domain.Persons;
 using Riok.Mapperly.Abstractions;
 
 namespace KittySaver.Api.Features.Advertisements.SharedContracts;
 
-public sealed class AdvertisementResponse
+public sealed class AdvertisementResponse : IHateoasAdvertisementResponse
 {
     public required Guid Id { get; init; }
     public required Guid PersonId { get; init; }
@@ -17,9 +17,10 @@ public sealed class AdvertisementResponse
     public required string ContactInfoEmail { get; init; }
     public required string ContactInfoPhoneNumber { get; init; }
     public required AdvertisementStatus Status { get; init; }
-    public required ICollection<CatDto> Cats { get; set; } = new List<CatDto>();
+    public required ICollection<CatDto> Cats { get; init; }
     public required PickupAddressDto PickupAddress { get; init; }
-    public ICollection<Link> Links { get; } = new List<Link>();
+    public ICollection<Link> Links { get; set; } = new List<Link>();
+
     
     public sealed class PickupAddressDto
     {
@@ -53,7 +54,9 @@ public static partial class AdvertisementStatusMapper
 
 public static class AdvertisementMapper
 {
-    public static IQueryable<AdvertisementResponse> ProjectToDto(this IQueryable<AdvertisementReadModel> persons) =>
+    
+    public static IQueryable<AdvertisementResponse> ProjectToDto(
+        this IQueryable<AdvertisementReadModel> persons) =>
         persons.Select(entity => new AdvertisementResponse
         {
             Id = entity.Id,

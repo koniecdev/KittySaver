@@ -1,12 +1,12 @@
 ﻿using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Infrastructure.ApiComponents;
+using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence.ReadModels;
 using KittySaver.Domain.Persons;
 using Riok.Mapperly.Abstractions;
 
 namespace KittySaver.Api.Features.Persons.SharedContracts;
 
-public sealed class PersonResponse
+public sealed class PersonResponse : IHateoasPersonResponse
 {
     public required Guid Id { get; init; }
     public required Guid UserIdentityId { get; init; }
@@ -16,7 +16,7 @@ public sealed class PersonResponse
     public required string DefaultAdvertisementsContactInfoEmail { get; init; }
     public required string DefaultAdvertisementsContactInfoPhoneNumber { get; init; }
     public required AddressDto DefaultAdvertisementsPickupAddress { get; init; }
-    public ICollection<Link> Links { get; } = new List<Link>();
+    public ICollection<Link> Links { get; set; } = new List<Link>();
 
     public sealed class AddressDto
     {
@@ -31,7 +31,8 @@ public sealed class PersonResponse
 
 public static class PersonResponseMapper
 {
-    public static IQueryable<PersonResponse> ProjectToDto(this IQueryable<PersonReadModel> persons) =>
+    public static IQueryable<PersonResponse> ProjectToDto(
+        this IQueryable<PersonReadModel> persons) =>
         persons.Select(entity => new PersonResponse
         {
             Id = entity.Id,

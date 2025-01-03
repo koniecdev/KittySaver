@@ -11,7 +11,6 @@ public sealed class CatReadModel
     public required DateTimeOffset CreatedOn { get; init; }
     public required string? LastModificationBy { get; init; }
     public required DateTimeOffset? LastModificationOn { get; init; }
-    public required Guid PersonId { get; init; }
     public required int MedicalHelpUrgency { get; init; }
     public required int AgeCategory { get; init; }
     public required int Behavior { get; init; }
@@ -21,6 +20,18 @@ public sealed class CatReadModel
     public required double PriorityScore { get; init; }
     public required string AdditionalRequirements { get; init; }
     public required string Name { get; init; }
+    public required Guid PersonId { get; init; }
+    public PersonReadModel Person { get; private set; } = null!;
     public Guid? AdvertisementId { get; init; }
     public AdvertisementReadModel? Advertisement { get; private set; }
+}
+
+internal sealed class CatReadModelConfiguration : IEntityTypeConfiguration<CatReadModel>, IReadConfiguration
+{
+    public void Configure(EntityTypeBuilder<CatReadModel> builder)
+    {
+        builder.ToTable("Cats");
+        
+        builder.HasKey(cat => cat.Id);
+    }
 }

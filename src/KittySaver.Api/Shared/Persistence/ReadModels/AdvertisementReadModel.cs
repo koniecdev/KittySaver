@@ -28,3 +28,18 @@ public sealed class AdvertisementReadModel
     public PersonReadModel Person { get; private set; } = null!;
     public ICollection<CatReadModel> Cats { get; } = new List<CatReadModel>();
 }
+
+internal sealed class AdvertisementReadModelConfiguration : IEntityTypeConfiguration<AdvertisementReadModel>, IReadConfiguration
+{
+    public void Configure(EntityTypeBuilder<AdvertisementReadModel> builder)
+    {
+        builder.ToTable("Advertisements");
+
+        builder.HasKey(advertisement => advertisement.Id);
+
+        builder.HasMany(advertisement => advertisement.Cats)
+            .WithOne(cat => cat.Advertisement)
+            .HasForeignKey(cat => cat.AdvertisementId)
+            .IsRequired(false);
+    }
+}

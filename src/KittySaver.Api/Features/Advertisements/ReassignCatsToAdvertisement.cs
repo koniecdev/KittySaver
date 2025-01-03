@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Persons;
@@ -14,8 +13,8 @@ public sealed class ReassignCatsToAdvertisement : IEndpoint
     public sealed record ReassignCatsToAdvertisementRequest(IEnumerable<Guid> CatIds);
     public sealed record ReassignCatsToAdvertisementCommand(
         Guid PersonId,
-        Guid AdvertisementId,
-        IEnumerable<Guid> CatIds) : IAdvertisementCommand;
+        Guid Id,
+        IEnumerable<Guid> CatIds) : ICommand, IAuthorizedRequest, IAdvertisementRequest;
 
     public sealed class AssignCatToAdvertisementCommandValidator : AbstractValidator<ReassignCatsToAdvertisementCommand>
     {
@@ -23,8 +22,8 @@ public sealed class ReassignCatsToAdvertisement : IEndpoint
         {
             RuleFor(x => x.PersonId)
                 .NotEmpty()
-                .NotEqual(x => x.AdvertisementId);
-            RuleFor(x => x.AdvertisementId)
+                .NotEqual(x => x.Id);
+            RuleFor(x => x.Id)
                 .NotEmpty()
                 .NotEqual(x => x.PersonId);
             RuleFor(x => x.CatIds).NotEmpty();
@@ -39,7 +38,7 @@ public sealed class ReassignCatsToAdvertisement : IEndpoint
         public async Task Handle(ReassignCatsToAdvertisementCommand request, CancellationToken cancellationToken)
         {
             Person owner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
-            owner.ReplaceCatsOfAdvertisement(request.AdvertisementId, request.CatIds);
+            owner.ReplaceCatsOfAdvertisement(request.Id, request.CatIds);
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
@@ -55,7 +54,7 @@ public sealed class ReassignCatsToAdvertisement : IEndpoint
         {
             ReassignCatsToAdvertisementCommand command = new(
                 PersonId: personId,
-                AdvertisementId: advertisementId,
+                Id: advertisementId,
                 CatIds: request.CatIds);
             await sender.Send(command, cancellationToken);
             return Results.NoContent();

@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Persons;
@@ -12,7 +11,7 @@ namespace KittySaver.Api.Features.Advertisements;
 
 public sealed class DeleteAdvertisement : IEndpoint
 {
-    public sealed record DeleteAdvertisementCommand(Guid PersonId, Guid AdvertisementId) : IAdvertisementCommand;
+    public sealed record DeleteAdvertisementCommand(Guid PersonId, Guid Id) : ICommand, IAuthorizedRequest, IAdvertisementRequest;
 
     public sealed class DeleteAdvertisementCommandValidator
         : AbstractValidator<DeleteAdvertisementCommand>
@@ -21,8 +20,8 @@ public sealed class DeleteAdvertisement : IEndpoint
         {
             RuleFor(x => x.PersonId)
                 .NotEmpty()
-                .NotEqual(x => x.AdvertisementId);
-            RuleFor(x => x.AdvertisementId)
+                .NotEqual(x => x.Id);
+            RuleFor(x => x.Id)
                 .NotEmpty()
                 .NotEqual(x => x.PersonId);
         }
@@ -36,7 +35,7 @@ public sealed class DeleteAdvertisement : IEndpoint
         public async Task Handle(DeleteAdvertisementCommand request, CancellationToken cancellationToken)
         {
             Person owner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
-            owner.RemoveAdvertisement(request.AdvertisementId);
+            owner.RemoveAdvertisement(request.Id);
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
@@ -49,7 +48,7 @@ public sealed class DeleteAdvertisement : IEndpoint
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            DeleteAdvertisementCommand command = new(PersonId: personId, AdvertisementId: advertisementId);
+            DeleteAdvertisementCommand command = new(PersonId: personId, Id: advertisementId);
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
         }).RequireAuthorization()

@@ -16,7 +16,9 @@ public sealed class Person : AggregateRoot
     public enum Role
     {
         Regular,
-        Admin
+        Admin,
+        Job,
+        Shelter
     }
 
     public Role CurrentRole { get; private init; } = Role.Regular;
@@ -171,6 +173,7 @@ public sealed class Person : AggregateRoot
         Advertisement advertisement = Advertisement.Create(
             dateOfCreation,
             Id,
+            CurrentRole,
             pickupAddress,
             contactInfoEmail,
             contactInfoPhoneNumber,

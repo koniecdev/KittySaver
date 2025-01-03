@@ -110,7 +110,7 @@ public static class EndpointNames
         public const string GetCatRel = "get-cat";
         
         public const string GetCatsName = "GetCats";
-        public const string GetCatsRel = "get-cat";
+        public const string GetCatsRel = "get-cats";
     }
     private static class Advertisement
     {
@@ -128,7 +128,7 @@ public static class EndpointNames
         
         public const string GetAdvertisementsName = "GetAdvertisements";
         public const string GetAdvertisementsRel = "get-advertisements";
-        public const string GetPersonAdvertisementsRel = "get-person-advertisements";
+        public const string GetPersonAdvertisementsRel = "get-advertisements-by-personid";
         
         public const string CloseAdvertisementName = "CloseAdvertisement";
         public const string CloseAdvertisementRel = "close-advertisement";

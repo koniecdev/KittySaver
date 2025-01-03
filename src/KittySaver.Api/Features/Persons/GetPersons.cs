@@ -1,7 +1,8 @@
 ﻿using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Infrastructure.ApiComponents;
+using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
+using KittySaver.Api.Shared.Persistence.ReadModels;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,29 +10,61 @@ namespace KittySaver.Api.Features.Persons;
 
 public sealed class GetPersons : IEndpoint
 {
-    public sealed class GetPersonsQuery : IAdminOnlyQuery<ICollection<PersonResponse>>;
-
-    internal sealed class GetPersonsQueryHandler(ApplicationReadDbContext db)
-        : IRequestHandler<GetPersonsQuery, ICollection<PersonResponse>>
+    public sealed class GetPersonsQuery(int? offset, int? limit) : IQuery<IPagedList<PersonResponse>>, IAdminOnlyRequest, IPagedQuery
     {
-        public async Task<ICollection<PersonResponse>> Handle(GetPersonsQuery request, CancellationToken cancellationToken)
+        public int? Offset { get; } = offset;
+        public int? Limit { get; } = limit;
+    }
+
+    internal sealed class GetPersonsQueryHandler(
+        ApplicationReadDbContext db,
+        IPaginationLinksService paginationLinksService)
+        : IRequestHandler<GetPersonsQuery, IPagedList<PersonResponse>>
+    {
+        public async Task<IPagedList<PersonResponse>> Handle(GetPersonsQuery request, CancellationToken cancellationToken)
         {
-            List<PersonResponse> persons = await db.Persons
-                .AsNoTracking()
-                .ProjectToDto()
-                .ToListAsync(cancellationToken);
-            return persons;
+            IQueryable<PersonReadModel> query = db.Persons;
+            int totalRecords = await query.CountAsync(cancellationToken);
+            
+            if (request.Offset.HasValue)
+            {
+                query = query.Skip(request.Offset.Value);
+            }
+            if (request.Limit.HasValue)
+            {
+                query = query.Take(request.Limit.Value);
+            }
+            
+            List<PersonResponse> persons = 
+                await query
+                    .ProjectToDto()
+                    .ToListAsync(cancellationToken);
+
+            PagedList<PersonResponse> response = new()
+            {
+                Items = persons,
+                Total = totalRecords,
+                Links = paginationLinksService.GeneratePaginationLinks(
+                    EndpointNames.GetPersons.EndpointName,
+                    request.Offset,
+                    request.Limit,
+                    totalRecords)
+            };
+            
+            return response;
         }
     }
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
         endpointRouteBuilder.MapGet("persons", async (
+            int? offset,
+            int? limit,
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            GetPersonsQuery query = new();
-            ICollection<PersonResponse> persons = await sender.Send(query, cancellationToken);
+            GetPersonsQuery query = new(offset, limit);
+            IPagedList<PersonResponse> persons = await sender.Send(query, cancellationToken);
             return Results.Ok(persons);
         }).RequireAuthorization()
         .WithName(EndpointNames.GetPersons.EndpointName)

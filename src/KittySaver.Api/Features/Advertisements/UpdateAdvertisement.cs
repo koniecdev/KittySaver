@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Persons;
@@ -25,7 +24,7 @@ public sealed class UpdateAdvertisement : IEndpoint
         string ContactInfoPhoneNumber);
 
     public sealed record UpdateAdvertisementCommand(
-        Guid AdvertisementId,
+        Guid Id,
         Guid PersonId,
         string? Description,
         string PickupAddressCountry,
@@ -35,7 +34,7 @@ public sealed class UpdateAdvertisement : IEndpoint
         string? PickupAddressStreet,
         string? PickupAddressBuildingNumber,
         string ContactInfoEmail,
-        string ContactInfoPhoneNumber) : IAdvertisementCommand;
+        string ContactInfoPhoneNumber) : ICommand, IAuthorizedRequest, IAdvertisementRequest;
 
     public sealed class UpdateAdvertisementCommandValidator
         : AbstractValidator<UpdateAdvertisementCommand>
@@ -44,9 +43,9 @@ public sealed class UpdateAdvertisement : IEndpoint
         {
             RuleFor(x => x.PersonId)
                 .NotEmpty()
-                .NotEqual(x => x.AdvertisementId);
+                .NotEqual(x => x.Id);
             
-            RuleFor(x => x.AdvertisementId)
+            RuleFor(x => x.Id)
                 .NotEmpty()
                 .NotEqual(x => x.PersonId);
             
@@ -105,7 +104,7 @@ public sealed class UpdateAdvertisement : IEndpoint
             Description description = Description.Create(request.Description);
             
             owner.UpdateAdvertisement(
-                advertisementId: request.AdvertisementId,
+                advertisementId: request.Id,
                 description: description,
                 pickupAddress: pickupAddress,
                 contactInfoEmail: contactInfoEmail,
@@ -139,5 +138,5 @@ public static partial class UpdateAdvertisementMapper
     public static partial UpdateAdvertisement.UpdateAdvertisementCommand MapToUpdateAdvertisementCommand(
         this UpdateAdvertisement.UpdateAdvertisementRequest request,
         Guid personId,
-        Guid advertisementId);
+        Guid id);
 }

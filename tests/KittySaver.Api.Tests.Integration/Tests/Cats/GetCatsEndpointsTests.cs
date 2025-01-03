@@ -5,6 +5,7 @@ using Bogus;
 using FluentAssertions;
 using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Features.Persons;
+using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
 using Microsoft.AspNetCore.Http;
@@ -76,10 +77,10 @@ public class GetCatsEndpointsTests : IAsyncLifetime
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        ICollection<CatResponse>? cats = await response.Content.ReadFromJsonAsync<ICollection<CatResponse>>();
+        PagedList<CatResponse>? cats = await response.Content.ReadFromJsonAsync<PagedList<CatResponse>>();
         cats.Should().NotBeNull();
-        cats!.Count.Should().BeGreaterThan(0);
-        CatResponse cat = cats.First();
+        cats!.Items.Count.Should().BeGreaterThan(0);
+        CatResponse cat = cats.Items.First();
         cat.Id.Should().Be(catCreateResponse.Id);
         cat.Name.Should().Be(_createCatRequest.Name);
         cat.AdditionalRequirements.Should().Be(_createCatRequest.AdditionalRequirements);
@@ -106,9 +107,9 @@ public class GetCatsEndpointsTests : IAsyncLifetime
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        ICollection<CatResponse>? cats = await response.Content.ReadFromJsonAsync<ICollection<CatResponse>>();
+        PagedList<CatResponse>? cats = await response.Content.ReadFromJsonAsync<PagedList<CatResponse>>();
         cats.Should().NotBeNull();
-        cats?.Count.Should().Be(0);
+        cats?.Items.Count.Should().Be(0);
     }
 
     [Fact]

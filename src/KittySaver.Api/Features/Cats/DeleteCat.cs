@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Persons;
@@ -11,10 +10,9 @@ namespace KittySaver.Api.Features.Cats;
 
 public sealed class DeleteCat : IEndpoint
 {
-    public sealed record DeleteCatCommand(Guid PersonId, Guid Id) : ICatCommand;
+    public sealed record DeleteCatCommand(Guid PersonId, Guid Id) : ICommand, IAuthorizedRequest, ICatRequest;
 
-    public sealed class DeleteCatCommandValidator
-        : AbstractValidator<DeleteCatCommand>
+    public sealed class DeleteCatCommandValidator : AbstractValidator<DeleteCatCommand>
     {
         public DeleteCatCommandValidator()
         {

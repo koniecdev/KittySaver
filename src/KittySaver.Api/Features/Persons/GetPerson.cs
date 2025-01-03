@@ -1,6 +1,6 @@
 ﻿using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Infrastructure.ApiComponents;
+using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using MediatR;
@@ -10,11 +10,10 @@ namespace KittySaver.Api.Features.Persons;
 
 public sealed class GetPerson : IEndpoint
 {
-    public sealed record GetPersonQuery(Guid IdOrUserIdentityId) : IPersonQuery<PersonResponse>;
+    public sealed record GetPersonQuery(Guid IdOrUserIdentityId) : IQuery<PersonResponse>, IAuthorizedRequest, IPersonRequest;
 
     internal sealed class GetPersonQueryHandler(
-        ApplicationReadDbContext db,
-        ILinkService linkService)
+        ApplicationReadDbContext db)
         : IRequestHandler<GetPersonQuery, PersonResponse>
     {
         public async Task<PersonResponse> Handle(GetPersonQuery request, CancellationToken cancellationToken)
@@ -26,52 +25,7 @@ public sealed class GetPerson : IEndpoint
                     .FirstOrDefaultAsync(cancellationToken)
                 ?? throw new NotFoundExceptions.PersonNotFoundException(request.IdOrUserIdentityId);
             
-            AddLinks(person);
-            
             return person;
-        }
-
-        private void AddLinks(PersonResponse personResponse)
-        {
-            personResponse.Links.Add(
-                linkService.Generate(
-                    endpointInfo: EndpointNames.GetPerson,
-                    routeValues: new { id = personResponse.Id },
-                    isSelf: true));
-            
-            personResponse.Links.Add(
-                linkService.Generate(
-                    endpointInfo: EndpointNames.UpdatePerson,
-                    routeValues: new { id = personResponse.Id }));
-    
-            personResponse.Links.Add(
-                linkService.Generate(
-                    endpointInfo: EndpointNames.DeletePerson,
-                    routeValues: new { id = personResponse.Id }));
-    
-            personResponse.Links.Add(
-                linkService.Generate(
-                    endpointInfo: EndpointNames.GetCats,
-                    routeValues: new { personId = personResponse.Id }));
-            
-            personResponse.Links.Add(
-                linkService.Generate(
-                    endpointInfo: EndpointNames.CreateCat,
-                    routeValues: new { personId = personResponse.Id }));
-
-            personResponse.Links.Add(
-                linkService.Generate(
-                    endpointInfo: EndpointNames.GetAdvertisements));
-            
-            personResponse.Links.Add(
-                linkService.Generate(
-                    endpointInfo: EndpointNames.GetPersonAdvertisements,
-                    routeValues: new { personId = personResponse.Id }));
-            
-            personResponse.Links.Add(
-                linkService.Generate(
-                    endpointInfo: EndpointNames.CreateAdvertisement,
-                    routeValues: new { personId = personResponse.Id }));
         }
     }
 

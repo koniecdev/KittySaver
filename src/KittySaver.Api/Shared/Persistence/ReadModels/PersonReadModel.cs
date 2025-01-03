@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using KittySaver.Domain.Persons;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 // ReSharper disable CollectionNeverUpdated.Global
 
@@ -26,4 +27,26 @@ public sealed class PersonReadModel
     public required string PhoneNumber { get; init; }
     public ICollection<CatReadModel> Cats { get; } = new List<CatReadModel>();
     public ICollection<AdvertisementReadModel> Advertisements { get; } = new List<AdvertisementReadModel>();
+}
+
+internal sealed class PersonReadModelConfiguration : IEntityTypeConfiguration<PersonReadModel>, IReadConfiguration
+{
+    public void Configure(EntityTypeBuilder<PersonReadModel> builder)
+    {
+        builder.ToTable("Persons");
+        
+        builder.HasKey(person => person.Id);
+
+        builder
+            .HasMany(person => person.Cats)
+            .WithOne(cat => cat.Person)
+            .HasForeignKey(cat => cat.PersonId)
+            .IsRequired();
+        
+        builder
+            .HasMany(person => person.Advertisements)
+            .WithOne(advertisement => advertisement.Person)
+            .HasForeignKey(advertisement => advertisement.PersonId)
+            .IsRequired();
+    }
 }

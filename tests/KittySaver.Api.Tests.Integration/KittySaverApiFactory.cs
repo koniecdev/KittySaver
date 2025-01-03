@@ -2,6 +2,7 @@
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Auth.Api.Shared.Infrastructure.Services;
+using KittySaver.Domain.Persons;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
@@ -28,6 +29,8 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
     
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        builder.UseEnvironment("Testing");
+        Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
         builder.ConfigureAppConfiguration((context, configBuilder) =>
         {
             // Remove the default configuration options
@@ -41,7 +44,8 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
             // You can also add in-memory configuration for overriding specific values
             configBuilder.AddInMemoryCollection(new Dictionary<string, string?>
             {
-                { "AppSettings:MinutesTokenExpiresIn", $"{FixedMinutesJwtExpire}" }
+                { "AppSettings:MinutesTokenExpiresIn", $"{FixedMinutesJwtExpire}" },
+                { "ASPNETCORE_ENVIRONMENT", "Testing" } // Add this line
             });
         });
         
@@ -58,9 +62,12 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
             
             services.RemoveAll(typeof(ICurrentUserService));
             ICurrentUserService currentUserService = Substitute.For<ICurrentUserService>();
-            currentUserService.EnsureUserIsAdminAsync().Returns(Task.FromResult(true));
-            currentUserService.EnsureUserIsAuthorizedAsync(Arg.Any<Guid>()).Returns(Task.CompletedTask);
+            currentUserService.EnsureUserIsAdminAsync(Arg.Any<CancellationToken>()).Returns(Task.FromResult(true));
+            currentUserService.EnsureUserIsAuthorizedAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
             currentUserService.GetCurrentUserIdentityId().Returns(Guid.NewGuid());
+            currentUserService.GetCurrentlyLoggedInPersonAsync(Arg.Any<CancellationToken>()).Returns(
+                Task.FromResult<CurrentlyLoggedInPerson?>
+                    (new CurrentlyLoggedInPerson{ PersonId = Guid.NewGuid(), Role = Person.Role.Admin}));
             services.AddSingleton<ICurrentUserService>(_ => currentUserService);
             
             services.RemoveAll(typeof(IAuthenticationService));
