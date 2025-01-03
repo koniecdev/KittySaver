@@ -1,6 +1,5 @@
 ﻿using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
@@ -11,7 +10,7 @@ namespace KittySaver.Api.Features.Persons;
 
 public sealed class GetPerson : IEndpoint
 {
-    public sealed record GetPersonQuery(Guid IdOrUserIdentityId) : IPersonQuery<PersonResponse>;
+    public sealed record GetPersonQuery(Guid IdOrUserIdentityId) : IQuery<PersonResponse>, IAuthorizedRequest, IPersonRequest;
 
     internal sealed class GetPersonQueryHandler(
         ApplicationReadDbContext db)

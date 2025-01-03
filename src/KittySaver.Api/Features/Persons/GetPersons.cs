@@ -1,6 +1,5 @@
 ﻿using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Api.Shared.Persistence.ReadModels;
@@ -11,7 +10,7 @@ namespace KittySaver.Api.Features.Persons;
 
 public sealed class GetPersons : IEndpoint
 {
-    public sealed class GetPersonsQuery(int? offset, int? limit) : IAdminOnlyQuery<IPagedList<PersonResponse>>
+    public sealed class GetPersonsQuery(int? offset, int? limit) : IQuery<IPagedList<PersonResponse>>, IAdminOnlyRequest, IPagedQuery
     {
         public int? Offset { get; } = offset;
         public int? Limit { get; } = limit;

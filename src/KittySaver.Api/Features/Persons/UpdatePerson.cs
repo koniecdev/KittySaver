@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
@@ -40,10 +39,9 @@ public sealed class UpdatePerson : IEndpoint
         string? DefaultAdvertisementPickupAddressStreet,
         string? DefaultAdvertisementPickupAddressBuildingNumber,
         string DefaultAdvertisementContactInfoEmail,
-        string DefaultAdvertisementContactInfoPhoneNumber) : IPersonCommand;
+        string DefaultAdvertisementContactInfoPhoneNumber) : ICommand, IAuthorizedRequest, IPersonRequest;
 
-    public sealed class UpdatePersonCommandValidator
-        : AbstractValidator<UpdatePersonCommand>, IAsyncValidator
+    public sealed class UpdatePersonCommandValidator : AbstractValidator<UpdatePersonCommand>, IAsyncValidator
     {
         public UpdatePersonCommandValidator(IPersonUniquenessChecksRepository personRepository)
         {
