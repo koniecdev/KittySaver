@@ -170,10 +170,10 @@ public class CloseAdvertisementEndpointsTests : IAsyncLifetime
         validationProblemDetails.Errors.Count.Should().Be(2);
         validationProblemDetails.Errors.Keys.Should()
             .BeEquivalentTo(nameof(CloseAdvertisement.CloseAdvertisementCommand.PersonId),
-                nameof(CloseAdvertisement.CloseAdvertisementCommand.AdvertisementId));
+                nameof(CloseAdvertisement.CloseAdvertisementCommand.Id));
         validationProblemDetails.Errors.Values.Count.Should().Be(2);
-        validationProblemDetails.Errors[nameof(CloseAdvertisement.CloseAdvertisementCommand.AdvertisementId)][0]
-            .Should().Be($"'Advertisement Id' must not be equal to '{randomId}'.");
+        validationProblemDetails.Errors[nameof(CloseAdvertisement.CloseAdvertisementCommand.Id)][0]
+            .Should().Be($"'Id' must not be equal to '{randomId}'.");
         validationProblemDetails.Errors[nameof(CloseAdvertisement.CloseAdvertisementCommand.PersonId)][0]
             .Should().Be($"'Person Id' must not be equal to '{randomId}'.");
     }
@@ -219,10 +219,10 @@ public class CloseAdvertisementEndpointsTests : IAsyncLifetime
         validationProblemDetails.Errors.Count.Should().Be(2);
         validationProblemDetails.Errors.Keys.Should()
             .BeEquivalentTo(nameof(CloseAdvertisement.CloseAdvertisementCommand.PersonId),
-                nameof(CloseAdvertisement.CloseAdvertisementCommand.AdvertisementId));
+                nameof(CloseAdvertisement.CloseAdvertisementCommand.Id));
         validationProblemDetails.Errors.Values.Count.Should().Be(2);
-        validationProblemDetails.Errors[nameof(CloseAdvertisement.CloseAdvertisementCommand.AdvertisementId)][0]
-            .Should().Be("'Advertisement Id' must not be empty.");
+        validationProblemDetails.Errors[nameof(CloseAdvertisement.CloseAdvertisementCommand.Id)][0]
+            .Should().Be("'Id' must not be empty.");
         validationProblemDetails.Errors[nameof(CloseAdvertisement.CloseAdvertisementCommand.PersonId)][0]
             .Should().Be("'Person Id' must not be empty.");
     }

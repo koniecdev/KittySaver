@@ -216,10 +216,10 @@ public class DeleteAdvertisementEndpointsTests : IAsyncLifetime
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
         validationProblemDetails.Errors.Count.Should().Be(1);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(
-            nameof(DeleteAdvertisement.DeleteAdvertisementCommand.AdvertisementId));
+            nameof(DeleteAdvertisement.DeleteAdvertisementCommand.Id));
         validationProblemDetails.Errors.Values.Count.Should().Be(1);
-        validationProblemDetails.Errors[nameof(DeleteAdvertisement.DeleteAdvertisementCommand.AdvertisementId)][0]
-            .Should().Be("'Advertisement Id' must not be empty.");
+        validationProblemDetails.Errors[nameof(DeleteAdvertisement.DeleteAdvertisementCommand.Id)][0]
+            .Should().Be("'Id' must not be empty.");
     }
     
     public Task InitializeAsync()
