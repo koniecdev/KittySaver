@@ -1,6 +1,5 @@
 ﻿using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Api.Shared.Persistence.ReadModels;
@@ -13,7 +12,7 @@ namespace KittySaver.Api.Features.Advertisements;
 public sealed class GetAdvertisements : IEndpoint
 {
     public sealed class GetAdvertisementsQuery(int? offset, int? limit)
-        : IAdvertisementQuery<IPagedList<AdvertisementResponse>>
+        : IQuery<IPagedList<AdvertisementResponse>>, IPagedQuery
     {
         public int? Offset { get; } = offset;
         public int? Limit { get; } = limit;

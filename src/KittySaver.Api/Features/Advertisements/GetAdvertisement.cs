@@ -1,6 +1,5 @@
 ﻿using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
@@ -12,7 +11,7 @@ namespace KittySaver.Api.Features.Advertisements;
 
 public class GetAdvertisement : IEndpoint
 {
-    public sealed record GetAdvertisementQuery(Guid Id) : IAdvertisementQuery<AdvertisementResponse>;
+    public sealed record GetAdvertisementQuery(Guid Id) : IQuery<AdvertisementResponse>;
 
     internal sealed class GetAdvertisementQueryHandler(
         ApplicationReadDbContext db)

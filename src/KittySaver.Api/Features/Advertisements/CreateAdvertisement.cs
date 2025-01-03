@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
@@ -38,7 +37,7 @@ public class CreateAdvertisement : IEndpoint
         string? PickupAddressStreet,
         string? PickupAddressBuildingNumber,
         string ContactInfoEmail,
-        string ContactInfoPhoneNumber) : IAdvertisementCommand<Guid>;
+        string ContactInfoPhoneNumber) : ICommand<Guid>, IAuthorizedRequest, IAdvertisementRequest;
 
     public sealed class CreateAdvertisementCommandValidator
         : AbstractValidator<CreateAdvertisementCommand>
