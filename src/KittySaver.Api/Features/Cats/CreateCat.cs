@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Common.Primitives.Enums;
@@ -32,7 +31,7 @@ public sealed class CreateCat : IEndpoint
         string AgeCategory,
         string Behavior,
         string HealthStatus,
-        string? AdditionalRequirements = null) : ICatCommand<Guid>;
+        string? AdditionalRequirements = null) : ICommand<Guid>, IAuthorizedRequest, ICatRequest;
 
     public sealed class CreateCatCommandValidator : AbstractValidator<CreateCatCommand>
     {

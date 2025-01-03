@@ -1,6 +1,5 @@
 ﻿using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
@@ -11,7 +10,7 @@ namespace KittySaver.Api.Features.Cats;
 
 public sealed class GetCat : IEndpoint
 {
-    public sealed record GetCatQuery(Guid PersonId, Guid Id) : ICatQuery<CatResponse>;
+    public sealed record GetCatQuery(Guid PersonId, Guid Id) : IQuery<CatResponse>, IAuthorizedRequest, ICatRequest;
 
     internal sealed class GetCatQueryHandler(
         ApplicationReadDbContext db)

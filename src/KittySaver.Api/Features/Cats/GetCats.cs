@@ -1,6 +1,5 @@
 ﻿using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Api.Shared.Persistence.ReadModels;
@@ -13,7 +12,7 @@ namespace KittySaver.Api.Features.Cats;
 public sealed class GetCats : IEndpoint
 {
     public sealed class GetCatsQuery(Guid personId, int? offset, int? limit)
-        : ICatQuery<IPagedList<CatResponse>>
+        : IQuery<IPagedList<CatResponse>>, IAuthorizedRequest, IPagedQuery, ICatRequest
     {
         public Guid PersonId { get; } = personId;
         public int? Offset { get; } = offset;
