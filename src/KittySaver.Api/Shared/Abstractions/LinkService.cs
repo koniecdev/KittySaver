@@ -1,5 +1,4 @@
 ﻿using KittySaver.Api.Features.Advertisements.SharedContracts;
-using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Domain.Persons;
 
