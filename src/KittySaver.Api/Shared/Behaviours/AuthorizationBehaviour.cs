@@ -1,23 +1,23 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Infrastructure.ApiComponents;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Domain.Persons;
 using MediatR;
 
 namespace KittySaver.Api.Shared.Behaviours;
 
-public sealed class AuthorizationBehaviour<TRequest, TResponse>(ICurrentUserService currentUserService)
+public sealed class AuthorizationBehaviour<TRequest, TResponse>(
+    ICurrentUserService currentUserService)
     : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IPersonAggregateAuthorizationRequiredRequest
+    where TRequest : IAuthenticationBasedRequest
 {
     public async Task<TResponse> Handle(
         TRequest request,
         RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
     {
-        if (request is IJobOrAdminOnlyCommandBase)
+        if (request is IJobOrAdminOnlyRequest)
         {
             CurrentlyLoggedInPerson? person = await currentUserService.GetCurrentlyLoggedInPersonAsync(cancellationToken);
             if (person is not { Role: Person.Role.Job or Person.Role.Admin })
@@ -25,13 +25,14 @@ public sealed class AuthorizationBehaviour<TRequest, TResponse>(ICurrentUserServ
                 throw new UnauthorizedAccessException();
             }
         }
-        else if (request is not IAdminOnlyQuery<TResponse>)
+        else if (request is not IAdminOnlyRequest && request is IAuthorizedRequest)
         {
             Guid personId = request switch
             {
-                IPersonAggregatePersonIdBase x => x.PersonId,
-                IIPersonAggregateUserIdentityIdBase x => x.UserIdentityId,
-                IIPersonAggregateIdOrUserIdentityIdBase x => x.IdOrUserIdentityId,
+                ICreatePersonRequest x => x.UserIdentityId,
+                ICatRequest x => x.PersonId,
+                IPersonRequest x => x.IdOrUserIdentityId,
+                IAdvertisementRequest x => x.PersonId,
                 _ => throw new InvalidOperationException("Report it to admin, there is something wrong with behaviour.")
             };
             await currentUserService.EnsureUserIsAuthorizedAsync(personId, cancellationToken);
