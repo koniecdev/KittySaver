@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
+using KittySaver.Api.Shared.Contracts;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
@@ -39,7 +40,7 @@ public sealed class UpdatePerson : IEndpoint
         string? DefaultAdvertisementPickupAddressStreet,
         string? DefaultAdvertisementPickupAddressBuildingNumber,
         string DefaultAdvertisementContactInfoEmail,
-        string DefaultAdvertisementContactInfoPhoneNumber) : ICommand, IAuthorizedRequest, IPersonRequest;
+        string DefaultAdvertisementContactInfoPhoneNumber) : ICommand<PersonHateoasResponse>, IAuthorizedRequest, IPersonRequest;
 
     public sealed class UpdatePersonCommandValidator : AbstractValidator<UpdatePersonCommand>, IAsyncValidator
     {
@@ -101,12 +102,11 @@ public sealed class UpdatePerson : IEndpoint
     internal sealed class UpdatePersonCommandHandler(
         IPersonRepository personRepository,
         IUnitOfWork unitOfWork)
-        : IRequestHandler<UpdatePersonCommand>
+        : IRequestHandler<UpdatePersonCommand, PersonHateoasResponse>
     {
-        public async Task Handle(UpdatePersonCommand request, CancellationToken cancellationToken)
+        public async Task<PersonHateoasResponse> Handle(UpdatePersonCommand request, CancellationToken cancellationToken)
         {
-            Person person =
-                await personRepository.GetPersonByIdOrIdentityIdAsync(request.IdOrUserIdentityId, cancellationToken);
+            Person person = await personRepository.GetPersonByIdOrIdentityIdAsync(request.IdOrUserIdentityId, cancellationToken);
 
             Nickname nickname = Nickname.Create(request.Nickname);
             Email email = Email.Create(request.Email);
@@ -133,6 +133,7 @@ public sealed class UpdatePerson : IEndpoint
                 defaultAdvertisementContactInfoPhoneNumber);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
+            return new PersonHateoasResponse(person.Id);
         }
     }
 
@@ -145,8 +146,8 @@ public sealed class UpdatePerson : IEndpoint
                 CancellationToken cancellationToken) =>
             {
                 UpdatePersonCommand command = request.MapToUpdatePersonCommand(id);
-                await sender.Send(command, cancellationToken);
-                return Results.NoContent();
+                PersonHateoasResponse response = await sender.Send(command, cancellationToken);
+                return Results.Ok(response);
             }).RequireAuthorization()
             .WithName(EndpointNames.UpdatePerson.EndpointName)
             .WithTags(EndpointNames.GroupNames.PersonGroup);
