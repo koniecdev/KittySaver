@@ -6,6 +6,8 @@ using Bogus.Extensions;
 using FluentAssertions;
 using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Features.Persons.SharedContracts;
+using KittySaver.Api.Shared.Abstractions;
+using KittySaver.Api.Shared.Contracts;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
@@ -56,13 +58,14 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
-        ApiResponses.CreatedWithIdResponse? registerResponse =
-            await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>();
-        registerResponse.Should().NotBeNull();
-        registerResponse!.Id.Should().NotBeEmpty();
-        response.Headers.Location!.ToString().Should().Contain($"/api/v1/persons/{registerResponse.Id}");
+        PersonHateoasResponse? hateoasResponse =
+            await response.Content.ReadFromJsonAsync<PersonHateoasResponse>();
+        hateoasResponse.Should().NotBeNull();
+        hateoasResponse!.Id.Should().NotBeEmpty();
+        response.Headers.Location!.ToString().Should().Contain($"/api/v1/persons/{hateoasResponse.Id}");
+        hateoasResponse.Links.Count.Should().Be(7);
         PersonResponse person =
-            await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{registerResponse.Id}")
+            await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{hateoasResponse.Id}")
             ?? throw new JsonException();
         person.Id.Should().NotBeEmpty();
     }
