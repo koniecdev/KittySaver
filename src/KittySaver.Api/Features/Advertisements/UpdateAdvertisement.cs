@@ -1,5 +1,7 @@
 ﻿using FluentValidation;
+using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
+using KittySaver.Api.Shared.Contracts;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Persons;
@@ -34,7 +36,7 @@ public sealed class UpdateAdvertisement : IEndpoint
         string? PickupAddressStreet,
         string? PickupAddressBuildingNumber,
         string ContactInfoEmail,
-        string ContactInfoPhoneNumber) : ICommand, IAuthorizedRequest, IAdvertisementRequest;
+        string ContactInfoPhoneNumber) : ICommand<AdvertisementHateoasResponse>, IAuthorizedRequest, IAdvertisementRequest;
 
     public sealed class UpdateAdvertisementCommandValidator
         : AbstractValidator<UpdateAdvertisementCommand>
@@ -86,9 +88,9 @@ public sealed class UpdateAdvertisement : IEndpoint
     internal sealed class UpdateAdvertisementCommandHandler(
         IPersonRepository personRepository,
         IUnitOfWork unitOfWork)
-        : IRequestHandler<UpdateAdvertisementCommand>
+        : IRequestHandler<UpdateAdvertisementCommand, AdvertisementHateoasResponse>
     {
-        public async Task Handle(UpdateAdvertisementCommand request, CancellationToken cancellationToken)
+        public async Task<AdvertisementHateoasResponse> Handle(UpdateAdvertisementCommand request, CancellationToken cancellationToken)
         {
             Person owner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
 
@@ -111,6 +113,8 @@ public sealed class UpdateAdvertisement : IEndpoint
                 contactInfoPhoneNumber: contactInfoPhoneNumber);
             
             await unitOfWork.SaveChangesAsync(cancellationToken);
+            Advertisement.AdvertisementStatus advertisementStatus = owner.Advertisements.First(x => x.Id == request.Id).Status;
+            return new AdvertisementHateoasResponse(request.Id, request.PersonId, (AdvertisementResponse.AdvertisementStatus)advertisementStatus);
         }
     }
 
@@ -124,8 +128,8 @@ public sealed class UpdateAdvertisement : IEndpoint
             CancellationToken cancellationToken) =>
         {
             UpdateAdvertisementCommand command = request.MapToUpdateAdvertisementCommand(personId, advertisementId);
-            await sender.Send(command, cancellationToken);
-            return Results.NoContent();
+            AdvertisementHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
+            return Results.Ok(hateoasResponse);
         }).RequireAuthorization()
         .WithName(EndpointNames.UpdateAdvertisement.EndpointName)
         .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
