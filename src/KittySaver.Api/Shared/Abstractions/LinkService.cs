@@ -128,7 +128,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
                 isSelf: true)
         ];
 
-        if (currentlyLoggedInPerson is null || currentlyLoggedInPerson.PersonId != personId)
+        if (currentlyLoggedInPerson?.Role is not Person.Role.Admin && currentlyLoggedInPerson?.PersonId != personId)
         {
             return links;
         }
@@ -169,7 +169,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
                 break;
             case AdvertisementResponse.AdvertisementStatus.Closed:
             default:
-                throw new ArgumentOutOfRangeException(nameof(advertisementStatus), advertisementStatus, null);
+                break;
         }
 
         return links;
