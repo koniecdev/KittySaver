@@ -8,6 +8,7 @@ using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Features.Cats;
 using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Features.Persons;
+using KittySaver.Api.Shared.Contracts;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.Persons;
@@ -101,8 +102,11 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                 request);
 
         //Assert
-        updateResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-
+        updateResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        CatHateoasResponse? hateoasResponse = await updateResponse.Content.ReadFromJsonAsync<CatHateoasResponse>();
+        hateoasResponse.Should().NotBeNull();
+        hateoasResponse!.Id.Should().Be(catCreateResponse.Id);
+        hateoasResponse.Links.Count.Should().Be(3);
         CatResponse catAfterUpdate =
             await _httpClient.GetFromJsonAsync<CatResponse>(
                 $"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}")
@@ -172,8 +176,11 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                 request);
 
         //Assert
-        updateResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-
+        updateResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        CatHateoasResponse? hateoasResponse = await updateResponse.Content.ReadFromJsonAsync<CatHateoasResponse>();
+        hateoasResponse.Should().NotBeNull();
+        hateoasResponse!.Id.Should().Be(createCatResponse.Id);
+        hateoasResponse.Links.Count.Should().Be(4);
         CatResponse catAfterUpdate =
             await _httpClient.GetFromJsonAsync<CatResponse>(
                 $"api/v1/persons/{createPersonResponse.Id}/cats/{createCatResponse.Id}")
@@ -231,12 +238,18 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                 request);
 
         //Assert
-        updateResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        updateResponse.StatusCode.Should().Be(HttpStatusCode.OK);
 
+        CatHateoasResponse? hateoasResponse = await updateResponse.Content.ReadFromJsonAsync<CatHateoasResponse>();
+        hateoasResponse.Should().NotBeNull();
+        hateoasResponse!.Id.Should().Be(catCreateResponse.Id);
+        hateoasResponse.Links.Count.Should().Be(3);
+        
         CatResponse catAfterUpdate =
             await _httpClient.GetFromJsonAsync<CatResponse>(
                 $"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}")
             ?? throw new JsonException();
+        
         catBeforeUpdate.Should().NotBeEquivalentTo(catAfterUpdate);
         catAfterUpdate.AdditionalRequirements.Should().Be(string.Empty);
         catAfterUpdate.Name.Should().Be(request.Name);
@@ -248,7 +261,7 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task UpdateCat_ShouldReturnSuccess_WhenInvalidAdditionalRequirementsAreProvided()
+    public async Task UpdateCat_ShouldReturnSuccess_WhenEmptyAdditionalRequirementsAreProvided()
     {
         //Arrange
         HttpResponseMessage personRegisterResponseMessage =
@@ -285,8 +298,12 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                 request);
 
         //Assert
-        updateResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-
+        updateResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        CatHateoasResponse? hateoasResponse = await updateResponse.Content.ReadFromJsonAsync<CatHateoasResponse>();
+        hateoasResponse.Should().NotBeNull();
+        hateoasResponse!.Id.Should().Be(catCreateResponse.Id);
+        hateoasResponse.Links.Count.Should().Be(3);
+        
         CatResponse catAfterUpdate =
             await _httpClient.GetFromJsonAsync<CatResponse>(
                 $"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}")
