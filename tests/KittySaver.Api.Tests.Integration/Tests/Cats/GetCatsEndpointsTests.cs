@@ -81,6 +81,11 @@ public class GetCatsEndpointsTests : IAsyncLifetime
         PagedList<CatResponse>? cats = await response.Content.ReadFromJsonAsync<PagedList<CatResponse>>();
         cats.Should().NotBeNull();
         cats!.Items.Count.Should().BeGreaterThan(0);
+        cats.Total.Should().Be(1);
+        cats.Links.Count.Should().Be(2);
+        cats.Links.Count(x => x.Rel == EndpointNames.SelfRel).Should().Be(1);
+        cats.Links.Count(x => x.Rel == "by-page").Should().Be(1);
+        
         CatResponse cat = cats.Items.First();
         cat.Id.Should().Be(catCreateResponse.Id);
         cat.Name.Should().Be(_createCatRequest.Name);
@@ -91,6 +96,7 @@ public class GetCatsEndpointsTests : IAsyncLifetime
         cat.HealthStatus.Should().Be(_createCatRequest.HealthStatus);
         cat.IsCastrated.Should().Be(_createCatRequest.IsCastrated);
         cat.PriorityScore.Should().BeGreaterThan(0);
+        cat.Links.Count.Should().Be(3);
     }
 
     [Fact]
@@ -110,7 +116,11 @@ public class GetCatsEndpointsTests : IAsyncLifetime
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         PagedList<CatResponse>? cats = await response.Content.ReadFromJsonAsync<PagedList<CatResponse>>();
         cats.Should().NotBeNull();
-        cats?.Items.Count.Should().Be(0);
+        cats!.Total.Should().Be(0);
+        cats.Links.Count.Should().Be(2);
+        cats.Links.Count(x => x.Rel == EndpointNames.SelfRel).Should().Be(1);
+        cats.Links.Count(x => x.Rel == "by-page").Should().Be(1);
+        cats.Items.Count.Should().Be(0);
     }
 
     [Fact]
