@@ -13,3 +13,10 @@ public class PersonHateoasResponse(Guid id) : IHateoasPersonResponse
     public Guid Id { get; } = id;
     public ICollection<Link> Links { get; set; } = new List<Link>();
 }
+public class CatHateoasResponse(Guid id, Guid personId, Guid? advertisementId) : IHateoasCatResponse
+{
+    public Guid Id { get; } = id;
+    public Guid PersonId { get; } = personId;
+    public Guid? AdvertisementId { get; } = advertisementId;
+    public ICollection<Link> Links { get; set; } = new List<Link>();
+}
