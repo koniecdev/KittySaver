@@ -5,6 +5,7 @@ using Bogus;
 using FluentAssertions;
 using KittySaver.Api.Features.Advertisements;
 using KittySaver.Api.Features.Persons;
+using KittySaver.Api.Shared.Contracts;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.ValueObjects;
@@ -91,15 +92,17 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
                         ContactInfoPhoneNumber: faker.Person.Phone
                     ));
 
-        HttpResponseMessage responseMessage = await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
+        HttpResponseMessage responseMessage = 
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
 
         //Assert
         responseMessage.StatusCode.Should().Be(HttpStatusCode.Created);
-        ApiResponses.CreatedWithIdResponse? response =
-            await responseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>();
-        response.Should().NotBeNull();
-        response!.Id.Should().NotBeEmpty();
-        responseMessage.Headers.Location!.ToString().Should().Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{response.Id}");
+        AdvertisementHateoasResponse? hateoasResponse = await responseMessage.Content.ReadFromJsonAsync<AdvertisementHateoasResponse>();
+        hateoasResponse.Should().NotBeNull();
+        hateoasResponse!.Id.Should().NotBeEmpty();
+        responseMessage.Headers.Location!.ToString()
+            .Should().Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{hateoasResponse.Id}");
+        hateoasResponse.Links.Count.Should().Be(6);
     }
 
     [Fact]
@@ -148,12 +151,12 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
 
         //Assert
         responseMessage.StatusCode.Should().Be(HttpStatusCode.Created);
-        ApiResponses.CreatedWithIdResponse? response =
-            await responseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>();
-        response.Should().NotBeNull();
-        response!.Id.Should().NotBeEmpty();
-        responseMessage.Headers.Location!.ToString().Should()
-            .Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{response.Id}");
+        AdvertisementHateoasResponse? hateoasResponse = await responseMessage.Content.ReadFromJsonAsync<AdvertisementHateoasResponse>();
+        hateoasResponse.Should().NotBeNull();
+        hateoasResponse!.Id.Should().NotBeEmpty();
+        responseMessage.Headers.Location!.ToString()
+            .Should().Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{hateoasResponse.Id}");
+        hateoasResponse.Links.Count.Should().Be(6);
     }
 
     [Theory]
@@ -198,11 +201,12 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
 
         //Assert
         responseMessage.StatusCode.Should().Be(HttpStatusCode.Created);
-        ApiResponses.CreatedWithIdResponse? response =
-            await responseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>();
-        response.Should().NotBeNull();
-        response!.Id.Should().NotBeEmpty();
-        responseMessage.Headers.Location!.ToString().Should().Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{response.Id}");
+        AdvertisementHateoasResponse? hateoasResponse = await responseMessage.Content.ReadFromJsonAsync<AdvertisementHateoasResponse>();
+        hateoasResponse.Should().NotBeNull();
+        hateoasResponse!.Id.Should().NotBeEmpty();
+        responseMessage.Headers.Location!.ToString()
+            .Should().Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{hateoasResponse.Id}");
+        hateoasResponse.Links.Count.Should().Be(6);
     }
     
     [Fact]

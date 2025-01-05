@@ -1,5 +1,7 @@
 ﻿using FluentValidation;
+using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
+using KittySaver.Api.Shared.Contracts;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
@@ -37,7 +39,7 @@ public class CreateAdvertisement : IEndpoint
         string? PickupAddressStreet,
         string? PickupAddressBuildingNumber,
         string ContactInfoEmail,
-        string ContactInfoPhoneNumber) : ICommand<Guid>, IAuthorizedRequest, IAdvertisementRequest;
+        string ContactInfoPhoneNumber) : ICommand<AdvertisementHateoasResponse>, IAuthorizedRequest, IAdvertisementRequest;
 
     public sealed class CreateAdvertisementCommandValidator
         : AbstractValidator<CreateAdvertisementCommand>
@@ -86,9 +88,9 @@ public class CreateAdvertisement : IEndpoint
         IPersonRepository personRepository,
         IUnitOfWork unitOfWork,
         IDateTimeService dateTimeService)
-        : IRequestHandler<CreateAdvertisementCommand, Guid>
+        : IRequestHandler<CreateAdvertisementCommand, AdvertisementHateoasResponse>
     {
-        public async Task<Guid> Handle(CreateAdvertisementCommand request, CancellationToken cancellationToken)
+        public async Task<AdvertisementHateoasResponse> Handle(CreateAdvertisementCommand request, CancellationToken cancellationToken)
         {
             Person owner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
 
@@ -112,7 +114,7 @@ public class CreateAdvertisement : IEndpoint
                 description);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
-            return advertisement.Id;
+            return new AdvertisementHateoasResponse(advertisement.Id, advertisement.PersonId, (AdvertisementResponse.AdvertisementStatus)advertisement.Status);
         }
     }
 
@@ -125,8 +127,14 @@ public class CreateAdvertisement : IEndpoint
             CancellationToken cancellationToken) =>
         {
             CreateAdvertisementCommand command = request.MapToCreateAdvertisementCommand(personId);
-            Guid advertisementId = await sender.Send(command, cancellationToken);
-            return Results.Created($"/api/v1/persons/{personId}/advertisements/{advertisementId}", new { Id = advertisementId });
+            AdvertisementHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
+            return Results.Created($"/api/v1/persons/{personId}/advertisements/{hateoasResponse.Id}", new
+            {
+                hateoasResponse.Id,
+                hateoasResponse.PersonId,
+                hateoasResponse.Status,
+                hateoasResponse.Links
+            });
         }).RequireAuthorization()
         .WithName(EndpointNames.CreateAdvertisement.EndpointName)
         .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
