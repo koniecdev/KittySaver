@@ -122,6 +122,7 @@ public class GetAdvertisementEndpointsTests : IAsyncLifetime
                 Name = createCatRequest.Name
             }
         ]);
+        advertisement.Links.Count.Should().Be(6);
     }
 
     [Fact]
@@ -208,6 +209,7 @@ public class GetAdvertisementEndpointsTests : IAsyncLifetime
                 Name = createCatRequest.Name
             }
         ]);
+        advertisement.Links.Count.Should().Be(6);
     }
 
     [Fact]
