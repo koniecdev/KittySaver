@@ -4,6 +4,7 @@ using System.Text.Json;
 using Bogus;
 using FluentAssertions;
 using KittySaver.Api.Features.Advertisements;
+using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Shared.Contracts;
 using KittySaver.Api.Tests.Integration.Helpers;
@@ -101,6 +102,7 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().NotBeEmpty();
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
+        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
         responseMessage.Headers.Location!.ToString()
             .Should().Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{hateoasResponse.Id}");
         hateoasResponse.Links.Count.Should().Be(6);
@@ -156,6 +158,7 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().NotBeEmpty();
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
+        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
         responseMessage.Headers.Location!.ToString()
             .Should().Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{hateoasResponse.Id}");
         hateoasResponse.Links.Count.Should().Be(6);
@@ -207,6 +210,7 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().NotBeEmpty();
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
+        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
         responseMessage.Headers.Location!.ToString()
             .Should().Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{hateoasResponse.Id}");
         hateoasResponse.Links.Count.Should().Be(6);

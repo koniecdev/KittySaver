@@ -114,6 +114,7 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().Be(createAdvertisementResponse.Id);
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
+        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
         hateoasResponse.Links.Count.Should().Be(6);
         
         HttpResponseMessage getAdvertisementResponse =
@@ -195,6 +196,7 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().Be(createAdvertisementResponse.Id);
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
+        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
         hateoasResponse.Links.Count.Should().Be(6);
         
         HttpResponseMessage getAdvertisementResponse =
