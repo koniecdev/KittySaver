@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
+using KittySaver.Api.Shared.Contracts;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Common.Primitives.Enums;
@@ -31,7 +32,7 @@ public sealed class CreateCat : IEndpoint
         string AgeCategory,
         string Behavior,
         string HealthStatus,
-        string? AdditionalRequirements = null) : ICommand<Guid>, IAuthorizedRequest, ICatRequest;
+        string? AdditionalRequirements = null) : ICommand<CatHateoasResponse>, IAuthorizedRequest, ICatRequest;
 
     public sealed class CreateCatCommandValidator : AbstractValidator<CreateCatCommand>
     {
@@ -59,9 +60,9 @@ public sealed class CreateCat : IEndpoint
         IPersonRepository personRepository,
         IUnitOfWork unitOfWork,
         ICatPriorityCalculatorService calculator)
-        : IRequestHandler<CreateCatCommand, Guid>
+        : IRequestHandler<CreateCatCommand, CatHateoasResponse>
     {
-        public async Task<Guid> Handle(CreateCatCommand request, CancellationToken cancellationToken)
+        public async Task<CatHateoasResponse> Handle(CreateCatCommand request, CancellationToken cancellationToken)
         {
             Person person = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
         
@@ -84,7 +85,7 @@ public sealed class CreateCat : IEndpoint
                 additionalRequirements: additionalRequirements);
             
             await unitOfWork.SaveChangesAsync(cancellationToken);
-            return cat.Id;
+            return new CatHateoasResponse(cat.Id, cat.PersonId, cat.AdvertisementId);
         }
     }
     
@@ -97,8 +98,14 @@ public sealed class CreateCat : IEndpoint
             CancellationToken cancellationToken) =>
         {
             CreateCatCommand command = request.MapToCreateCatCommand(personId);
-            Guid catId = await sender.Send(command, cancellationToken);
-            return Results.Created($"/api/v1/persons/{personId}/cats/{catId}", new { Id = catId });
+            CatHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
+            return Results.Created($"/api/v1/persons/{personId}/cats/{hateoasResponse.Id}", new
+            {
+                hateoasResponse.Id,
+                hateoasResponse.PersonId,
+                hateoasResponse.AdvertisementId,
+                hateoasResponse.Links
+            });
         }).RequireAuthorization()
         .WithName(EndpointNames.CreateCat.EndpointName)
         .WithTags(EndpointNames.GroupNames.CatGroup);

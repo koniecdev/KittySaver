@@ -81,6 +81,8 @@ public class GetCatEndpointsTests : IAsyncLifetime
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         CatResponse cat = await response.Content.ReadFromJsonAsync<CatResponse>() ?? throw new JsonException();
         cat.Id.Should().Be(catCreateResponse.Id);
+        cat.PersonId.Should().Be(personRegisterResponse.Id);
+        cat.AdvertisementId.Should().Be(null);
         cat.Name.Should().Be(_createCatRequest.Name);
         cat.AdditionalRequirements.Should().Be(_createCatRequest.AdditionalRequirements);
         cat.Behavior.Should().Be(_createCatRequest.Behavior);
@@ -90,6 +92,7 @@ public class GetCatEndpointsTests : IAsyncLifetime
         cat.IsCastrated.Should().Be(_createCatRequest.IsCastrated);
         cat.PriorityScore.Should().BeGreaterThan(0);
         cat.IsAssignedToAdvertisement.Should().BeFalse();
+        cat.Links.Count.Should().Be(3);
     }
 
     [Fact]
@@ -134,11 +137,11 @@ public class GetCatEndpointsTests : IAsyncLifetime
         CatResponse cat = await response.Content.ReadFromJsonAsync<CatResponse>() ?? throw new JsonException();
         cat.Id.Should().Be(catCreateResponse.Id);
         cat.IsAssignedToAdvertisement.Should().BeTrue();
+        cat.Links.Count.Should().Be(4);
     }
 
     [Fact]
-    public async Task
-        GetCat_ShouldReturnCatWithPositiveIsAssignedToAdvertisementFlag_WhenCatIsReassignedToAdvertisement()
+    public async Task GetCat_ShouldReturnCatWithPositiveIsAssignedToAdvertisementFlag_WhenCatIsReassignedToAdvertisement()
     {
         //Arrange
         HttpResponseMessage personRegisterResponseMessage =
@@ -208,12 +211,14 @@ public class GetCatEndpointsTests : IAsyncLifetime
         CatResponse cat = await response.Content.ReadFromJsonAsync<CatResponse>() ?? throw new JsonException();
         cat.Id.Should().Be(catCreateResponse.Id);
         cat.IsAssignedToAdvertisement.Should().BeFalse();
+        cat.Links.Count.Should().Be(3);
 
         responseOfAnotherCat.StatusCode.Should().Be(HttpStatusCode.OK);
         CatResponse anotherCat = await responseOfAnotherCat.Content.ReadFromJsonAsync<CatResponse>() ??
                                  throw new JsonException();
         anotherCat.Id.Should().Be(anotherCat.Id);
         anotherCat.IsAssignedToAdvertisement.Should().BeTrue();
+        anotherCat.Links.Count.Should().Be(4);
     }
 
     [Fact]

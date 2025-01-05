@@ -1,5 +1,7 @@
 ﻿using FluentValidation;
+using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
+using KittySaver.Api.Shared.Contracts;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
@@ -11,7 +13,8 @@ namespace KittySaver.Api.Features.Advertisements;
 
 public sealed class ExpireAdvertisement : IEndpoint
 {
-    public sealed record ExpireAdvertisementCommand(Guid PersonId, Guid Id) : ICommand, IJobOrAdminOnlyRequest, IAdvertisementRequest;
+    public sealed record ExpireAdvertisementCommand(Guid PersonId, Guid Id) 
+        : ICommand<AdvertisementHateoasResponse>, IJobOrAdminOnlyRequest, IAdvertisementRequest;
 
     public sealed class ExpireAdvertisementCommandValidator
         : AbstractValidator<ExpireAdvertisementCommand>
@@ -31,13 +34,15 @@ public sealed class ExpireAdvertisement : IEndpoint
         IPersonRepository personRepository,
         IUnitOfWork unitOfWork,
         IDateTimeService dateTimeService)
-        : IRequestHandler<ExpireAdvertisementCommand>
+        : IRequestHandler<ExpireAdvertisementCommand, AdvertisementHateoasResponse>
     {
-        public async Task Handle(ExpireAdvertisementCommand request, CancellationToken cancellationToken)
+        public async Task<AdvertisementHateoasResponse> Handle(ExpireAdvertisementCommand request, CancellationToken cancellationToken)
         {
             Person owner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
             owner.ExpireAdvertisement(request.Id, dateTimeService.Now);
             await unitOfWork.SaveChangesAsync(cancellationToken);
+            Advertisement.AdvertisementStatus advertisementStatus = owner.Advertisements.First(x => x.Id == request.Id).Status;
+            return new AdvertisementHateoasResponse(request.Id, request.PersonId, (AdvertisementResponse.AdvertisementStatus)advertisementStatus);
         }
     }
 
@@ -50,8 +55,8 @@ public sealed class ExpireAdvertisement : IEndpoint
             CancellationToken cancellationToken) =>
         {
             ExpireAdvertisementCommand command = new(PersonId: personId, Id: advertisementId);
-            await sender.Send(command, cancellationToken);
-            return Results.Ok();
+            AdvertisementHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
+            return Results.Ok(hateoasResponse);
         }).RequireAuthorization()
         .WithName(EndpointNames.ExpireAdvertisement.EndpointName)
         .WithTags(EndpointNames.GroupNames.AdvertisementGroup);

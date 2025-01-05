@@ -7,6 +7,7 @@ using KittySaver.Api.Features.Advertisements;
 using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Features.Persons;
+using KittySaver.Api.Shared.Contracts;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
 using Microsoft.AspNetCore.Http;
@@ -96,6 +97,13 @@ public class CloseAdvertisementEndpointsTests : IAsyncLifetime
         
         //Assert
         closeResponseMessage.StatusCode.Should().Be(HttpStatusCode.OK);
+        AdvertisementHateoasResponse? hateoasResponse = await closeResponseMessage.Content.ReadFromJsonAsync<AdvertisementHateoasResponse>();
+        hateoasResponse.Should().NotBeNull();
+        hateoasResponse!.Id.Should().Be(advertisementResponse.Id);
+        hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
+        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Closed);
+        hateoasResponse.Links.Count.Should().Be(1);
+        
         CatResponse catAfterClosure =
             await _httpClient.GetFromJsonAsync<CatResponse>($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}")
             ?? throw new JsonException();

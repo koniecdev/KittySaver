@@ -1,5 +1,7 @@
 ﻿using FluentValidation;
+using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
+using KittySaver.Api.Shared.Contracts;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
@@ -11,7 +13,8 @@ namespace KittySaver.Api.Features.Advertisements;
 
 public sealed class CloseAdvertisement : IEndpoint
 {
-    public sealed record CloseAdvertisementCommand(Guid PersonId, Guid Id) : ICommand, IAuthorizedRequest, IAdvertisementRequest;
+    public sealed record CloseAdvertisementCommand(Guid PersonId, Guid Id)
+        : ICommand<AdvertisementHateoasResponse>, IAuthorizedRequest, IAdvertisementRequest;
 
     public sealed class CloseAdvertisementCommandValidator
         : AbstractValidator<CloseAdvertisementCommand>
@@ -31,13 +34,15 @@ public sealed class CloseAdvertisement : IEndpoint
         IPersonRepository personRepository,
         IUnitOfWork unitOfWork,
         IDateTimeService dateTimeService)
-        : IRequestHandler<CloseAdvertisementCommand>
+        : IRequestHandler<CloseAdvertisementCommand, AdvertisementHateoasResponse>
     {
-        public async Task Handle(CloseAdvertisementCommand request, CancellationToken cancellationToken)
+        public async Task<AdvertisementHateoasResponse> Handle(CloseAdvertisementCommand request, CancellationToken cancellationToken)
         {
             Person owner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
             owner.CloseAdvertisement(request.Id, dateTimeService.Now);
             await unitOfWork.SaveChangesAsync(cancellationToken);
+            Advertisement.AdvertisementStatus advertisementStatus = owner.Advertisements.First(x => x.Id == request.Id).Status;
+            return new AdvertisementHateoasResponse(request.Id, request.PersonId, (AdvertisementResponse.AdvertisementStatus)advertisementStatus);
         }
     }
 
@@ -50,8 +55,8 @@ public sealed class CloseAdvertisement : IEndpoint
             CancellationToken cancellationToken) =>
         {
             CloseAdvertisementCommand command = new(PersonId: personId, Id: advertisementId);
-            await sender.Send(command, cancellationToken);
-            return Results.Ok();
+            AdvertisementHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
+            return Results.Ok(hateoasResponse);
         }).RequireAuthorization()
         .WithName(EndpointNames.CloseAdvertisement.EndpointName)
         .WithTags(EndpointNames.GroupNames.AdvertisementGroup);

@@ -5,6 +5,7 @@ using FluentAssertions;
 using KittySaver.Api.Features.Advertisements;
 using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Features.Persons;
+using KittySaver.Api.Shared.Contracts;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
 using Shared;
@@ -63,6 +64,7 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
             await _httpClient.PostAsJsonAsync("api/v1/persons", personRegisterRequest);
         ApiResponses.CreatedWithIdResponse personRegisterResponse =
             await personRegisterResponseMessage.GetIdResponseFromResponseMessageAsync();
+        
         CreateCat.CreateCatRequest catCreateRequest = _createCatRequestGenerator.Generate();
         HttpResponseMessage catCreateResponseMessage =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", catCreateRequest);
@@ -107,7 +109,14 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
                 reassignCatsRequest);
 
         //Assert
-        reassignCatsResponseMessage.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        reassignCatsResponseMessage.StatusCode.Should().Be(HttpStatusCode.OK);
+        AdvertisementHateoasResponse? hateoasResponse = await reassignCatsResponseMessage.Content.ReadFromJsonAsync<AdvertisementHateoasResponse>();
+        hateoasResponse.Should().NotBeNull();
+        hateoasResponse!.Id.Should().Be(createAdvertisementResponse.Id);
+        hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
+        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
+        hateoasResponse.Links.Count.Should().Be(6);
+        
         HttpResponseMessage getAdvertisementResponse =
             await _httpClient.GetAsync($"api/v1/advertisements/{createAdvertisementResponse.Id}");
         getAdvertisementResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -182,7 +191,14 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
                 reassignCatsRequest);
 
         //Assert
-        reassignCatsResponseMessage.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        reassignCatsResponseMessage.StatusCode.Should().Be(HttpStatusCode.OK);
+        AdvertisementHateoasResponse? hateoasResponse = await reassignCatsResponseMessage.Content.ReadFromJsonAsync<AdvertisementHateoasResponse>();
+        hateoasResponse.Should().NotBeNull();
+        hateoasResponse!.Id.Should().Be(createAdvertisementResponse.Id);
+        hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
+        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
+        hateoasResponse.Links.Count.Should().Be(6);
+        
         HttpResponseMessage getAdvertisementResponse =
             await _httpClient.GetAsync($"api/v1/advertisements/{createAdvertisementResponse.Id}");
         getAdvertisementResponse.StatusCode.Should().Be(HttpStatusCode.OK);

@@ -10,19 +10,24 @@ public interface IEndpoint
 
 public interface IHateoasResponse
 {
-    public Guid Id { get; }
     public ICollection<Link> Links { get; set; }
 }
-public interface IHateoasPersonResponse : IHateoasResponse;
+
+public interface IHateoasPersonResponse : IHateoasResponse
+{
+    public Guid Id { get; }
+}
 
 public interface IHateoasCatResponse : IHateoasResponse
 {
+    public Guid Id { get; }
     public Guid PersonId { get; }
     public Guid? AdvertisementId { get; }
 }
 
 public interface IHateoasAdvertisementResponse : IHateoasResponse
 {
+    public Guid Id { get; }
     public Guid PersonId { get; }
     public AdvertisementResponse.AdvertisementStatus Status { get; }
 }

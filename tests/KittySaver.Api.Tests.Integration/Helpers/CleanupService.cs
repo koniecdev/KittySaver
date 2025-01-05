@@ -3,6 +3,7 @@ using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
+using KittySaver.Api.Shared.Contracts;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KittySaver.Api.Tests.Integration.Helpers;
@@ -23,22 +24,10 @@ public class CleanupHelper(HttpClient httpClient)
         }
         foreach (PersonResponse person in persons.Items)
         {
-            PagedList<CatResponse>? cats = await httpClient.GetFromJsonAsync<PagedList<CatResponse>>($"api/v1/persons/{person.Id}/cats");
-            if (cats is not null)
-            {
-                foreach (CatResponse cat in cats.Items)
-                {
-                    var msg2 = await httpClient.DeleteAsync($"api/v1/persons/{person.Id}/cats/{cat.Id}");
-                    if (!msg2.IsSuccessStatusCode)
-                    {
-                        ProblemDetails msg2ProblemDetail = await msg2.Content.ReadFromJsonAsync<ProblemDetails>() ?? throw new Exception();
-                    }
-                }
-            }
-            var msg3 = await httpClient.DeleteAsync($"api/v1/persons/{person.Id}");
+            HttpResponseMessage msg3 = await httpClient.DeleteAsync($"api/v1/persons/{person.Id}");
             if (!msg3.IsSuccessStatusCode)
             {
-                ProblemDetails msg3ProblemDetail = await msg3.Content.ReadFromJsonAsync<ProblemDetails>() ?? throw new Exception();
+                ProblemDetails problemDetails = await msg3.Content.ReadFromJsonAsync<ProblemDetails>() ?? throw new Exception();
             }
         }
     }

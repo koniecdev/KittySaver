@@ -7,6 +7,7 @@ using KittySaver.Api.Features.Advertisements;
 using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Shared.Abstractions;
+using KittySaver.Api.Shared.Contracts;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
 using Shared;
@@ -132,6 +133,11 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
             await response.Content.ReadFromJsonAsync<PagedList<AdvertisementResponse>>();
         advertisements.Should().NotBeNull();
         advertisements!.Items.Count.Should().Be(2);
+        advertisements.Total.Should().Be(2);
+        advertisements.Links.Count.Should().Be(2);
+        advertisements.Links.Count(x => x.Rel == EndpointNames.SelfRel).Should().Be(1);
+        advertisements.Links.Count(x => x.Rel == "by-page").Should().Be(1);
+        
         AdvertisementResponse firstPersonAdvertisement =
             advertisements.Items.First(x => x.PersonId == personRegisterResponse.Id);
         firstPersonAdvertisement.Id.Should().NotBeEmpty();
@@ -144,6 +150,8 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
         firstPersonAdvertisement.PickupAddress.Street.Should().Be(request.PickupAddressStreet);
         firstPersonAdvertisement.PickupAddress.BuildingNumber.Should().Be(request.PickupAddressBuildingNumber);
         firstPersonAdvertisement.PriorityScore.Should().BeGreaterThan(0);
+        firstPersonAdvertisement.Links.Count.Should().Be(6);
+
         AdvertisementResponse secondPersonAdvertisement =
             advertisements.Items.First(x => x.PersonId == secondPersonRegisterResponse.Id);
         secondPersonAdvertisement.Id.Should().NotBeEmpty();
@@ -156,6 +164,7 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
         secondPersonAdvertisement.PickupAddress.Street.Should().Be(secondRequest.PickupAddressStreet);
         secondPersonAdvertisement.PickupAddress.BuildingNumber.Should().Be(secondRequest.PickupAddressBuildingNumber);
         secondPersonAdvertisement.PriorityScore.Should().BeGreaterThan(0);
+        secondPersonAdvertisement.Links.Count.Should().Be(6);
     }
 
     [Fact]
@@ -166,10 +175,14 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        PagedList<AdvertisementResponse>? advertisement =
+        PagedList<AdvertisementResponse>? advertisements =
             await response.Content.ReadFromJsonAsync<PagedList<AdvertisementResponse>>();
-        advertisement.Should().NotBeNull();
-        advertisement!.Items.Count.Should().Be(0);
+        advertisements.Should().NotBeNull();
+        advertisements!.Items.Count.Should().Be(0);
+        advertisements.Total.Should().Be(0);
+        advertisements.Links.Count.Should().Be(2);
+        advertisements.Links.Count(x => x.Rel == EndpointNames.SelfRel).Should().Be(1);
+        advertisements.Links.Count(x => x.Rel == "by-page").Should().Be(1);
     }
 
     public Task InitializeAsync()

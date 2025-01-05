@@ -4,14 +4,6 @@ using KittySaver.Domain.Persons;
 
 namespace KittySaver.Api.Shared.Abstractions;
 
-public sealed class Link(string href, string rel, string method, bool templated = false)
-{
-    public string Href { get; } = href;
-    public string Rel { get; } = rel;
-    public string Method { get; } = method;
-    public bool Templated { get; } = templated;
-}
-
 public interface ILinkService
 {
     public List<Link> GeneratePersonRelatedLinks(Guid personId, CurrentlyLoggedInPerson? currentlyLoggedInPerson);
@@ -136,7 +128,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
                 isSelf: true)
         ];
 
-        if (currentlyLoggedInPerson is null || currentlyLoggedInPerson.PersonId != personId)
+        if (currentlyLoggedInPerson?.Role is not Person.Role.Admin && currentlyLoggedInPerson?.PersonId != personId)
         {
             return links;
         }
@@ -177,7 +169,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
                 break;
             case AdvertisementResponse.AdvertisementStatus.Closed:
             default:
-                throw new ArgumentOutOfRangeException(nameof(advertisementStatus), advertisementStatus, null);
+                break;
         }
 
         return links;

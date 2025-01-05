@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
+using KittySaver.Api.Shared.Contracts;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
@@ -38,7 +39,7 @@ public sealed class CreatePerson : IEndpoint
         string? DefaultAdvertisementPickupAddressStreet,
         string? DefaultAdvertisementPickupAddressBuildingNumber,
         string DefaultAdvertisementContactInfoEmail,
-        string DefaultAdvertisementContactInfoPhoneNumber) : ICommand<Guid>, ICreatePersonRequest, IAuthorizedRequest;
+        string DefaultAdvertisementContactInfoPhoneNumber) : ICommand<PersonHateoasResponse>, ICreatePersonRequest, IAuthorizedRequest;
 
     public sealed class CreatePersonCommandValidator : AbstractValidator<CreatePersonCommand>, IAsyncValidator
     {
@@ -103,9 +104,9 @@ public sealed class CreatePerson : IEndpoint
     internal sealed class CreatePersonCommandHandler(
         IPersonRepository personRepository,
         IUnitOfWork unitOfWork)
-        : IRequestHandler<CreatePersonCommand, Guid>
+        : IRequestHandler<CreatePersonCommand, PersonHateoasResponse>
     {
-        public async Task<Guid> Handle(CreatePersonCommand request, CancellationToken cancellationToken)
+        public async Task<PersonHateoasResponse> Handle(CreatePersonCommand request, CancellationToken cancellationToken)
         {
             Nickname nickname = Nickname.Create(request.Nickname);
             Email email = Email.Create(request.Email);
@@ -133,7 +134,7 @@ public sealed class CreatePerson : IEndpoint
             
             personRepository.Insert(person);
             await unitOfWork.SaveChangesAsync(cancellationToken);
-            return person.Id;
+            return new PersonHateoasResponse(person.Id);
         }
     }
     
@@ -145,8 +146,8 @@ public sealed class CreatePerson : IEndpoint
             CancellationToken cancellationToken) =>
         {
             CreatePersonCommand command = request.MapToCreatePersonCommand();
-            Guid personId = await sender.Send(command, cancellationToken);
-            return Results.Created($"/api/v1/persons/{personId}", new { Id = personId });
+            PersonHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
+            return Results.Created($"/api/v1/persons/{hateoasResponse.Id}", new { hateoasResponse.Id, hateoasResponse.Links });
         }).RequireAuthorization()
         .WithName(EndpointNames.CreatePerson.EndpointName)
         .WithTags(EndpointNames.GroupNames.PersonGroup);

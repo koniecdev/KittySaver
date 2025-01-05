@@ -6,6 +6,7 @@ using Bogus.Extensions;
 using FluentAssertions;
 using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Features.Persons;
+using KittySaver.Api.Shared.Contracts;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.Persons;
@@ -76,12 +77,13 @@ public class CreateCatEndpointsTests : IAsyncLifetime
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
-        ApiResponses.CreatedWithIdResponse? registerResponse =
-            await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>();
-        registerResponse.Should().NotBeNull();
-        registerResponse!.Id.Should().NotBeEmpty();
+        CatHateoasResponse? hateoasResponse = await response.Content.ReadFromJsonAsync<CatHateoasResponse>();
+        hateoasResponse.Should().NotBeNull();
+        hateoasResponse!.Id.Should().NotBeEmpty();
+        hateoasResponse.PersonId.Should().NotBeEmpty();
+        hateoasResponse.Links.Count.Should().Be(3);
         response.Headers.Location!.ToString().Should()
-            .Contain($"/api/v1/persons/{personRegisterResponse.Id}/cats/{registerResponse.Id}");
+            .Contain($"/api/v1/persons/{hateoasResponse.PersonId}/cats/{hateoasResponse.Id}");
     }
 
     [Fact]
@@ -108,16 +110,17 @@ public class CreateCatEndpointsTests : IAsyncLifetime
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
-        ApiResponses.CreatedWithIdResponse? registerResponse =
-            await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>();
-        registerResponse.Should().NotBeNull();
-        registerResponse!.Id.Should().NotBeEmpty();
+        CatHateoasResponse? hateoasResponse = await response.Content.ReadFromJsonAsync<CatHateoasResponse>();
+        hateoasResponse.Should().NotBeNull();
+        hateoasResponse!.Id.Should().NotBeEmpty();
+        hateoasResponse.PersonId.Should().NotBeEmpty();
+        hateoasResponse.Links.Count.Should().Be(3);
         response.Headers.Location!.ToString().Should()
-            .Contain($"/api/v1/persons/{personRegisterResponse.Id}/cats/{registerResponse.Id}");
+            .Contain($"/api/v1/persons/{hateoasResponse.PersonId}/cats/{hateoasResponse.Id}");
     }
 
     [Fact]
-    public async Task CreateCat_ShouldReturnSuccess_WhenInvalidAdditionalRequirementsAreProvided()
+    public async Task CreateCat_ShouldReturnSuccess_WhenEmptyAdditionalRequirementsAreProvided()
     {
         //Arrange
         HttpResponseMessage personRegisterResponseMessage =
@@ -141,15 +144,17 @@ public class CreateCatEndpointsTests : IAsyncLifetime
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
-        ApiResponses.CreatedWithIdResponse? registerResponse =
-            await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>();
-        registerResponse.Should().NotBeNull();
-        registerResponse!.Id.Should().NotBeEmpty();
+        CatHateoasResponse? hateoasResponse = await response.Content.ReadFromJsonAsync<CatHateoasResponse>();
+        hateoasResponse.Should().NotBeNull();
+        hateoasResponse!.Id.Should().NotBeEmpty();
+        hateoasResponse.PersonId.Should().NotBeEmpty();
+        hateoasResponse.Links.Count.Should().Be(3);
         response.Headers.Location!.ToString().Should()
-            .Contain($"/api/v1/persons/{personRegisterResponse.Id}/cats/{registerResponse.Id}");
+            .Contain($"/api/v1/persons/{hateoasResponse.PersonId}/cats/{hateoasResponse.Id}");
+        
         CatResponse catAfterUpdate =
             await _httpClient.GetFromJsonAsync<CatResponse>(
-                $"api/v1/persons/{personRegisterResponse.Id}/cats/{registerResponse.Id}")
+                $"api/v1/persons/{personRegisterResponse.Id}/cats/{hateoasResponse.Id}")
             ?? throw new JsonException();
         catAfterUpdate.AdditionalRequirements.Should().Be(string.Empty);
     }

@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
+using KittySaver.Api.Shared.Contracts;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Common.Primitives.Enums;
@@ -32,7 +33,7 @@ public sealed class UpdateCat : IEndpoint
         string AgeCategory,
         string Behavior,
         string HealthStatus,
-        string? AdditionalRequirements = null) : ICommand, IAuthorizedRequest, ICatRequest;
+        string? AdditionalRequirements = null) : ICommand<CatHateoasResponse>, IAuthorizedRequest, ICatRequest;
 
     public sealed class UpdateCatCommandValidator : AbstractValidator<UpdateCatCommand>
     {
@@ -66,9 +67,9 @@ public sealed class UpdateCat : IEndpoint
         IPersonRepository personRepository,
         IUnitOfWork unitOfWork,
         ICatPriorityCalculatorService calculator)
-        : IRequestHandler<UpdateCatCommand>
+        : IRequestHandler<UpdateCatCommand, CatHateoasResponse>
     {
-        public async Task Handle(UpdateCatCommand request, CancellationToken cancellationToken)
+        public async Task<CatHateoasResponse> Handle(UpdateCatCommand request, CancellationToken cancellationToken)
         {
             Person catOwner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
             
@@ -92,6 +93,8 @@ public sealed class UpdateCat : IEndpoint
                 medicalHelpUrgency);
             
             await unitOfWork.SaveChangesAsync(cancellationToken);
+            Guid? catAdvertisementId = catOwner.Cats.First(cat => cat.Id == request.Id).AdvertisementId;
+            return new CatHateoasResponse(request.Id, request.PersonId, catAdvertisementId);
         }
     }
     
@@ -105,8 +108,8 @@ public sealed class UpdateCat : IEndpoint
             CancellationToken cancellationToken) =>
         {
             UpdateCatCommand command = request.MapToUpdateCatCommand(personId, id);
-            await sender.Send(command, cancellationToken);
-            return Results.NoContent();
+            CatHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
+            return Results.Ok(hateoasResponse);
         }).RequireAuthorization()
         .WithName(EndpointNames.UpdateCat.EndpointName)
         .WithTags(EndpointNames.GroupNames.CatGroup);

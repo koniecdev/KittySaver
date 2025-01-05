@@ -1,4 +1,6 @@
-﻿namespace KittySaver.Api.Shared.Abstractions;
+﻿using KittySaver.Api.Shared.Abstractions;
+
+namespace KittySaver.Api.Shared.Contracts;
 
 public interface IPagedList<TResponse>
 {

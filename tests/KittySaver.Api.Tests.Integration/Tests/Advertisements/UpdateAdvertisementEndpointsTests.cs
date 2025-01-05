@@ -3,8 +3,10 @@ using System.Net.Http.Json;
 using Bogus;
 using FluentAssertions;
 using KittySaver.Api.Features.Advertisements;
+using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Features.Persons.SharedContracts;
+using KittySaver.Api.Shared.Contracts;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.ValueObjects;
@@ -119,7 +121,13 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
             await _httpClient.PutAsJsonAsync($"api/v1/persons/{createPersonResponse.Id}/advertisements/{advertisementResponse.Id}", request);
 
         //Assert
-        updateResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        updateResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        AdvertisementHateoasResponse? hateoasResponse = await updateResponse.Content.ReadFromJsonAsync<AdvertisementHateoasResponse>();
+        hateoasResponse.Should().NotBeNull();
+        hateoasResponse!.Id.Should().Be(advertisementResponse.Id);
+        hateoasResponse.PersonId.Should().Be(createPersonResponse.Id);
+        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
+        hateoasResponse.Links.Count.Should().Be(6);
     }
 
     [Fact]

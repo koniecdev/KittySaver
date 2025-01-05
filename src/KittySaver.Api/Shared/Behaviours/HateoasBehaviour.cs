@@ -20,8 +20,8 @@ public sealed class HateoasBehaviour<TRequest, TResponse>(
 
         response.Links = response switch
         {
-            IHateoasPersonResponse => linkService.GeneratePersonRelatedLinks(
-                response.Id,
+            IHateoasPersonResponse personResponse => linkService.GeneratePersonRelatedLinks(
+                personResponse.Id,
                 issuingPerson),
             IHateoasCatResponse catResponse => linkService.GenerateCatRelatedLinks(
                 catResponse.Id,

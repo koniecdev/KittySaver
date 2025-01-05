@@ -5,6 +5,7 @@ using Bogus.Extensions;
 using FluentAssertions;
 using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Features.Persons.SharedContracts;
+using KittySaver.Api.Shared.Contracts;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
@@ -56,6 +57,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         PersonResponse person =
             await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{registeredPersonResponse.Id}")
             ?? throw new JsonException();
+        
         //Act
         UpdatePerson.UpdatePersonRequest request = new Faker<UpdatePerson.UpdatePersonRequest>()
             .CustomInstantiator(faker =>
@@ -73,11 +75,14 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
                     DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 ));
 
-        HttpResponseMessage updateResponse =
-            await _httpClient.PutAsJsonAsync($"api/v1/persons/{registeredPersonResponse.Id}", request);
-
+        HttpResponseMessage updateResponse = await _httpClient.PutAsJsonAsync($"api/v1/persons/{registeredPersonResponse.Id}", request);
+        
         //Assert
-        updateResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        updateResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        PersonHateoasResponse? hateoasResponse = await updateResponse.Content.ReadFromJsonAsync<PersonHateoasResponse>();
+        hateoasResponse.Should().NotBeNull();
+        hateoasResponse!.Id.Should().Be(person.Id);
+        hateoasResponse.Links.Count.Should().Be(7);
 
         PersonResponse personAfterUpdate =
             await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{registeredPersonResponse.Id}")
@@ -120,8 +125,12 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
             await _httpClient.PutAsJsonAsync($"api/v1/persons/{person.UserIdentityId}", request);
 
         //Assert
-        updateResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-
+        updateResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        PersonHateoasResponse? hateoasResponse = await updateResponse.Content.ReadFromJsonAsync<PersonHateoasResponse>();
+        hateoasResponse.Should().NotBeNull();
+        hateoasResponse!.Id.Should().Be(person.Id);
+        hateoasResponse.Links.Count.Should().Be(7);
+        
         PersonResponse personAfterUpdate =
             await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{registeredPersonResponse.Id}")
             ?? throw new JsonException();
