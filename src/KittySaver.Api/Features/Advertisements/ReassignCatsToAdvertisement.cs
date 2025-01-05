@@ -1,5 +1,7 @@
 ﻿using FluentValidation;
+using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
+using KittySaver.Api.Shared.Contracts;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Persons;
@@ -14,7 +16,7 @@ public sealed class ReassignCatsToAdvertisement : IEndpoint
     public sealed record ReassignCatsToAdvertisementCommand(
         Guid PersonId,
         Guid Id,
-        IEnumerable<Guid> CatIds) : ICommand, IAuthorizedRequest, IAdvertisementRequest;
+        IEnumerable<Guid> CatIds) : ICommand<AdvertisementHateoasResponse>, IAuthorizedRequest, IAdvertisementRequest;
 
     public sealed class AssignCatToAdvertisementCommandValidator : AbstractValidator<ReassignCatsToAdvertisementCommand>
     {
@@ -33,13 +35,15 @@ public sealed class ReassignCatsToAdvertisement : IEndpoint
     public sealed class ReassignCatsToAdvertisementCommandHandler(
         IPersonRepository personRepository,
         IUnitOfWork unitOfWork) 
-        : IRequestHandler<ReassignCatsToAdvertisementCommand>
+        : IRequestHandler<ReassignCatsToAdvertisementCommand, AdvertisementHateoasResponse>
     {
-        public async Task Handle(ReassignCatsToAdvertisementCommand request, CancellationToken cancellationToken)
+        public async Task<AdvertisementHateoasResponse> Handle(ReassignCatsToAdvertisementCommand request, CancellationToken cancellationToken)
         {
             Person owner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
             owner.ReplaceCatsOfAdvertisement(request.Id, request.CatIds);
             await unitOfWork.SaveChangesAsync(cancellationToken);
+            Advertisement.AdvertisementStatus advertisementStatus = owner.Advertisements.First(x => x.Id == request.Id).Status;
+            return new AdvertisementHateoasResponse(request.Id, request.PersonId, (AdvertisementResponse.AdvertisementStatus)advertisementStatus);
         }
     }
     
@@ -56,8 +60,8 @@ public sealed class ReassignCatsToAdvertisement : IEndpoint
                 PersonId: personId,
                 Id: advertisementId,
                 CatIds: request.CatIds);
-            await sender.Send(command, cancellationToken);
-            return Results.NoContent();
+            AdvertisementHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
+            return Results.Ok(hateoasResponse);
         }).RequireAuthorization()
         .WithName(EndpointNames.ReassignCatsToAdvertisement.EndpointName)
         .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
