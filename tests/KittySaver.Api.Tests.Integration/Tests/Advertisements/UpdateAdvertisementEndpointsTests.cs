@@ -123,7 +123,8 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
         updateResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         AdvertisementHateoasResponse? hateoasResponse = await updateResponse.Content.ReadFromJsonAsync<AdvertisementHateoasResponse>();
         hateoasResponse.Should().NotBeNull();
-        hateoasResponse!.Id.Should().Be(hateoasResponse.Id);
+        hateoasResponse!.Id.Should().Be(advertisementResponse.Id);
+        hateoasResponse.PersonId.Should().Be(createPersonResponse.Id);
         hateoasResponse.Links.Count.Should().Be(6);
     }
 

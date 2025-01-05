@@ -100,6 +100,7 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
         AdvertisementHateoasResponse? hateoasResponse = await responseMessage.Content.ReadFromJsonAsync<AdvertisementHateoasResponse>();
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().NotBeEmpty();
+        hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
         responseMessage.Headers.Location!.ToString()
             .Should().Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{hateoasResponse.Id}");
         hateoasResponse.Links.Count.Should().Be(6);
@@ -154,6 +155,7 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
         AdvertisementHateoasResponse? hateoasResponse = await responseMessage.Content.ReadFromJsonAsync<AdvertisementHateoasResponse>();
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().NotBeEmpty();
+        hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
         responseMessage.Headers.Location!.ToString()
             .Should().Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{hateoasResponse.Id}");
         hateoasResponse.Links.Count.Should().Be(6);
@@ -204,6 +206,7 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
         AdvertisementHateoasResponse? hateoasResponse = await responseMessage.Content.ReadFromJsonAsync<AdvertisementHateoasResponse>();
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().NotBeEmpty();
+        hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
         responseMessage.Headers.Location!.ToString()
             .Should().Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{hateoasResponse.Id}");
         hateoasResponse.Links.Count.Should().Be(6);
