@@ -6,6 +6,7 @@ using FluentAssertions;
 using KittySaver.Api.Features.Advertisements;
 using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Features.Persons;
+using KittySaver.Api.Shared.Contracts;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
 using Microsoft.AspNetCore.Http;
@@ -99,6 +100,12 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
 
         //Assert
         expireResponseMessage.StatusCode.Should().Be(HttpStatusCode.OK);
+        AdvertisementHateoasResponse? hateoasResponse = await expireResponseMessage.Content.ReadFromJsonAsync<AdvertisementHateoasResponse>();
+        hateoasResponse.Should().NotBeNull();
+        hateoasResponse!.Id.Should().Be(advertisementResponse.Id);
+        hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
+        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Expired);
+        hateoasResponse.Links.Count.Should().Be(2);
         AdvertisementResponse advertisement =
             await _httpClient.GetFromJsonAsync<AdvertisementResponse>(
                 $"api/v1/advertisements/{advertisementResponse.Id}") ?? throw new JsonException();
