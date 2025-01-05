@@ -62,8 +62,8 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
             await response.Content.ReadFromJsonAsync<PersonHateoasResponse>();
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().NotBeEmpty();
-        response.Headers.Location!.ToString().Should().Contain($"/api/v1/persons/{hateoasResponse.Id}");
         hateoasResponse.Links.Count.Should().Be(7);
+        response.Headers.Location!.ToString().Should().Contain($"/api/v1/persons/{hateoasResponse.Id}");
         PersonResponse person =
             await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{hateoasResponse.Id}")
             ?? throw new JsonException();
@@ -85,7 +85,7 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
                     PhoneNumber: faker.Person.Phone,
                     UserIdentityId: Guid.NewGuid(),
                     DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
-                    DefaultAdvertisementPickupAddressState: faker.Address.State(),
+                    DefaultAdvertisementPickupAddressState: state,
                     DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
                     DefaultAdvertisementPickupAddressCity: faker.Address.City(),
                     DefaultAdvertisementPickupAddressStreet: faker.Address.StreetName(),
