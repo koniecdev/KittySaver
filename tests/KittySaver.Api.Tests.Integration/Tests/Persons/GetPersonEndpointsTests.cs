@@ -59,6 +59,7 @@ public class GetPersonEndpointsTests : IAsyncLifetime
         person.Id.Should().Be(registerResponse.Id);
         person.Email.Should().Be(request.Email);
         person.PhoneNumber.Should().Be(request.PhoneNumber);
+        person.Links.Count.Should().Be(7);
     }
 
     [Fact]

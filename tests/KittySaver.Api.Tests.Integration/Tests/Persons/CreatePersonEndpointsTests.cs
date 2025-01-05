@@ -99,11 +99,13 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
-        ApiResponses.CreatedWithIdResponse? registerResponse =
-            await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>();
-        registerResponse.Should().NotBeNull();
-        registerResponse!.Id.Should().NotBeEmpty();
-        response.Headers.Location!.ToString().Should().Contain($"/api/v1/persons/{registerResponse.Id}");
+        PersonHateoasResponse? hateoasResponse =
+            await response.Content.ReadFromJsonAsync<PersonHateoasResponse>();
+        hateoasResponse.Should().NotBeNull();
+        hateoasResponse!.Links.Count.Should().Be(7);
+        hateoasResponse.Should().NotBeNull();
+        hateoasResponse.Id.Should().NotBeEmpty();
+        response.Headers.Location!.ToString().Should().Contain($"/api/v1/persons/{hateoasResponse.Id}");
     }
 
     [Fact]
