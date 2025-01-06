@@ -61,7 +61,8 @@ public sealed class GetCats : IEndpoint
                     EndpointNames.GetCats.EndpointName,
                     request.Offset,
                     request.Limit,
-                    totalRecords)
+                    totalRecords,
+                    request.PersonId)
             };
             
             return response;
