@@ -1,7 +1,6 @@
 ﻿using System.Globalization;
 using System.Linq.Expressions;
 using System.Numerics;
-using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Shared.Contracts;
 
 namespace KittySaver.Api.Shared.Abstractions;
@@ -11,19 +10,11 @@ public interface IPropertyFilter<TEntity>
     bool MatchesProperty(string propertyName);
     IQueryable<TEntity> ApplyFilter(IQueryable<TEntity> query, FilterCriteria.FilterOperation operation, string value);
 }
-public abstract class PropertyFilterBase<TEntity, TProperty>
+
+public abstract class PropertyFilterBase<TEntity, TProperty>(Expression<Func<TEntity, TProperty>> propertySelector, string name)
 {
-    protected readonly Expression<Func<TEntity, TProperty>> PropertySelector;
-    protected readonly string PropertyName;
-
-    protected PropertyFilterBase(Expression<Func<TEntity, TProperty>> propertySelector, string propertyName)
-    {
-        PropertySelector = propertySelector;
-        PropertyName = propertyName;
-    }
-
     public bool MatchesProperty(string propertyName) =>
-        string.Equals(PropertyName, propertyName, StringComparison.CurrentCultureIgnoreCase);
+        string.Equals(name, propertyName, StringComparison.CurrentCultureIgnoreCase);
 
     protected abstract Expression CreateFilterExpression(
         Expression property,
@@ -35,25 +26,21 @@ public abstract class PropertyFilterBase<TEntity, TProperty>
         FilterCriteria.FilterOperation operation,
         TProperty value)
     {
-        var parameter = Expression.Parameter(typeof(TEntity));
-        var property = Expression.Invoke(PropertySelector, parameter);
-        var constant = Expression.Constant(value);
+        ParameterExpression parameter = Expression.Parameter(typeof(TEntity));
+        InvocationExpression property = Expression.Invoke(propertySelector, parameter);
+        ConstantExpression constant = Expression.Constant(value);
 
-        var comparison = CreateFilterExpression(property, operation, constant);
-        var lambda = Expression.Lambda<Func<TEntity, bool>>(comparison, parameter);
+        Expression comparison = CreateFilterExpression(property, operation, constant);
+        Expression<Func<TEntity, bool>> lambda = Expression.Lambda<Func<TEntity, bool>>(comparison, parameter);
         
         return query.Where(lambda);
     }
 }
 
-// Implementation for string properties
-public class StringPropertyFilter<TEntity> : PropertyFilterBase<TEntity, string>, IPropertyFilter<TEntity>
+public class StringPropertyFilter<TEntity>(Expression<Func<TEntity, string>> propertySelector)
+    : PropertyFilterBase<TEntity, string>(propertySelector, ExpressionHelper.GetPropertyName(propertySelector)),
+        IPropertyFilter<TEntity>
 {
-    public StringPropertyFilter(Expression<Func<TEntity, string>> propertySelector)
-        : base(propertySelector, ExpressionHelper.GetPropertyName(propertySelector))
-    {
-    }
-
     protected override Expression CreateFilterExpression(
         Expression property,
         FilterCriteria.FilterOperation operation,
@@ -64,11 +51,15 @@ public class StringPropertyFilter<TEntity> : PropertyFilterBase<TEntity, string>
             FilterCriteria.FilterOperation.Eq => Expression.Equal(property, constantValue),
             FilterCriteria.FilterOperation.Neq => Expression.NotEqual(property, constantValue),
             FilterCriteria.FilterOperation.In => Expression.Call(property,
-                typeof(string).GetMethod(nameof(string.Contains), new[] { typeof(string) })!,
+                typeof(string).GetMethod(nameof(string.Contains), [typeof(string)])!,
                 constantValue),
             FilterCriteria.FilterOperation.Nin => Expression.Not(Expression.Call(property,
-                typeof(string).GetMethod(nameof(string.Contains), new[] { typeof(string) })!,
+                typeof(string).GetMethod(nameof(string.Contains), [typeof(string)])!,
                 constantValue)),
+            FilterCriteria.FilterOperation.Gt => Expression.Equal(property, constantValue),
+            FilterCriteria.FilterOperation.Gte => Expression.Equal(property, constantValue),
+            FilterCriteria.FilterOperation.Lt => Expression.Equal(property, constantValue),
+            FilterCriteria.FilterOperation.Lte => Expression.Equal(property, constantValue),
             _ => throw new ArgumentException($"Unsupported string operation: {operation}")
         };
     }
@@ -77,15 +68,11 @@ public class StringPropertyFilter<TEntity> : PropertyFilterBase<TEntity, string>
         => ApplyFilterExpression(query, operation, value);
 }
 
-// Implementation for numeric properties
-public class NumericPropertyFilter<TEntity, TNumber> : PropertyFilterBase<TEntity, TNumber>, IPropertyFilter<TEntity>
+public class NumericPropertyFilter<TEntity, TNumber>(Expression<Func<TEntity, TNumber>> propertySelector)
+    : PropertyFilterBase<TEntity, TNumber>(propertySelector, ExpressionHelper.GetPropertyName(propertySelector)),
+        IPropertyFilter<TEntity>
     where TNumber : INumber<TNumber>
 {
-    public NumericPropertyFilter(Expression<Func<TEntity, TNumber>> propertySelector)
-        : base(propertySelector, ExpressionHelper.GetPropertyName(propertySelector))
-    {
-    }
-
     protected override Expression CreateFilterExpression(
         Expression property,
         FilterCriteria.FilterOperation operation,
@@ -99,18 +86,17 @@ public class NumericPropertyFilter<TEntity, TNumber> : PropertyFilterBase<TEntit
             FilterCriteria.FilterOperation.Gte => Expression.GreaterThanOrEqual(property, constantValue),
             FilterCriteria.FilterOperation.Lt => Expression.LessThan(property, constantValue),
             FilterCriteria.FilterOperation.Lte => Expression.LessThanOrEqual(property, constantValue),
+            FilterCriteria.FilterOperation.In => Expression.Equal(property, constantValue),
+            FilterCriteria.FilterOperation.Nin => Expression.NotEqual(property, constantValue),
             _ => throw new ArgumentException($"Unsupported numeric operation: {operation}")
         };
     }
 
     public IQueryable<TEntity> ApplyFilter(IQueryable<TEntity> query, FilterCriteria.FilterOperation operation, string value)
     {
-        if (!TNumber.TryParse(value, CultureInfo.InvariantCulture, out var parsedValue))
-        {
-            throw new ArgumentException($"Cannot parse '{value}' as {typeof(TNumber).Name}");
-        }
-        
-        return ApplyFilterExpression(query, operation, parsedValue);
+        return !TNumber.TryParse(value, CultureInfo.InvariantCulture, out TNumber? parsedValue) 
+            ? query 
+            : ApplyFilterExpression(query, operation, parsedValue);
     }
 }
 public static class ExpressionHelper
@@ -119,12 +105,33 @@ public static class ExpressionHelper
     {
         return expression.Body switch
         {
-            // Handle the case of direct member access
             MemberExpression memberExpression => memberExpression.Member.Name,
-            // Handle the case of conversions (like implicit numeric conversions)
-            UnaryExpression unaryExpression when unaryExpression.Operand is MemberExpression memberExpr => memberExpr
-                .Member.Name,
-            _ => throw new ArgumentException("Expression must be a simple property access", nameof(expression))
+            UnaryExpression { Operand: MemberExpression memberExpr } => memberExpr.Member.Name,
+            _ => ""
         };
+    }
+}
+
+public static class FilterExtensions
+{
+    public static IQueryable<TEntity> ApplyFilters<TEntity>(
+        this IQueryable<TEntity> query,
+        IEnumerable<FilterCriteria> filterCriteria,
+        IEnumerable<IPropertyFilter<TEntity>> filters)
+    {
+        List<IPropertyFilter<TEntity>> availableFilters = filters.ToList();
+
+        foreach (FilterCriteria criteria in filterCriteria)
+        {
+            IPropertyFilter<TEntity>? filter = availableFilters.FirstOrDefault(f => f.MatchesProperty(criteria.PropertyName));
+            if (filter == null)
+            {
+                continue;
+            }
+
+            query = filter.ApplyFilter(query, criteria.Operation, criteria.Value);
+        }
+
+        return query;
     }
 }

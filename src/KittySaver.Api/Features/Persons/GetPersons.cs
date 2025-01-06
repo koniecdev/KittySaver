@@ -44,7 +44,9 @@ public sealed class GetPersons : IEndpoint
                     .Split(',')
                     .Select(FilterCriteria.Parse);
                 
-                query = query.ApplyFilters(filters);
+                IPropertyFilter<PersonReadModel>[] propertyFilters = GetPropertyFilters();
+                
+                query = query.ApplyFilters(filters, propertyFilters);
             }
             
             query = request.SortOrder?.ToLower() == "desc" 
@@ -80,6 +82,19 @@ public sealed class GetPersons : IEndpoint
             return response;
         }
 
+        private static IPropertyFilter<PersonReadModel>[] GetPropertyFilters()
+        {
+            IPropertyFilter<PersonReadModel>[] propertyFilters =
+            [
+                new StringPropertyFilter<PersonReadModel>(p => p.Nickname),
+                new StringPropertyFilter<PersonReadModel>(p => p.Email),
+                new StringPropertyFilter<PersonReadModel>(p => p.PhoneNumber),
+                
+                new NumericPropertyFilter<PersonReadModel, int>(p => p.CurrentRole)
+            ];
+            return propertyFilters;
+        }
+
         private static Expression<Func<PersonReadModel, object>> GetSortProperty(GetPersonsQuery request)
             => request.SortColumn?.ToLower() switch
             {
@@ -107,37 +122,5 @@ public sealed class GetPersons : IEndpoint
             }).RequireAuthorization()
             .WithName(EndpointNames.GetPersons.EndpointName)
             .WithTags(EndpointNames.GroupNames.PersonGroup);
-    }
-}
-
-
-
-public static class PersonFilters
-{
-    private static readonly IPropertyFilter<PersonReadModel>[] Filters =
-    [
-        // String filters
-        new StringPropertyFilter<PersonReadModel>(p => p.Nickname),
-        new StringPropertyFilter<PersonReadModel>(p => p.Email),
-        new StringPropertyFilter<PersonReadModel>(p => p.PhoneNumber),
-        
-        // Numeric filters (example with age - add your numeric properties)
-        new NumericPropertyFilter<PersonReadModel, int>(p => p.CurrentRole)
-    ];
-
-    public static IQueryable<PersonReadModel> ApplyFilters(this IQueryable<PersonReadModel> query, IEnumerable<FilterCriteria> filterCriteria)
-    {
-        foreach (FilterCriteria criteria in filterCriteria)
-        {
-            IPropertyFilter<PersonReadModel>? filter = Filters.FirstOrDefault(f => f.MatchesProperty(criteria.PropertyName));
-            if (filter == null)
-            {
-                continue;
-            }
-
-            query = filter.ApplyFilter(query, criteria.Operation, criteria.Value);
-        }
-
-        return query;
     }
 }
