@@ -80,6 +80,87 @@ public class GetPersonsEndpointsTests : IAsyncLifetime
         persons.Total.Should().Be(0);
     }
 
+    [Fact]
+    public async Task GetPersons_ShouldReturnSingleUser_WhenFiltersAreApplied()
+    {
+        //Arrange
+        // Person 1: Primary resident in Houston with California address
+        CreatePerson.CreatePersonRequest createRequest1 = new(
+            Nickname: "Sophia",
+            Email: "sophia80@yahoo.com",
+            PhoneNumber: "+12774688688",
+            UserIdentityId: Guid.NewGuid(),
+            DefaultAdvertisementPickupAddressCountry: "US",
+            DefaultAdvertisementPickupAddressState: "CA",
+            DefaultAdvertisementPickupAddressZipCode: "94225",
+            DefaultAdvertisementPickupAddressCity: "Houston",
+            DefaultAdvertisementPickupAddressStreet: "Oak Street",
+            DefaultAdvertisementPickupAddressBuildingNumber: "23",
+            DefaultAdvertisementContactInfoEmail: "sophia80@yahoo.com",
+            DefaultAdvertisementContactInfoPhoneNumber: "+12774688688"
+        );
+
+        // Person 2: Miami resident with California mailing address
+        CreatePerson.CreatePersonRequest createRequest2 = new(
+            Nickname: "Noah",
+            Email: "noah852@gmail.com",
+            PhoneNumber: "+19486935859",
+            UserIdentityId: Guid.NewGuid(),
+            DefaultAdvertisementPickupAddressCountry: "US",
+            DefaultAdvertisementPickupAddressState: "CA",
+            DefaultAdvertisementPickupAddressZipCode: "66613",
+            DefaultAdvertisementPickupAddressCity: "Miami",
+            DefaultAdvertisementPickupAddressStreet: "Elm Street",
+            DefaultAdvertisementPickupAddressBuildingNumber: "504",
+            DefaultAdvertisementContactInfoEmail: "noah852@outlook.com",
+            DefaultAdvertisementContactInfoPhoneNumber: "+19486935859"
+        );
+
+        // Person 3: Houston resident with New York address
+        CreatePerson.CreatePersonRequest createRequest3 = new(
+            Nickname: "Emma",
+            Email: "emma413@gmail.com",
+            PhoneNumber: "+11869419170",
+            UserIdentityId: Guid.NewGuid(),
+            DefaultAdvertisementPickupAddressCountry: "US",
+            DefaultAdvertisementPickupAddressState: "NY",
+            DefaultAdvertisementPickupAddressZipCode: "34882",
+            DefaultAdvertisementPickupAddressCity: "Houston",
+            DefaultAdvertisementPickupAddressStreet: "Elm Street",
+            DefaultAdvertisementPickupAddressBuildingNumber: "597",
+            DefaultAdvertisementContactInfoEmail: "emma413@hotmail.com",
+            DefaultAdvertisementContactInfoPhoneNumber: "+11869419170"
+        );
+
+        // Person 4: Miami resident with California address
+        CreatePerson.CreatePersonRequest createRequest4 = new(
+            Nickname: "Noah",
+            Email: "noah8@gmail.com",
+            PhoneNumber: "+18326616873",
+            UserIdentityId: Guid.NewGuid(),
+            DefaultAdvertisementPickupAddressCountry: "US",
+            DefaultAdvertisementPickupAddressState: "CA",
+            DefaultAdvertisementPickupAddressZipCode: "79122",
+            DefaultAdvertisementPickupAddressCity: "Miami",
+            DefaultAdvertisementPickupAddressStreet: "Pine Street",
+            DefaultAdvertisementPickupAddressBuildingNumber: "532",
+            DefaultAdvertisementContactInfoEmail: "noah8@gmail.com",
+            DefaultAdvertisementContactInfoPhoneNumber: "+18326616873"
+        );
+        await _httpClient.PostAsJsonAsync("api/v1/persons", createRequest1);
+        await _httpClient.PostAsJsonAsync("api/v1/persons", createRequest2);
+        await _httpClient.PostAsJsonAsync("api/v1/persons", createRequest3);
+        await _httpClient.PostAsJsonAsync("api/v1/persons", createRequest4);
+        
+        //Act
+        HttpResponseMessage response = 
+            await _httpClient.GetAsync("/api/v1/persons?searchTerm=nickname-eq-noah,email-in-@gmail,phonenumber-in-1,currentrole-lt-1");
+        //Assert
+        PagedList<PersonResponse>? persons = await response.Content.ReadFromJsonAsync<PagedList<PersonResponse>>();
+        persons?.Items.Count.Should().Be(2);
+        persons?.Total.Should().Be(4);
+    }
+    
     public Task InitializeAsync()
     {
         return Task.CompletedTask;
