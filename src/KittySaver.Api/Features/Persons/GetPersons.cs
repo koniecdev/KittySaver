@@ -44,7 +44,7 @@ public sealed class GetPersons : IEndpoint
                     .Split(',')
                     .Select(FilterCriteria.Parse);
                 
-                query = query.FilterPerson(filters);
+                query = query.ApplyFilters(filters);
             }
             
             query = request.SortOrder?.ToLower() == "desc" 
@@ -110,45 +110,32 @@ public sealed class GetPersons : IEndpoint
     }
 }
 
-public static partial class FilterService
+
+
+public static class PersonFilters
 {
-    public static IQueryable<PersonReadModel> FilterPerson(this IQueryable<PersonReadModel> query, IEnumerable<FilterCriteria> filterCriterias)
+    private static readonly IPropertyFilter<PersonReadModel>[] Filters =
+    [
+        // String filters
+        new StringPropertyFilter<PersonReadModel>(p => p.Nickname),
+        new StringPropertyFilter<PersonReadModel>(p => p.Email),
+        new StringPropertyFilter<PersonReadModel>(p => p.PhoneNumber),
+        
+        // Numeric filters (example with age - add your numeric properties)
+        new NumericPropertyFilter<PersonReadModel, int>(p => p.CurrentRole)
+    ];
+
+    public static IQueryable<PersonReadModel> ApplyFilters(this IQueryable<PersonReadModel> query, IEnumerable<FilterCriteria> filterCriteria)
     {
-        foreach (FilterCriteria filterCriteria in filterCriterias)
+        foreach (FilterCriteria criteria in filterCriteria)
         {
-            if (string.Equals(filterCriteria.PropertyName, nameof(PersonReadModel.Nickname), StringComparison.CurrentCultureIgnoreCase))
+            IPropertyFilter<PersonReadModel>? filter = Filters.FirstOrDefault(f => f.MatchesProperty(criteria.PropertyName));
+            if (filter == null)
             {
-                query = filterCriteria.Operation switch
-                {
-                    FilterCriteria.FilterOperation.Eq => query.Where(x=>x.Nickname == filterCriteria.Value),
-                    FilterCriteria.FilterOperation.Neq => query.Where(x=>x.Nickname != filterCriteria.Value),
-                    FilterCriteria.FilterOperation.In => query.Where(x=>x.Nickname.Contains(filterCriteria.Value)),
-                    FilterCriteria.FilterOperation.Nin => query.Where(x=>!x.Nickname.Contains(filterCriteria.Value)),
-                    _ => query
-                };
+                continue;
             }
-            if (string.Equals(filterCriteria.PropertyName, nameof(PersonReadModel.Email), StringComparison.CurrentCultureIgnoreCase))
-            {
-                query = filterCriteria.Operation switch
-                {
-                    FilterCriteria.FilterOperation.Eq => query.Where(x=>x.Email == filterCriteria.Value),
-                    FilterCriteria.FilterOperation.Neq => query.Where(x=>x.Email != filterCriteria.Value),
-                    FilterCriteria.FilterOperation.In => query.Where(x=>x.Email.Contains(filterCriteria.Value)),
-                    FilterCriteria.FilterOperation.Nin => query.Where(x=>!x.Email.Contains(filterCriteria.Value)),
-                    _ => query
-                };
-            }
-            if (string.Equals(filterCriteria.PropertyName, nameof(PersonReadModel.PhoneNumber), StringComparison.CurrentCultureIgnoreCase))
-            {
-                query = filterCriteria.Operation switch
-                {
-                    FilterCriteria.FilterOperation.Eq => query.Where(x=>x.PhoneNumber == filterCriteria.Value),
-                    FilterCriteria.FilterOperation.Neq => query.Where(x=>x.PhoneNumber != filterCriteria.Value),
-                    FilterCriteria.FilterOperation.In => query.Where(x=>x.PhoneNumber.Contains(filterCriteria.Value)),
-                    FilterCriteria.FilterOperation.Nin => query.Where(x=>!x.PhoneNumber.Contains(filterCriteria.Value)),
-                    _ => query
-                };
-            }
+
+            query = filter.ApplyFilter(query, criteria.Operation, criteria.Value);
         }
 
         return query;

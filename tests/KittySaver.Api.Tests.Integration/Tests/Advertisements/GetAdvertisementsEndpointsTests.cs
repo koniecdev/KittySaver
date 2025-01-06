@@ -135,8 +135,8 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
         advertisements!.Items.Count.Should().Be(2);
         advertisements.Total.Should().Be(2);
         advertisements.Links.Count.Should().Be(2);
-        advertisements.Links.Count(x => x.Rel == EndpointNames.SelfRel).Should().Be(1);
-        advertisements.Links.Count(x => x.Rel == "by-page").Should().Be(1);
+        advertisements.Links.First(x => x.Rel == EndpointNames.SelfRel).Href.Should().Contain("://");
+        advertisements.Links.First(x => x.Rel == "by-page").Href.Should().Contain("://");
         
         AdvertisementResponse firstPersonAdvertisement =
             advertisements.Items.First(x => x.PersonId == personRegisterResponse.Id);
@@ -181,8 +181,8 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
         advertisements!.Items.Count.Should().Be(0);
         advertisements.Total.Should().Be(0);
         advertisements.Links.Count.Should().Be(2);
-        advertisements.Links.Count(x => x.Rel == EndpointNames.SelfRel).Should().Be(1);
-        advertisements.Links.Count(x => x.Rel == "by-page").Should().Be(1);
+        advertisements.Links.First(x => x.Rel == EndpointNames.SelfRel).Href.Should().Contain("://");
+        advertisements.Links.First(x => x.Rel == "by-page").Href.Should().Contain("://");
     }
 
     public Task InitializeAsync()

@@ -55,8 +55,8 @@ public class GetPersonsEndpointsTests : IAsyncLifetime
         persons!.Items.Count.Should().BeGreaterThan(0);
         persons.Total.Should().Be(1);
         persons.Links.Count.Should().Be(2);
-        persons.Links.Count(x => x.Rel == EndpointNames.SelfRel).Should().Be(1);
-        persons.Links.Count(x => x.Rel == "by-page").Should().Be(1);
+        persons.Links.First(x => x.Rel == EndpointNames.SelfRel).Href.Should().Contain("://");
+        persons.Links.First(x => x.Rel == "by-page").Href.Should().Contain("://");
         PersonResponse registeredPerson = persons.Items.First();
         registeredPerson.Id.Should().NotBeEmpty();
         registeredPerson.Nickname.Should().Be(createRequest.Nickname);
@@ -75,8 +75,8 @@ public class GetPersonsEndpointsTests : IAsyncLifetime
         PagedList<PersonResponse>? persons = await response.Content.ReadFromJsonAsync<PagedList<PersonResponse>>();
         persons?.Items.Count.Should().Be(0);
         persons!.Links.Count.Should().Be(2);
-        persons.Links.Count(x => x.Rel == EndpointNames.SelfRel).Should().Be(1);
-        persons.Links.Count(x => x.Rel == "by-page").Should().Be(1);
+        persons.Links.First(x => x.Rel == EndpointNames.SelfRel).Href.Should().Contain("://");
+        persons.Links.First(x => x.Rel == "by-page").Href.Should().Contain("://");
         persons.Total.Should().Be(0);
     }
 
