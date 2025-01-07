@@ -84,7 +84,7 @@ public class GetCatsEndpointsTests : IAsyncLifetime
         cats.Total.Should().Be(1);
         cats.Links.Count.Should().Be(2);
         cats.Links.Count(x => x.Rel == EndpointNames.SelfRel).Should().Be(1);
-        cats.Links.Count(x => x.Rel == "by-page").Should().Be(1);
+        cats.Links.First(x => x.Rel == "by-page").Href.Should().Contain("://");
         
         CatResponse cat = cats.Items.First();
         cat.Id.Should().Be(catCreateResponse.Id);
@@ -118,8 +118,8 @@ public class GetCatsEndpointsTests : IAsyncLifetime
         cats.Should().NotBeNull();
         cats!.Total.Should().Be(0);
         cats.Links.Count.Should().Be(2);
-        cats.Links.Count(x => x.Rel == EndpointNames.SelfRel).Should().Be(1);
-        cats.Links.Count(x => x.Rel == "by-page").Should().Be(1);
+        cats.Links.First(x => x.Rel == EndpointNames.SelfRel).Href.Should().Contain("://");
+        cats.Links.First(x => x.Rel == "by-page").Href.Should().Contain("://");
         cats.Items.Count.Should().Be(0);
     }
 

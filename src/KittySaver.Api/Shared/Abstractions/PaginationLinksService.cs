@@ -5,7 +5,8 @@ public interface IPaginationLinksService
         string endpointName,
         int? currentOffset,
         int? currentLimit,
-        int totalRecords);
+        int totalRecords,
+        Guid? personId = null);
 }
 public class PaginationLinksService(ILinkService linkService) : IPaginationLinksService
 {
@@ -13,13 +14,14 @@ public class PaginationLinksService(ILinkService linkService) : IPaginationLinks
         string endpointName,
         int? currentOffset,
         int? currentLimit,
-        int totalRecords)
+        int totalRecords,
+        Guid? personId = null)
     {
         List<Link> links =
         [
             linkService.Generate(
                 endpointName,
-                new { offset = currentOffset, limit = currentLimit },
+                new { offset = currentOffset, limit = currentLimit, personId },
                 rel: "self")
         ];
         
@@ -67,7 +69,7 @@ public class PaginationLinksService(ILinkService linkService) : IPaginationLinks
                 rel: "first"));
         }
 
-        links.AddRange(linkService.GeneratePaginationLinks(endpointName, currentOffset, currentLimit));
+        links.AddRange(linkService.GeneratePaginationLinks(endpointName, currentOffset, currentLimit, personId));
         
         return links;
     }

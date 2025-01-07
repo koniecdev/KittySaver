@@ -16,7 +16,7 @@ public interface ILinkService
         Guid personId,
         CurrentlyLoggedInPerson? currentlyLoggedInPerson);
     Link Generate(string endpointName, object? routeValues, string rel, string verb = "GET", bool isTemplated = false);
-    List<Link> GeneratePaginationLinks(string endpointName, int? offset, int? limit);
+    List<Link> GeneratePaginationLinks(string endpointName, int? offset, int? limit, Guid? personId);
 }
 
 public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccessor httpContextAccessor) : ILinkService
@@ -62,7 +62,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
 
         links.Add(Generate(
             endpointInfo: EndpointNames.GetPersonAdvertisements,
-            routeValues: new { personId }));
+            routeValues: new { searchTerm = $"personid-eq-{personId}" }));
 
         links.Add(Generate(
             endpointInfo: EndpointNames.CreateAdvertisement,
@@ -199,10 +199,10 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         return link;
     }
     
-    public List<Link> GeneratePaginationLinks(string endpointName, int? offset, int? limit)
+    public List<Link> GeneratePaginationLinks(string endpointName, int? offset, int? limit, Guid? personId)
     {
         List<Link> links = [];
-        string href = linkGenerator.GetUriByName(httpContextAccessor.HttpContext!, endpointName)!;
+        string? href = linkGenerator.GetUriByName(httpContextAccessor.HttpContext!, endpointName, new {personId});
         if (limit is not null)
         {
             links.Add(new Link(

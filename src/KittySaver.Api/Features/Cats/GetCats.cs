@@ -1,4 +1,6 @@
-﻿using KittySaver.Api.Features.Cats.SharedContracts;
+﻿using System.Linq.Expressions;
+using KittySaver.Api.Features.Cats.SharedContracts;
+using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Contracts;
 using KittySaver.Api.Shared.Infrastructure.Services;
@@ -12,12 +14,21 @@ namespace KittySaver.Api.Features.Cats;
 
 public sealed class GetCats : IEndpoint
 {
-    public sealed class GetCatsQuery(Guid personId, int? offset, int? limit)
+    public sealed class GetCatsQuery(
+        Guid personId,
+        int? offset,
+        int? limit,
+        string? searchTerm,
+        string? sortColumn,
+        string? sortOrder)
         : IQuery<IPagedList<CatResponse>>, IAuthorizedRequest, IPagedQuery, ICatRequest
     {
         public Guid PersonId { get; } = personId;
         public int? Offset { get; } = offset;
         public int? Limit { get; } = limit;
+        public string? SearchTerm { get; } = searchTerm;
+        public string? SortColumn { get; } = sortColumn;
+        public string? SortOrder { get; } = sortOrder;
     }
 
     internal sealed class GetCatsQueryHandler(
@@ -36,9 +47,23 @@ public sealed class GetCats : IEndpoint
 
             IQueryable<CatReadModel> query = db.Cats
                 .Where(x => x.PersonId == request.PersonId);
-            
             int totalRecords = await query.CountAsync(cancellationToken);
+            
+            if (!string.IsNullOrEmpty(request.SearchTerm))
+            {
+                IEnumerable<FilterCriteria> filters = request.SearchTerm
+                    .Split(',')
+                    .Select(FilterCriteria.Parse);
+                
+                IPropertyFilter<CatReadModel>[] propertyFilters = GetPropertyFilters();
+                
+                query = query.ApplyFilters(filters, propertyFilters);
+            }
 
+            query = request.SortOrder?.ToLower() == "desc" 
+                ? query.OrderByDescending(GetSortProperty(request)) 
+                : query.OrderBy(GetSortProperty(request));
+            
             if (request.Offset.HasValue)
             {
                 query = query.Skip(request.Offset.Value);
@@ -48,6 +73,7 @@ public sealed class GetCats : IEndpoint
             {
                 query = query.Take(request.Limit.Value);
             }
+            
             List<CatResponse> cats =
                 await query
                     .ProjectToDto()
@@ -61,11 +87,27 @@ public sealed class GetCats : IEndpoint
                     EndpointNames.GetCats.EndpointName,
                     request.Offset,
                     request.Limit,
-                    totalRecords)
+                    totalRecords,
+                    request.PersonId)
             };
             
             return response;
         }
+        
+        private static IPropertyFilter<CatReadModel>[] GetPropertyFilters() =>
+        [
+            new StringPropertyFilter<CatReadModel>(p => p.Name),
+                
+            new NumericPropertyFilter<CatReadModel, double>(p => p.PriorityScore)
+        ];
+        
+        private static Expression<Func<CatReadModel, object>> GetSortProperty(GetCatsQuery request)
+            => request.SortColumn?.ToLower() switch
+            {
+                "name" => cat => cat.Name,
+                "priorityscore" => cat => cat.PriorityScore,
+                _ => cat => cat.Name
+            };
     }
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
@@ -74,10 +116,13 @@ public sealed class GetCats : IEndpoint
                 Guid personId,
                 int? offset,
                 int? limit,
+                string? searchTerm,
+                string? sortColumn,
+                string? sortOrder,
                 ISender sender,
                 CancellationToken cancellationToken) =>
             {
-                GetCatsQuery query = new(personId, offset, limit);
+                GetCatsQuery query = new(personId, offset, limit, searchTerm, sortColumn, sortOrder);
                 IPagedList<CatResponse> cats = await sender.Send(query, cancellationToken);
                 return Results.Ok(cats);
             }).RequireAuthorization()

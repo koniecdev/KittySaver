@@ -18,11 +18,11 @@ public sealed class AdvertisementReadModel
     public required string ContactInfoEmail { get; init; }
     public required string ContactInfoPhoneNumber { get; init; }
     public required string Description { get; init; }
-    public required string PickupAddressBuildingNumber { get; init; }
+    public required string? PickupAddressBuildingNumber { get; init; }
     public required string PickupAddressCity { get; init; }
     public required string PickupAddressCountry { get; init; }
     public required string? PickupAddressState { get; init; }
-    public required string PickupAddressStreet { get; init; }
+    public required string? PickupAddressStreet { get; init; }
     public required string PickupAddressZipCode { get; init; }
     public required Guid PersonId { get; init; }
     public PersonReadModel Person { get; private set; } = null!;

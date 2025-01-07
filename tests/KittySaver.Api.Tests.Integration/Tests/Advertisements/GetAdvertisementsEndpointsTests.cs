@@ -135,8 +135,8 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
         advertisements!.Items.Count.Should().Be(2);
         advertisements.Total.Should().Be(2);
         advertisements.Links.Count.Should().Be(2);
-        advertisements.Links.Count(x => x.Rel == EndpointNames.SelfRel).Should().Be(1);
-        advertisements.Links.Count(x => x.Rel == "by-page").Should().Be(1);
+        advertisements.Links.First(x => x.Rel == EndpointNames.SelfRel).Href.Should().Contain("://");
+        advertisements.Links.First(x => x.Rel == "by-page").Href.Should().Contain("://");
         
         AdvertisementResponse firstPersonAdvertisement =
             advertisements.Items.First(x => x.PersonId == personRegisterResponse.Id);
@@ -181,10 +181,89 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
         advertisements!.Items.Count.Should().Be(0);
         advertisements.Total.Should().Be(0);
         advertisements.Links.Count.Should().Be(2);
-        advertisements.Links.Count(x => x.Rel == EndpointNames.SelfRel).Should().Be(1);
-        advertisements.Links.Count(x => x.Rel == "by-page").Should().Be(1);
+        advertisements.Links.First(x => x.Rel == EndpointNames.SelfRel).Href.Should().Contain("://");
+        advertisements.Links.First(x => x.Rel == "by-page").Href.Should().Contain("://");
     }
 
+    [Fact]
+    public async Task GetAdvertisements_ShouldReturnOneOfTwoAdvertisements_WhenPersonIdFilterExists()
+    {
+        //Arrange
+        CreatePerson.CreatePersonRequest personRegisterRequest = _createPersonRequestGenerator.Generate();
+        HttpResponseMessage personRegisterResponseMessage =
+            await _httpClient.PostAsJsonAsync("api/v1/persons", personRegisterRequest);
+        ApiResponses.CreatedWithIdResponse personRegisterResponse =
+            await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
+            ?? throw new JsonException();
+        CreateCat.CreateCatRequest catCreateRequest = _createCatRequestGenerator.Generate();
+        HttpResponseMessage catCreateResponseMessage =
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", catCreateRequest);
+        ApiResponses.CreatedWithIdResponse catCreateResponse =
+            await catCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
+            ?? throw new JsonException();
+
+        CreateAdvertisement.CreateAdvertisementRequest request =
+            new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
+                .CustomInstantiator(faker =>
+                    new CreateAdvertisement.CreateAdvertisementRequest(
+                        CatsIdsToAssign: [catCreateResponse.Id],
+                        Description: faker.Lorem.Lines(2),
+                        PickupAddressCountry: faker.Address.CountryCode(),
+                        PickupAddressState: faker.Address.State(),
+                        PickupAddressZipCode: faker.Address.ZipCode(),
+                        PickupAddressCity: faker.Address.City(),
+                        PickupAddressStreet: faker.Address.StreetName(),
+                        PickupAddressBuildingNumber: faker.Address.BuildingNumber(),
+                        ContactInfoEmail: faker.Person.Email,
+                        ContactInfoPhoneNumber: faker.Person.Phone
+                    ));
+
+        await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
+
+        CreatePerson.CreatePersonRequest secondPersonRegisterRequest = _createPersonRequestGenerator.Generate();
+        HttpResponseMessage secondPersonRegisterResponseMessage =
+            await _httpClient.PostAsJsonAsync("api/v1/persons", secondPersonRegisterRequest);
+        ApiResponses.CreatedWithIdResponse secondPersonRegisterResponse =
+            await secondPersonRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
+            ?? throw new JsonException();
+        CreateCat.CreateCatRequest secondCatCreateRequest = _createCatRequestGenerator.Generate();
+        HttpResponseMessage secondCatCreateResponseMessage =
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{secondPersonRegisterResponse.Id}/cats",
+                secondCatCreateRequest);
+        ApiResponses.CreatedWithIdResponse secondCatCreateResponse =
+            await secondCatCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
+            ?? throw new JsonException();
+
+        CreateAdvertisement.CreateAdvertisementRequest secondRequest =
+            new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
+                .CustomInstantiator(faker =>
+                    new CreateAdvertisement.CreateAdvertisementRequest(
+                        CatsIdsToAssign: [secondCatCreateResponse.Id],
+                        Description: faker.Lorem.Lines(2),
+                        PickupAddressCountry: faker.Address.CountryCode(),
+                        PickupAddressState: faker.Address.State(),
+                        PickupAddressZipCode: faker.Address.ZipCode(),
+                        PickupAddressCity: faker.Address.City(),
+                        PickupAddressStreet: faker.Address.StreetName(),
+                        PickupAddressBuildingNumber: faker.Address.BuildingNumber(),
+                        ContactInfoEmail: faker.Person.Email,
+                        ContactInfoPhoneNumber: faker.Person.Phone
+                    ));
+
+        await _httpClient.PostAsJsonAsync($"api/v1/persons/{secondPersonRegisterResponse.Id}/advertisements", secondRequest);
+
+        //Act
+        HttpResponseMessage response = await _httpClient.GetAsync($"/api/v1/advertisements?searchTerm=personid-eq-{personRegisterResponse.Id}");
+
+        //Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        PagedList<AdvertisementResponse>? advertisements =
+            await response.Content.ReadFromJsonAsync<PagedList<AdvertisementResponse>>();
+        advertisements?.Items.Count.Should().Be(1);
+        advertisements?.Items.Count(x=>x.PersonId == personRegisterResponse.Id).Should().Be(1);
+        advertisements?.Total.Should().Be(2);
+    }
+    
     public Task InitializeAsync()
     {
         return Task.CompletedTask;
