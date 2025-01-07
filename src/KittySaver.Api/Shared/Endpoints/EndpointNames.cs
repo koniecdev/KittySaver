@@ -1,4 +1,4 @@
-﻿namespace KittySaver.Api.Shared.Abstractions;
+﻿namespace KittySaver.Api.Shared.Endpoints;
 
 public static class EndpointNames
 {

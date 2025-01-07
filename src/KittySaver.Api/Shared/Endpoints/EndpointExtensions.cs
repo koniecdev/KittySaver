@@ -2,7 +2,7 @@
 using KittySaver.Api.Shared.Abstractions;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace KittySaver.Api.Shared.Infrastructure.Extensions;
+namespace KittySaver.Api.Shared.Endpoints;
 
 public static class EndpointExtensions
 {

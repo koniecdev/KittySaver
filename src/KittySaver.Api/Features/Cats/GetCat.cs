@@ -1,5 +1,6 @@
 ﻿using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
+using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using MediatR;

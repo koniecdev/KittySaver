@@ -1,11 +1,29 @@
 ﻿using KittySaver.Api.Features.Advertisements.SharedContracts;
-using KittySaver.Api.Shared.Abstractions;
 
-namespace KittySaver.Api.Shared.Contracts;
+namespace KittySaver.Api.Shared.Hateoas;
 
-public class HateoasResponse : IHateoasResponse
+public interface IHateoasResponse
 {
-    public ICollection<Link> Links { get; set; } = new List<Link>();
+    public ICollection<Link> Links { get; set; }
+}
+
+public interface IHateoasPersonResponse : IHateoasResponse
+{
+    public Guid Id { get; }
+}
+
+public interface IHateoasCatResponse : IHateoasResponse
+{
+    public Guid Id { get; }
+    public Guid PersonId { get; }
+    public Guid? AdvertisementId { get; }
+}
+
+public interface IHateoasAdvertisementResponse : IHateoasResponse
+{
+    public Guid Id { get; }
+    public Guid PersonId { get; }
+    public AdvertisementResponse.AdvertisementStatus Status { get; }
 }
 
 public class PersonHateoasResponse(Guid id) : IHateoasPersonResponse
