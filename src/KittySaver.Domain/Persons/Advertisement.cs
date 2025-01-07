@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using KittySaver.Domain.Common.Primitives;
 using KittySaver.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;

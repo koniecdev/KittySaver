@@ -2,12 +2,9 @@
 using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Contracts;
-using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Api.Shared.Persistence.ReadModels;
-using KittySaver.Domain.Persons;
 using MediatR;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace KittySaver.Api.Features.Persons;

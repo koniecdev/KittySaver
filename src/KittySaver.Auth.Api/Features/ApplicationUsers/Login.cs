@@ -1,7 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Authentication;
-using System.Security.Claims;
-using System.Text;
+﻿using System.Security.Authentication;
 using FluentValidation;
 using KittySaver.Auth.Api.Features.ApplicationUsers.SharedContracts;
 using KittySaver.Auth.Api.Shared.Domain.Entites;
@@ -11,7 +8,6 @@ using KittySaver.Auth.Api.Shared.Infrastructure.Services;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Riok.Mapperly.Abstractions;
 
 namespace KittySaver.Auth.Api.Features.ApplicationUsers;

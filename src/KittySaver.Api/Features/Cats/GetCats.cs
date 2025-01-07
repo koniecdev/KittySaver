@@ -1,9 +1,7 @@
 ﻿using System.Linq.Expressions;
 using KittySaver.Api.Features.Cats.SharedContracts;
-using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Contracts;
-using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Api.Shared.Persistence.ReadModels;
 using KittySaver.Domain.Common.Exceptions;

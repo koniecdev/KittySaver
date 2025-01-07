@@ -1,6 +1,5 @@
 using Bogus;
 using FluentAssertions;
-using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.Persons;

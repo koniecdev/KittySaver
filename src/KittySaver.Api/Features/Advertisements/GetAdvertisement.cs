@@ -1,9 +1,7 @@
 ﻿using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
-using KittySaver.Domain.Persons;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using KittySaver.Auth.Api.Shared.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

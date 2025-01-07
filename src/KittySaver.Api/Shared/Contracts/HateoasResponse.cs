@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using KittySaver.Api.Features.Advertisements.SharedContracts;
+﻿using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
 
 namespace KittySaver.Api.Shared.Contracts;

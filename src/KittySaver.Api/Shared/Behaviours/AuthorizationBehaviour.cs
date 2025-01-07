@@ -1,6 +1,4 @@
-﻿using FluentValidation;
-using FluentValidation.Results;
-using KittySaver.Api.Shared.Abstractions;
+﻿using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Domain.Persons;
 using MediatR;

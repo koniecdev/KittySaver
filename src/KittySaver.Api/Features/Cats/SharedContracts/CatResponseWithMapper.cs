@@ -1,8 +1,6 @@
 ﻿using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence.ReadModels;
 using KittySaver.Domain.Common.Primitives.Enums;
-using KittySaver.Domain.Persons;
 
 namespace KittySaver.Api.Features.Cats.SharedContracts;
 

@@ -1,8 +1,5 @@
 ﻿using System.Net.Http.Json;
-using KittySaver.Api.Features.Advertisements.SharedContracts;
-using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Features.Persons.SharedContracts;
-using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Contracts;
 using Microsoft.AspNetCore.Mvc;
 

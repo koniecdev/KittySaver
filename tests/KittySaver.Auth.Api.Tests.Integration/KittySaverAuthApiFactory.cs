@@ -13,7 +13,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using Shared;
 using Testcontainers.MsSql;
 using TestAuthHandler = KittySaver.Auth.Api.Tests.Integration.Helpers.TestAuthHandler;
 
