@@ -2,9 +2,8 @@
 using System.Linq.Expressions;
 using System.Numerics;
 using System.Reflection;
-using KittySaver.Api.Shared.Contracts;
 
-namespace KittySaver.Api.Shared.Abstractions;
+namespace KittySaver.Api.Shared.CollectionsQueriesFiltering;
 
 public interface IPropertyFilter<TEntity>
 {

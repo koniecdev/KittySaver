@@ -1,6 +1,5 @@
 ﻿using Bogus;
 using FluentAssertions;
-using KittySaver.Auth.Api.Features.ApplicationUsers;
 using KittySaver.Auth.Api.Shared.Domain.Entites;
 using Shared;
 

@@ -1,4 +1,4 @@
-﻿namespace KittySaver.Api.Shared.Contracts;
+﻿namespace KittySaver.Api.Shared.CollectionsQueriesFiltering;
 
 public sealed class FilterCriteria
 {

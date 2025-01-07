@@ -1,8 +1,9 @@
 ﻿using KittySaver.Api.Features.Advertisements.SharedContracts;
+using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Domain.Persons;
 
-namespace KittySaver.Api.Shared.Abstractions;
+namespace KittySaver.Api.Shared.Hateoas;
 
 public interface ILinkService
 {
@@ -181,10 +182,10 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
                 ? $"{linkGenerator.GetUriByName(httpContextAccessor.HttpContext!, endpointInfo.EndpointName)!}"
                 : linkGenerator.GetUriByName(httpContextAccessor.HttpContext!, endpointInfo.EndpointName, routeValues)!;
         Link link = new Link(
-            href: href,
-            rel: isSelf ? EndpointNames.SelfRel : endpointInfo.Rel,
-            method: endpointInfo.Verb,
-            templated: isTemplated);
+            href,
+            isSelf ? EndpointNames.SelfRel : endpointInfo.Rel,
+            endpointInfo.Verb,
+            isTemplated);
         return link;
     }
 
@@ -192,10 +193,10 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
     {
         string href = linkGenerator.GetUriByName(httpContextAccessor.HttpContext!, endpointName, routeValues)!;
         Link link = new Link(
-            href: href,
-            rel: rel,
-            method: verb,
-            templated: isTemplated);
+            href,
+            rel,
+            verb,
+            isTemplated);
         return link;
     }
     
@@ -206,26 +207,26 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         if (limit is not null)
         {
             links.Add(new Link(
-                href: $"{href}?offset={{offset}}&limit={limit}",
-                rel: "by-offset",
-                method: "GET",
-                templated: true));
+                $"{href}?offset={{offset}}&limit={limit}",
+                "by-offset",
+                "GET",
+                true));
         }
 
         if (offset is not null)
         {
             links.Add(new Link(
-                href: $"{href}?offset={offset}&limit={{limit}}",
-                rel: "by-limit",
-                method: "GET",
-                templated: true));
+                $"{href}?offset={offset}&limit={{limit}}",
+                "by-limit",
+                "GET",
+                true));
         }
         
         links.Add(new Link(
-            href: $"{href}?offset={{offset}}&limit={{limit}}",
-            rel: "by-page",
-            method: "GET",
-            templated: true));
+            $"{href}?offset={{offset}}&limit={{limit}}",
+            "by-page",
+            "GET",
+            true));
         return links;
     }
 }

@@ -1,14 +1,12 @@
 ﻿using FluentValidation;
-using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Contracts;
+using KittySaver.Api.Shared.Endpoints;
+using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Shared.Persistence;
-using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 using Riok.Mapperly.Abstractions;
 
 namespace KittySaver.Api.Features.Cats;

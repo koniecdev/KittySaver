@@ -1,12 +1,6 @@
-﻿using KittySaver.Api.Shared.Infrastructure.Services;
-using KittySaver.Api.Shared.Persistence.ReadModels;
+﻿using KittySaver.Api.Shared.Persistence.ReadModels;
 using KittySaver.Domain;
-using KittySaver.Domain.Common.Primitives;
-using KittySaver.Domain.Persons;
-using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using SmartEnum.EFCore;
 
 namespace KittySaver.Api.Shared.Persistence;
 

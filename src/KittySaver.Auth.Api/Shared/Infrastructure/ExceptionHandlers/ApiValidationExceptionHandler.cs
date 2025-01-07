@@ -1,7 +1,5 @@
-﻿using KittySaver.Auth.Api.Shared.Exceptions;
-using KittySaver.Auth.Api.Shared.Infrastructure.Clients;
+﻿using KittySaver.Auth.Api.Shared.Infrastructure.Clients;
 using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
 
 namespace KittySaver.Auth.Api.Shared.Infrastructure.ExceptionHandlers;
 

@@ -1,6 +1,7 @@
 using System.Reflection;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
+using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Exceptions;
 using Serilog;
 

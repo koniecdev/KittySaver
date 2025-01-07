@@ -1,5 +1,4 @@
-﻿using KittySaver.Domain.Persons;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 // ReSharper disable CollectionNeverUpdated.Global
 

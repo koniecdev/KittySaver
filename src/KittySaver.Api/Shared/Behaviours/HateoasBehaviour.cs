@@ -1,7 +1,6 @@
-﻿using KittySaver.Api.Features.Advertisements.SharedContracts;
-using KittySaver.Api.Shared.Abstractions;
+﻿using KittySaver.Api.Shared.Abstractions;
+using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Shared.Infrastructure.Services;
-using KittySaver.Domain.Persons;
 using MediatR;
 
 namespace KittySaver.Api.Shared.Behaviours;
