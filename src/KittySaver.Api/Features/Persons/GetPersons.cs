@@ -82,18 +82,14 @@ public sealed class GetPersons : IEndpoint
             return response;
         }
 
-        private static IPropertyFilter<PersonReadModel>[] GetPropertyFilters()
-        {
-            IPropertyFilter<PersonReadModel>[] propertyFilters =
-            [
-                new StringPropertyFilter<PersonReadModel>(p => p.Nickname),
-                new StringPropertyFilter<PersonReadModel>(p => p.Email),
-                new StringPropertyFilter<PersonReadModel>(p => p.PhoneNumber),
+        private static IPropertyFilter<PersonReadModel>[] GetPropertyFilters() =>
+        [
+            new StringPropertyFilter<PersonReadModel>(p => p.Nickname),
+            new StringPropertyFilter<PersonReadModel>(p => p.Email),
+            new StringPropertyFilter<PersonReadModel>(p => p.PhoneNumber),
                 
-                new NumericPropertyFilter<PersonReadModel, int>(p => p.CurrentRole)
-            ];
-            return propertyFilters;
-        }
+            new NumericPropertyFilter<PersonReadModel, int>(p => p.CurrentRole)
+        ];
 
         private static Expression<Func<PersonReadModel, object>> GetSortProperty(GetPersonsQuery request)
             => request.SortColumn?.ToLower() switch
