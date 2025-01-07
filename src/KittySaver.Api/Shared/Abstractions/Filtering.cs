@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.Linq.Expressions;
 using System.Numerics;
+using System.Reflection;
 using KittySaver.Api.Shared.Contracts;
 
 namespace KittySaver.Api.Shared.Abstractions;
@@ -37,8 +38,8 @@ public abstract class PropertyFilterBase<TEntity, TProperty>(Expression<Func<TEn
     }
 }
 
-public class StringPropertyFilter<TEntity>(Expression<Func<TEntity, string>> propertySelector)
-    : PropertyFilterBase<TEntity, string>(propertySelector, ExpressionHelper.GetPropertyName(propertySelector)),
+public class StringPropertyFilter<TEntity>(Expression<Func<TEntity, string?>> propertySelector)
+    : PropertyFilterBase<TEntity, string?>(propertySelector, ExpressionHelper.GetPropertyName(propertySelector)),
         IPropertyFilter<TEntity>
 {
     protected override Expression CreateFilterExpression(
@@ -99,6 +100,91 @@ public class NumericPropertyFilter<TEntity, TNumber>(Expression<Func<TEntity, TN
             : ApplyFilterExpression(query, operation, parsedValue);
     }
 }
+
+public class ComparablePropertyFilter<TEntity, TProperty>(Expression<Func<TEntity, TProperty>> propertySelector)
+    : PropertyFilterBase<TEntity, TProperty>(propertySelector, ExpressionHelper.GetPropertyName(propertySelector)),
+        IPropertyFilter<TEntity>
+    where TProperty : IComparable<TProperty>
+{
+    protected override Expression CreateFilterExpression(
+        Expression property,
+        FilterCriteria.FilterOperation operation,
+        Expression constantValue)
+    {
+        return operation switch
+        {
+            FilterCriteria.FilterOperation.Eq => Expression.Equal(property, constantValue),
+            FilterCriteria.FilterOperation.Neq => Expression.NotEqual(property, constantValue),
+            FilterCriteria.FilterOperation.Gt => Expression.GreaterThan(property, constantValue),
+            FilterCriteria.FilterOperation.Gte => Expression.GreaterThanOrEqual(property, constantValue),
+            FilterCriteria.FilterOperation.Lt => Expression.LessThan(property, constantValue),
+            FilterCriteria.FilterOperation.Lte => Expression.LessThanOrEqual(property, constantValue),
+            _ => Expression.Equal(property, constantValue)
+        };
+    }
+
+    public virtual IQueryable<TEntity> ApplyFilter(
+        IQueryable<TEntity> query,
+        FilterCriteria.FilterOperation operation,
+        string value)
+    {
+        var typedValue = ParseValue(value);
+        return ApplyFilterExpression(query, operation, typedValue);
+    }
+
+    protected virtual TProperty ParseValue(string value)
+    {
+        try
+        {
+            if (typeof(TProperty) == typeof(Guid))
+            {
+                return (TProperty)(object)Guid.Parse(value);
+            }
+            if (typeof(TProperty) == typeof(DateTimeOffset))
+            {
+                return (TProperty)(object)DateTimeOffset.Parse(value);
+            }
+            if (typeof(TProperty) == typeof(DateTime))
+            {
+                return (TProperty)(object)DateTime.Parse(value);
+            }
+
+            MethodInfo? parseMethod = typeof(TProperty).GetMethod("Parse", [typeof(string)]);
+            if (parseMethod is not null)
+            {
+                return (TProperty)parseMethod.Invoke(null, [value])!;
+            }
+
+            throw new NotSupportedException($"No parsing method found for type {typeof(TProperty).Name}");
+        }
+        catch (Exception ex)
+        {
+            throw new ArgumentException($"Cannot parse '{value}' as {typeof(TProperty).Name}", ex);
+        }
+    }
+}
+
+public class DateTimeOffsetPropertyFilter<TEntity>(Expression<Func<TEntity, DateTimeOffset>> propertySelector)
+    : ComparablePropertyFilter<TEntity, DateTimeOffset>(propertySelector)
+{
+    protected override DateTimeOffset ParseValue(string value)
+    {
+        return value.ToLower() switch
+        {
+            _ => DateTimeOffset.Parse(value)
+        };
+    }
+}
+
+public class GuidPropertyFilter<TEntity>(Expression<Func<TEntity, Guid>> propertySelector)
+    : ComparablePropertyFilter<TEntity, Guid>(propertySelector)
+{
+    protected override Guid ParseValue(string value)
+    {
+        return value.Equals("empty", StringComparison.CurrentCultureIgnoreCase) ? Guid.Empty : Guid.Parse(value);
+    }
+}
+
 public static class ExpressionHelper
 {
     public static string GetPropertyName<TEntity, TProperty>(Expression<Func<TEntity, TProperty>> expression)

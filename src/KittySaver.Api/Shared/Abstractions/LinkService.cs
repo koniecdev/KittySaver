@@ -62,7 +62,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
 
         links.Add(Generate(
             endpointInfo: EndpointNames.GetPersonAdvertisements,
-            routeValues: new { personId }));
+            routeValues: new { searchTerm = $"personid-eq-{personId}" }));
 
         links.Add(Generate(
             endpointInfo: EndpointNames.CreateAdvertisement,
