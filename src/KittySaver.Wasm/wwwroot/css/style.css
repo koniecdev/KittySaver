@@ -1,0 +1,108 @@
+*{
+    box-sizing: border-box;
+}
+:root{
+    --nav_height: 84px;
+}
+body{
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+}
+nav{
+    display: grid;
+    background-color: #303030;
+    color: #fff;
+    grid-template-columns: max-content max-content;
+    grid-gap: 2rem;
+    justify-content: space-between;
+    height: var(--nav_height);
+}
+.logo{
+    display: grid;
+    align-content: center;
+    padding: 0 2.75rem;
+    font-size: 1.5rem;
+    text-transform: uppercase;
+}
+.hamburger{
+    display: none;
+}
+nav a{
+    color: #fff;
+}
+a{
+    text-decoration: none;
+    padding: 0 2rem;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    font-size: 1.125rem;
+}
+.nav_content{
+    display: flex;
+    gap: 2rem;
+}
+main{
+    background-color: #181818;
+    min-height: calc(100vh - var(--nav_height));
+    color: #fff;
+    display: grid;
+}
+p{
+    margin: 0;
+}
+.advertisement_grid{
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-gap: 2.75rem;
+    padding: 2.75rem;
+    grid-auto-rows: max-content;
+}
+.advertisement_tile{
+    border: 4px solid #2F9C26;
+    border-radius: 10px;
+    overflow: hidden;
+    padding-bottom: .5rem;
+}
+img{
+    width: 100%;
+}
+.advertisement_tile strong,
+.advertisement_tile p{
+    padding: 0 1rem;
+}
+.index_grid{
+    display: grid;
+    grid-template-columns: 350px 1fr;
+}
+.index_aside{
+    background-color: #242424;
+    height: 100%;
+    padding: 2.75rem;
+    display: grid;
+    grid-gap: 1.5rem;
+    grid-auto-rows: max-content;
+}
+.index_aside input[type="text"], .index_aside select, .index_aside button{
+    padding: .5rem 1rem;
+    border: unset;
+    border-radius: 5px;
+    font-family: "Poppins", sans-serif;
+    display: grid;
+    background-color: #fff;
+}
+.filtering_tile{
+    display: grid;
+    grid-gap: .5rem;
+}
+input{
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.index_aside button{
+    margin-top: 1.25rem;
+    background-color: #2F9C26;
+    font-size: 1rem;
+    color: #fff;
+}
