@@ -1,0 +1,71 @@
+﻿@page "/"
+@using KittySaver.Wasm.Shared.HttpClients
+@using KittySaver.Wasm.Shared.HttpClients.MainApiResponses
+@inject IApiClient MainApiClient
+
+<PageTitle>uratujkota.pl</PageTitle>
+<div class="index_grid">
+    <aside class="index_aside">
+        <div class="filtering_tile">
+            <label for="filtering_city">Miasto</label>
+            <input type="text" id="filtering_city" class="filtering_input">
+        </div>
+        <div class="filtering_tile">
+            <label for="filtering_city">Województwo</label>
+            <select type="text" id="filtering_state" class="filtering_input">
+                <option value="">Kliknij aby wybrać</option>
+                <option value="Dolnośląskie">Dolnośląskie</option>
+                <option value="Kujawsko-Pomorskie">Kujawsko-Pomorskie</option>
+                <option value="Lubelskie">Lubelskie</option>
+                <option value="Lubuskie">Lubuskie</option>
+                <option value="Łódzkie">Łódzkie</option>
+                <option value="Małopolskie">Małopolskie</option>
+                <option value="Mazowieckie">Mazowieckie</option>
+                <option value="Opolskie">Opolskie</option>
+                <option value="Podkarpackie">Podkarpackie</option>
+                <option value="Podlaskie">Podlaskie</option>
+                <option value="Pomorskie">Pomorskie</option>
+                <option value="Śląskie">Śląskie</option>
+                <option value="Świętokrzyskie">Świętokrzyskie</option>
+                <option value="Warmińsko-Mazurskie">Warmińsko-Mazurskie</option>
+                <option value="Wielkopolskie">Wielkopolskie</option>
+                <option value="Zachodniopomorskie">Zachodniopomorskie</option>
+            </select>
+        </div>
+        <div class="filtering_tile">
+            <label for="filtering_city">Kod pocztowy</label>
+            <input type="text" id="filtering_zipcode" class="filtering_input">
+        </div>
+        <button>Zatwierdź filtry</button>
+    </aside>
+
+    @if (_advertisements == null)
+    {
+        <p>Ładujemy ogłoszenia ze słodkimi kotkami...</p>
+    }
+    else
+    {
+        <div class="advertisement_grid">
+            @foreach (AdvertisementResponse ad in _advertisements.Items)
+            {
+                <div class="advertisement_tile">
+                    <div class="advertisement_tile_img_container">
+                        <img src="https://www.pap.pl/sites/default/files/styles/main_image/public/202312/pap_20060522_089.jpg?itok=vpGbp_36" class="advertisement_tile_img" alt="uratujkota.pl - @ad.Title">
+                        <strong>@ad.Title</strong>
+                        <p>@ad.PickupAddress.City<br>@ad.PickupAddress.State<br>@ad.PickupAddress.ZipCode</p>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+
+@code {
+    private PagedList<AdvertisementResponse>? _advertisements;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _advertisements = await MainApiClient.GetAsync<PagedList<AdvertisementResponse>>("api/v1/advertisements");
+    }
+}
