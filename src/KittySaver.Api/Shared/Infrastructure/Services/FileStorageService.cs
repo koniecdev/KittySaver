@@ -6,6 +6,7 @@ public interface IFileStorageService
     Task<FileStream> GetFileAsync(string fileName, CancellationToken cancellationToken);
     Task DeleteFileAsync(string fileName, CancellationToken cancellationToken);
 }
+
 public sealed class LocalFileStorageService(IWebHostEnvironment webHostEnvironment) : IFileStorageService
 {
     private readonly string _basePath = Path.Combine(
@@ -16,18 +17,20 @@ public sealed class LocalFileStorageService(IWebHostEnvironment webHostEnvironme
     public async Task SaveFileAsync(Stream sourceStream, string fileName, CancellationToken cancellationToken)
     {
         string advertisementId = Path.GetFileNameWithoutExtension(fileName).Split('_')[0];
-        string advertisementDirectory = Path.Combine(_basePath, advertisementId);
+        string thumbnailDirectory = Path.Combine(_basePath, advertisementId, "thumbnail");
         
-        Directory.CreateDirectory(advertisementDirectory);
+        // Create directory if it doesn't exist
+        Directory.CreateDirectory(thumbnailDirectory);
         
-        string extension = Path.GetExtension(fileName);
-        string newFileName = $"thumbnail{extension}";
-        string filePath = Path.Combine(advertisementDirectory, newFileName);
-        
-        if (File.Exists(filePath))
+        // Clean existing thumbnail (if any)
+        foreach (string existingFile in Directory.GetFiles(thumbnailDirectory))
         {
-            File.Delete(filePath);
+            File.Delete(existingFile);
         }
+        
+        // Save new thumbnail
+        string extension = Path.GetExtension(fileName);
+        string filePath = Path.Combine(thumbnailDirectory, $"thumbnail{extension}");
         
         await using FileStream destinationStream = File.Create(filePath);
         await sourceStream.CopyToAsync(destinationStream, cancellationToken);
@@ -35,37 +38,41 @@ public sealed class LocalFileStorageService(IWebHostEnvironment webHostEnvironme
 
     public Task<FileStream> GetFileAsync(string fileName, CancellationToken cancellationToken)
     {
-        string advertisementId = Path.GetFileNameWithoutExtension(fileName).Split('-')[0];
-        string extension = Path.GetExtension(fileName);
+        string advertisementId = Path.GetFileNameWithoutExtension(fileName).Split('_')[0];
+        string thumbnailDirectory = Path.Combine(_basePath, advertisementId, "thumbnail");
         
-        string filePath = Path.Combine(_basePath, advertisementId, $"thumbnail{extension}");
-        
-        if (!File.Exists(filePath))
+        if (!Directory.Exists(thumbnailDirectory))
         {
             throw new FileNotFoundException($"Thumbnail for advertisement {advertisementId} not found");
         }
-        
-        return Task.FromResult(new FileStream(filePath, FileMode.Open, FileAccess.Read));
+
+        string[] files = Directory.GetFiles(thumbnailDirectory);
+        if (files.Length == 0)
+        {
+            throw new FileNotFoundException($"Thumbnail for advertisement {advertisementId} not found");
+        }
+
+        string thumbnailPath = files[0];
+        return Task.FromResult(new FileStream(thumbnailPath, FileMode.Open, FileAccess.Read));
     }
 
     public Task DeleteFileAsync(string fileName, CancellationToken cancellationToken)
     {
         string advertisementId = Path.GetFileNameWithoutExtension(fileName).Split('-')[0];
-        string extension = Path.GetExtension(fileName);
-        string filePath = Path.Combine(_basePath, advertisementId, $"thumbnail{extension}");
-        
-        if (File.Exists(filePath))
+        string thumbnailDirectory = Path.Combine(_basePath, advertisementId, "thumbnail");
+
+        if (!Directory.Exists(thumbnailDirectory))
         {
-            File.Delete(filePath);
-            
-            // Optionally clean up empty directory
-            string directory = Path.GetDirectoryName(filePath)!;
-            if (Directory.Exists(directory) && !Directory.EnumerateFileSystemEntries(directory).Any())
-            {
-                Directory.Delete(directory);
-            }
+            return Task.CompletedTask;
         }
-        
+        Directory.Delete(thumbnailDirectory, recursive: true);
+            
+        string advertisementDirectory = Path.GetDirectoryName(thumbnailDirectory)!;
+        if (!Directory.EnumerateFileSystemEntries(advertisementDirectory).Any())
+        {
+            Directory.Delete(advertisementDirectory);
+        }
+
         return Task.CompletedTask;
     }
 }
