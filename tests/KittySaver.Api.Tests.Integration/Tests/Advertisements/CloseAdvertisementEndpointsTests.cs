@@ -102,7 +102,7 @@ public class CloseAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse!.Id.Should().Be(advertisementResponse.Id);
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
         hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Closed);
-        hateoasResponse.Links.Count.Should().Be(1);
+        hateoasResponse.Links.Count.Should().Be(2);
         
         CatResponse catAfterClosure =
             await _httpClient.GetFromJsonAsync<CatResponse>($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}")
