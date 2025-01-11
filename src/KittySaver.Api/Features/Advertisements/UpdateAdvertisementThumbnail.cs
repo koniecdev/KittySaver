@@ -50,7 +50,7 @@ public sealed class UpdateAdvertisementThumbnail : IEndpoint
 
     internal sealed class UpdateAdvertisementThumbnailCommandHandler(
         IPersonRepository personRepository,
-        IFileStorage fileStorage)
+        IFileStorageService fileStorage)
         : IRequestHandler<UpdateAdvertisementThumbnailCommand, AdvertisementHateoasResponse>
     {
         public async Task<AdvertisementHateoasResponse> Handle(UpdateAdvertisementThumbnailCommand request, CancellationToken cancellationToken)

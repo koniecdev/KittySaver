@@ -49,6 +49,6 @@
       <ProjectReference Include="..\KittySaver.Domain\KittySaver.Domain.csproj" />
     </ItemGroup>
     <ItemGroup>
-      <Folder Include="wwwroot\" />
+      <Folder Include="PrivateFiles\advertisements\" />
     </ItemGroup>
 </Project>

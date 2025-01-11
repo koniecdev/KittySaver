@@ -484,3 +484,5 @@ $RECYCLE.BIN/
 *.swp
 
 logs
+
+src/KittySaver.Api/PrivateFiles/**/*
