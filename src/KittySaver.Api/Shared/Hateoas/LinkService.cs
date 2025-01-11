@@ -18,6 +18,7 @@ public interface ILinkService
         CurrentlyLoggedInPerson? currentlyLoggedInPerson);
     Link Generate(string endpointName, object? routeValues, string rel, string verb = "GET", bool isTemplated = false);
     List<Link> GeneratePaginationLinks(string endpointName, int? offset, int? limit, Guid? personId);
+    List<Link> GenerateApiDiscoveryV1Links(Guid? personId);
 }
 
 public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccessor httpContextAccessor) : ILinkService
@@ -123,10 +124,11 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
     {
         List<Link> links =
         [
-            Generate(
-                endpointInfo: EndpointNames.GetAdvertisement,
-                routeValues: new { id },
-                isSelf: true)
+            Generate(endpointInfo: EndpointNames.GetAdvertisement,
+                    routeValues: new { id },
+                    isSelf: true),
+            Generate(endpointInfo: EndpointNames.GetAdvertisementThumbnail,
+                    routeValues: new { id })
         ];
 
         if (currentlyLoggedInPerson?.Role is not Person.Role.Admin && currentlyLoggedInPerson?.PersonId != personId)
@@ -153,10 +155,6 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
                 links.Add(Generate(
                     endpointInfo: EndpointNames.UpdateAdvertisementThumbnail,
                     routeValues: new { id, personId }));
-                
-                links.Add(Generate(
-                    endpointInfo: EndpointNames.GetAdvertisementThumbnail,
-                    routeValues: new { id }));
             
                 links.Add(Generate(
                     endpointInfo: EndpointNames.CloseAdvertisement,
@@ -235,6 +233,41 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
             "by-page",
             "GET",
             true));
+        return links;
+    }
+
+    public List<Link> GenerateApiDiscoveryV1Links(Guid? personId)
+    {
+        List<Link> links =
+        [
+            Generate(endpointInfo: EndpointNames.GetApiDiscoveryV1,
+                    routeValues: null,
+                    isSelf: true),
+            Generate(endpointInfo: EndpointNames.GetAdvertisements,
+                    routeValues: null)
+        ];
+        
+        if (personId is null)
+        {
+            return links;
+        }
+        
+        links.Add(Generate(
+            endpointInfo: EndpointNames.GetCats,
+            routeValues: new { personId = personId.Value }));
+        
+        links.Add(Generate(
+            endpointInfo: EndpointNames.GetAdvertisements,
+            routeValues: new { personId = personId.Value }));
+        
+        links.Add(Generate(
+            endpointInfo: EndpointNames.CreateCat,
+            routeValues: new { personId = personId.Value }));
+        
+        links.Add(Generate(
+            endpointInfo: EndpointNames.CreateAdvertisement,
+            routeValues: new { personId = personId.Value }));
+        
         return links;
     }
 }
