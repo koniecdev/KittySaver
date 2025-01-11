@@ -63,6 +63,9 @@ public static class EndpointNames
     
     public static readonly EndpointInfo ReassignCatsToAdvertisement = 
         new (Advertisement.ReassignCatsToAdvertisementName, Advertisement.ReassignCatsToAdvertisementRel, HttpVerbs.Put);
+    
+    public static readonly EndpointInfo UpdateAdvertisementThumbnail = 
+        new (Advertisement.UpdateAdvertisementThumbnailName, Advertisement.UpdateAdvertisementThumbnailRel, HttpVerbs.Put);
 
     public static class GroupNames
     {
@@ -141,5 +144,8 @@ public static class EndpointNames
         
         public const string ReassignCatsToAdvertisementName = "ReassignCatsToAdvertisement";
         public const string ReassignCatsToAdvertisementRel = "reassign-cats-to-advertisement";
+        
+        public const string UpdateAdvertisementThumbnailName = "UpdateAdvertisementThumbnailRel";
+        public const string UpdateAdvertisementThumbnailRel = "update-advertisement-thumbnail";
     }
 }
