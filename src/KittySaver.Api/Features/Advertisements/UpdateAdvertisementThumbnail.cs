@@ -73,14 +73,14 @@ public sealed class UpdateAdvertisementThumbnail : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapPut("persons/{personId:guid}/advertisements/{advertisementId:guid}/thumbnail", async (
+        endpointRouteBuilder.MapPut("persons/{personId:guid}/advertisements/{id:guid}/thumbnail", async (
             Guid personId,
-            Guid advertisementId,
+            Guid id,
             IFormFile thumbnail,
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            UpdateAdvertisementThumbnailCommand command = new(personId, advertisementId, thumbnail);
+            UpdateAdvertisementThumbnailCommand command = new(personId, id, thumbnail);
             AdvertisementHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
             return Results.Ok(hateoasResponse);
         })

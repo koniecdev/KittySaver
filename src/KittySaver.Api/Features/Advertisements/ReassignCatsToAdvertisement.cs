@@ -48,16 +48,16 @@ public sealed class ReassignCatsToAdvertisement : IEndpoint
     
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapPut("persons/{personId:guid}/advertisements/{advertisementId:guid}/cats", async (
+        endpointRouteBuilder.MapPut("persons/{personId:guid}/advertisements/{id:guid}/cats", async (
             Guid personId,
-            Guid advertisementId,
+            Guid id,
             ReassignCatsToAdvertisementRequest request,
             ISender sender,
             CancellationToken cancellationToken) =>
         {
             ReassignCatsToAdvertisementCommand command = new(
                 PersonId: personId,
-                Id: advertisementId,
+                Id: id,
                 CatIds: request.CatIds);
             AdvertisementHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
             return Results.Ok(hateoasResponse);

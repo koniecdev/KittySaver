@@ -105,7 +105,7 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
         responseMessage.Headers.Location!.ToString()
             .Should().Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{hateoasResponse.Id}");
-        hateoasResponse.Links.Count.Should().Be(6);
+        hateoasResponse.Links.Count.Should().Be(8);
     }
 
     [Fact]
@@ -161,7 +161,7 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
         responseMessage.Headers.Location!.ToString()
             .Should().Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{hateoasResponse.Id}");
-        hateoasResponse.Links.Count.Should().Be(6);
+        hateoasResponse.Links.Count.Should().Be(8);
     }
 
     [Theory]
@@ -213,7 +213,7 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
         responseMessage.Headers.Location!.ToString()
             .Should().Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{hateoasResponse.Id}");
-        hateoasResponse.Links.Count.Should().Be(6);
+        hateoasResponse.Links.Count.Should().Be(8);
     }
     
     [Fact]

@@ -119,14 +119,14 @@ public sealed class UpdateAdvertisement : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapPut("persons/{personId:guid}/advertisements/{advertisementId:guid}", async (
+        endpointRouteBuilder.MapPut("persons/{personId:guid}/advertisements/{id:guid}", async (
             Guid personId,
-            Guid advertisementId,
+            Guid id,
             UpdateAdvertisementRequest request,
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            UpdateAdvertisementCommand command = request.MapToUpdateAdvertisementCommand(personId, advertisementId);
+            UpdateAdvertisementCommand command = request.MapToUpdateAdvertisementCommand(personId, id);
             AdvertisementHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
             return Results.Ok(hateoasResponse);
         }).RequireAuthorization()

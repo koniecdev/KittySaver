@@ -106,7 +106,7 @@ public class RefreshAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse!.Id.Should().Be(advertisementResponse.Id);
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
         hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
-        hateoasResponse.Links.Count.Should().Be(6);
+        hateoasResponse.Links.Count.Should().Be(8);
         AdvertisementResponse advertisement =
             await _httpClient.GetFromJsonAsync<AdvertisementResponse>(
                 $"api/v1/advertisements/{advertisementResponse.Id}") ?? throw new JsonException();
@@ -160,7 +160,7 @@ public class RefreshAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse!.Id.Should().Be(advertisementResponse.Id);
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
         hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
-        hateoasResponse.Links.Count.Should().Be(6);
+        hateoasResponse.Links.Count.Should().Be(8);
         AdvertisementResponse advertisement =
             await _httpClient.GetFromJsonAsync<AdvertisementResponse>(
                 $"api/v1/advertisements/{advertisementResponse.Id}") ?? throw new JsonException();
