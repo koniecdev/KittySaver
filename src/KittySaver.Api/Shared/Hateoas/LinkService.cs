@@ -149,6 +149,14 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
                 links.Add(Generate(
                     endpointInfo: EndpointNames.ReassignCatsToAdvertisement,
                     routeValues: new { id, personId }));
+                
+                links.Add(Generate(
+                    endpointInfo: EndpointNames.UpdateAdvertisementThumbnail,
+                    routeValues: new { id, personId }));
+                
+                links.Add(Generate(
+                    endpointInfo: EndpointNames.GetAdvertisementThumbnail,
+                    routeValues: new { id }));
             
                 links.Add(Generate(
                     endpointInfo: EndpointNames.CloseAdvertisement,
