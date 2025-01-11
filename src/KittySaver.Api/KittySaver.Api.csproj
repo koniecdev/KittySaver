@@ -6,6 +6,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <UserSecretsId>9ef2a186-aad2-4691-9b6d-21daf58b56a2</UserSecretsId>
+        <UseStaticWebAssets>true</UseStaticWebAssets>
     </PropertyGroup>
 
     <ItemGroup>
@@ -46,5 +47,8 @@
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\KittySaver.Domain\KittySaver.Domain.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="wwwroot\" />
     </ItemGroup>
 </Project>

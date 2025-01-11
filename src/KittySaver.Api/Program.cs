@@ -52,6 +52,7 @@ try
     WebApplication app = builder.Build();
     app.UseExceptionHandler();
     app.UseHttpsRedirection();
+    app.UseStaticFiles();
     app.UseSerilogRequestLogging();
     app.UseCors("AllowedPolicies");
     app.UseAuthentication();
