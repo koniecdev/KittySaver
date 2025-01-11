@@ -66,6 +66,9 @@ public static class EndpointNames
     
     public static readonly EndpointInfo UpdateAdvertisementThumbnail = 
         new (Advertisement.UpdateAdvertisementThumbnailName, Advertisement.UpdateAdvertisementThumbnailRel, HttpVerbs.Put);
+    
+    public static readonly EndpointInfo GetAdvertisementThumbnail = 
+        new (Advertisement.GetAdvertisementThumbnailName, Advertisement.GetAdvertisementThumbnailRel, HttpVerbs.Get);
 
     public static class GroupNames
     {
@@ -147,5 +150,8 @@ public static class EndpointNames
         
         public const string UpdateAdvertisementThumbnailName = "UpdateAdvertisementThumbnailRel";
         public const string UpdateAdvertisementThumbnailRel = "update-advertisement-thumbnail";
+        
+        public const string GetAdvertisementThumbnailName = "GetAdvertisementThumbnailRel";
+        public const string GetAdvertisementThumbnailRel = "get-advertisement-thumbnail";
     }
 }
