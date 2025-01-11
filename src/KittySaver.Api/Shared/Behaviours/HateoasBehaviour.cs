@@ -1,4 +1,5 @@
-﻿using KittySaver.Api.Shared.Abstractions;
+﻿using KittySaver.Api.Features.ApiDiscovery;
+using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using MediatR;
@@ -19,6 +20,7 @@ public sealed class HateoasBehaviour<TRequest, TResponse>(
 
         response.Links = response switch
         {
+            GetApiDiscoveryV1.GetApiDiscoveryV1Response => linkService.GenerateApiDiscoveryV1Links(issuingPerson?.PersonId ?? null),
             IHateoasPersonResponse personResponse => linkService.GeneratePersonRelatedLinks(
                 personResponse.Id,
                 issuingPerson),
