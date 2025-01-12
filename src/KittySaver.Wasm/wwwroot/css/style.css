@@ -63,6 +63,7 @@ p{
     border-radius: 10px;
     overflow: hidden;
     padding-bottom: .5rem;
+    background-color: #242424;
 }
 img{
     width: 100%;
@@ -99,10 +100,13 @@ input{
     box-sizing: border-box;
     width: 100%;
 }
-
+select{
+    cursor: pointer;
+}
 .index_aside button{
     margin-top: 1.25rem;
     background-color: #2F9C26;
     font-size: 1rem;
     color: #fff;
+    cursor: pointer;
 }

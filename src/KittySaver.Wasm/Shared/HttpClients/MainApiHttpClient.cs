@@ -118,7 +118,6 @@ public static class HttpClientExtensions
     {
         services.AddHttpClient<IApiClient, ApiClient>(client =>
             {
-                client.BaseAddress = new Uri(configuration["ApiBaseUrl"] ?? "https://api.your-backend.com/");
                 client.Timeout = TimeSpan.FromSeconds(30);
             })
             .AddPolicyHandler(GetRetryPolicy())

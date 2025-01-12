@@ -4,6 +4,9 @@ public static class EndpointNames
 {
     public const string SelfRel = "self";
     
+    public static readonly EndpointInfo GetApiDiscoveryV1 = 
+        new(ApiDiscovery.GetApiDiscoveryV1Name, SelfRel, HttpVerbs.Get);
+    
     public static readonly EndpointInfo CreatePerson = 
         new(Person.CreatePersonName, Person.CreatePersonRel, HttpVerbs.Post);
     
@@ -72,6 +75,7 @@ public static class EndpointNames
 
     public static class GroupNames
     {
+        public const string Discovery = "Discovery";
         public const string PersonGroup = "Persons";
         public const string CatGroup = "Cats";
         public const string AdvertisementGroup = "Advertisements";
@@ -83,6 +87,11 @@ public static class EndpointNames
         public const string Post = "POST";
         public const string Put = "PUT";
         public const string Delete = "DELETE";
+    }
+
+    private static class ApiDiscovery
+    {
+        public const string GetApiDiscoveryV1Name = "GetApiDiscoveryV1";
     }
     private static class Person
     {
