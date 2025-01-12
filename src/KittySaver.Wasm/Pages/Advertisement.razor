@@ -1,0 +1,56 @@
+﻿@page "/advertisement/{Id:guid}"
+@using KittySaver.Wasm.Shared.Components.Advertisement
+@using KittySaver.Wasm.Shared.HttpClients
+@using KittySaver.Wasm.Shared.HttpClients.MainApiResponses
+@inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
+@inject IAdvertisementStateService AdvertisementState
+@inject IApiClient MainApiClient
+
+<PageTitle>Uratujkota.pl - Szczegóły ogłoszenia</PageTitle>
+
+@if (_advertisement == null)
+{
+    <p>Ładowanie szczegółów ogłoszenia...</p>
+}
+else
+{
+    <div class="advertisement-details">
+        <h1>@_advertisement.Title</h1>
+        <!-- rest of your advertisement details -->
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private AdvertisementResponse? _advertisement;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnInitializedAsync();
+        await LoadAdvertisement();
+    }
+
+    private async Task LoadAdvertisement()
+    {
+        Link? link = AdvertisementState.GetSelectedAdvertisementLink(Id);
+        
+        if (link is not null)
+        {
+            _advertisement = await MainApiClient.GetAsync<AdvertisementResponse>(link.Href);
+            AdvertisementState.ClearSelectedAdvertisementLink(Id);
+        }
+        else
+        {
+            // Fallback to discovery endpoint if link not in state
+            // (e.g., user navigated directly to URL)
+            Link? discoveryLink = ApiNavigation.GetLink(EndpointRels.Advertisement.GetAdvertisementRel);
+            if (discoveryLink is not null)
+            {
+                string href = discoveryLink.Href.Replace("{id}", Id.ToString());
+                _advertisement = await MainApiClient.GetAsync<AdvertisementResponse>(href);
+            }
+        }
+    }
+}
