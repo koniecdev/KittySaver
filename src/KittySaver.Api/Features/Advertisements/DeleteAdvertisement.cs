@@ -40,13 +40,13 @@ public sealed class DeleteAdvertisement : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapDelete("persons/{personId:guid}/advertisements/{advertisementId:guid}", async (
+        endpointRouteBuilder.MapDelete("persons/{personId:guid}/advertisements/{id:guid}", async (
             Guid personId,
-            Guid advertisementId,
+            Guid id,
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            DeleteAdvertisementCommand command = new(PersonId: personId, Id: advertisementId);
+            DeleteAdvertisementCommand command = new(PersonId: personId, Id: id);
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
         }).RequireAuthorization()

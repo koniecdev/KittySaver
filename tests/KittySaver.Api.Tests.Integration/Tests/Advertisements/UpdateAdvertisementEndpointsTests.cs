@@ -127,7 +127,7 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse!.Id.Should().Be(advertisementResponse.Id);
         hateoasResponse.PersonId.Should().Be(createPersonResponse.Id);
         hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
-        hateoasResponse.Links.Count.Should().Be(6);
+        hateoasResponse.Links.Count.Should().Be(8);
     }
 
     [Fact]

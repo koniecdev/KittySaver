@@ -92,7 +92,8 @@ public sealed class CurrentUserService(
             {
                 PersonId = x.Id,
                 Role = (Person.Role)x.CurrentRole
-            }).FirstOrDefaultAsync(cancellationToken) ?? throw new AuthenticationException();
+            }).FirstOrDefaultAsync(cancellationToken);
+                      // ?? throw new AuthenticationException();
 
         return _cachedUser;
     }

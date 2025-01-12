@@ -151,7 +151,7 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
         firstPersonAdvertisement.PickupAddress.Street.Should().Be(request.PickupAddressStreet);
         firstPersonAdvertisement.PickupAddress.BuildingNumber.Should().Be(request.PickupAddressBuildingNumber);
         firstPersonAdvertisement.PriorityScore.Should().BeGreaterThan(0);
-        firstPersonAdvertisement.Links.Count.Should().Be(6);
+        firstPersonAdvertisement.Links.Count.Should().Be(8);
 
         AdvertisementResponse secondPersonAdvertisement =
             advertisements.Items.First(x => x.PersonId == secondPersonRegisterResponse.Id);
@@ -165,7 +165,7 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
         secondPersonAdvertisement.PickupAddress.Street.Should().Be(secondRequest.PickupAddressStreet);
         secondPersonAdvertisement.PickupAddress.BuildingNumber.Should().Be(secondRequest.PickupAddressBuildingNumber);
         secondPersonAdvertisement.PriorityScore.Should().BeGreaterThan(0);
-        secondPersonAdvertisement.Links.Count.Should().Be(6);
+        secondPersonAdvertisement.Links.Count.Should().Be(8);
     }
 
     [Fact]

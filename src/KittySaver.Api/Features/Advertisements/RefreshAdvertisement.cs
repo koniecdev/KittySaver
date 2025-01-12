@@ -47,13 +47,13 @@ public sealed class RefreshAdvertisement : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapPost("persons/{personId:guid}/advertisements/{advertisementId:guid}/refresh", async (
+        endpointRouteBuilder.MapPost("persons/{personId:guid}/advertisements/{id:guid}/refresh", async (
             Guid personId,
-            Guid advertisementId,
+            Guid id,
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            RefreshAdvertisementCommand command = new(PersonId: personId, Id: advertisementId);
+            RefreshAdvertisementCommand command = new(PersonId: personId, Id: id);
             AdvertisementHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
             return Results.Ok(hateoasResponse);
         }).RequireAuthorization()

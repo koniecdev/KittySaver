@@ -33,6 +33,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IPersonUniquenessChecksRepository, PersonUniquenessChecksRepository>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<ICatPriorityCalculatorService, DefaultCatPriorityCalculatorService>();
+        services.AddScoped<IFileStorageService, LocalFileStorageService>();
         services.AddValidatorsFromAssembly(assembly);
         
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

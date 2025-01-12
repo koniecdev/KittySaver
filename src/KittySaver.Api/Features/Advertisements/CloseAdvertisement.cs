@@ -47,13 +47,13 @@ public sealed class CloseAdvertisement : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapPost("persons/{personId:guid}/advertisements/{advertisementId:guid}/close", async (
+        endpointRouteBuilder.MapPost("persons/{personId:guid}/advertisements/{id:guid}/close", async (
             Guid personId,
-            Guid advertisementId,
+            Guid id,
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            CloseAdvertisementCommand command = new(PersonId: personId, Id: advertisementId);
+            CloseAdvertisementCommand command = new(PersonId: personId, Id: id);
             AdvertisementHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
             return Results.Ok(hateoasResponse);
         }).RequireAuthorization()

@@ -1,6 +1,7 @@
 ﻿@page "/"
 @using KittySaver.Wasm.Shared.HttpClients
 @using KittySaver.Wasm.Shared.HttpClients.MainApiResponses
+@inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
 @inject IApiClient MainApiClient
 
 <PageTitle>uratujkota.pl</PageTitle>
@@ -50,7 +51,7 @@
             {
                 <div class="advertisement_tile">
                     <div class="advertisement_tile_img_container">
-                        <img src="https://www.pap.pl/sites/default/files/styles/main_image/public/202312/pap_20060522_089.jpg?itok=vpGbp_36" class="advertisement_tile_img" alt="uratujkota.pl - @ad.Title">
+                        <img src="@ad.Links.FirstOrDefault(x=>x.Rel == "get-advertisement-thumbnail")?.Href" class="advertisement_tile_img" alt="uratujkota.pl - @ad.Title">
                         <strong>@ad.Title</strong>
                         <p>@ad.PickupAddress.City<br>@ad.PickupAddress.State<br>@ad.PickupAddress.ZipCode</p>
                     </div>
@@ -66,6 +67,11 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _advertisements = await MainApiClient.GetAsync<PagedList<AdvertisementResponse>>("api/v1/advertisements");
+        await base.OnInitializedAsync();
+        Link? getAdvertisementsLink = ApiNavigation.GetLink(EndpointRels.Advertisement.GetAdvertisementsRel);
+        @if (getAdvertisementsLink is not null)
+        {
+            _advertisements = await MainApiClient.GetAsync<PagedList<AdvertisementResponse>>(getAdvertisementsLink.Href);
+        }
     }
 }

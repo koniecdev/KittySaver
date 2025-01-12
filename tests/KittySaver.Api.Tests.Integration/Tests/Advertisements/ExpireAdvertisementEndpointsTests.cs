@@ -105,7 +105,7 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse!.Id.Should().Be(advertisementResponse.Id);
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
         hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Expired);
-        hateoasResponse.Links.Count.Should().Be(2);
+        hateoasResponse.Links.Count.Should().Be(3);
         AdvertisementResponse advertisement =
             await _httpClient.GetFromJsonAsync<AdvertisementResponse>(
                 $"api/v1/advertisements/{advertisementResponse.Id}") ?? throw new JsonException();

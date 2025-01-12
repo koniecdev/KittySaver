@@ -47,13 +47,13 @@ public sealed class ExpireAdvertisement : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapPost("persons/{personId:guid}/advertisements/{advertisementId:guid}/expire", async (
+        endpointRouteBuilder.MapPost("persons/{personId:guid}/advertisements/{id:guid}/expire", async (
             Guid personId,
-            Guid advertisementId,
+            Guid id,
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            ExpireAdvertisementCommand command = new(PersonId: personId, Id: advertisementId);
+            ExpireAdvertisementCommand command = new(PersonId: personId, Id: id);
             AdvertisementHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
             return Results.Ok(hateoasResponse);
         }).RequireAuthorization()
