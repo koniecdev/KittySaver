@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace KittySaver.Auth.Api.Shared.Persistence;
 
@@ -20,7 +21,6 @@ public sealed class ApplicationDbContext(
         base.OnModelCreating(builder);
         builder.ApplyConfigurationsFromAssembly(typeof(Program).Assembly);
     }
-
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         foreach (EntityEntry<AuditableEntity> entity in ChangeTracker.Entries<AuditableEntity>())
