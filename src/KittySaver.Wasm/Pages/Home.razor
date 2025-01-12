@@ -1,19 +1,20 @@
 ﻿@page "/"
+@using KittySaver.Wasm.Shared.Components.Advertisement
 @using KittySaver.Wasm.Shared.HttpClients
 @using KittySaver.Wasm.Shared.HttpClients.MainApiResponses
 @inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
 @inject IApiClient MainApiClient
 
-<PageTitle>uratujkota.pl</PageTitle>
+<PageTitle>Uratujkota.pl - Ogłoszenia - Bo życie kotków jest priorytetem - Portal adopcyjny dla potrzebujących kotów.</PageTitle>
 <div class="index_grid">
     <aside class="index_aside">
         <div class="filtering_tile">
             <label for="filtering_city">Miasto</label>
-            <input type="text" id="filtering_city" class="filtering_input">
+            <input type="text" id="filtering_city" class="filtering_input" @bind="City" @bind:event="oninput">
         </div>
         <div class="filtering_tile">
-            <label for="filtering_city">Województwo</label>
-            <select type="text" id="filtering_state" class="filtering_input">
+            <label for="filtering_state">Województwo</label>
+            <select type="text" id="filtering_state" class="filtering_input" @bind="State">
                 <option value="">Kliknij aby wybrać</option>
                 <option value="Dolnośląskie">Dolnośląskie</option>
                 <option value="Kujawsko-Pomorskie">Kujawsko-Pomorskie</option>
@@ -34,10 +35,10 @@
             </select>
         </div>
         <div class="filtering_tile">
-            <label for="filtering_city">Kod pocztowy</label>
-            <input type="text" id="filtering_zipcode" class="filtering_input">
+            <label for="filtering_zipcode">Kod pocztowy</label>
+            <input type="text" id="filtering_zipcode" class="filtering_input" @bind="ZipCode" @bind:event="oninput">
         </div>
-        <button>Zatwierdź filtry</button>
+        <button @onclick="ApplyFilters">Zatwierdź filtry</button>
     </aside>
 
     @if (_advertisements == null)
@@ -49,29 +50,88 @@
         <div class="advertisement_grid">
             @foreach (AdvertisementResponse ad in _advertisements.Items)
             {
-                <div class="advertisement_tile">
+                <a @onclick="@(() => NavigateToAdvertisement(ad))" @onclick:preventDefault href="/advertisement/@ad.Id" class="advertisement_tile">
                     <div class="advertisement_tile_img_container">
-                        <img src="@ad.Links.FirstOrDefault(x=>x.Rel == "get-advertisement-thumbnail")?.Href" class="advertisement_tile_img" alt="uratujkota.pl - @ad.Title">
+                        <img src="@ad.Links.FirstOrDefault(x=>x.Rel == EndpointRels.Advertisement.GetAdvertisementThumbnailRel)?.Href" class="advertisement_tile_img" alt="uratujkota.pl - @ad.Title">
                         <strong>@ad.Title</strong>
                         <p>@ad.PickupAddress.City<br>@ad.PickupAddress.State<br>@ad.PickupAddress.ZipCode</p>
                     </div>
-                </div>
+                </a>
             }
         </div>
     }
 </div>
 
-
 @code {
+    [Inject] 
+    private IAdvertisementStateService AdvertisementState { get; set; } = null!;
+    
+    [Inject] 
+    private NavigationManager Navigation { get; set; } = null!;
+    
     private PagedList<AdvertisementResponse>? _advertisements;
+    private string? City { get; set; }
+    private string? State { get; set; }
+    private string? ZipCode { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+        await LoadAdvertisements();
+    }
+
+    private async Task LoadAdvertisements()
+    {
         Link? getAdvertisementsLink = ApiNavigation.GetLink(EndpointRels.Advertisement.GetAdvertisementsRel);
-        @if (getAdvertisementsLink is not null)
+        if (getAdvertisementsLink is not null)
         {
-            _advertisements = await MainApiClient.GetAsync<PagedList<AdvertisementResponse>>(getAdvertisementsLink.Href);
+            string searchTerms = BuildSearchTerms();
+            string url = getAdvertisementsLink.Href;
+            
+            if (!string.IsNullOrEmpty(searchTerms))
+            {
+                url = $"{url}?searchTerm={searchTerms}";
+            }
+
+            _advertisements = await MainApiClient.GetAsync<PagedList<AdvertisementResponse>>(url);
         }
+    }
+
+    private string BuildSearchTerms()
+    {
+        List<string> terms = [];
+
+        if (!string.IsNullOrWhiteSpace(City))
+        {
+            terms.Add($"pickupaddresscity-in-{City.ToLower()}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(State))
+        {
+            terms.Add($"pickupaddressstate-in-{State.ToLower()}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(ZipCode))
+        {
+            terms.Add($"pickupaddresszipcode-in-{ZipCode.ToLower()}");
+        }
+
+        return string.Join(",", terms);
+    }
+
+    private async Task ApplyFilters()
+    {
+        await LoadAdvertisements();
+    }
+    
+    private void NavigateToAdvertisement(AdvertisementResponse ad)
+    {
+        Link? link = ad.Links.FirstOrDefault(x => x.Rel == EndpointRels.SelfRel);
+        if (link is null)
+        {
+            return;
+        }
+        AdvertisementState.SetSelectedAdvertisementLink(ad.Id, link);
+        Navigation.NavigateTo($"/advertisement/{ad.Id}");
     }
 }

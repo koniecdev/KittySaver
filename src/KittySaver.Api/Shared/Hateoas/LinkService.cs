@@ -2,6 +2,7 @@
 using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Domain.Persons;
+using Microsoft.AspNetCore.Routing.Patterns;
 
 namespace KittySaver.Api.Shared.Hateoas;
 
@@ -184,9 +185,18 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
     
     private Link Generate(EndpointInfo endpointInfo, object? routeValues = null, bool isSelf = false, bool isTemplated = false)
     {
-        string href = isTemplated 
-                ? $"{linkGenerator.GetUriByName(httpContextAccessor.HttpContext!, endpointInfo.EndpointName)!}"
-                : linkGenerator.GetUriByName(httpContextAccessor.HttpContext!, endpointInfo.EndpointName, routeValues)!;
+        string href = linkGenerator.GetUriByName(
+            httpContextAccessor.HttpContext!, 
+            endpointInfo.EndpointName,
+            routeValues)!;
+    
+        if (isTemplated)
+        {
+            href = href
+                .Replace(UrlPlaceholders.Id.ToString(), "{id}")
+                .Replace(UrlPlaceholders.PersonId.ToString(), "{personId}");
+        }
+    
         Link link = new Link(
             href,
             isSelf ? EndpointNames.SelfRel : endpointInfo.Rel,
@@ -240,13 +250,19 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
     {
         List<Link> links =
         [
+
             Generate(endpointInfo: EndpointNames.GetApiDiscoveryV1,
-                    routeValues: null,
-                    isSelf: true),
+                routeValues: null,
+                isSelf: true),
+
             Generate(endpointInfo: EndpointNames.GetAdvertisements,
-                    routeValues: null)
+                routeValues: null),
+
+            Generate(endpointInfo: EndpointNames.GetAdvertisement,
+                routeValues: new { id = UrlPlaceholders.Id },
+                isTemplated: true)
         ];
-        
+
         if (personId is null)
         {
             return links;
@@ -270,4 +286,9 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         
         return links;
     }
+}
+public static class UrlPlaceholders
+{
+    public static readonly Guid Id = Guid.Empty;
+    public static readonly Guid PersonId = Guid.Parse("11111111-1111-1111-1111-111111111111");
 }

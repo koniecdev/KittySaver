@@ -18,7 +18,7 @@ public sealed class Advertisement : AuditableEntity
     {
         Active,
         Closed,
-        Expired //TODO: Background running task every day
+        Expired
     }
 
     public required Guid PersonId

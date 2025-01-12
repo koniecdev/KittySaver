@@ -86,6 +86,7 @@ public sealed class GetAdvertisements : IEndpoint
         [
             new StringPropertyFilter<AdvertisementReadModel>(p => p.PickupAddressCountry),
             new StringPropertyFilter<AdvertisementReadModel>(p => p.PickupAddressState),
+            new StringPropertyFilter<AdvertisementReadModel>(p => p.PickupAddressZipCode),
             new StringPropertyFilter<AdvertisementReadModel>(p => p.PickupAddressCity),
             new StringPropertyFilter<AdvertisementReadModel>(p => p.PickupAddressStreet),
             new StringPropertyFilter<AdvertisementReadModel>(p => p.PickupAddressBuildingNumber),
