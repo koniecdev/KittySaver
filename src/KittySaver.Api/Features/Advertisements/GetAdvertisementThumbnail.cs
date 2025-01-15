@@ -7,7 +7,6 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace KittySaver.Api.Features.Advertisements;
-
 public sealed class GetAdvertisementThumbnail : IEndpoint
 {
     public sealed record GetAdvertisementThumbnailQuery(Guid Id) : IQuery<(FileStream Stream, string ContentType)>;
@@ -17,15 +16,20 @@ public sealed class GetAdvertisementThumbnail : IEndpoint
         IAdvertisementFileStorageService fileStorage)
         : IRequestHandler<GetAdvertisementThumbnailQuery, (FileStream Stream, string ContentType)>
     {
-        public async Task<(FileStream Stream, string ContentType)> Handle(GetAdvertisementThumbnailQuery request, CancellationToken cancellationToken)
+        public async Task<(FileStream Stream, string ContentType)> Handle(
+            GetAdvertisementThumbnailQuery request, 
+            CancellationToken cancellationToken)
         {
-            if (await db.Advertisements.AllAsync(x => x.Id != request.Id, cancellationToken))
+            bool exists = await db.Advertisements
+                .AnyAsync(x => x.Id == request.Id, cancellationToken);
+            
+            if (!exists)
             {
                 throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);
             }
         
             FileStream fileStream = fileStorage.GetThumbnail(request.Id);
-            string contentType = AdvertisementFileStorageDecorator.GetContentType(fileStream.Name);
+            string contentType = fileStorage.GetContentType(fileStream.Name);
         
             return (fileStream, contentType);
         }
@@ -38,11 +42,11 @@ public sealed class GetAdvertisementThumbnail : IEndpoint
                 ISender sender,
                 CancellationToken cancellationToken) =>
             {
-                GetAdvertisementThumbnailQuery query = new GetAdvertisementThumbnailQuery(id);
+                GetAdvertisementThumbnailQuery query = new(id);
                 (FileStream fileStream, string contentType) = await sender.Send(query, cancellationToken);
-                    
-                return Results.File(
-                    fileStream, 
+                
+                return Results.Stream(
+                    fileStream,
                     contentType: contentType,
                     enableRangeProcessing: true);
             })
