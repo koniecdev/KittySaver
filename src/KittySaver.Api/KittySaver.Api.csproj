@@ -49,7 +49,4 @@
     <ItemGroup>
       <ProjectReference Include="..\KittySaver.Domain\KittySaver.Domain.csproj" />
     </ItemGroup>
-    <ItemGroup>
-      <Folder Include="PrivateFiles\advertisements\" />
-    </ItemGroup>
 </Project>
