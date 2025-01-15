@@ -52,7 +52,9 @@
             {
                 <a @onclick="@(() => NavigateToAdvertisement(ad))" @onclick:preventDefault href="/advertisement/@ad.Id" class="advertisement_tile">
                     <div class="advertisement_tile_img_container">
-                        <img src="@ad.Links.FirstOrDefault(x=>x.Rel == EndpointRels.Advertisement.GetAdvertisementThumbnailRel)?.Href" class="advertisement_tile_img" alt="uratujkota.pl - @ad.Title">
+                        <div class="advertisement_tile_img_wrapper">
+                            <img src="@ad.Links.FirstOrDefault(x => x.Rel == EndpointRels.Advertisement.GetAdvertisementThumbnailRel)?.Href" class="advertisement_tile_img" alt="uratujkota.pl - @ad.Title">
+                        </div>
                         <strong>@ad.Title</strong>
                         <p>@ad.PickupAddress.City<br>@ad.PickupAddress.State<br>@ad.PickupAddress.ZipCode</p>
                     </div>

@@ -15,9 +15,6 @@ namespace KittySaver.Api.Features.Advertisements;
 
 public sealed class UpdateAdvertisementThumbnail : IEndpoint
 {
-    // public sealed record UpdateAdvertisementThumbnailRequest(
-    //     IFormFile Thumbnail);
-
     public sealed record UpdateAdvertisementThumbnailCommand(
         Guid PersonId,
         Guid Id,
@@ -50,7 +47,7 @@ public sealed class UpdateAdvertisementThumbnail : IEndpoint
 
     internal sealed class UpdateAdvertisementThumbnailCommandHandler(
         IPersonRepository personRepository,
-        IFileStorageService fileStorage)
+        IAdvertisementFileStorageService fileStorage)
         : IRequestHandler<UpdateAdvertisementThumbnailCommand, AdvertisementHateoasResponse>
     {
         public async Task<AdvertisementHateoasResponse> Handle(UpdateAdvertisementThumbnailCommand request, CancellationToken cancellationToken)
@@ -61,11 +58,13 @@ public sealed class UpdateAdvertisementThumbnail : IEndpoint
             {
                 throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);
             }
-            
+    
+            fileStorage.DeleteThumbnail(request.Id);
+    
             await using Stream stream = request.Thumbnail.OpenReadStream();
-            string fileName = $"{request.Id}_thumbnail{Path.GetExtension(request.Thumbnail.FileName)}";
-            await fileStorage.SaveFileAsync(stream, fileName, cancellationToken);
-            
+            string extension = Path.GetExtension(request.Thumbnail.FileName);
+            await fileStorage.SaveThumbnailAsync(stream, request.Id, extension, cancellationToken);
+    
             Advertisement.AdvertisementStatus advertisementStatus = owner.Advertisements.First(x => x.Id == request.Id).Status;
             return new AdvertisementHateoasResponse(request.Id, request.PersonId, (AdvertisementResponse.AdvertisementStatus)advertisementStatus);
         }

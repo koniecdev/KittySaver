@@ -14,29 +14,19 @@ public sealed class GetAdvertisementThumbnail : IEndpoint
 
     internal sealed class GetAdvertisementThumbnailQueryHandler(
         ApplicationReadDbContext db,
-        IFileStorageService fileStorage)
+        IAdvertisementFileStorageService fileStorage)
         : IRequestHandler<GetAdvertisementThumbnailQuery, (FileStream Stream, string ContentType)>
     {
-        private static readonly Dictionary<string, string> ContentTypes = new()
-        {
-            [".jpg"] = "image/jpeg",
-            [".jpeg"] = "image/jpeg",
-            [".png"] = "image/png",
-            [".webp"] = "image/webp"
-        };
-
         public async Task<(FileStream Stream, string ContentType)> Handle(GetAdvertisementThumbnailQuery request, CancellationToken cancellationToken)
         {
             if (await db.Advertisements.AllAsync(x => x.Id != request.Id, cancellationToken))
             {
                 throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);
             }
-            
-            FileStream fileStream = await fileStorage.GetFileAsync($"{request.Id}_thumbnail", cancellationToken);
-            
-            string extension = Path.GetExtension(fileStream.Name).ToLowerInvariant();
-            string contentType = ContentTypes.GetValueOrDefault(extension, "application/octet-stream");
-            
+        
+            FileStream fileStream = fileStorage.GetThumbnail(request.Id);
+            string contentType = AdvertisementFileStorageDecorator.GetContentType(fileStream.Name);
+        
             return (fileStream, contentType);
         }
     }
