@@ -23,9 +23,6 @@ public sealed class UpdateAdvertisementThumbnail : IEndpoint
     public sealed class UpdateAdvertisementThumbnailCommandValidator
         : AbstractValidator<UpdateAdvertisementThumbnailCommand>
     {
-        private readonly string[] _allowedExtensions = [".jpg", ".jpeg", ".png", ".webp"];
-        private const int MaxFileSizeBytes = 5 * 1024 * 1024; // 5MB
-
         public UpdateAdvertisementThumbnailCommandValidator()
         {
             RuleFor(x => x.PersonId)
@@ -38,10 +35,11 @@ public sealed class UpdateAdvertisementThumbnail : IEndpoint
 
             RuleFor(x => x.Thumbnail)
                 .NotNull()
-                .Must(file => file.Length <= MaxFileSizeBytes)
+                .Must(file => file.Length <= IThumbnailStorageService.Constants.MaxFileSizeBytes)
                 .WithMessage("File size must not exceed 5MB")
-                .Must(file => _allowedExtensions.Contains(Path.GetExtension(file.FileName).ToLowerInvariant()))
-                .WithMessage("Only .jpg, .jpeg and .png files are allowed");
+                .Must(file => IThumbnailStorageService.Constants.AllowedThumbnailTypes
+                    .ContainsKey(Path.GetExtension(file.FileName).ToLowerInvariant()))
+                .WithMessage("Only .jpg, .jpeg, .png and .webp files are allowed");
         }
     }
 
@@ -50,7 +48,9 @@ public sealed class UpdateAdvertisementThumbnail : IEndpoint
         IAdvertisementFileStorageService fileStorage)
         : IRequestHandler<UpdateAdvertisementThumbnailCommand, AdvertisementHateoasResponse>
     {
-        public async Task<AdvertisementHateoasResponse> Handle(UpdateAdvertisementThumbnailCommand request, CancellationToken cancellationToken)
+        public async Task<AdvertisementHateoasResponse> Handle(
+            UpdateAdvertisementThumbnailCommand request, 
+            CancellationToken cancellationToken)
         {
             Person owner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
 
@@ -58,43 +58,37 @@ public sealed class UpdateAdvertisementThumbnail : IEndpoint
             {
                 throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);
             }
+            
+            await fileStorage.SaveThumbnailAsync(request.Thumbnail, request.Id, cancellationToken);
     
-            fileStorage.DeleteThumbnail(request.Id);
-    
-            await using Stream stream = request.Thumbnail.OpenReadStream();
-            string extension = Path.GetExtension(request.Thumbnail.FileName);
-            await fileStorage.SaveThumbnailAsync(stream, request.Id, extension, cancellationToken);
-    
-            Advertisement.AdvertisementStatus advertisementStatus = owner.Advertisements.First(x => x.Id == request.Id).Status;
-            return new AdvertisementHateoasResponse(request.Id, request.PersonId, (AdvertisementResponse.AdvertisementStatus)advertisementStatus);
+            Advertisement.AdvertisementStatus advertisementStatus = owner.Advertisements
+                .First(x => x.Id == request.Id)
+                .Status;
+                
+            return new AdvertisementHateoasResponse(
+                request.Id, 
+                request.PersonId, 
+                (AdvertisementResponse.AdvertisementStatus)advertisementStatus);
         }
     }
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
         endpointRouteBuilder.MapPut("persons/{personId:guid}/advertisements/{id:guid}/thumbnail", async (
-            Guid personId,
-            Guid id,
-            IFormFile thumbnail,
-            ISender sender,
-            CancellationToken cancellationToken) =>
-        {
-            UpdateAdvertisementThumbnailCommand command = new(personId, id, thumbnail);
-            AdvertisementHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
-            return Results.Ok(hateoasResponse);
-        })
-        .DisableAntiforgery()
-        .Accepts<IFormFile>("multipart/form-data").RequireAuthorization()
-        .WithName(EndpointNames.UpdateAdvertisementThumbnail.EndpointName)
-        .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
+                Guid personId,
+                Guid id,
+                IFormFile thumbnail,
+                ISender sender,
+                CancellationToken cancellationToken) =>
+            {
+                UpdateAdvertisementThumbnailCommand command = new(personId, id, thumbnail);
+                AdvertisementHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
+                return Results.Ok(hateoasResponse);
+            })
+            .DisableAntiforgery()
+            .Accepts<IFormFile>("multipart/form-data")
+            .RequireAuthorization()
+            .WithName(EndpointNames.UpdateAdvertisementThumbnail.EndpointName)
+            .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
     }
 }
-
-// [Mapper]
-// public static partial class UpdateAdvertisementThumbnailMapper
-// {
-//     public static partial UpdateAdvertisementThumbnail.UpdateAdvertisementThumbnailCommand MapToUpdateAdvertisementThumbnailCommand(
-//         this UpdateAdvertisementThumbnail.UpdateAdvertisementThumbnailRequest request,
-//         Guid personId,
-//         Guid id);
-// }
