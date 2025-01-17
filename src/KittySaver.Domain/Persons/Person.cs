@@ -225,6 +225,15 @@ public sealed class Person : AggregateRoot
         }
     }
 
+    public void ActivateAdvertisementIfThumbnailIsUploadedForTheFirstTime(Guid advertisementId)
+    {
+        Advertisement advertisement = GetAdvertisementById(advertisementId);
+        if (advertisement.Status is Advertisement.AdvertisementStatus.ThumbnailNotUploaded)
+        {
+            advertisement.Activate();
+        }
+    }
+    
     public void ExpireAdvertisement(Guid advertisementId, DateTimeOffset currentDate)
     {
         Advertisement advertisement = GetAdvertisementById(advertisementId);
