@@ -16,7 +16,7 @@ public sealed class AdvertisementResponse : IHateoasAdvertisementResponse
     public required string? Description { get; init; }
     public required string ContactInfoEmail { get; init; }
     public required string ContactInfoPhoneNumber { get; init; }
-    public required AdvertisementStatus Status { get; init; }
+    public required AdvertisementStatus Status { get; init; } = AdvertisementStatus.ThumbnailNotUploaded;
     public required ICollection<CatDto> Cats { get; init; }
     public required PickupAddressDto PickupAddress { get; init; }
     public ICollection<Link> Links { get; set; } = new List<Link>();
@@ -42,7 +42,8 @@ public sealed class AdvertisementResponse : IHateoasAdvertisementResponse
     {
         Active,
         Closed,
-        Expired
+        Expired,
+        ThumbnailNotUploaded
     }
 }
 
