@@ -1,4 +1,6 @@
-﻿public interface IFileStorageService
+﻿namespace KittySaver.Api.Shared.Infrastructure.Services;
+
+public interface IFileStorageService
 {
     Task SaveFileAsync(Stream sourceStream, string? subdirectoryPath, string filenameWithExtension, CancellationToken cancellationToken);
     FileStream GetFileStream(string filePath);
@@ -43,7 +45,7 @@ public sealed class LocalFileStorageService(IWebHostEnvironment webHostEnvironme
         return new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
     }
     
-    private string[] GetAllFilesPaths(string directory)
+    private static string[] GetAllFilesPaths(string directory)
     {
         if (!Directory.Exists(directory))
         {
