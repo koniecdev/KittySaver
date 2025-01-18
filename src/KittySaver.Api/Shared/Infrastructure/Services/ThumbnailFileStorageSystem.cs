@@ -1,4 +1,6 @@
-﻿namespace KittySaver.Api.Shared.Infrastructure.Services;
+﻿using ImageMagick;
+
+namespace KittySaver.Api.Shared.Infrastructure.Services;
 
 public interface IThumbnailStorageService
 {
@@ -30,12 +32,12 @@ public class ThumbnailStorageService(
     {
         ArgumentNullException.ThrowIfNull(sourceFile);
         ArgumentException.ThrowIfNullOrEmpty(entityType);
-        
+    
         if (sourceFile.Length > IThumbnailStorageService.Constants.MaxFileSizeBytes)
         {
             throw new InvalidOperationException($"File size exceeds maximum allowed size of 5MB");
         }
-        
+    
         string fileExtension = Path.GetExtension(sourceFile.FileName);
         if (!IThumbnailStorageService.Constants.AllowedThumbnailTypes.ContainsKey(fileExtension.ToLowerInvariant()))
         {
@@ -46,12 +48,24 @@ public class ThumbnailStorageService(
         {
             fileStorage.DeleteFile(existingPath);
         }
-        
+    
         string subdirectoryPath = GetThumbnailFolderPath(entityType, entityId);
         string fileName = $"thumbnail{fileExtension}";
-        
+
         await using Stream sourceStream = sourceFile.OpenReadStream();
-        await fileStorage.SaveFileAsync(sourceStream, subdirectoryPath, fileName, cancellationToken);
+        using MagickImage image = new(sourceStream);
+    
+        double ratio = (double)image.Height / image.Width;
+        const uint newWidth = 300;
+        uint newHeight = (uint)(newWidth * ratio);
+    
+        image.Resize(width: newWidth, height: newHeight);
+    
+        using MemoryStream memoryStream = new();
+        await image.WriteAsync(memoryStream, cancellationToken);
+        memoryStream.Position = 0;
+    
+        await fileStorage.SaveFileAsync(memoryStream, subdirectoryPath, fileName, cancellationToken);
     }
 
     public FileStream GetThumbnail(string entityType, Guid entityId)
