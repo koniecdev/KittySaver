@@ -652,6 +652,8 @@ public class PersonTests
             contactInfoEmail: sut.DefaultAdvertisementsContactInfoEmail,
             contactInfoPhoneNumber: sut.DefaultAdvertisementsContactInfoPhoneNumber,
             description: Description.Create("lorem ipsum"));
+        sut.ActivateAdvertisementIfThumbnailIsUploadedForTheFirstTime(advertisement.Id);
+
         DateTimeOffset currentDate = DateTimeOffset.UtcNow;
 
         // Act
@@ -690,7 +692,6 @@ public class PersonTests
                     healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
                     isCastrated: false)).Generate();
         
-        //Act
         Advertisement advertisement = sut.AddAdvertisement(
             dateOfCreation: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
             catsIdsToAssign: [cat.Id],
@@ -698,6 +699,7 @@ public class PersonTests
             contactInfoEmail: sut.DefaultAdvertisementsContactInfoEmail,
             contactInfoPhoneNumber: sut.DefaultAdvertisementsContactInfoPhoneNumber,
             description: Description.Create("lorem ipsum"));
+        sut.ActivateAdvertisementIfThumbnailIsUploadedForTheFirstTime(advertisement.Id);
         DateTimeOffset expirationDate = DateTimeOffset.UtcNow.AddDays(31); // After default expiration period
 
         // Act
@@ -735,7 +737,6 @@ public class PersonTests
                     healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
                     isCastrated: false)).Generate();
         
-        //Act
         Advertisement advertisement = sut.AddAdvertisement(
             dateOfCreation: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
             catsIdsToAssign: [cat.Id],
@@ -743,8 +744,8 @@ public class PersonTests
             contactInfoEmail: sut.DefaultAdvertisementsContactInfoEmail,
             contactInfoPhoneNumber: sut.DefaultAdvertisementsContactInfoPhoneNumber,
             description: Description.Create("lorem ipsum"));
+        sut.ActivateAdvertisementIfThumbnailIsUploadedForTheFirstTime(advertisement.Id);
         DateTimeOffset refreshDate = DateTimeOffset.UtcNow;
-
         // Act
         sut.RefreshAdvertisement(advertisement.Id, refreshDate);
 

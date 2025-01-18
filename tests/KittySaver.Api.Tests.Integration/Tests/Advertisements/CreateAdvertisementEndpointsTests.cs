@@ -102,7 +102,7 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().NotBeEmpty();
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
-        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
+        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.ThumbnailNotUploaded);
         responseMessage.Headers.Location!.ToString()
             .Should().Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{hateoasResponse.Id}");
         hateoasResponse.Links.Count.Should().Be(8);
@@ -158,7 +158,7 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().NotBeEmpty();
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
-        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
+        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.ThumbnailNotUploaded);
         responseMessage.Headers.Location!.ToString()
             .Should().Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{hateoasResponse.Id}");
         hateoasResponse.Links.Count.Should().Be(8);
@@ -210,7 +210,7 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().NotBeEmpty();
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
-        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
+        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.ThumbnailNotUploaded);
         responseMessage.Headers.Location!.ToString()
             .Should().Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{hateoasResponse.Id}");
         hateoasResponse.Links.Count.Should().Be(8);

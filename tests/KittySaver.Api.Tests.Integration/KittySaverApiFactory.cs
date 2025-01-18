@@ -55,11 +55,16 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
 
         builder.ConfigureTestServices(services =>
         {
-            services.RemoveAll(typeof(IDateTimeProvider));
+            services.RemoveAll<IDateTimeProvider>();
             IDateTimeService dateTimeSub = new ApplicationDateTimeService();
             services.AddSingleton<IDateTimeService>(_ => dateTimeSub);
             
-            services.RemoveAll(typeof(ICurrentUserService));
+            services.RemoveAll<IAdvertisementFileStorageService>();
+            IAdvertisementFileStorageService advertisementFileStorageService = Substitute.For<IAdvertisementFileStorageService>();
+            services.AddSingleton<IAdvertisementFileStorageService>(_ => advertisementFileStorageService);
+
+            
+            services.RemoveAll<ICurrentUserService>();
             ICurrentUserService currentUserService = Substitute.For<ICurrentUserService>();
             currentUserService.EnsureUserIsAdminAsync(Arg.Any<CancellationToken>()).Returns(Task.FromResult(true));
             currentUserService.EnsureUserIsAuthorizedAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
