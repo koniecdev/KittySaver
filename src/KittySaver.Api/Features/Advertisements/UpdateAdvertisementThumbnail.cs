@@ -39,13 +39,20 @@ public sealed class UpdateAdvertisementThumbnail : IEndpoint
                 .WithMessage("File size must not exceed 5MB")
                 .Must(file => IThumbnailStorageService.Constants.AllowedThumbnailTypes
                     .ContainsKey(Path.GetExtension(file.FileName).ToLowerInvariant()))
-                .WithMessage("Only .jpg, .jpeg, .png and .webp files are allowed");
+                .WithMessage("Only .jpg, .jpeg, .png and .webp files are allowed")
+                .Must(file =>
+                {
+                    string thumbnailType = IThumbnailStorageService.Constants
+                        .AllowedThumbnailTypes[Path.GetExtension(file.FileName).ToLowerInvariant()];
+                    return file.ContentType == thumbnailType;
+                }).WithMessage("Only .jpg, .jpeg, .png and .webp files content-types are allowed");
         }
     }
 
     internal sealed class UpdateAdvertisementThumbnailCommandHandler(
         IPersonRepository personRepository,
-        IAdvertisementFileStorageService fileStorage)
+        IAdvertisementFileStorageService fileStorage,
+        IUnitOfWork unitOfWork)
         : IRequestHandler<UpdateAdvertisementThumbnailCommand, AdvertisementHateoasResponse>
     {
         public async Task<AdvertisementHateoasResponse> Handle(
@@ -54,13 +61,11 @@ public sealed class UpdateAdvertisementThumbnail : IEndpoint
         {
             Person owner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
 
-            if (owner.Advertisements.All(x => x.Id != request.Id))
-            {
-                throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);
-            }
+            owner.ActivateAdvertisementIfThumbnailIsUploadedForTheFirstTime(request.Id);
             
             await fileStorage.SaveThumbnailAsync(request.Thumbnail, request.Id, cancellationToken);
-    
+
+            await unitOfWork.SaveChangesAsync(cancellationToken);
             Advertisement.AdvertisementStatus advertisementStatus = owner.Advertisements
                 .First(x => x.Id == request.Id)
                 .Status;
@@ -77,10 +82,11 @@ public sealed class UpdateAdvertisementThumbnail : IEndpoint
         endpointRouteBuilder.MapPut("persons/{personId:guid}/advertisements/{id:guid}/thumbnail", async (
                 Guid personId,
                 Guid id,
-                IFormFile thumbnail,
+                IFormFile? thumbnail,
                 ISender sender,
                 CancellationToken cancellationToken) =>
             {
+                ArgumentNullException.ThrowIfNull(thumbnail);
                 UpdateAdvertisementThumbnailCommand command = new(personId, id, thumbnail);
                 AdvertisementHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
                 return Results.Ok(hateoasResponse);

@@ -113,7 +113,10 @@ public class CreateAdvertisement : IEndpoint
                 description);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
-            return new AdvertisementHateoasResponse(advertisement.Id, advertisement.PersonId, (AdvertisementResponse.AdvertisementStatus)advertisement.Status);
+            return new AdvertisementHateoasResponse(
+                advertisement.Id,
+                advertisement.PersonId,
+                (AdvertisementResponse.AdvertisementStatus)advertisement.Status);
         }
     }
 
