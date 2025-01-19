@@ -17,7 +17,7 @@ public interface ILinkService
         CurrentlyLoggedInPerson? currentlyLoggedInPerson);
 
     public List<Link> GenerateAdvertisementRelatedLinks(Guid id,
-        AdvertisementResponse.AdvertisementStatus advertisementStatus,
+        Advertisement.AdvertisementStatus advertisementStatus,
         Guid personId,
         CurrentlyLoggedInPerson? currentlyLoggedInPerson,
         bool doesRequestRequireAuthorization);
@@ -124,7 +124,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
 
     public List<Link> GenerateAdvertisementRelatedLinks(
         Guid id,
-        AdvertisementResponse.AdvertisementStatus advertisementStatus,
+        Advertisement.AdvertisementStatus advertisementStatus,
         Guid personId,
         CurrentlyLoggedInPerson? currentlyLoggedInPerson,
         bool doesRequestRequireAuthorization)
@@ -160,7 +160,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
 
             switch (advertisementStatus)
             {
-                case AdvertisementResponse.AdvertisementStatus.Active:
+                case Advertisement.AdvertisementStatus.Active:
                     links.Add(Generate(
                         endpointInfo: EndpointNames.UpdateAdvertisement,
                         routeValues: new { id, personId }));
@@ -193,7 +193,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
 
                     break;
 
-                case AdvertisementResponse.AdvertisementStatus.Expired:
+                case Advertisement.AdvertisementStatus.Expired:
                     links.Add(Generate(
                         endpointInfo: EndpointNames.RefreshAdvertisement,
                         routeValues: new { id, personId }));
@@ -207,7 +207,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
                     
                     break;
 
-                case AdvertisementResponse.AdvertisementStatus.ThumbnailNotUploaded:
+                case Advertisement.AdvertisementStatus.ThumbnailNotUploaded:
                     links.Add(Generate(
                         endpointInfo: EndpointNames.UpdateAdvertisementThumbnail,
                         routeValues: new { id, personId }));
@@ -225,7 +225,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
                         routeValues: new { id, personId }));
                     break;
                 
-                case AdvertisementResponse.AdvertisementStatus.Closed:
+                case Advertisement.AdvertisementStatus.Closed:
                     links.Add(Generate(endpointInfo: EndpointNames.GetAdvertisementThumbnail,
                         routeValues: new { id }));
                     break;

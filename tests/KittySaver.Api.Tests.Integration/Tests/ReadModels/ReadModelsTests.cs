@@ -9,6 +9,7 @@ using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Domain.Persons;
 using Shared;
 
 namespace KittySaver.Api.Tests.Integration.Tests.ReadModels;
@@ -172,7 +173,7 @@ public class ReadModelsIntegrationTests : IAsyncLifetime
         advertisement.Description.Should().Be(createAdvertisementRequest.Description);
         advertisement.ContactInfoEmail.Should().Be(createAdvertisementRequest.ContactInfoEmail);
         advertisement.ContactInfoPhoneNumber.Should().Be(createAdvertisementRequest.ContactInfoPhoneNumber);
-        advertisement.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.ThumbnailNotUploaded);
+        advertisement.Status.Should().Be(Advertisement.AdvertisementStatus.ThumbnailNotUploaded);
         advertisement.PriorityScore.Should().BeGreaterThan(0);
         
         advertisement.PickupAddress.Should().NotBeNull();

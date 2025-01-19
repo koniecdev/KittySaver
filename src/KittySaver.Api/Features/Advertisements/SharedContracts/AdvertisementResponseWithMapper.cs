@@ -16,7 +16,7 @@ public sealed class AdvertisementResponse : IHateoasAdvertisementResponse
     public required string? Description { get; init; }
     public required string ContactInfoEmail { get; init; }
     public required string ContactInfoPhoneNumber { get; init; }
-    public required AdvertisementStatus Status { get; init; } = AdvertisementStatus.ThumbnailNotUploaded;
+    public required Advertisement.AdvertisementStatus Status { get; init; }
     public required ICollection<CatDto> Cats { get; init; }
     public required PickupAddressDto PickupAddress { get; init; }
     public ICollection<Link> Links { get; set; } = new List<Link>();
@@ -37,22 +37,7 @@ public sealed class AdvertisementResponse : IHateoasAdvertisementResponse
         public required Guid Id { get; init; }
         public required string Name { get; init; }
     }
-    
-    public enum AdvertisementStatus
-    {
-        Active,
-        Closed,
-        Expired,
-        ThumbnailNotUploaded
-    }
 }
-
-[Mapper]
-public static partial class AdvertisementStatusMapper
-{
-    public static partial AdvertisementResponse.AdvertisementStatus MapStatus(Advertisement.AdvertisementStatus status);
-}
-
 public static class AdvertisementMapper
 {
     
@@ -72,7 +57,7 @@ public static class AdvertisementMapper
                 Id = cat.Id,
                 Name = cat.Name
             }).ToList(),
-            Status = AdvertisementStatusMapper.MapStatus((Advertisement.AdvertisementStatus)entity.Status),
+            Status = entity.Status,
             PickupAddress = new AdvertisementResponse.PickupAddressDto
             {
                 BuildingNumber = entity.PickupAddressBuildingNumber,

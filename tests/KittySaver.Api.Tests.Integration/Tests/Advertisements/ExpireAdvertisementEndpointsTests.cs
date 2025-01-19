@@ -11,6 +11,7 @@ using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Domain.Persons;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
@@ -116,7 +117,7 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().Be(advertisementResponse.Id);
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
-        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Expired);
+        hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.Expired);
         List<string> expectedRels =
         [
             EndpointNames.SelfRel,
@@ -131,7 +132,7 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
             await _httpClient.GetFromJsonAsync<AdvertisementResponse>
                 ($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}")
             ?? throw new JsonException();
-        advertisement.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Expired);
+        advertisement.Status.Should().Be(Advertisement.AdvertisementStatus.Expired);
     }
 
     [Fact]

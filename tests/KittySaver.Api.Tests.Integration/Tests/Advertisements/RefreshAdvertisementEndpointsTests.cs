@@ -9,6 +9,7 @@ using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Domain.Persons;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
@@ -114,12 +115,12 @@ public class RefreshAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().Be(advertisementResponse.Id);
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
-        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
+        hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.Active);
         hateoasResponse.Links.Count.Should().Be(8);
         AdvertisementResponse advertisement =
             await _httpClient.GetFromJsonAsync<AdvertisementResponse>(
                 $"api/v1/advertisements/{advertisementResponse.Id}") ?? throw new JsonException();
-        advertisement.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
+        advertisement.Status.Should().Be(Advertisement.AdvertisementStatus.Active);
     }
 
     [Fact]
@@ -177,12 +178,12 @@ public class RefreshAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().Be(advertisementResponse.Id);
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
-        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
+        hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.Active);
         hateoasResponse.Links.Count.Should().Be(8);
         AdvertisementResponse advertisement =
             await _httpClient.GetFromJsonAsync<AdvertisementResponse>(
                 $"api/v1/advertisements/{advertisementResponse.Id}") ?? throw new JsonException();
-        advertisement.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
+        advertisement.Status.Should().Be(Advertisement.AdvertisementStatus.Active);
     }
 
     [Fact]

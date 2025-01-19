@@ -10,6 +10,7 @@ using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -103,7 +104,7 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().NotBeEmpty();
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
-        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.ThumbnailNotUploaded);
+        hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.ThumbnailNotUploaded);
         responseMessage.Headers.Location!.ToString()
             .Should().Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{hateoasResponse.Id}");
         hateoasResponse.Links.Select(x => x.Rel).Should().BeEquivalentTo(
@@ -165,7 +166,7 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().NotBeEmpty();
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
-        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.ThumbnailNotUploaded);
+        hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.ThumbnailNotUploaded);
         responseMessage.Headers.Location!.ToString()
             .Should().Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{hateoasResponse.Id}");
         hateoasResponse.Links.Select(x => x.Rel).Should().BeEquivalentTo(
@@ -223,7 +224,7 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().NotBeEmpty();
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
-        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.ThumbnailNotUploaded);
+        hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.ThumbnailNotUploaded);
         responseMessage.Headers.Location!.ToString()
             .Should().Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{hateoasResponse.Id}");
         hateoasResponse.Links.Select(x => x.Rel).Should().BeEquivalentTo(

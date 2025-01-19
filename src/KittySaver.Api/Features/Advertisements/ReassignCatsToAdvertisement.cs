@@ -42,7 +42,7 @@ public sealed class ReassignCatsToAdvertisement : IEndpoint
             owner.ReplaceCatsOfAdvertisement(request.Id, request.CatIds);
             await unitOfWork.SaveChangesAsync(cancellationToken);
             Advertisement.AdvertisementStatus advertisementStatus = owner.Advertisements.First(x => x.Id == request.Id).Status;
-            return new AdvertisementHateoasResponse(request.Id, request.PersonId, (AdvertisementResponse.AdvertisementStatus)advertisementStatus);
+            return new AdvertisementHateoasResponse(request.Id, request.PersonId, advertisementStatus);
         }
     }
     

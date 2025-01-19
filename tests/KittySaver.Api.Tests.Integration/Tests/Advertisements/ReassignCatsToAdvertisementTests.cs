@@ -8,6 +8,7 @@ using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Domain.Persons;
 using Shared;
 
 namespace KittySaver.Api.Tests.Integration.Tests.Advertisements;
@@ -123,7 +124,7 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().Be(createAdvertisementResponse.Id);
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
-        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
+        hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.Active);
         hateoasResponse.Links.Count.Should().Be(8);
         
         HttpResponseMessage getAdvertisementResponse =
@@ -214,7 +215,7 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().Be(createAdvertisementResponse.Id);
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
-        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
+        hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.Active);
         hateoasResponse.Links.Count.Should().Be(8);
         
         HttpResponseMessage getAdvertisementResponse =

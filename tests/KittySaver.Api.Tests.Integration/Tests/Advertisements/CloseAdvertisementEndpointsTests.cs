@@ -11,6 +11,7 @@ using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Domain.Persons;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
@@ -111,7 +112,7 @@ public class CloseAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().Be(advertisementResponse.Id);
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
-        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Closed);
+        hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.Closed);
         hateoasResponse.Links.Count.Should().Be(2);
         
         CatResponse catAfterClosure =
@@ -122,7 +123,7 @@ public class CloseAdvertisementEndpointsTests : IAsyncLifetime
             await _httpClient.GetFromJsonAsync<AdvertisementResponse>(
                 $"api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}")
             ?? throw new JsonException();
-        advertisement.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Closed);
+        advertisement.Status.Should().Be(Advertisement.AdvertisementStatus.Closed);
     }
     
     [Fact]

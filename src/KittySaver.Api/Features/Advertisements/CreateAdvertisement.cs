@@ -116,7 +116,7 @@ public class CreateAdvertisement : IEndpoint
             return new AdvertisementHateoasResponse(
                 advertisement.Id,
                 advertisement.PersonId,
-                (AdvertisementResponse.AdvertisementStatus)advertisement.Status);
+                advertisement.Status);
         }
     }
 
