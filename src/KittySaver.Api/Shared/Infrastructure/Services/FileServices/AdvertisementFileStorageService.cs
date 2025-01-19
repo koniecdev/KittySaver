@@ -1,10 +1,11 @@
-﻿namespace KittySaver.Api.Shared.Infrastructure.Services;
+﻿namespace KittySaver.Api.Shared.Infrastructure.Services.FileServices;
 
 public interface IAdvertisementFileStorageService
 {
     Task SaveThumbnailAsync(IFormFile sourceFile, Guid advertisementId, CancellationToken cancellationToken);
     FileStream GetThumbnail(Guid advertisementId);
     string GetContentType(string fileName);
+    void DeleteThumbnail(Guid advertisementId);
 }
 
 public class AdvertisementFileStorageService(IThumbnailStorageService thumbnailStorage)
@@ -20,4 +21,9 @@ public class AdvertisementFileStorageService(IThumbnailStorageService thumbnailS
         
     public string GetContentType(string fileName) =>
         thumbnailStorage.GetContentType(fileName);
+
+    public void DeleteThumbnail(Guid advertisementId)
+    {
+        thumbnailStorage.DeleteThumbnail(EntityType, advertisementId);
+    }
 }

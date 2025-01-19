@@ -1,16 +1,16 @@
 ﻿using ImageMagick;
 
-namespace KittySaver.Api.Shared.Infrastructure.Services;
+namespace KittySaver.Api.Shared.Infrastructure.Services.FileServices;
 
 public interface IThumbnailStorageService
 {
     Task SaveThumbnailAsync(IFormFile sourceFile, string entityType, Guid entityId, CancellationToken cancellationToken);
     FileStream GetThumbnail(string entityType, Guid entityId);
     string GetContentType(string fileName);
+    void DeleteThumbnail(string entityType, Guid entityId);
     
     public static class Constants
     {
-        public const int MaxFileSizeBytes = 5 * 1024 * 1024; // 5MB
         public static readonly IReadOnlyDictionary<string, string> AllowedThumbnailTypes = new Dictionary<string, string>
         {
             [".jpg"] = "image/jpeg",
@@ -32,11 +32,6 @@ public class ThumbnailStorageService(
     {
         ArgumentNullException.ThrowIfNull(sourceFile);
         ArgumentException.ThrowIfNullOrEmpty(entityType);
-    
-        if (sourceFile.Length > IThumbnailStorageService.Constants.MaxFileSizeBytes)
-        {
-            throw new InvalidOperationException($"File size exceeds maximum allowed size of 5MB");
-        }
     
         string fileExtension = Path.GetExtension(sourceFile.FileName);
         if (!IThumbnailStorageService.Constants.AllowedThumbnailTypes.ContainsKey(fileExtension.ToLowerInvariant()))
@@ -92,7 +87,28 @@ public class ThumbnailStorageService(
         return IThumbnailStorageService.Constants.AllowedThumbnailTypes
             .GetValueOrDefault(extension, "application/octet-stream");
     }
-    
+
+    public void DeleteThumbnail(string entityType, Guid entityId)
+    {
+        string thumbnailDirectory = GetThumbnailFolderPath(entityType, entityId);
+
+        if (!Directory.Exists(thumbnailDirectory))
+        {
+            return;
+        }
+        
+        string[] files = Directory.GetFiles(thumbnailDirectory);
+        if (files.Length == 0)
+        {
+            return;
+        }
+        
+        foreach (string file in files)
+        {
+            File.Delete(file);
+        }
+    }
+
     private bool TryGetThumbnailPath(string entityType, Guid entityId, out string thumbnailPath)
     {
         thumbnailPath = string.Empty;

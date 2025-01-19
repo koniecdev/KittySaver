@@ -1,4 +1,4 @@
-﻿namespace KittySaver.Api.Shared.Infrastructure.Services;
+﻿namespace KittySaver.Api.Shared.Infrastructure.Services.FileServices;
 
 public interface IFileStorageService
 {
