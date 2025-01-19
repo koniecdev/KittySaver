@@ -251,7 +251,7 @@ public sealed class Person : AggregateRoot
         IEnumerable<Guid> catsIdsQuery = Cats
             .Where(x => x.AdvertisementId == advertisementId)
             .Select(x => x.Id);
-
+        
         foreach (Guid catId in catsIdsQuery)
         {
             UnassignCatFromAdvertisement(catId);
@@ -365,7 +365,7 @@ public sealed class Person : AggregateRoot
     }
 }
 
-internal sealed class PersonConfiguration : IEntityTypeConfiguration<Person>
+public sealed class PersonConfiguration : IEntityTypeConfiguration<Person>
 {
     public void Configure(EntityTypeBuilder<Person> builder)
     {

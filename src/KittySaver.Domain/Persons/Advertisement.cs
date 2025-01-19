@@ -178,7 +178,7 @@ public sealed class Advertisement : AuditableEntity
     }
 }
 
-internal sealed class AdvertisementConfiguration : IEntityTypeConfiguration<Advertisement>
+public sealed class AdvertisementConfiguration : IEntityTypeConfiguration<Advertisement>
 {
     public void Configure(EntityTypeBuilder<Advertisement> builder)
     {
