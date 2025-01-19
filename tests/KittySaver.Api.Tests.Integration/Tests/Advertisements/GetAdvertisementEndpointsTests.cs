@@ -5,6 +5,7 @@ using FluentAssertions;
 using KittySaver.Api.Features.Advertisements;
 using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Features.Persons;
+using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
 using Microsoft.AspNetCore.Http;
@@ -93,7 +94,7 @@ public class GetAdvertisementEndpointsTests : IAsyncLifetime
 
         //Act
         HttpResponseMessage response =
-            await _httpClient.GetAsync($"api/v1/advertisements/{createAdvertisementResponse.Id}");
+            await _httpClient.GetAsync($"api/v1/persons/{createPersonResponse.Id}/advertisements/{createAdvertisementResponse.Id}");
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -122,7 +123,13 @@ public class GetAdvertisementEndpointsTests : IAsyncLifetime
                 Name = createCatRequest.Name
             }
         ]);
-        advertisement.Links.Count.Should().Be(8);
+        advertisement.Links.Select(x => x.Rel).Should().BeEquivalentTo(
+            EndpointNames.SelfRel,
+            EndpointNames.UpdateAdvertisementThumbnail.Rel,
+            EndpointNames.UpdateAdvertisement.Rel,
+            EndpointNames.DeleteAdvertisement.Rel,
+            EndpointNames.ReassignCatsToAdvertisement.Rel);
+        advertisement.Links.All(x => !string.IsNullOrWhiteSpace(x.Href)).Should().BeTrue();
     }
 
     [Fact]
@@ -180,7 +187,7 @@ public class GetAdvertisementEndpointsTests : IAsyncLifetime
 
         //Act
         HttpResponseMessage response =
-            await _httpClient.GetAsync($"api/v1/advertisements/{createAdvertisementResponse.Id}");
+            await _httpClient.GetAsync($"api/v1/persons/{createPersonResponse.Id}/advertisements/{createAdvertisementResponse.Id}");
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -209,7 +216,13 @@ public class GetAdvertisementEndpointsTests : IAsyncLifetime
                 Name = createCatRequest.Name
             }
         ]);
-        advertisement.Links.Count.Should().Be(8);
+        advertisement.Links.Select(x => x.Rel).Should().BeEquivalentTo(
+            EndpointNames.SelfRel,
+            EndpointNames.UpdateAdvertisementThumbnail.Rel,
+            EndpointNames.UpdateAdvertisement.Rel,
+            EndpointNames.DeleteAdvertisement.Rel,
+            EndpointNames.ReassignCatsToAdvertisement.Rel);
+        advertisement.Links.All(x => !string.IsNullOrWhiteSpace(x.Href)).Should().BeTrue();
     }
 
     [Fact]

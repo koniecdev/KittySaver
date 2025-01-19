@@ -6,6 +6,7 @@ using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Behaviours;
 using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Shared.Infrastructure.Services;
+using KittySaver.Api.Shared.Infrastructure.Services.FileServices;
 using KittySaver.Api.Shared.Pagination;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
@@ -34,7 +35,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<ICatPriorityCalculatorService, DefaultCatPriorityCalculatorService>();
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
-        services.AddScoped<IAdvertisementFileStorageService, AdvertisementFileStorageDecorator>();
+        services.AddScoped<IThumbnailStorageService, ThumbnailStorageService>();
+        services.AddScoped<IAdvertisementFileStorageService, AdvertisementFileStorageService>();
         services.AddValidatorsFromAssembly(assembly);
         
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

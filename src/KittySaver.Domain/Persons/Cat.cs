@@ -208,7 +208,7 @@ public sealed class Cat : AuditableEntity
     }
 }
 
-internal sealed class CatConfiguration : IEntityTypeConfiguration<Cat>
+public sealed class CatConfiguration : IEntityTypeConfiguration<Cat>
 {
     public void Configure(EntityTypeBuilder<Cat> builder)
     {

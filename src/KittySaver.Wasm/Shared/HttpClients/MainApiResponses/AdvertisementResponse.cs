@@ -36,6 +36,7 @@ public sealed class AdvertisementResponse
     {
         Active,
         Closed,
-        Expired
+        Expired,
+        ThumbnailNotUploaded
     }
 }

@@ -45,7 +45,7 @@ else
         {
             // Fallback to discovery endpoint if link not in state
             // (e.g., user navigated directly to URL)
-            Link? discoveryLink = ApiNavigation.GetLink(EndpointRels.Advertisement.GetAdvertisementRel);
+            Link? discoveryLink = ApiNavigation.GetLink(EndpointRels.Advertisement.GetPublicAdvertisementRel);
             if (discoveryLink is not null)
             {
                 string href = discoveryLink.Href.Replace("{id}", Id.ToString());

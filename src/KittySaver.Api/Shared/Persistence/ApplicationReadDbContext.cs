@@ -15,8 +15,6 @@ public sealed class ApplicationReadDbContext(
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        builder.ApplyConfigurationsFromAssembly(typeof(IDomainMarker).Assembly, ReadConfigurationFilter);
+        builder.ApplyConfigurationsFromAssembly(typeof(IApiMarker).Assembly);
     }
-
-    private static bool ReadConfigurationFilter(Type type) => type.IsAssignableTo(typeof(IReadConfiguration));
 }

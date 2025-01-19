@@ -18,7 +18,8 @@ public sealed class Advertisement : AuditableEntity
     {
         Active,
         Closed,
-        Expired
+        Expired,
+        ThumbnailNotUploaded
     }
 
     public required Guid PersonId
@@ -42,7 +43,7 @@ public sealed class Advertisement : AuditableEntity
             : value;
     }
 
-    public AdvertisementStatus Status { get; private set; }
+    public AdvertisementStatus Status { get; private set; } = AdvertisementStatus.ThumbnailNotUploaded;
     public DateTimeOffset? ClosedOn { get; private set; }
     public DateTimeOffset ExpiresOn { get; private set; }
     public Description Description { get; private set; }
@@ -118,6 +119,15 @@ public sealed class Advertisement : AuditableEntity
         ContactInfoPhoneNumber = contactInfoPhoneNumber;
     }
 
+    internal void Activate()
+    {
+        if (Status is not AdvertisementStatus.ThumbnailNotUploaded)
+        {
+            throw new InvalidOperationException(ErrorMessages.ThumbnailNotUploadedStatusIsRequiredOperation);
+        }
+        Status = AdvertisementStatus.Active;
+    }
+    
     internal void Close(DateTimeOffset currentDate)
     {
         EnsureAdvertisementIsActive();
@@ -154,7 +164,7 @@ public sealed class Advertisement : AuditableEntity
     {
         if (Status is not AdvertisementStatus.Active)
         {
-            throw new InvalidOperationException(ErrorMessages.InvalidStatusOperation);
+            throw new InvalidOperationException(ErrorMessages.ActiveStatusIsRequiredOperation);
         }
     }
 
@@ -162,12 +172,13 @@ public sealed class Advertisement : AuditableEntity
     {
         public const string ZeroPriorityScore = "PriorityScore cannot be zero, probably something went wrong.";
         public const string EmptyPersonId = "Provided person id is empty.";
-        public const string InvalidStatusOperation = "Active advertisement status is required for that operation.";
+        public const string ActiveStatusIsRequiredOperation = "Active advertisement status is required for that operation.";
+        public const string ThumbnailNotUploadedStatusIsRequiredOperation = "Thumbnail not uploaded advertisement status is required for that operation.";
         public const string InvalidRefreshOperation = "You cannot refresh an advertisement that is not active/expired.";
     }
 }
 
-internal sealed class AdvertisementConfiguration : IEntityTypeConfiguration<Advertisement>
+public sealed class AdvertisementConfiguration : IEntityTypeConfiguration<Advertisement>
 {
     public void Configure(EntityTypeBuilder<Advertisement> builder)
     {

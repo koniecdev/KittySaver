@@ -9,6 +9,7 @@ using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Domain.Persons;
 using Shared;
 
 namespace KittySaver.Api.Tests.Integration.Tests.ReadModels;
@@ -135,6 +136,7 @@ public class ReadModelsIntegrationTests : IAsyncLifetime
         HttpResponseMessage createCatResponseMessage = await _httpClient.PostAsJsonAsync($"api/v1/persons/{createPersonResponse.Id}/cats", createCatRequest);
         ApiResponses.CreatedWithIdResponse createCatResponse = await createCatResponseMessage.GetIdResponseFromResponseMessageAsync();
 
+        // Act
         CreateAdvertisement.CreateAdvertisementRequest createAdvertisementRequest = 
             new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
@@ -150,13 +152,16 @@ public class ReadModelsIntegrationTests : IAsyncLifetime
                         ContactInfoEmail: faker.Person.Email,
                         ContactInfoPhoneNumber: faker.Person.Phone
                     )).Generate();
-
-        // Act
-        HttpResponseMessage createAdvertisementResponseMessage = await _httpClient.PostAsJsonAsync($"api/v1/persons/{createPersonResponse.Id}/advertisements", createAdvertisementRequest);
-        ApiResponses.CreatedWithIdResponse createAdvertisementResponse = await createAdvertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
+        HttpResponseMessage createAdvertisementResponseMessage =
+            await _httpClient.PostAsJsonAsync(
+                $"api/v1/persons/{createPersonResponse.Id}/advertisements",
+                createAdvertisementRequest);
+        ApiResponses.CreatedWithIdResponse createAdvertisementResponse = 
+            await createAdvertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
 
         // Assert
-        HttpResponseMessage getResponse = await _httpClient.GetAsync($"api/v1/advertisements/{createAdvertisementResponse.Id}");
+        HttpResponseMessage getResponse = await _httpClient.GetAsync(
+            $"api/v1/persons/{createPersonResponse.Id}/advertisements/{createAdvertisementResponse.Id}");
         getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         
         AdvertisementResponse advertisement = await getResponse.GetResponseFromResponseMessageAsync<AdvertisementResponse>();
@@ -168,7 +173,7 @@ public class ReadModelsIntegrationTests : IAsyncLifetime
         advertisement.Description.Should().Be(createAdvertisementRequest.Description);
         advertisement.ContactInfoEmail.Should().Be(createAdvertisementRequest.ContactInfoEmail);
         advertisement.ContactInfoPhoneNumber.Should().Be(createAdvertisementRequest.ContactInfoPhoneNumber);
-        advertisement.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
+        advertisement.Status.Should().Be(Advertisement.AdvertisementStatus.ThumbnailNotUploaded);
         advertisement.PriorityScore.Should().BeGreaterThan(0);
         
         advertisement.PickupAddress.Should().NotBeNull();
@@ -180,7 +185,7 @@ public class ReadModelsIntegrationTests : IAsyncLifetime
         advertisement.PickupAddress.BuildingNumber.Should().Be(createAdvertisementRequest.PickupAddressBuildingNumber);
         
         advertisement.Cats.Should().ContainSingle();
-        var cat = advertisement.Cats.Single();
+        AdvertisementResponse.CatDto cat = advertisement.Cats.Single();
         cat.Id.Should().Be(createCatResponse.Id);
         cat.Name.Should().Be(createCatRequest.Name);
     }

@@ -20,6 +20,7 @@ public sealed class PagedHateoasBehaviour<TRequest, TResponse>(
         TResponse response = await next();
 
         CurrentlyLoggedInPerson? issuingPerson = await currentUserService.GetCurrentlyLoggedInPersonAsync(cancellationToken);
+        bool doesRequestRequireAuthorization = request is IAuthorizedRequest;
 
         switch (response)
         {
@@ -50,7 +51,8 @@ public sealed class PagedHateoasBehaviour<TRequest, TResponse>(
                         advertisementResponse.Id,
                         advertisementResponse.Status,
                         advertisementResponse.PersonId,
-                        issuingPerson);
+                        issuingPerson,
+                        doesRequestRequireAuthorization);
                 }
                 break;
         }

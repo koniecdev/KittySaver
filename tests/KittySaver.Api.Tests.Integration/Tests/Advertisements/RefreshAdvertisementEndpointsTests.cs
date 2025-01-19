@@ -9,6 +9,7 @@ using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Domain.Persons;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
@@ -24,13 +25,13 @@ public class RefreshAdvertisementEndpointsTests : IAsyncLifetime
     public RefreshAdvertisementEndpointsTests(KittySaverApiFactory appFactory)
     {
         _httpClient = appFactory.CreateClient();
-        _cleanup = new CleanupHelper(_httpClient);
+        _cleanup = new(_httpClient);
     }
 
     private readonly Faker<CreatePerson.CreatePersonRequest> _createPersonRequestGenerator =
         new Faker<CreatePerson.CreatePersonRequest>()
             .CustomInstantiator(faker =>
-                new CreatePerson.CreatePersonRequest(
+                new(
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
@@ -48,7 +49,7 @@ public class RefreshAdvertisementEndpointsTests : IAsyncLifetime
     private readonly Faker<CreateCat.CreateCatRequest> _createCatRequestGenerator =
         new Faker<CreateCat.CreateCatRequest>()
             .CustomInstantiator(faker =>
-                new CreateCat.CreateCatRequest(
+                new(
                     Name: faker.Name.FirstName(),
                     IsCastrated: true,
                     MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
@@ -76,7 +77,7 @@ public class RefreshAdvertisementEndpointsTests : IAsyncLifetime
         CreateAdvertisement.CreateAdvertisementRequest request =
             new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
-                    new CreateAdvertisement.CreateAdvertisementRequest(
+                    new(
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.CountryCode(),
@@ -95,6 +96,15 @@ public class RefreshAdvertisementEndpointsTests : IAsyncLifetime
             await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
         await _httpClient.PostAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}/expire", null);
 
+        await using Stream imageStream = CreateTestImageHelper.Create();
+        using MultipartFormDataContent content = new();
+        StreamContent imageContent = new(imageStream);
+        imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
+        content.Add(imageContent, "thumbnail", "test.jpg");
+        await _httpClient.PutAsync(
+            $"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}/thumbnail", 
+            content);
+        
         //Act
         HttpResponseMessage refreshResponseMessage =
             await _httpClient.PostAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}/refresh", null);
@@ -105,12 +115,12 @@ public class RefreshAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().Be(advertisementResponse.Id);
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
-        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
+        hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.Active);
         hateoasResponse.Links.Count.Should().Be(8);
         AdvertisementResponse advertisement =
             await _httpClient.GetFromJsonAsync<AdvertisementResponse>(
                 $"api/v1/advertisements/{advertisementResponse.Id}") ?? throw new JsonException();
-        advertisement.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
+        advertisement.Status.Should().Be(Advertisement.AdvertisementStatus.Active);
     }
 
     [Fact]
@@ -131,7 +141,7 @@ public class RefreshAdvertisementEndpointsTests : IAsyncLifetime
         CreateAdvertisement.CreateAdvertisementRequest request =
             new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
-                    new CreateAdvertisement.CreateAdvertisementRequest(
+                    new(
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.CountryCode(),
@@ -148,6 +158,15 @@ public class RefreshAdvertisementEndpointsTests : IAsyncLifetime
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
         ApiResponses.CreatedWithIdResponse advertisementResponse =
             await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
+        
+        await using Stream imageStream = CreateTestImageHelper.Create();
+        using MultipartFormDataContent content = new();
+        StreamContent imageContent = new(imageStream);
+        imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
+        content.Add(imageContent, "thumbnail", "test.jpg");
+        await _httpClient.PutAsync(
+            $"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}/thumbnail", 
+            content);
 
         //Act
         HttpResponseMessage refreshResponseMessage =
@@ -159,12 +178,12 @@ public class RefreshAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().Be(advertisementResponse.Id);
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
-        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
+        hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.Active);
         hateoasResponse.Links.Count.Should().Be(8);
         AdvertisementResponse advertisement =
             await _httpClient.GetFromJsonAsync<AdvertisementResponse>(
                 $"api/v1/advertisements/{advertisementResponse.Id}") ?? throw new JsonException();
-        advertisement.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
+        advertisement.Status.Should().Be(Advertisement.AdvertisementStatus.Active);
     }
 
     [Fact]

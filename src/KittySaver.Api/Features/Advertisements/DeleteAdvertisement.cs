@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Endpoints;
+using KittySaver.Api.Shared.Infrastructure.Services.FileServices;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
 using MediatR;
@@ -27,13 +28,17 @@ public sealed class DeleteAdvertisement : IEndpoint
 
     internal sealed class DeleteAdvertisementCommandHandler(
         IPersonRepository personRepository,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IAdvertisementFileStorageService advertisementFileStorageService)
         : IRequestHandler<DeleteAdvertisementCommand>
     {
         public async Task Handle(DeleteAdvertisementCommand request, CancellationToken cancellationToken)
         {
             Person owner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
             owner.RemoveAdvertisement(request.Id);
+            
+            advertisementFileStorageService.DeleteThumbnail(request.Id);
+            
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }

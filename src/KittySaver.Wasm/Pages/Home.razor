@@ -15,7 +15,7 @@
         <div class="filtering_tile">
             <label for="filtering_state">Województwo</label>
             <select type="text" id="filtering_state" class="filtering_input" @bind="State">
-                <option value="">Kliknij aby wybrać</option>
+                <option value="">Wszystkie</option>
                 <option value="Dolnośląskie">Dolnośląskie</option>
                 <option value="Kujawsko-Pomorskie">Kujawsko-Pomorskie</option>
                 <option value="Lubelskie">Lubelskie</option>
@@ -51,10 +51,10 @@
             @foreach (AdvertisementResponse ad in _advertisements.Items)
             {
                 <a @onclick="@(() => NavigateToAdvertisement(ad))" @onclick:preventDefault href="/advertisement/@ad.Id" class="advertisement_tile">
-                    <div class="advertisement_tile_img_container">
-                        <div class="advertisement_tile_img_wrapper">
-                            <img src="@ad.Links.FirstOrDefault(x => x.Rel == EndpointRels.Advertisement.GetAdvertisementThumbnailRel)?.Href" class="advertisement_tile_img" alt="uratujkota.pl - @ad.Title">
-                        </div>
+                    <div class="advertisement_tile_img_wrapper">
+                        <img src="@ad.Links.FirstOrDefault(x => x.Rel == EndpointRels.Advertisement.GetAdvertisementThumbnailRel)?.Href" class="advertisement_tile_img" alt="uratujkota.pl - @ad.Title">
+                    </div>
+                    <div class="advertisement_tile_content">
                         <strong>@ad.Title</strong>
                         <p>@ad.PickupAddress.City<br>@ad.PickupAddress.State<br>@ad.PickupAddress.ZipCode</p>
                     </div>
@@ -84,7 +84,7 @@
 
     private async Task LoadAdvertisements()
     {
-        Link? getAdvertisementsLink = ApiNavigation.GetLink(EndpointRels.Advertisement.GetAdvertisementsRel);
+        Link? getAdvertisementsLink = ApiNavigation.GetLink(EndpointRels.Advertisement.GetPublicAdvertisementsRel);
         if (getAdvertisementsLink is not null)
         {
             string searchTerms = BuildSearchTerms();

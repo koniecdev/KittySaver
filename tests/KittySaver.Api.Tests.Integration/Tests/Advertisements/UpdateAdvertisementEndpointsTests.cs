@@ -6,9 +6,11 @@ using KittySaver.Api.Features.Advertisements;
 using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Features.Persons.SharedContracts;
+using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -126,8 +128,14 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().Be(advertisementResponse.Id);
         hateoasResponse.PersonId.Should().Be(createPersonResponse.Id);
-        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
-        hateoasResponse.Links.Count.Should().Be(8);
+        hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.ThumbnailNotUploaded);
+        hateoasResponse.Links.Select(x => x.Rel).Should().BeEquivalentTo(
+            EndpointNames.SelfRel,
+            EndpointNames.UpdateAdvertisementThumbnail.Rel,
+            EndpointNames.DeleteAdvertisement.Rel,
+            EndpointNames.UpdateAdvertisement.Rel,
+            EndpointNames.ReassignCatsToAdvertisement.Rel);
+        hateoasResponse.Links.Select(x => x.Href).All(x => !string.IsNullOrEmpty(x)).Should().BeTrue();
     }
 
     [Fact]

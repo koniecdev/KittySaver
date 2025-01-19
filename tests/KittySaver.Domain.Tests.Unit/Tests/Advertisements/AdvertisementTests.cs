@@ -85,7 +85,7 @@ public class AdvertisementTests
             contactInfoEmail: contactInfoEmail,
             contactInfoPhoneNumber: contactInfoPhoneNumber,
             description: Description.Create("lorem ipsum"));
-
+        
         //Assert
         advertisement.Should().NotBeNull();
         advertisement.Id.Should().NotBeEmpty();
@@ -94,11 +94,11 @@ public class AdvertisementTests
         advertisement.ContactInfoPhoneNumber.Should().BeEquivalentTo(contactInfoPhoneNumber);
         advertisement.ExpiresOn.Should().Be(Date.AddDays(30));
         advertisement.Description.Value.Should().Be("Lorem ipsum");
-        advertisement.Status.Should().Be(Advertisement.AdvertisementStatus.Active);
+        advertisement.Status.Should().Be(Advertisement.AdvertisementStatus.ThumbnailNotUploaded);
         advertisement.PersonId.Should().Be(Person.Id);
         advertisement.PriorityScore.Should().NotBe(0);
     }
-
+    
     [Fact]
     public void CreateAdvertisement_ShouldThrowArgumentException_WhenEmptyCatsListIsProvided()
     {
@@ -137,6 +137,8 @@ public class AdvertisementTests
                 contactInfoPhoneNumber: ContactInfoPhoneNumberGenerator.Generate(),
                 description: Description.Create("lorem ipsum"));
         
+        Person.ActivateAdvertisementIfThumbnailIsUploadedForTheFirstTime(advertisement.Id);
+        
         //Act
         DateTimeOffset closureDate = Date.AddDays(1);
         advertisement.Close(closureDate);
@@ -157,6 +159,9 @@ public class AdvertisementTests
             contactInfoEmail: ContactInfoEmailGenerator.Generate(),
             contactInfoPhoneNumber: ContactInfoPhoneNumberGenerator.Generate(),
             description: Description.Create("lorem ipsum"));
+        Person.ActivateAdvertisementIfThumbnailIsUploadedForTheFirstTime(advertisement.Id);
+
+        
         advertisement.Expire(Date.AddDays(60));
         
         //Act
@@ -180,6 +185,7 @@ public class AdvertisementTests
             contactInfoEmail: ContactInfoEmailGenerator.Generate(),
             contactInfoPhoneNumber: ContactInfoPhoneNumberGenerator.Generate(),
             description: Description.Create("lorem ipsum"));
+        Person.ActivateAdvertisementIfThumbnailIsUploadedForTheFirstTime(advertisement.Id);
         
         //Act
         DateTimeOffset expirationDate = advertisement.ExpiresOn.AddDays(1);
@@ -200,6 +206,7 @@ public class AdvertisementTests
             contactInfoEmail: ContactInfoEmailGenerator.Generate(),
             contactInfoPhoneNumber: ContactInfoPhoneNumberGenerator.Generate(),
             description: Description.Create("lorem ipsum"));
+        Person.ActivateAdvertisementIfThumbnailIsUploadedForTheFirstTime(advertisement.Id);
         advertisement.Expire(Date.AddDays(60));
         
         //Act
@@ -224,6 +231,8 @@ public class AdvertisementTests
             contactInfoPhoneNumber: ContactInfoPhoneNumberGenerator.Generate(),
             description: Description.Create("lorem ipsum"));
         
+        Person.ActivateAdvertisementIfThumbnailIsUploadedForTheFirstTime(advertisement.Id);
+        
         DateTimeOffset expirationDate = advertisement.ExpiresOn.AddDays(1);
         advertisement.Expire(expirationDate);
         
@@ -246,6 +255,7 @@ public class AdvertisementTests
             contactInfoEmail: ContactInfoEmailGenerator.Generate(),
             contactInfoPhoneNumber: ContactInfoPhoneNumberGenerator.Generate(),
             description: Description.Create("lorem ipsum"));
+        Person.ActivateAdvertisementIfThumbnailIsUploadedForTheFirstTime(advertisement.Id);
         DateTimeOffset closureDate = advertisement.ExpiresOn.AddDays(1);
         advertisement.Close(closureDate);
         
@@ -305,4 +315,29 @@ public class AdvertisementTests
         createAdvertisement.Should().Throw<ArgumentException>().WithMessage("Provided person id is empty. (Parameter 'PersonId')");
     }
     
+    [Fact]
+    public void Activate_ShouldThrowInvalidOperationException_WhenAdvertisementHasWrongStatus()
+    {
+        //Arrange
+        List<Cat> cats = [CatGenerator.Generate(), CatGenerator.Generate(), CatGenerator.Generate()];
+        Address pickupAddress = PickupAddressGenerator.Generate();
+        Email contactInfoEmail = ContactInfoEmailGenerator.Generate();
+        PhoneNumber contactInfoPhoneNumber = ContactInfoPhoneNumberGenerator.Generate();
+
+        Advertisement advertisement = Person.AddAdvertisement(
+        dateOfCreation: Date,
+        catsIdsToAssign: cats.Select(x=>x.Id),
+        pickupAddress: pickupAddress,
+        contactInfoEmail: contactInfoEmail,
+        contactInfoPhoneNumber: contactInfoPhoneNumber,
+        description: Description.Create("lorem ipsum"));
+        
+        Person.ActivateAdvertisementIfThumbnailIsUploadedForTheFirstTime(advertisement.Id);
+        
+        //Act
+        Action activation = advertisement.Activate;
+        
+        //Assert
+        activation.Should().ThrowExactly<InvalidOperationException>();
+    }
 }

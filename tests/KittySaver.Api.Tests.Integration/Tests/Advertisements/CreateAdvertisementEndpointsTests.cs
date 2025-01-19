@@ -6,9 +6,11 @@ using FluentAssertions;
 using KittySaver.Api.Features.Advertisements;
 using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Features.Persons;
+using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -102,10 +104,16 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().NotBeEmpty();
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
-        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
+        hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.ThumbnailNotUploaded);
         responseMessage.Headers.Location!.ToString()
             .Should().Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{hateoasResponse.Id}");
-        hateoasResponse.Links.Count.Should().Be(8);
+        hateoasResponse.Links.Select(x => x.Rel).Should().BeEquivalentTo(
+            EndpointNames.SelfRel,
+            EndpointNames.UpdateAdvertisementThumbnail.Rel,
+            EndpointNames.UpdateAdvertisement.Rel,
+            EndpointNames.DeleteAdvertisement.Rel,
+            EndpointNames.ReassignCatsToAdvertisement.Rel);
+        hateoasResponse.Links.All(x => !string.IsNullOrWhiteSpace(x.Href)).Should().BeTrue();
     }
 
     [Fact]
@@ -151,17 +159,23 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
 
         HttpResponseMessage responseMessage = 
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
-
+        
         //Assert
         responseMessage.StatusCode.Should().Be(HttpStatusCode.Created);
         AdvertisementHateoasResponse? hateoasResponse = await responseMessage.Content.ReadFromJsonAsync<AdvertisementHateoasResponse>();
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().NotBeEmpty();
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
-        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
+        hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.ThumbnailNotUploaded);
         responseMessage.Headers.Location!.ToString()
             .Should().Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{hateoasResponse.Id}");
-        hateoasResponse.Links.Count.Should().Be(8);
+        hateoasResponse.Links.Select(x => x.Rel).Should().BeEquivalentTo(
+            EndpointNames.SelfRel,
+            EndpointNames.UpdateAdvertisementThumbnail.Rel,
+            EndpointNames.UpdateAdvertisement.Rel,
+            EndpointNames.DeleteAdvertisement.Rel,
+            EndpointNames.ReassignCatsToAdvertisement.Rel);
+        hateoasResponse.Links.All(x => !string.IsNullOrWhiteSpace(x.Href)).Should().BeTrue();
     }
 
     [Theory]
@@ -210,10 +224,16 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().NotBeEmpty();
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
-        hateoasResponse.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Active);
+        hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.ThumbnailNotUploaded);
         responseMessage.Headers.Location!.ToString()
             .Should().Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{hateoasResponse.Id}");
-        hateoasResponse.Links.Count.Should().Be(8);
+        hateoasResponse.Links.Select(x => x.Rel).Should().BeEquivalentTo(
+            EndpointNames.SelfRel,
+            EndpointNames.UpdateAdvertisementThumbnail.Rel,
+            EndpointNames.UpdateAdvertisement.Rel,
+            EndpointNames.DeleteAdvertisement.Rel,
+            EndpointNames.ReassignCatsToAdvertisement.Rel);
+        hateoasResponse.Links.All(x => !string.IsNullOrWhiteSpace(x.Href)).Should().BeTrue();
     }
     
     [Fact]

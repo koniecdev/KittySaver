@@ -13,7 +13,7 @@ namespace KittySaver.Api.Features.Advertisements;
 public sealed class ExpireAdvertisement : IEndpoint
 {
     public sealed record ExpireAdvertisementCommand(Guid PersonId, Guid Id) 
-        : ICommand<AdvertisementHateoasResponse>, IJobOrAdminOnlyRequest, IAdvertisementRequest;
+        : ICommand<AdvertisementHateoasResponse>, IJobOrAdminOnlyRequest, IAuthorizedRequest, IAdvertisementRequest;
 
     public sealed class ExpireAdvertisementCommandValidator
         : AbstractValidator<ExpireAdvertisementCommand>
@@ -41,7 +41,7 @@ public sealed class ExpireAdvertisement : IEndpoint
             owner.ExpireAdvertisement(request.Id, dateTimeService.Now);
             await unitOfWork.SaveChangesAsync(cancellationToken);
             Advertisement.AdvertisementStatus advertisementStatus = owner.Advertisements.First(x => x.Id == request.Id).Status;
-            return new AdvertisementHateoasResponse(request.Id, request.PersonId, (AdvertisementResponse.AdvertisementStatus)advertisementStatus);
+            return new AdvertisementHateoasResponse(request.Id, request.PersonId, advertisementStatus);
         }
     }
 

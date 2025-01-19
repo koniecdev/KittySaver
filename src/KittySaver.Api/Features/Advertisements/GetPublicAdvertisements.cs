@@ -7,31 +7,38 @@ using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Pagination;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Api.Shared.Persistence.ReadModels;
+using KittySaver.Domain.Persons;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace KittySaver.Api.Features.Advertisements;
 
-public sealed class GetAdvertisements : IEndpoint
+public sealed class GetPublicAdvertisements : IEndpoint
 {
-    public sealed record GetAdvertisementsQuery(
-        Guid PersonId,
-        int? Offset,
-        int? Limit,
-        string? SearchTerm,
-        string? SortColumn,
-        string? SortOrder)
-        : IQuery<IPagedList<AdvertisementResponse>>, IAuthorizedRequest, IPagedQuery, IAdvertisementRequest;
+    public sealed class GetPublicAdvertisementsQuery(
+        int? offset,
+        int? limit,
+        string? searchTerm,
+        string? sortColumn,
+        string? sortOrder)
+        : IQuery<IPagedList<AdvertisementResponse>>, IPagedQuery
+    {
+        public int? Offset { get; } = offset;
+        public int? Limit { get; } = limit;
+        public string? SearchTerm { get; } = searchTerm;
+        public string? SortColumn { get; } = sortColumn;
+        public string? SortOrder { get; } = sortOrder;
+    }
 
-    internal sealed class GetAdvertisementsQueryHandler(
+    internal sealed class GetPublicAdvertisementsQueryHandler(
         ApplicationReadDbContext db,
         IPaginationLinksService paginationLinksService)
-        : IRequestHandler<GetAdvertisementsQuery, IPagedList<AdvertisementResponse>>
+        : IRequestHandler<GetPublicAdvertisementsQuery, IPagedList<AdvertisementResponse>>
     {
-        public async Task<IPagedList<AdvertisementResponse>> Handle(GetAdvertisementsQuery request, CancellationToken cancellationToken)
+        public async Task<IPagedList<AdvertisementResponse>> Handle(GetPublicAdvertisementsQuery request, CancellationToken cancellationToken)
         {
             IQueryable<AdvertisementReadModel> query = db.Advertisements
-                .Where(x=>x.PersonId == request.PersonId);
+                .Where(x=>x.Status == Advertisement.AdvertisementStatus.Active);
             
             int totalRecords = await query.CountAsync(cancellationToken);
             
@@ -47,7 +54,7 @@ public sealed class GetAdvertisements : IEndpoint
             }
             
             query = request.SortOrder?.ToLower() == "desc" 
-                ? query.OrderByDescending(GetSortProperty(request)) 
+                ? query.OrderByDescending(GetSortProperty(request))
                 : query.OrderBy(GetSortProperty(request));
             
             if (request.Offset.HasValue)
@@ -70,11 +77,10 @@ public sealed class GetAdvertisements : IEndpoint
                 Items = advertisements,
                 Total = totalRecords,
                 Links = paginationLinksService.GeneratePaginationLinks(
-                    EndpointNames.GetAdvertisements.EndpointName,
+                    EndpointNames.GetPublicAdvertisements.EndpointName,
                     request.Offset,
                     request.Limit,
-                    totalRecords,
-                    request.PersonId)
+                    totalRecords)
             };
             
             return response;
@@ -89,10 +95,12 @@ public sealed class GetAdvertisements : IEndpoint
             new StringPropertyFilter<AdvertisementReadModel>(p => p.PickupAddressStreet),
             new StringPropertyFilter<AdvertisementReadModel>(p => p.PickupAddressBuildingNumber),
                 
-            new NumericPropertyFilter<AdvertisementReadModel, double>(p => p.PriorityScore)
+            new NumericPropertyFilter<AdvertisementReadModel, double>(p => p.PriorityScore),
+            
+            new GuidPropertyFilter<AdvertisementReadModel>(p => p.PersonId)
         ];
         
-        private static Expression<Func<AdvertisementReadModel, object>> GetSortProperty(GetAdvertisementsQuery request)
+        private static Expression<Func<AdvertisementReadModel, object>> GetSortProperty(GetPublicAdvertisementsQuery request)
             => request.SortColumn?.ToLower() switch
             {
                 "pickupaddresscountry" => advertisement => advertisement.PickupAddressCountry,
@@ -101,14 +109,14 @@ public sealed class GetAdvertisements : IEndpoint
                 "pickupaddressstreet" => advertisement => advertisement.PickupAddressStreet!,
                 "pickupaddressbuildingnumber" => advertisement => advertisement.PickupAddressBuildingNumber!,
                 "priorityscore" => advertisement => advertisement.PriorityScore,
+                "personid" => advertisement => advertisement.PersonId,
                 _ => advertisement => advertisement.PriorityScore
             };
     }
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapGet("persons/{personId:guid}/advertisements", async (
-            Guid personId,
+        endpointRouteBuilder.MapGet("advertisements", async (
             int? offset,
             int? limit,
             string? searchTerm,
@@ -117,11 +125,11 @@ public sealed class GetAdvertisements : IEndpoint
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            GetAdvertisementsQuery query = new(personId, offset, limit, searchTerm, sortColumn, sortOrder);
+            GetPublicAdvertisementsQuery query = new(offset, limit, searchTerm, sortColumn, sortOrder);
             IPagedList<AdvertisementResponse> advertisements = await sender.Send(query, cancellationToken);
             return Results.Ok(advertisements);
-        }).RequireAuthorization()
-        .WithName(EndpointNames.GetAdvertisements.EndpointName)
+        }).AllowAnonymous()
+        .WithName(EndpointNames.GetPublicAdvertisements.EndpointName)
         .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
     }
 }

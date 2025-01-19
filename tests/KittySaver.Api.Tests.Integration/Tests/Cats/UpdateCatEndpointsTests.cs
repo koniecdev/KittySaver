@@ -147,7 +147,6 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                 PickupAddressBuildingNumber: _createPersonRequest.DefaultAdvertisementPickupAddressBuildingNumber,
                 ContactInfoEmail: _createPersonRequest.DefaultAdvertisementContactInfoEmail,
                 ContactInfoPhoneNumber: _createPersonRequest.DefaultAdvertisementContactInfoPhoneNumber);
-
         HttpResponseMessage createAdvertisementResponseMessage =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{createPersonResponse.Id}/advertisements", createAdvertisementRequest);
         ApiResponses.CreatedWithIdResponse createAdvertisementResponse =
@@ -170,7 +169,6 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                     AgeCategory: AgeCategory.Senior.Name,
                     AdditionalRequirements: "Lorem ipsum dolor sit"
                 )).Generate();
-
         HttpResponseMessage updateResponse =
             await _httpClient.PutAsJsonAsync($"api/v1/persons/{createPersonResponse.Id}/cats/{createCatResponse.Id}",
                 request);
@@ -195,7 +193,7 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
         catAfterUpdate.IsCastrated.Should().Be(request.IsCastrated);
         AdvertisementResponse advertisementAfterUpdate =
             await _httpClient.GetFromJsonAsync<AdvertisementResponse>(
-                $"api/v1/advertisements/{createAdvertisementResponse.Id}")
+                $"api/v1/persons/{createPersonResponse.Id}/advertisements/{createAdvertisementResponse.Id}")
             ?? throw new JsonException();
         advertisementAfterUpdate.PriorityScore.Should().Be(catAfterUpdate.PriorityScore);
     }

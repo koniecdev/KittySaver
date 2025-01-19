@@ -63,17 +63,18 @@ p{
     border: 4px solid #2F9C26;
     border-radius: 10px;
     overflow: hidden;
-    padding: 0 0 .5rem 0;
     background-color: #242424;
     color: #fff;
     display: grid;
 }
+.advertisement_tile_content{
+    padding: .5rem 1rem;
+}
+.advertisement_tile_content strong{
+    font-size: 1.125rem;
+}
 img{
     width: 100%;
-}
-.advertisement_tile strong,
-.advertisement_tile p{
-    padding: 0 1rem;
 }
 .index_grid{
     display: grid;
