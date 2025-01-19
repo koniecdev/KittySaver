@@ -3,6 +3,7 @@ using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
+using KittySaver.Domain.Persons;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,14 +21,25 @@ public sealed class GetAdvertisementThumbnail : IEndpoint
             GetAdvertisementThumbnailQuery request, 
             CancellationToken cancellationToken)
         {
-            bool exists = await db.Advertisements
-                .AnyAsync(x => x.Id == request.Id, cancellationToken);
+            Advertisement.AdvertisementStatus? status = await db.Advertisements
+                .Where(x => x.Id == request.Id)
+                .Select(x=>x.Status)
+                .FirstOrDefaultAsync(cancellationToken);
             
-            if (!exists)
+            switch (status)
             {
-                throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);
+                case null:
+                    throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);
+                case Advertisement.AdvertisementStatus.ThumbnailNotUploaded:
+                    throw new InvalidOperationException("Thumbnail is not uploaded");
+                case Advertisement.AdvertisementStatus.Active:
+                case Advertisement.AdvertisementStatus.Closed:
+                case Advertisement.AdvertisementStatus.Expired:
+                    break;
+                default:
+                    throw new IndexOutOfRangeException();
             }
-        
+
             FileStream fileStream = fileStorage.GetThumbnail(request.Id);
             string contentType = fileStorage.GetContentType(fileStream.Name);
         
