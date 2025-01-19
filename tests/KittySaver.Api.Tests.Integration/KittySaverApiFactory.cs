@@ -1,4 +1,5 @@
 ﻿using KittySaver.Api.Shared.Infrastructure.Services;
+using KittySaver.Api.Shared.Infrastructure.Services.FileServices;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Auth.Api.Shared.Infrastructure.Services;
