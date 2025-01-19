@@ -21,11 +21,9 @@ public sealed class ApplicationWriteDbContext(
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        builder.ApplyConfigurationsFromAssembly(typeof(IDomainMarker).Assembly, WriteConfigurationFilter);
+        builder.ApplyConfigurationsFromAssembly(typeof(IDomainMarker).Assembly);
     }
-
-    private static bool WriteConfigurationFilter(Type type) => !type.IsAssignableTo(typeof(IReadConfiguration));
-
+    
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         configurationBuilder.ConfigureSmartEnum();
