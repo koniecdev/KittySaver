@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using KittySaver.Domain.Persons;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 // ReSharper disable CollectionNeverUpdated.Global
 
@@ -13,7 +14,7 @@ public sealed class AdvertisementReadModel
     public required DateTimeOffset? LastModificationOn { get; init; }
     public required DateTimeOffset? ClosedOn { get; init; }
     public required DateTimeOffset ExpiresOn { get; init; }
-    public required int Status { get; init; }
+    public required Advertisement.AdvertisementStatus Status { get; init; }
     public required double PriorityScore { get; init; }
     public required string ContactInfoEmail { get; init; }
     public required string ContactInfoPhoneNumber { get; init; }
