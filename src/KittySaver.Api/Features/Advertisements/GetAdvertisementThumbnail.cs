@@ -24,7 +24,7 @@ public sealed class GetAdvertisementThumbnail : IEndpoint
         {
             Advertisement.AdvertisementStatus? status = await db.Advertisements
                 .Where(x => x.Id == request.Id)
-                .Select(x=>x.Status)
+                .Select(x=>(Advertisement.AdvertisementStatus?)x.Status)
                 .FirstOrDefaultAsync(cancellationToken);
             
             switch (status)
