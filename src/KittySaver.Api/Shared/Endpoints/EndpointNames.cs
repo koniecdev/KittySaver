@@ -46,6 +46,15 @@ public static class EndpointNames
     public static readonly EndpointInfo DeleteAdvertisement = 
         new (Advertisement.DeleteAdvertisementName, Advertisement.DeleteAdvertisementRel, HttpVerbs.Delete);
     
+    public static readonly EndpointInfo GetPublicAdvertisement = 
+        new (Advertisement.GetPublicAdvertisementName, Advertisement.GetPublicAdvertisementRel, HttpVerbs.Get);
+    
+    public static readonly EndpointInfo GetPublicAdvertisements = 
+        new (Advertisement.GetPublicAdvertisementsName, Advertisement.GetPublicAdvertisementsRel, HttpVerbs.Get);
+    
+    public static readonly EndpointInfo GetPublicPersonAdvertisements = 
+        new (Advertisement.GetPublicAdvertisementsName, Advertisement.GetPublicPersonAdvertisementsRel, HttpVerbs.Get);
+    
     public static readonly EndpointInfo GetAdvertisement = 
         new (Advertisement.GetAdvertisementName, Advertisement.GetAdvertisementRel, HttpVerbs.Get);
     
@@ -145,6 +154,13 @@ public static class EndpointNames
         public const string GetAdvertisementsRel = "get-advertisements";
         public const string GetPersonAdvertisementsRel = "get-advertisements-by-personid";
         
+        public const string GetPublicAdvertisementName = "GetPublicAdvertisement";
+        public const string GetPublicAdvertisementRel = "get-public-advertisement";
+        
+        public const string GetPublicAdvertisementsName = "GetPublicAdvertisements";
+        public const string GetPublicAdvertisementsRel = "get-public-advertisements";
+        public const string GetPublicPersonAdvertisementsRel = "get-public-advertisements-by-personid";
+        
         public const string CloseAdvertisementName = "CloseAdvertisement";
         public const string CloseAdvertisementRel = "close-advertisement";
         
@@ -157,10 +173,10 @@ public static class EndpointNames
         public const string ReassignCatsToAdvertisementName = "ReassignCatsToAdvertisement";
         public const string ReassignCatsToAdvertisementRel = "reassign-cats-to-advertisement";
         
-        public const string UpdateAdvertisementThumbnailName = "UpdateAdvertisementThumbnailRel";
+        public const string UpdateAdvertisementThumbnailName = "UpdateAdvertisementThumbnail";
         public const string UpdateAdvertisementThumbnailRel = "update-advertisement-thumbnail";
         
-        public const string GetAdvertisementThumbnailName = "GetAdvertisementThumbnailRel";
+        public const string GetAdvertisementThumbnailName = "GetAdvertisementThumbnail";
         public const string GetAdvertisementThumbnailRel = "get-advertisement-thumbnail";
     }
 }
