@@ -79,7 +79,7 @@ public sealed class GetCats : IEndpoint
                     .ProjectToDto()
                     .ToListAsync(cancellationToken);
             
-            PagedList<CatResponse> response = new PagedList<CatResponse>
+            PagedList<CatResponse> response = new()
             {
                 Items = cats,
                 Total = totalRecords,

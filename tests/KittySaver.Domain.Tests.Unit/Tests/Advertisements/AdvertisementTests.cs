@@ -315,4 +315,29 @@ public class AdvertisementTests
         createAdvertisement.Should().Throw<ArgumentException>().WithMessage("Provided person id is empty. (Parameter 'PersonId')");
     }
     
+    [Fact]
+    public void Activate_ShouldThrowInvalidOperationException_WhenAdvertisementHasWrongStatus()
+    {
+        //Arrange
+        List<Cat> cats = [CatGenerator.Generate(), CatGenerator.Generate(), CatGenerator.Generate()];
+        Address pickupAddress = PickupAddressGenerator.Generate();
+        Email contactInfoEmail = ContactInfoEmailGenerator.Generate();
+        PhoneNumber contactInfoPhoneNumber = ContactInfoPhoneNumberGenerator.Generate();
+
+        Advertisement advertisement = Person.AddAdvertisement(
+        dateOfCreation: Date,
+        catsIdsToAssign: cats.Select(x=>x.Id),
+        pickupAddress: pickupAddress,
+        contactInfoEmail: contactInfoEmail,
+        contactInfoPhoneNumber: contactInfoPhoneNumber,
+        description: Description.Create("lorem ipsum"));
+        
+        Person.ActivateAdvertisementIfThumbnailIsUploadedForTheFirstTime(advertisement.Id);
+        
+        //Act
+        Action activation = advertisement.Activate;
+        
+        //Assert
+        activation.Should().ThrowExactly<InvalidOperationException>();
+    }
 }
