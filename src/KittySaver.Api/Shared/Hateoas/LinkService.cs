@@ -1,4 +1,5 @@
-﻿using KittySaver.Api.Features.Advertisements.SharedContracts;
+﻿using KittySaver.Api.Features.Advertisements;
+using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Domain.Persons;
@@ -9,14 +10,18 @@ namespace KittySaver.Api.Shared.Hateoas;
 public interface ILinkService
 {
     public List<Link> GeneratePersonRelatedLinks(Guid personId, CurrentlyLoggedInPerson? currentlyLoggedInPerson);
+
     public List<Link> GenerateCatRelatedLinks(Guid id,
         Guid personId,
         Guid? advertisementId,
         CurrentlyLoggedInPerson? currentlyLoggedInPerson);
+
     public List<Link> GenerateAdvertisementRelatedLinks(Guid id,
         AdvertisementResponse.AdvertisementStatus advertisementStatus,
         Guid personId,
-        CurrentlyLoggedInPerson? currentlyLoggedInPerson);
+        CurrentlyLoggedInPerson? currentlyLoggedInPerson,
+        bool doesRequestRequireAuthorization);
+
     Link Generate(string endpointName, object? routeValues, string rel, string verb = "GET", bool isTemplated = false);
     List<Link> GeneratePaginationLinks(string endpointName, int? offset, int? limit, Guid? personId);
     List<Link> GenerateApiDiscoveryV1Links(Guid? personId);
@@ -40,7 +45,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         {
             return links;
         }
-        
+
         bool isLoggedInPersonAnOwner = currentlyLoggedInPerson.PersonId == personId;
         if (currentlyLoggedInPerson.Role is not Person.Role.Admin && isLoggedInPersonAnOwner)
         {
@@ -70,10 +75,10 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         links.Add(Generate(
             endpointInfo: EndpointNames.CreateAdvertisement,
             routeValues: new { personId }));
-        
+
         return links;
     }
-    
+
     public List<Link> GenerateCatRelatedLinks(
         Guid id,
         Guid personId,
@@ -84,7 +89,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         [
             Generate(
                 endpointInfo: EndpointNames.GetCat,
-                routeValues: new { id, personId},
+                routeValues: new { id, personId },
                 isSelf: true),
         ];
 
@@ -98,15 +103,15 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         {
             return links;
         }
-        
+
         links.Add(Generate(
             endpointInfo: EndpointNames.UpdateCat,
-            routeValues: new { id, personId}));
+            routeValues: new { id, personId }));
 
         links.Add(Generate(
             endpointInfo: EndpointNames.DeleteCat,
             routeValues: new { id, personId }));
-            
+
         if (advertisementId is not null)
         {
             links.Add(Generate(
@@ -116,87 +121,135 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
 
         return links;
     }
-    
+
     public List<Link> GenerateAdvertisementRelatedLinks(
         Guid id,
         AdvertisementResponse.AdvertisementStatus advertisementStatus,
         Guid personId,
-        CurrentlyLoggedInPerson? currentlyLoggedInPerson)
+        CurrentlyLoggedInPerson? currentlyLoggedInPerson,
+        bool doesRequestRequireAuthorization)
     {
-        List<Link> links =
-        [
-            Generate(endpointInfo: EndpointNames.GetAdvertisement,
+        return doesRequestRequireAuthorization ? GetPersonAdvertisements() : GetPublicActiveAdvertisements();
+
+        List<Link> GetPublicActiveAdvertisements()
+        {
+            List<Link> links =
+            [
+                Generate(endpointInfo: EndpointNames.GetPublicAdvertisement,
                     routeValues: new { id },
                     isSelf: true),
-            Generate(endpointInfo: EndpointNames.GetAdvertisementThumbnail,
+                Generate(endpointInfo: EndpointNames.GetAdvertisementThumbnail,
                     routeValues: new { id })
-        ];
-
-        if (currentlyLoggedInPerson?.Role is not Person.Role.Admin && currentlyLoggedInPerson?.PersonId != personId)
-        {
+            ];
             return links;
         }
-
-        switch (advertisementStatus)
+        
+        List<Link> GetPersonAdvertisements()
         {
-            case AdvertisementResponse.AdvertisementStatus.Active:
+            List<Link> links =
+            [
+                Generate(endpointInfo: EndpointNames.GetAdvertisement,
+                        routeValues: new { id, personId },
+                        isSelf: true)
+            ];
+
+            if (currentlyLoggedInPerson?.Role is not Person.Role.Admin && currentlyLoggedInPerson?.PersonId != personId)
             {
-                links.Add(Generate(
-                    endpointInfo: EndpointNames.UpdateAdvertisement,
-                    routeValues: new { id, personId }));
-
-                links.Add(Generate(
-                    endpointInfo: EndpointNames.DeleteAdvertisement,
-                    routeValues: new { id, personId }));
-            
-                links.Add(Generate(
-                    endpointInfo: EndpointNames.ReassignCatsToAdvertisement,
-                    routeValues: new { id, personId }));
-                
-                links.Add(Generate(
-                    endpointInfo: EndpointNames.UpdateAdvertisementThumbnail,
-                    routeValues: new { id, personId }));
-            
-                links.Add(Generate(
-                    endpointInfo: EndpointNames.CloseAdvertisement,
-                    routeValues: new { id, personId }));
-            
-                if (currentlyLoggedInPerson.Role is Person.Role.Job or Person.Role.Admin)
-                {
-                    links.Add(Generate(
-                        endpointInfo: EndpointNames.ExpireAdvertisement,
-                        routeValues: new { id, personId }));
-                }
-
-                break;
+                return links;
             }
-            case AdvertisementResponse.AdvertisementStatus.Expired:
-                links.Add(Generate(
-                    endpointInfo: EndpointNames.RefreshAdvertisement,
-                    routeValues: new { id, personId }));
-                break;
-            case AdvertisementResponse.AdvertisementStatus.Closed:
-            default:
-                break;
-        }
 
-        return links;
+            switch (advertisementStatus)
+            {
+                case AdvertisementResponse.AdvertisementStatus.Active:
+                    links.Add(Generate(
+                        endpointInfo: EndpointNames.UpdateAdvertisement,
+                        routeValues: new { id, personId }));
+                    
+                    links.Add(Generate(endpointInfo: EndpointNames.GetAdvertisementThumbnail,
+                        routeValues: new { id }));
+                    
+                    links.Add(Generate(
+                        endpointInfo: EndpointNames.DeleteAdvertisement,
+                        routeValues: new { id, personId }));
+
+                    links.Add(Generate(
+                        endpointInfo: EndpointNames.ReassignCatsToAdvertisement,
+                        routeValues: new { id, personId }));
+
+                    links.Add(Generate(
+                        endpointInfo: EndpointNames.UpdateAdvertisementThumbnail,
+                        routeValues: new { id, personId }));
+
+                    links.Add(Generate(
+                        endpointInfo: EndpointNames.CloseAdvertisement,
+                        routeValues: new { id, personId }));
+
+                    if (currentlyLoggedInPerson.Role is Person.Role.Job or Person.Role.Admin)
+                    {
+                        links.Add(Generate(
+                            endpointInfo: EndpointNames.ExpireAdvertisement,
+                            routeValues: new { id, personId }));
+                    }
+
+                    break;
+
+                case AdvertisementResponse.AdvertisementStatus.Expired:
+                    links.Add(Generate(
+                        endpointInfo: EndpointNames.RefreshAdvertisement,
+                        routeValues: new { id, personId }));
+                    
+                    links.Add(Generate(endpointInfo: EndpointNames.GetAdvertisementThumbnail,
+                        routeValues: new { id }));
+                    
+                    links.Add(Generate(
+                        endpointInfo: EndpointNames.DeleteAdvertisement,
+                        routeValues: new { id, personId }));
+                    
+                    break;
+
+                case AdvertisementResponse.AdvertisementStatus.ThumbnailNotUploaded:
+                    links.Add(Generate(
+                        endpointInfo: EndpointNames.UpdateAdvertisementThumbnail,
+                        routeValues: new { id, personId }));
+                    
+                    links.Add(Generate(
+                        endpointInfo: EndpointNames.UpdateAdvertisement,
+                        routeValues: new { id, personId }));
+
+                    links.Add(Generate(
+                        endpointInfo: EndpointNames.DeleteAdvertisement,
+                        routeValues: new { id, personId }));
+
+                    links.Add(Generate(
+                        endpointInfo: EndpointNames.ReassignCatsToAdvertisement,
+                        routeValues: new { id, personId }));
+                    break;
+                
+                case AdvertisementResponse.AdvertisementStatus.Closed:
+                    links.Add(Generate(endpointInfo: EndpointNames.GetAdvertisementThumbnail,
+                        routeValues: new { id }));
+                    break;
+            }
+
+            return links;
+        }
     }
-    
-    private Link Generate(EndpointInfo endpointInfo, object? routeValues = null, bool isSelf = false, bool isTemplated = false)
+
+    private Link Generate(EndpointInfo endpointInfo, object? routeValues = null, bool isSelf = false,
+        bool isTemplated = false)
     {
         string href = linkGenerator.GetUriByName(
-            httpContextAccessor.HttpContext!, 
+            httpContextAccessor.HttpContext!,
             endpointInfo.EndpointName,
             routeValues)!;
-    
+
         if (isTemplated)
         {
             href = href
                 .Replace(UrlPlaceholders.Id.ToString(), "{id}")
                 .Replace(UrlPlaceholders.PersonId.ToString(), "{personId}");
         }
-    
+
         Link link = new Link(
             href,
             isSelf ? EndpointNames.SelfRel : endpointInfo.Rel,
@@ -205,7 +258,8 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         return link;
     }
 
-    public Link Generate(string endpointName, object? routeValues, string rel, string verb = "GET", bool isTemplated = false)
+    public Link Generate(string endpointName, object? routeValues, string rel, string verb = "GET",
+        bool isTemplated = false)
     {
         string href = linkGenerator.GetUriByName(httpContextAccessor.HttpContext!, endpointName, routeValues)!;
         Link link = new Link(
@@ -215,11 +269,11 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
             isTemplated);
         return link;
     }
-    
+
     public List<Link> GeneratePaginationLinks(string endpointName, int? offset, int? limit, Guid? personId)
     {
         List<Link> links = [];
-        string? href = linkGenerator.GetUriByName(httpContextAccessor.HttpContext!, endpointName, new {personId});
+        string? href = linkGenerator.GetUriByName(httpContextAccessor.HttpContext!, endpointName, new { personId });
         if (limit is not null)
         {
             links.Add(new Link(
@@ -237,7 +291,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
                 "GET",
                 true));
         }
-        
+
         links.Add(new Link(
             $"{href}?offset={{offset}}&limit={{limit}}",
             "by-page",
@@ -250,16 +304,19 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
     {
         List<Link> links =
         [
-
             Generate(endpointInfo: EndpointNames.GetApiDiscoveryV1,
                 routeValues: null,
                 isSelf: true),
 
-            Generate(endpointInfo: EndpointNames.GetAdvertisements,
+            Generate(endpointInfo: EndpointNames.GetPublicAdvertisements,
                 routeValues: null),
 
-            Generate(endpointInfo: EndpointNames.GetAdvertisement,
+            Generate(endpointInfo: EndpointNames.GetPublicAdvertisement,
                 routeValues: new { id = UrlPlaceholders.Id },
+                isTemplated: true),
+
+            Generate(endpointInfo: EndpointNames.GetPublicPersonAdvertisements,
+                routeValues: new { searchTerm = $"personid-eq-{UrlPlaceholders.Id}" },
                 isTemplated: true)
         ];
 
@@ -267,26 +324,23 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         {
             return links;
         }
-        
+
         links.Add(Generate(
             endpointInfo: EndpointNames.GetCats,
             routeValues: new { personId = personId.Value }));
-        
-        links.Add(Generate(
-            endpointInfo: EndpointNames.GetAdvertisements,
-            routeValues: new { personId = personId.Value }));
-        
+
         links.Add(Generate(
             endpointInfo: EndpointNames.CreateCat,
             routeValues: new { personId = personId.Value }));
-        
+
         links.Add(Generate(
             endpointInfo: EndpointNames.CreateAdvertisement,
             routeValues: new { personId = personId.Value }));
-        
+
         return links;
     }
 }
+
 public static class UrlPlaceholders
 {
     public static readonly Guid Id = Guid.Empty;
