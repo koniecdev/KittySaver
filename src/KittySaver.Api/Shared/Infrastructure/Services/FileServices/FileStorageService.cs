@@ -4,7 +4,7 @@ public interface IFileStorageService
 {
     Task SaveFileAsync(Stream sourceStream, string? subdirectoryPath, string filenameWithExtension, CancellationToken cancellationToken);
     FileStream GetFileStream(string filePath);
-    FileStream GetFileStream(string subdirectoryPath, string fileName); // Fixed typo
+    FileStream GetFileStream(string subdirectoryPath, string fileName);
     void DeleteFile(string path);
 }
 
