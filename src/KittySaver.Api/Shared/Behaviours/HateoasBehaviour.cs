@@ -18,6 +18,7 @@ public sealed class HateoasBehaviour<TRequest, TResponse>(
 
         CurrentlyLoggedInPerson? issuingPerson = await currentUserService.GetCurrentlyLoggedInPersonAsync(cancellationToken);
 
+        bool doesRequestRequireAuthorization = request is IAuthorizedRequest;
         response.Links = response switch
         {
             GetApiDiscoveryV1.GetApiDiscoveryV1Response => linkService.GenerateApiDiscoveryV1Links(issuingPerson?.PersonId ?? null),
@@ -33,7 +34,8 @@ public sealed class HateoasBehaviour<TRequest, TResponse>(
                 advertisementResponse.Id,
                 advertisementResponse.Status,
                 advertisementResponse.PersonId,
-                issuingPerson),
+                issuingPerson,
+                doesRequestRequireAuthorization),
             _ => response.Links
         };
 
