@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Bogus;
@@ -91,6 +92,15 @@ public class CloseAdvertisementEndpointsTests : IAsyncLifetime
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
         ApiResponses.CreatedWithIdResponse advertisementResponse = await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
         
+        await using Stream imageStream = CreateTestImageHelper.Create();
+        using MultipartFormDataContent content = new();
+        StreamContent imageContent = new(imageStream);
+        imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
+        content.Add(imageContent, "thumbnail", "test.jpg");
+        await _httpClient.PutAsync(
+            $"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}/thumbnail", 
+            content);
+        
         //Act
         HttpResponseMessage closeResponseMessage = 
             await _httpClient.PostAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}/close", null);
@@ -110,7 +120,8 @@ public class CloseAdvertisementEndpointsTests : IAsyncLifetime
         catAfterClosure.IsAdopted.Should().BeTrue();
         AdvertisementResponse advertisement =
             await _httpClient.GetFromJsonAsync<AdvertisementResponse>(
-                $"api/v1/advertisements/{advertisementResponse.Id}") ?? throw new JsonException();
+                $"api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}")
+            ?? throw new JsonException();
         advertisement.Status.Should().Be(AdvertisementResponse.AdvertisementStatus.Closed);
     }
     

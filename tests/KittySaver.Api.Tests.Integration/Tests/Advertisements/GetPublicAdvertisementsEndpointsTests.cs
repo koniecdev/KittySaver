@@ -16,21 +16,21 @@ using Shared;
 namespace KittySaver.Api.Tests.Integration.Tests.Advertisements;
 
 [Collection("Api")]
-public class GetAdvertisementsEndpointsTests : IAsyncLifetime
+public class GetPublicAdvertisementsEndpointsTests : IAsyncLifetime
 {
     private readonly HttpClient _httpClient;
     private readonly CleanupHelper _cleanup;
 
-    public GetAdvertisementsEndpointsTests(KittySaverApiFactory appFactory)
+    public GetPublicAdvertisementsEndpointsTests(KittySaverApiFactory appFactory)
     {
         _httpClient = appFactory.CreateClient();
-        _cleanup = new(_httpClient);
+        _cleanup = new CleanupHelper(_httpClient);
     }
 
     private readonly Faker<CreatePerson.CreatePersonRequest> _createPersonRequestGenerator =
         new Faker<CreatePerson.CreatePersonRequest>()
             .CustomInstantiator(faker =>
-                new(
+                new CreatePerson.CreatePersonRequest(
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
@@ -48,7 +48,7 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
     private readonly Faker<CreateCat.CreateCatRequest> _createCatRequestGenerator =
         new Faker<CreateCat.CreateCatRequest>()
             .CustomInstantiator(faker =>
-                new(
+                new CreateCat.CreateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: true,
                     MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
@@ -68,7 +68,6 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
         ApiResponses.CreatedWithIdResponse personRegisterResponse =
             await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        
         CreateCat.CreateCatRequest catCreateRequest = _createCatRequestGenerator.Generate();
         HttpResponseMessage catCreateResponseMessage =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", catCreateRequest);
@@ -91,8 +90,18 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
                         ContactInfoEmail: faker.Person.Email,
                         ContactInfoPhoneNumber: faker.Person.Phone
                     ));
-
-        await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
+        HttpResponseMessage advertisementResponseMessage =
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
+        ApiResponses.CreatedWithIdResponse advertisementResponse = await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
+        
+        await using Stream imageStream = CreateTestImageHelper.Create();
+        using MultipartFormDataContent content = new();
+        StreamContent imageContent = new(imageStream);
+        imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
+        content.Add(imageContent, "thumbnail", "test.jpg");
+        await _httpClient.PutAsync(
+            $"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}/thumbnail", 
+            content);
 
         CreatePerson.CreatePersonRequest secondPersonRegisterRequest = _createPersonRequestGenerator.Generate();
         HttpResponseMessage secondPersonRegisterResponseMessage =
@@ -123,36 +132,76 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
                         ContactInfoEmail: faker.Person.Email,
                         ContactInfoPhoneNumber: faker.Person.Phone
                     ));
-
-        await _httpClient.PostAsJsonAsync($"api/v1/persons/{secondPersonRegisterResponse.Id}/advertisements", secondRequest);
-
+        HttpResponseMessage secondAdvertisementResponseMessage = 
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{secondPersonRegisterResponse.Id}/advertisements", secondRequest);
+        ApiResponses.CreatedWithIdResponse secondAdvertisementResponse =
+            await secondAdvertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
+        
+        await using Stream secondImageStream = CreateTestImageHelper.Create();
+        using MultipartFormDataContent secondContent = new();
+        StreamContent secondImageContent = new(imageStream);
+        secondImageContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
+        secondContent.Add(secondImageContent, "thumbnail", "test.jpg");
+        await _httpClient.PutAsync(
+            $"/api/v1/persons/{secondPersonRegisterResponse.Id}/advertisements/{secondAdvertisementResponse.Id}/thumbnail", 
+            secondContent);
+        
         //Act
-        HttpResponseMessage response = await _httpClient.GetAsync($"/api/v1/persons/{secondPersonRegisterResponse.Id}/advertisements");
+        HttpResponseMessage response = await _httpClient.GetAsync("/api/v1/advertisements");
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         PagedList<AdvertisementResponse>? advertisements =
             await response.Content.ReadFromJsonAsync<PagedList<AdvertisementResponse>>();
         advertisements.Should().NotBeNull();
-        advertisements!.Items.Count.Should().Be(1);
-        advertisements.Total.Should().Be(1);
+        advertisements!.Items.Count.Should().Be(2);
+        advertisements.Total.Should().Be(2);
         advertisements.Links.Count.Should().Be(2);
-        advertisements.Links.Select(x=>x.Href).All(x=>x.Contains("://")).Should().BeTrue();
+        advertisements.Links.First(x => x.Rel == EndpointNames.SelfRel).Href.Should().Contain("://");
+        advertisements.Links.First(x => x.Rel == "by-page").Href.Should().Contain("://");
+        
+        AdvertisementResponse firstPersonAdvertisement =
+            advertisements.Items.First(x => x.PersonId == personRegisterResponse.Id);
+        firstPersonAdvertisement.Id.Should().NotBeEmpty();
+        firstPersonAdvertisement.Cats.Count.Should().Be(1);
+        firstPersonAdvertisement.Title.Should().Be(firstPersonAdvertisement.Cats.First().Name);
+        firstPersonAdvertisement.PickupAddress.Country.Should().Be(request.PickupAddressCountry);
+        firstPersonAdvertisement.PickupAddress.State.Should().Be(request.PickupAddressState);
+        firstPersonAdvertisement.PickupAddress.ZipCode.Should().Be(request.PickupAddressZipCode);
+        firstPersonAdvertisement.PickupAddress.City.Should().Be(request.PickupAddressCity);
+        firstPersonAdvertisement.PickupAddress.Street.Should().Be(request.PickupAddressStreet);
+        firstPersonAdvertisement.PickupAddress.BuildingNumber.Should().Be(request.PickupAddressBuildingNumber);
+        firstPersonAdvertisement.PriorityScore.Should().BeGreaterThan(0);
+        firstPersonAdvertisement.Links.Select(x => x.Rel).Should().BeEquivalentTo(
+            EndpointNames.SelfRel,
+            EndpointNames.GetAdvertisementThumbnail.Rel
+        );
+        firstPersonAdvertisement.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();        
+
+        AdvertisementResponse secondPersonAdvertisement =
+            advertisements.Items.First(x => x.PersonId == secondPersonRegisterResponse.Id);
+        secondPersonAdvertisement.Id.Should().NotBeEmpty();
+        secondPersonAdvertisement.Cats.Count.Should().Be(1);
+        secondPersonAdvertisement.Title.Should().Be(secondPersonAdvertisement.Cats.First().Name);
+        secondPersonAdvertisement.PickupAddress.Country.Should().Be(secondRequest.PickupAddressCountry);
+        secondPersonAdvertisement.PickupAddress.State.Should().Be(secondRequest.PickupAddressState);
+        secondPersonAdvertisement.PickupAddress.ZipCode.Should().Be(secondRequest.PickupAddressZipCode);
+        secondPersonAdvertisement.PickupAddress.City.Should().Be(secondRequest.PickupAddressCity);
+        secondPersonAdvertisement.PickupAddress.Street.Should().Be(secondRequest.PickupAddressStreet);
+        secondPersonAdvertisement.PickupAddress.BuildingNumber.Should().Be(secondRequest.PickupAddressBuildingNumber);
+        secondPersonAdvertisement.PriorityScore.Should().BeGreaterThan(0);
+        secondPersonAdvertisement.Links.Select(x => x.Rel).Should().BeEquivalentTo(
+            EndpointNames.SelfRel,
+            EndpointNames.GetAdvertisementThumbnail.Rel
+        );
+        secondPersonAdvertisement.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
     }
 
     [Fact]
     public async Task GetAdvertisements_ShouldReturnEmptyList_WhenNoAdvertisementsExist()
     {
-        //Arrange
-        CreatePerson.CreatePersonRequest personRegisterRequest = _createPersonRequestGenerator.Generate();
-        HttpResponseMessage personRegisterResponseMessage =
-            await _httpClient.PostAsJsonAsync("api/v1/persons", personRegisterRequest);
-        ApiResponses.CreatedWithIdResponse personRegisterResponse =
-            await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
-        
         //Act
-        HttpResponseMessage response = await _httpClient.GetAsync($"/api/v1/persons/{personRegisterResponse.Id}/advertisements");
+        HttpResponseMessage response = await _httpClient.GetAsync("/api/v1/advertisements");
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -199,15 +248,26 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
                         ContactInfoEmail: faker.Person.Email,
                         ContactInfoPhoneNumber: faker.Person.Phone
                     ));
-        await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
-
+        HttpResponseMessage advertisementResponseMessage = 
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
+        ApiResponses.CreatedWithIdResponse advertisementResponse =
+            await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
+        
+        await using Stream imageStream = CreateTestImageHelper.Create();
+        using MultipartFormDataContent content = new();
+        StreamContent imageContent = new(imageStream);
+        imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
+        content.Add(imageContent, "thumbnail", "test.jpg");
+        await _httpClient.PutAsync(
+            $"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}/thumbnail", 
+            content);
+        
         CreatePerson.CreatePersonRequest secondPersonRegisterRequest = _createPersonRequestGenerator.Generate();
         HttpResponseMessage secondPersonRegisterResponseMessage =
             await _httpClient.PostAsJsonAsync("api/v1/persons", secondPersonRegisterRequest);
         ApiResponses.CreatedWithIdResponse secondPersonRegisterResponse =
             await secondPersonRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        
         CreateCat.CreateCatRequest secondCatCreateRequest = _createCatRequestGenerator.Generate();
         HttpResponseMessage secondCatCreateResponseMessage =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{secondPersonRegisterResponse.Id}/cats",
@@ -232,10 +292,22 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
                         ContactInfoPhoneNumber: faker.Person.Phone
                     ));
 
-        await _httpClient.PostAsJsonAsync($"api/v1/persons/{secondPersonRegisterResponse.Id}/advertisements", secondRequest);
-
+        HttpResponseMessage secondAdvertisementResponseMessage =
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{secondPersonRegisterResponse.Id}/advertisements", secondRequest);
+        ApiResponses.CreatedWithIdResponse secondAdvertisementResponse =
+            await secondAdvertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
+        
+        await using Stream secondImageStream = CreateTestImageHelper.Create();
+        using MultipartFormDataContent secondContent = new();
+        StreamContent secondImageContent = new(secondImageStream);
+        secondContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
+        secondContent.Add(secondImageContent, "thumbnail", "test.jpg");
+        await _httpClient.PutAsync(
+            $"/api/v1/persons/{secondPersonRegisterResponse.Id}/advertisements/{secondAdvertisementResponse.Id}/thumbnail",
+            content);
+        
         //Act
-        HttpResponseMessage response = await _httpClient.GetAsync($"/api/v1/persons/{personRegisterResponse.Id}/advertisements");
+        HttpResponseMessage response = await _httpClient.GetAsync($"/api/v1/advertisements?searchTerm=personid-eq-{personRegisterResponse.Id}");
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -243,7 +315,7 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
             await response.Content.ReadFromJsonAsync<PagedList<AdvertisementResponse>>();
         advertisements?.Items.Count.Should().Be(1);
         advertisements?.Items.Count(x=>x.PersonId == personRegisterResponse.Id).Should().Be(1);
-        advertisements?.Total.Should().Be(1);
+        advertisements?.Total.Should().Be(2);
     }
     
     public Task InitializeAsync()

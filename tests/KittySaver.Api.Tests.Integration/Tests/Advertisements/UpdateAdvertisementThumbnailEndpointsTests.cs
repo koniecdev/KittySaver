@@ -1,5 +1,5 @@
-﻿using System.Net;
-using System.Net.Http.Headers;
+﻿global using System.Net.Http.Headers;
+using System.Net;
 using System.Net.Http.Json;
 using Bogus;
 using FluentAssertions;
@@ -173,7 +173,7 @@ public class UpdateAdvertisementThumbnailEndpointsTests : IAsyncLifetime
 
     private static MemoryStream CreateTestImage(int width = 100, int height = 100)
     {
-        MemoryStream stream = new MemoryStream();
+        MemoryStream stream = new();
         byte[] bytes = new byte[width * height * 3]; // RGB data
         new Random().NextBytes(bytes);
         stream.Write(bytes, 0, bytes.Length);
