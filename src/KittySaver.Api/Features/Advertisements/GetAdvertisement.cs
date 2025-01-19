@@ -10,7 +10,7 @@ namespace KittySaver.Api.Features.Advertisements;
 
 public class GetAdvertisement : IEndpoint
 {
-    public sealed record GetAdvertisementQuery(Guid Id) : IQuery<AdvertisementResponse>;
+    public sealed record GetAdvertisementQuery(Guid PersonId, Guid Id) : IQuery<AdvertisementResponse>, IAuthorizedRequest, IAdvertisementRequest;
 
     internal sealed class GetAdvertisementQueryHandler(
         ApplicationReadDbContext db)
@@ -19,7 +19,7 @@ public class GetAdvertisement : IEndpoint
         public async Task<AdvertisementResponse> Handle(GetAdvertisementQuery request, CancellationToken cancellationToken)
         {
             AdvertisementResponse advertisement = await db.Advertisements
-                .Where(x => x.Id == request.Id)
+                .Where(x => x.PersonId == request.PersonId && x.Id == request.Id)
                 .ProjectToDto()
                 .FirstOrDefaultAsync(cancellationToken)
                 ?? throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);
@@ -30,15 +30,16 @@ public class GetAdvertisement : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapGet("advertisements/{id:guid}", async(
+        endpointRouteBuilder.MapGet("persons/{personId:guid}/advertisements/{id:guid}", async(
+            Guid personId,
             Guid id,
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            GetAdvertisementQuery query = new(id);
+            GetAdvertisementQuery query = new(PersonId: personId, Id: id);
             AdvertisementResponse advertisement = await sender.Send(query, cancellationToken);
             return Results.Ok(advertisement);
-        }).AllowAnonymous()
+        }).RequireAuthorization()
         .WithName(EndpointNames.GetAdvertisement.EndpointName)
         .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
     }

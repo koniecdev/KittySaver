@@ -3,6 +3,7 @@ using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.CollectionsQueriesFiltering;
 using KittySaver.Api.Shared.Endpoints;
+using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Pagination;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Api.Shared.Persistence.ReadModels;
@@ -13,20 +14,14 @@ namespace KittySaver.Api.Features.Advertisements;
 
 public sealed class GetAdvertisements : IEndpoint
 {
-    public sealed class GetAdvertisementsQuery(
-        int? offset,
-        int? limit,
-        string? searchTerm,
-        string? sortColumn,
-        string? sortOrder)
-        : IQuery<IPagedList<AdvertisementResponse>>, IPagedQuery
-    {
-        public int? Offset { get; } = offset;
-        public int? Limit { get; } = limit;
-        public string? SearchTerm { get; } = searchTerm;
-        public string? SortColumn { get; } = sortColumn;
-        public string? SortOrder { get; } = sortOrder;
-    }
+    public sealed record GetAdvertisementsQuery(
+        Guid PersonId,
+        int? Offset,
+        int? Limit,
+        string? SearchTerm,
+        string? SortColumn,
+        string? SortOrder)
+        : IQuery<IPagedList<AdvertisementResponse>>, IAuthorizedRequest, IPagedQuery, IAdvertisementRequest;
 
     internal sealed class GetAdvertisementsQueryHandler(
         ApplicationReadDbContext db,
@@ -35,7 +30,9 @@ public sealed class GetAdvertisements : IEndpoint
     {
         public async Task<IPagedList<AdvertisementResponse>> Handle(GetAdvertisementsQuery request, CancellationToken cancellationToken)
         {
-            IQueryable<AdvertisementReadModel> query = db.Advertisements;
+            IQueryable<AdvertisementReadModel> query = db.Advertisements
+                .Where(x=>x.PersonId == request.PersonId);
+            
             int totalRecords = await query.CountAsync(cancellationToken);
             
             if (!string.IsNullOrEmpty(request.SearchTerm))
@@ -76,7 +73,8 @@ public sealed class GetAdvertisements : IEndpoint
                     EndpointNames.GetAdvertisements.EndpointName,
                     request.Offset,
                     request.Limit,
-                    totalRecords)
+                    totalRecords,
+                    request.PersonId)
             };
             
             return response;
@@ -91,9 +89,7 @@ public sealed class GetAdvertisements : IEndpoint
             new StringPropertyFilter<AdvertisementReadModel>(p => p.PickupAddressStreet),
             new StringPropertyFilter<AdvertisementReadModel>(p => p.PickupAddressBuildingNumber),
                 
-            new NumericPropertyFilter<AdvertisementReadModel, double>(p => p.PriorityScore),
-            
-            new GuidPropertyFilter<AdvertisementReadModel>(p => p.PersonId)
+            new NumericPropertyFilter<AdvertisementReadModel, double>(p => p.PriorityScore)
         ];
         
         private static Expression<Func<AdvertisementReadModel, object>> GetSortProperty(GetAdvertisementsQuery request)
@@ -105,14 +101,14 @@ public sealed class GetAdvertisements : IEndpoint
                 "pickupaddressstreet" => advertisement => advertisement.PickupAddressStreet!,
                 "pickupaddressbuildingnumber" => advertisement => advertisement.PickupAddressBuildingNumber!,
                 "priorityscore" => advertisement => advertisement.PriorityScore,
-                "personid" => advertisement => advertisement.PersonId,
                 _ => advertisement => advertisement.PriorityScore
             };
     }
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapGet("advertisements", async (
+        endpointRouteBuilder.MapGet("persons/{personId:guid}/advertisements", async (
+            Guid personId,
             int? offset,
             int? limit,
             string? searchTerm,
@@ -121,10 +117,10 @@ public sealed class GetAdvertisements : IEndpoint
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            GetAdvertisementsQuery query = new(offset, limit, searchTerm, sortColumn, sortOrder);
+            GetAdvertisementsQuery query = new(personId, offset, limit, searchTerm, sortColumn, sortOrder);
             IPagedList<AdvertisementResponse> advertisements = await sender.Send(query, cancellationToken);
             return Results.Ok(advertisements);
-        }).AllowAnonymous()
+        }).RequireAuthorization()
         .WithName(EndpointNames.GetAdvertisements.EndpointName)
         .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
     }
