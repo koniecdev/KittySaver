@@ -24,8 +24,7 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
     private readonly MsSqlContainer _msSqlContainer
         = new MsSqlBuilder().Build();
 
-    public static DateTimeOffset FixedDateTime => new(2024, 1, 1, 0, 0, 0, TimeSpan.Zero);
-    public static int FixedMinutesJwtExpire => 5;
+    private static int FixedMinutesJwtExpire => 5;
     
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -62,8 +61,15 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
             
             services.RemoveAll<IAdvertisementFileStorageService>();
             IAdvertisementFileStorageService advertisementFileStorageService = Substitute.For<IAdvertisementFileStorageService>();
-            services.AddSingleton<IAdvertisementFileStorageService>(_ => advertisementFileStorageService);
+            TestableFileStream testStream = new("test/path/image.jpg");
+            advertisementFileStorageService
+                .GetThumbnail(Arg.Any<Guid>())
+                .Returns(testStream);
 
+            advertisementFileStorageService
+                .GetContentType("test/path/image.jpg")
+                .Returns("image/jpeg");
+            services.AddSingleton<IAdvertisementFileStorageService>(_ => advertisementFileStorageService);
             
             services.RemoveAll<ICurrentUserService>();
             ICurrentUserService currentUserService = Substitute.For<ICurrentUserService>();
@@ -75,8 +81,8 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
                     (new CurrentlyLoggedInPerson{ PersonId = Guid.NewGuid(), Role = Person.Role.Admin}));
             services.AddSingleton<ICurrentUserService>(_ => currentUserService);
             
-            services.RemoveAll(typeof(IAuthenticationService));
-            services.RemoveAll(typeof(IAuthorizationHandler));
+            services.RemoveAll<IAuthenticationService>();
+            services.RemoveAll<IAuthorizationHandler>();
             
             services.AddAuthentication(options =>
             {
@@ -90,7 +96,8 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
                     .RequireAssertion(_ => true)
                     .Build());
             
-            ServiceDescriptor? descriptor = services.SingleOrDefault(m => m.ServiceType == typeof(DbContextOptions<ApplicationWriteDbContext>));
+            ServiceDescriptor? descriptor = services
+                .SingleOrDefault(m => m.ServiceType == typeof(DbContextOptions<ApplicationWriteDbContext>));
             if(descriptor is not null)
             {
                 services.Remove(descriptor);
@@ -100,7 +107,8 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
                 options.UseSqlServer(_msSqlContainer.GetConnectionString());
             });
             
-            ServiceDescriptor? descriptorOfReadDbContext = services.SingleOrDefault(m => m.ServiceType == typeof(DbContextOptions<ApplicationReadDbContext>));
+            ServiceDescriptor? descriptorOfReadDbContext = services
+                .SingleOrDefault(m => m.ServiceType == typeof(DbContextOptions<ApplicationReadDbContext>));
             if(descriptorOfReadDbContext is not null)
             {
                 services.Remove(descriptorOfReadDbContext);
@@ -122,14 +130,13 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
 
     public new async Task DisposeAsync()
     {
-        // _authApiServer.Dispose();
         await _msSqlContainer.DisposeAsync();
     }
 }
 
 public class ApplicationDateTimeService : IDateTimeService
 {
-    public static DateTimeOffset ApplicationDateTime { get; set; } = new(2024, 2, 10, 1, 1, 1, TimeSpan.Zero);
+    private static DateTimeOffset ApplicationDateTime { get; set; } = new(2024, 2, 10, 1, 1, 1, TimeSpan.Zero);
 
     public DateTimeOffset Now
     {
@@ -139,4 +146,10 @@ public class ApplicationDateTimeService : IDateTimeService
             return ApplicationDateTime;
         }
     }
+}
+
+public class TestableFileStream(string path) : FileStream(Path.GetTempFileName(), FileMode.Open)
+{
+    public new string Name => TestName;
+    private string TestName { get; } = path;
 }
