@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Endpoints;
+using KittySaver.Api.Shared.Infrastructure.Services.FileServices;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
 using MediatR;
@@ -28,24 +29,15 @@ public sealed class DeleteAdvertisement : IEndpoint
     internal sealed class DeleteAdvertisementCommandHandler(
         IPersonRepository personRepository,
         IUnitOfWork unitOfWork,
-        IWebHostEnvironment webHostEnvironment)
+        IAdvertisementFileStorageService advertisementFileStorageService)
         : IRequestHandler<DeleteAdvertisementCommand>
     {
-        private readonly string _advertisementsBasePath = Path.Combine(
-            webHostEnvironment.ContentRootPath,
-            "PrivateFiles",
-            "advertisements");
-        
         public async Task Handle(DeleteAdvertisementCommand request, CancellationToken cancellationToken)
         {
             Person owner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
             owner.RemoveAdvertisement(request.Id);
             
-            string advertisementPath = Path.Combine(_advertisementsBasePath, request.Id.ToString());
-            if (Directory.Exists(advertisementPath))
-            {
-                Directory.Delete(advertisementPath, recursive: true);
-            }
+            advertisementFileStorageService.DeleteThumbnail(request.Id);
             
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }

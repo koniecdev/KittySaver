@@ -4,6 +4,7 @@ using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Shared.Infrastructure.Services;
+using KittySaver.Api.Shared.Infrastructure.Services.FileServices;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Persons;
@@ -35,8 +36,6 @@ public sealed class UpdateAdvertisementThumbnail : IEndpoint
 
             RuleFor(x => x.Thumbnail)
                 .NotNull()
-                .Must(file => file.Length <= IThumbnailStorageService.Constants.MaxFileSizeBytes)
-                .WithMessage("File size must not exceed 5MB")
                 .Must(file => IThumbnailStorageService.Constants.AllowedThumbnailTypes
                     .ContainsKey(Path.GetExtension(file.FileName).ToLowerInvariant()))
                 .WithMessage("Only .jpg, .jpeg, .png and .webp files are allowed")
@@ -73,7 +72,7 @@ public sealed class UpdateAdvertisementThumbnail : IEndpoint
             return new AdvertisementHateoasResponse(
                 request.Id, 
                 request.PersonId, 
-                (AdvertisementResponse.AdvertisementStatus)advertisementStatus);
+                advertisementStatus);
         }
     }
 
