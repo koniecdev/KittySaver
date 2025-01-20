@@ -97,7 +97,12 @@ public class GetCatsEndpointsTests : IAsyncLifetime
         cat.HealthStatus.Should().Be(_createCatRequest.HealthStatus);
         cat.IsCastrated.Should().Be(_createCatRequest.IsCastrated);
         cat.PriorityScore.Should().BeGreaterThan(0);
-        cat.Links.Count.Should().Be(3);
+        cat.Links.Select(x => x.Rel).Should()
+            .BeEquivalentTo(EndpointNames.SelfRel,
+                EndpointNames.UpdateCat.Rel,
+                EndpointNames.DeleteCat.Rel,
+                EndpointNames.UpdateCatThumbnail.Rel);
+        cat.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
     }
 
     [Fact]

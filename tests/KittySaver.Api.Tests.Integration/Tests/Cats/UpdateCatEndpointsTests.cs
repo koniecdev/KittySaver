@@ -8,6 +8,7 @@ using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Features.Cats;
 using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Features.Persons;
+using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
@@ -106,7 +107,12 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
         CatHateoasResponse? hateoasResponse = await updateResponse.Content.ReadFromJsonAsync<CatHateoasResponse>();
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().Be(catCreateResponse.Id);
-        hateoasResponse.Links.Count.Should().Be(3);
+        hateoasResponse.Links.Select(x => x.Rel).Should()
+            .BeEquivalentTo(EndpointNames.SelfRel,
+                EndpointNames.UpdateCat.Rel,
+                EndpointNames.DeleteCat.Rel,
+                EndpointNames.UpdateCatThumbnail.Rel);
+        hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         CatResponse catAfterUpdate =
             await _httpClient.GetFromJsonAsync<CatResponse>(
                 $"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}")
@@ -178,7 +184,13 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
         CatHateoasResponse? hateoasResponse = await updateResponse.Content.ReadFromJsonAsync<CatHateoasResponse>();
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().Be(createCatResponse.Id);
-        hateoasResponse.Links.Count.Should().Be(4);
+        hateoasResponse.Links.Select(x => x.Rel).Should()
+            .BeEquivalentTo(EndpointNames.SelfRel,
+                EndpointNames.UpdateCat.Rel,
+                EndpointNames.DeleteCat.Rel,
+                EndpointNames.UpdateCatThumbnail.Rel,
+                EndpointNames.GetAdvertisement.Rel);
+        hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         CatResponse catAfterUpdate =
             await _httpClient.GetFromJsonAsync<CatResponse>(
                 $"api/v1/persons/{createPersonResponse.Id}/cats/{createCatResponse.Id}")
@@ -241,7 +253,12 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
         CatHateoasResponse? hateoasResponse = await updateResponse.Content.ReadFromJsonAsync<CatHateoasResponse>();
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().Be(catCreateResponse.Id);
-        hateoasResponse.Links.Count.Should().Be(3);
+        hateoasResponse.Links.Select(x => x.Rel).Should()
+            .BeEquivalentTo(EndpointNames.SelfRel,
+                EndpointNames.UpdateCat.Rel,
+                EndpointNames.DeleteCat.Rel,
+                EndpointNames.UpdateCatThumbnail.Rel);
+        hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         
         CatResponse catAfterUpdate =
             await _httpClient.GetFromJsonAsync<CatResponse>(
@@ -300,7 +317,12 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
         CatHateoasResponse? hateoasResponse = await updateResponse.Content.ReadFromJsonAsync<CatHateoasResponse>();
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().Be(catCreateResponse.Id);
-        hateoasResponse.Links.Count.Should().Be(3);
+        hateoasResponse.Links.Select(x => x.Rel).Should()
+            .BeEquivalentTo(EndpointNames.SelfRel,
+                EndpointNames.UpdateCat.Rel,
+                EndpointNames.DeleteCat.Rel,
+                EndpointNames.UpdateCatThumbnail.Rel);
+        hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         
         CatResponse catAfterUpdate =
             await _httpClient.GetFromJsonAsync<CatResponse>(

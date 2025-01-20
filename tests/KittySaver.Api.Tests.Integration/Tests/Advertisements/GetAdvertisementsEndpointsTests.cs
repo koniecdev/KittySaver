@@ -24,7 +24,7 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
     public GetAdvertisementsEndpointsTests(KittySaverApiFactory appFactory)
     {
         _httpClient = appFactory.CreateClient();
-        _cleanup = new(_httpClient);
+        _cleanup = new CleanupHelper(_httpClient);
     }
 
     private readonly Faker<CreatePerson.CreatePersonRequest> _createPersonRequestGenerator =

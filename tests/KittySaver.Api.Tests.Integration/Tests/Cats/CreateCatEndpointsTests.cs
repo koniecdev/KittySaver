@@ -6,6 +6,7 @@ using Bogus.Extensions;
 using FluentAssertions;
 using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Features.Persons;
+using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
@@ -81,7 +82,12 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().NotBeEmpty();
         hateoasResponse.PersonId.Should().NotBeEmpty();
-        hateoasResponse.Links.Count.Should().Be(3);
+        hateoasResponse.Links.Select(x => x.Rel).Should()
+            .BeEquivalentTo(EndpointNames.SelfRel,
+                EndpointNames.UpdateCat.Rel,
+                EndpointNames.DeleteCat.Rel,
+                EndpointNames.UpdateCatThumbnail.Rel);
+        hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         response.Headers.Location!.ToString().Should()
             .Contain($"/api/v1/persons/{hateoasResponse.PersonId}/cats/{hateoasResponse.Id}");
     }
@@ -114,7 +120,12 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().NotBeEmpty();
         hateoasResponse.PersonId.Should().NotBeEmpty();
-        hateoasResponse.Links.Count.Should().Be(3);
+        hateoasResponse.Links.Select(x => x.Rel).Should()
+            .BeEquivalentTo(EndpointNames.SelfRel,
+                EndpointNames.UpdateCat.Rel,
+                EndpointNames.DeleteCat.Rel,
+                EndpointNames.UpdateCatThumbnail.Rel);
+        hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         response.Headers.Location!.ToString().Should()
             .Contain($"/api/v1/persons/{hateoasResponse.PersonId}/cats/{hateoasResponse.Id}");
     }
@@ -148,7 +159,12 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().NotBeEmpty();
         hateoasResponse.PersonId.Should().NotBeEmpty();
-        hateoasResponse.Links.Count.Should().Be(3);
+        hateoasResponse.Links.Select(x => x.Rel).Should()
+            .BeEquivalentTo(EndpointNames.SelfRel,
+                EndpointNames.UpdateCat.Rel,
+                EndpointNames.DeleteCat.Rel,
+                EndpointNames.UpdateCatThumbnail.Rel);
+        hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         response.Headers.Location!.ToString().Should()
             .Contain($"/api/v1/persons/{hateoasResponse.PersonId}/cats/{hateoasResponse.Id}");
         
