@@ -14,6 +14,7 @@ public sealed class CatResponse : IHateoasCatResponse
     public required string? AdditionalRequirements { get; init; }
     public required bool IsCastrated { get; init; }
     public required bool IsAdopted { get; init; }
+    public required bool IsThumbnailUploaded { get; init; }
     public required bool IsAssignedToAdvertisement { get; init; }
     public required string MedicalHelpUrgency { get; init; }
     public required string AgeCategory { get; init; }
@@ -36,12 +37,17 @@ public static class CatResponseMapper
                 AdditionalRequirements = entity.AdditionalRequirements,
                 IsCastrated = entity.IsCastrated,
                 IsAdopted = entity.IsAdopted,
-                MedicalHelpUrgency = MedicalHelpUrgency.FromValue(entity.MedicalHelpUrgency).ToString(),
-                AgeCategory = AgeCategory.FromValue(entity.AgeCategory).ToString(),
-                Behavior = Behavior.FromValue(entity.Behavior).ToString(),
-                HealthStatus = HealthStatus.FromValue(entity.HealthStatus).ToString(),
+                MedicalHelpUrgency = MedicalHelpUrgency.FromValue(entity.MedicalHelpUrgency)
+                    .ToString(),
+                AgeCategory = AgeCategory.FromValue(entity.AgeCategory)
+                    .ToString(),
+                Behavior = Behavior.FromValue(entity.Behavior)
+                    .ToString(),
+                HealthStatus = HealthStatus.FromValue(entity.HealthStatus)
+                    .ToString(),
                 PriorityScore = entity.PriorityScore,
-                IsAssignedToAdvertisement = entity.AdvertisementId.HasValue
+                IsAssignedToAdvertisement = entity.AdvertisementId.HasValue,
+                IsThumbnailUploaded = entity.IsThumbnailUploaded
             }
         );
 }
