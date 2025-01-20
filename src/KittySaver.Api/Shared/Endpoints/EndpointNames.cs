@@ -21,6 +21,7 @@ public static class EndpointNames
     
     public static readonly EndpointInfo GetPersons = 
         new (Person.GetPersonsName, Person.GetPersonsRel, HttpVerbs.Get);
+    
         
     public static readonly EndpointInfo CreateCat = 
         new (Cat.CreateCatName, Cat.CreateCatRel, HttpVerbs.Post);
@@ -36,7 +37,13 @@ public static class EndpointNames
     
     public static readonly EndpointInfo GetCats = 
         new (Cat.GetCatsName, Cat.GetCatsRel, HttpVerbs.Get);
-        
+    
+    public static readonly EndpointInfo UpdateCatThumbnail = 
+        new (Cat.UpdateCatThumbnailName, Cat.UpdateCatThumbnailRel, HttpVerbs.Put);
+    
+    public static readonly EndpointInfo GetCatThumbnail = 
+        new (Cat.GetCatThumbnailName, Cat.GetCatThumbnailRel, HttpVerbs.Get);
+    
     public static readonly EndpointInfo CreateAdvertisement = 
         new (Advertisement.CreateAdvertisementName, Advertisement.CreateAdvertisementRel, HttpVerbs.Post);
     
@@ -135,6 +142,12 @@ public static class EndpointNames
         
         public const string GetCatsName = "GetCats";
         public const string GetCatsRel = "get-cats";
+        
+        public const string UpdateCatThumbnailName = "UpdateCatThumbnail";
+        public const string UpdateCatThumbnailRel = "update-cat-thumbnail";
+        
+        public const string GetCatThumbnailName = "GetCatThumbnail";
+        public const string GetCatThumbnailRel = "get-cat-thumbnail";
     }
     private static class Advertisement
     {
