@@ -83,7 +83,7 @@ public sealed class CreateCat : IEndpoint
                 additionalRequirements: additionalRequirements);
             
             await unitOfWork.SaveChangesAsync(cancellationToken);
-            return new CatHateoasResponse(cat.Id, cat.PersonId, cat.AdvertisementId);
+            return new CatHateoasResponse(cat.Id, cat.PersonId, cat.AdvertisementId, cat.IsThumbnailUploaded);
         }
     }
     
