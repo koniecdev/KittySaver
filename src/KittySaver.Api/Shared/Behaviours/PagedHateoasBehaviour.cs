@@ -40,6 +40,7 @@ public sealed class PagedHateoasBehaviour<TRequest, TResponse>(
                         catResponse.Id,
                         catResponse.PersonId,
                         catResponse.AdvertisementId,
+                        catResponse.IsThumbnailUploaded,
                         issuingPerson);
                 }
                 break;

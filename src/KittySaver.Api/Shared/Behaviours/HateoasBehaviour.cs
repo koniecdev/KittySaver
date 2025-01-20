@@ -31,6 +31,7 @@ public sealed class HateoasBehaviour<TRequest, TResponse>(
                 catResponse.Id,
                 catResponse.PersonId,
                 catResponse.AdvertisementId,
+                catResponse.IsThumbnailUploaded,
                 issuingPerson),
             IHateoasAdvertisementResponse advertisementResponse => linkService.GenerateAdvertisementRelatedLinks(
                 advertisementResponse.Id,
