@@ -60,6 +60,7 @@ public sealed class Cat : AuditableEntity
     public HealthStatus HealthStatus { get; private set; }
     public bool IsCastrated { get; private set; }
     public bool IsAdopted { get; private set; }
+    public bool IsThumbnailUploaded { get; private set; }
 
     /// <remarks>
     /// Required by EF Core, and should never be used by programmer as it bypasses business rules.
@@ -166,6 +167,14 @@ public sealed class Cat : AuditableEntity
     internal void MarkAsAdopted()
     {
         IsAdopted = true;
+    }
+    
+    /// <remarks>
+    /// Only for use within Person aggregate
+    /// </remarks>
+    internal void MarkAsThumbnailUploaded()
+    {
+        IsThumbnailUploaded = true;
     }
 
     /// <remarks>
