@@ -1,9 +1,6 @@
-﻿using KittySaver.Api.Features.Advertisements;
-using KittySaver.Api.Features.Advertisements.SharedContracts;
-using KittySaver.Api.Shared.Endpoints;
+﻿using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Domain.Persons;
-using Microsoft.AspNetCore.Routing.Patterns;
 
 namespace KittySaver.Api.Shared.Hateoas;
 
@@ -14,6 +11,7 @@ public interface ILinkService
     public List<Link> GenerateCatRelatedLinks(Guid id,
         Guid personId,
         Guid? advertisementId,
+        bool isThumbnailUploaded,
         CurrentlyLoggedInPerson? currentlyLoggedInPerson);
 
     public List<Link> GenerateAdvertisementRelatedLinks(Guid id,
@@ -69,8 +67,8 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
             routeValues: new { personId }));
 
         links.Add(Generate(
-            endpointInfo: EndpointNames.GetPersonAdvertisements,
-            routeValues: new { searchTerm = $"personid-eq-{personId}" }));
+            endpointInfo: EndpointNames.GetAdvertisements,
+            routeValues: new { personId }));
 
         links.Add(Generate(
             endpointInfo: EndpointNames.CreateAdvertisement,
@@ -83,27 +81,36 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         Guid id,
         Guid personId,
         Guid? advertisementId,
+        bool isThumbnailUploaded,
         CurrentlyLoggedInPerson? currentlyLoggedInPerson)
     {
         List<Link> links =
         [
-            Generate(
-                endpointInfo: EndpointNames.GetCat,
-                routeValues: new { id, personId },
-                isSelf: true),
+            Generate(endpointInfo: EndpointNames.GetCat,
+                    routeValues: new { id, personId },
+                    isSelf: true)
         ];
 
+        if (isThumbnailUploaded)
+        {
+            links.Add(Generate(endpointInfo: EndpointNames.GetCatThumbnail,
+                routeValues: new { id, personId }));
+        }
+        
         if (currentlyLoggedInPerson is null)
         {
             return links;
         }
 
-        bool isLoggedInPersonAnOwner = currentlyLoggedInPerson.PersonId == personId;
-        if (currentlyLoggedInPerson.Role is not Person.Role.Admin && isLoggedInPersonAnOwner)
+        if (currentlyLoggedInPerson.PersonId != personId && currentlyLoggedInPerson.Role is not Person.Role.Admin)
         {
             return links;
         }
 
+        links.Add(Generate(
+            endpointInfo: EndpointNames.UpdateCatThumbnail,
+            routeValues: new { id, personId }));
+        
         links.Add(Generate(
             endpointInfo: EndpointNames.UpdateCat,
             routeValues: new { id, personId }));
@@ -116,7 +123,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         {
             links.Add(Generate(
                 endpointInfo: EndpointNames.GetAdvertisement,
-                routeValues: new { id = advertisementId }));
+                routeValues: new { id = advertisementId.Value, personId }));
         }
 
         return links;
