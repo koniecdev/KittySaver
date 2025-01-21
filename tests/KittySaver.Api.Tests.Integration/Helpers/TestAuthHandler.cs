@@ -21,9 +21,9 @@ public class TestAuthHandler(
             new(ClaimTypes.Email, "defaultadmin@koniec.dev")
         ];
 
-        ClaimsIdentity identity = new ClaimsIdentity(claims, "TestAuthType");
-        ClaimsPrincipal principal = new ClaimsPrincipal(identity);
-        AuthenticationTicket ticket = new AuthenticationTicket(principal, "TestScheme");
+        ClaimsIdentity identity = new(claims, "TestAuthType");
+        ClaimsPrincipal principal = new(identity);
+        AuthenticationTicket ticket = new(principal, "TestScheme");
 
         return Task.FromResult(AuthenticateResult.Success(ticket));
     }

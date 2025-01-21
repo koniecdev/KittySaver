@@ -23,13 +23,13 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
     public ReassignCatsToAdvertisementTests(KittySaverApiFactory appFactory)
     {
         _httpClient = appFactory.CreateClient();
-        _cleanup = new(_httpClient);
+        _cleanup = new CleanupHelper(_httpClient);
     }
 
     private readonly Faker<CreatePerson.CreatePersonRequest> _createPersonRequestGenerator =
         new Faker<CreatePerson.CreatePersonRequest>()
             .CustomInstantiator(faker =>
-                new(
+                new CreatePerson.CreatePersonRequest(
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
@@ -47,7 +47,7 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
     private readonly Faker<CreateCat.CreateCatRequest> _createCatRequestGenerator =
         new Faker<CreateCat.CreateCatRequest>()
             .CustomInstantiator(faker =>
-                new(
+                new CreateCat.CreateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: true,
                     MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
@@ -76,7 +76,7 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
         CreateAdvertisement.CreateAdvertisementRequest request =
             new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
-                    new(
+                    new CreateAdvertisement.CreateAdvertisementRequest(
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.CountryCode(),

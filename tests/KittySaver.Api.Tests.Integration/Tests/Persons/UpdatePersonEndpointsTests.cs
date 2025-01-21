@@ -410,7 +410,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
             await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{idOfCreatedPersonResponse.Id}")
             ?? throw new JsonException();
 
-        UpdatePerson.UpdatePersonRequest request = new UpdatePerson.UpdatePersonRequest(
+        UpdatePerson.UpdatePersonRequest request = new(
             Nickname: person.Nickname,
             Email: email,
             PhoneNumber: person.PhoneNumber,

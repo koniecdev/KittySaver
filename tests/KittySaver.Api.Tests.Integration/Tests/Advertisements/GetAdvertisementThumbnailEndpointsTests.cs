@@ -64,8 +64,8 @@ public class GetAdvertisementThumbnailEndpointsTests : IAsyncLifetime
         (Guid personId, Guid advertisementId) = await CreateTestAdvertisement();
         
         await using Stream imageStream = CreateTestImage();
-        using MultipartFormDataContent content = new MultipartFormDataContent();
-        StreamContent imageContent = new StreamContent(imageStream);
+        using MultipartFormDataContent content = new();
+        StreamContent imageContent = new(imageStream);
         imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
         content.Add(imageContent, "thumbnail", "test.jpg");
         await _httpClient.PutAsync(

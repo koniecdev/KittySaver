@@ -142,7 +142,7 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
             await catCreateResponseMessage.GetIdResponseFromResponseMessageAsync();
 
         CreateAdvertisement.CreateAdvertisementRequest createAdvertisementRequest =
-            new CreateAdvertisement.CreateAdvertisementRequest(
+            new(
                 CatsIdsToAssign: [createCatResponse.Id],
                 Description: _createCatRequest.AdditionalRequirements,
                 PickupAddressCountry: _createPersonRequest.DefaultAdvertisementPickupAddressCountry,
@@ -432,7 +432,7 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
 
         //Act
         UpdateCat.UpdateCatRequest request =
-            new UpdateCat.UpdateCatRequest(
+            new(
                 Name: "",
                 IsCastrated: false,
                 MedicalHelpUrgency: "",

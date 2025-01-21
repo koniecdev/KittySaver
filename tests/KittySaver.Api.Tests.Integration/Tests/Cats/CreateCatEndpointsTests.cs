@@ -101,7 +101,7 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         ApiResponses.CreatedWithIdResponse personRegisterResponse =
             await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        CreateCat.CreateCatRequest request = new CreateCat.CreateCatRequest(
+        CreateCat.CreateCatRequest request = new(
             Name: "Whiskers",
             IsCastrated: true,
             MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
@@ -139,7 +139,7 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         ApiResponses.CreatedWithIdResponse personRegisterResponse =
             await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        CreateCat.CreateCatRequest request = new CreateCat.CreateCatRequest(
+        CreateCat.CreateCatRequest request = new(
             Name: "Whiskers",
             IsCastrated: true,
             MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
