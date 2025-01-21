@@ -5,6 +5,7 @@ using Bogus.Extensions;
 using FluentAssertions;
 using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Features.Persons.SharedContracts;
+using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Persons;
@@ -79,10 +80,19 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         
         //Assert
         updateResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        PersonHateoasResponse? hateoasResponse = await updateResponse.Content.ReadFromJsonAsync<PersonHateoasResponse>();
-        hateoasResponse.Should().NotBeNull();
-        hateoasResponse!.Id.Should().Be(person.Id);
-        hateoasResponse.Links.Count.Should().Be(7);
+        PersonHateoasResponse hateoasResponse =
+            await updateResponse.Content.ReadFromJsonAsync<PersonHateoasResponse>()
+            ?? throw new JsonException();
+        hateoasResponse.Links.Select(x => x.Rel).Should()
+            .BeEquivalentTo(EndpointNames.SelfRel,
+                EndpointNames.UpdatePerson.Rel,
+                EndpointNames.DeletePerson.Rel,
+                EndpointNames.GetCats.Rel,
+                EndpointNames.GetAdvertisements.Rel,
+                EndpointNames.CreateCat.Rel,
+                EndpointNames.CreateAdvertisement.Rel);
+        hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
+        hateoasResponse.Id.Should().Be(person.Id);
 
         PersonResponse personAfterUpdate =
             await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{registeredPersonResponse.Id}")
@@ -126,10 +136,19 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
 
         //Assert
         updateResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        PersonHateoasResponse? hateoasResponse = await updateResponse.Content.ReadFromJsonAsync<PersonHateoasResponse>();
-        hateoasResponse.Should().NotBeNull();
-        hateoasResponse!.Id.Should().Be(person.Id);
-        hateoasResponse.Links.Count.Should().Be(7);
+        PersonHateoasResponse hateoasResponse =
+            await updateResponse.Content.ReadFromJsonAsync<PersonHateoasResponse>()
+            ?? throw new JsonException();
+        hateoasResponse.Links.Select(x => x.Rel).Should()
+            .BeEquivalentTo(EndpointNames.SelfRel,
+                EndpointNames.UpdatePerson.Rel,
+                EndpointNames.DeletePerson.Rel,
+                EndpointNames.GetCats.Rel,
+                EndpointNames.GetAdvertisements.Rel,
+                EndpointNames.CreateCat.Rel,
+                EndpointNames.CreateAdvertisement.Rel);
+        hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
+        hateoasResponse.Id.Should().Be(person.Id);
         
         PersonResponse personAfterUpdate =
             await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{registeredPersonResponse.Id}")
@@ -391,7 +410,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
             await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{idOfCreatedPersonResponse.Id}")
             ?? throw new JsonException();
 
-        UpdatePerson.UpdatePersonRequest request = new UpdatePerson.UpdatePersonRequest(
+        UpdatePerson.UpdatePersonRequest request = new(
             Nickname: person.Nickname,
             Email: email,
             PhoneNumber: person.PhoneNumber,

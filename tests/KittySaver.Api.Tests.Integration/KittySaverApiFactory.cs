@@ -71,6 +71,18 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
                 .Returns("image/jpeg");
             services.AddSingleton<IAdvertisementFileStorageService>(_ => advertisementFileStorageService);
             
+            services.RemoveAll<ICatFileStorageService>();
+            ICatFileStorageService catFileStorageService = Substitute.For<ICatFileStorageService>();
+            TestableFileStream testStream1 = new("test/path/image.jpg");
+            catFileStorageService
+                .GetThumbnail(Arg.Any<Guid>())
+                .Returns(testStream1);
+
+            catFileStorageService
+                .GetContentType("test/path/image.jpg")
+                .Returns("image/jpeg");
+            services.AddSingleton<ICatFileStorageService>(_ => catFileStorageService);
+            
             services.RemoveAll<ICurrentUserService>();
             ICurrentUserService currentUserService = Substitute.For<ICurrentUserService>();
             currentUserService.EnsureUserIsAdminAsync(Arg.Any<CancellationToken>()).Returns(Task.FromResult(true));
@@ -78,7 +90,7 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
             currentUserService.GetCurrentUserIdentityId().Returns(Guid.NewGuid());
             currentUserService.GetCurrentlyLoggedInPersonAsync(Arg.Any<CancellationToken>()).Returns(
                 Task.FromResult<CurrentlyLoggedInPerson?>
-                    (new CurrentlyLoggedInPerson{ PersonId = Guid.NewGuid(), Role = Person.Role.Admin}));
+                    (new CurrentlyLoggedInPerson() { PersonId = Guid.NewGuid(), Role = Person.Role.Admin}));
             services.AddSingleton<ICurrentUserService>(_ => currentUserService);
             
             services.RemoveAll<IAuthenticationService>();

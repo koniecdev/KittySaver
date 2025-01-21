@@ -1,5 +1,4 @@
-﻿global using System.Net.Http.Headers;
-using System.Net;
+﻿using System.Net;
 using System.Net.Http.Json;
 using Bogus;
 using FluentAssertions;
@@ -12,15 +11,15 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
 
-namespace KittySaver.Api.Tests.Integration.Tests.Advertisements;
+namespace KittySaver.Api.Tests.Integration.Tests.Cats;
 
 [Collection("Api")]
-public class GetAdvertisementThumbnailEndpointsTests : IAsyncLifetime
+public class UpdateCatThumbnailEndpointsTests : IAsyncLifetime
 {
     private readonly HttpClient _httpClient;
     private readonly CleanupHelper _cleanup;
 
-    public GetAdvertisementThumbnailEndpointsTests(KittySaverApiFactory appFactory)
+    public UpdateCatThumbnailEndpointsTests(KittySaverApiFactory appFactory)
     {
         _httpClient = appFactory.CreateClient();
         _cleanup = new CleanupHelper(_httpClient);
@@ -58,33 +57,46 @@ public class GetAdvertisementThumbnailEndpointsTests : IAsyncLifetime
                 ));
 
     [Fact]
-    public async Task GetThumbnail_ShouldReturnSuccess_WhenValidImageIsProvided()
+    public async Task UpdateThumbnail_ShouldReturnSuccess_WhenValidImageIsProvided()
     {
         // Arrange
-        (Guid personId, Guid advertisementId) = await CreateTestAdvertisement();
+        (Guid personId, Guid catId) = await CreateTestCat();
         
         await using Stream imageStream = CreateTestImage();
         using MultipartFormDataContent content = new();
         StreamContent imageContent = new(imageStream);
         imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
         content.Add(imageContent, "thumbnail", "test.jpg");
-        await _httpClient.PutAsync(
-            $"/api/v1/persons/{personId}/advertisements/{advertisementId}/thumbnail", 
-            content);
 
         // Act
-        var getResponse = await _httpClient.GetAsync($"/api/v1/advertisements/{advertisementId}/thumbnail");
-        
+        HttpResponseMessage response = await _httpClient.PutAsync(
+            $"api/v1/persons/{personId}/cats/{catId}/thumbnail",
+            content);
+
         // Assert
-        getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        CatHateoasResponse? hateoasResponse = await response.Content.ReadFromJsonAsync<CatHateoasResponse>();
+        hateoasResponse.Should().NotBeNull();
+        hateoasResponse!.Links.Should().NotBeEmpty();
+        hateoasResponse.Links.Select(x=>x.Href).All(x=>x.Contains("://")).Should().BeTrue();
     }
     
 
     [Fact]
-    public async Task GetThumbnail_ShouldReturnNotFound_WhenAdvertisementDoesNotExist()
+    public async Task UpdateThumbnail_ShouldReturnNotFound_WhenCatDoesNotExist()
     {
+        // Arrange
+        (Guid personId, _) = await CreateTestCat();
+        await using Stream imageStream = CreateTestImage();
+        using MultipartFormDataContent content = new();
+        StreamContent imageContent = new(imageStream);
+        imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
+        content.Add(imageContent, "thumbnail", "test.jpg");
+
         // Act
-        HttpResponseMessage response = await _httpClient.GetAsync($"/api/v1/advertisements/{Guid.NewGuid()}/thumbnail");
+        HttpResponseMessage response = await _httpClient.PutAsync(
+            $"/api/v1/persons/{personId}/cats/{Guid.NewGuid()}/thumbnail", 
+            content);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -97,53 +109,67 @@ public class GetAdvertisementThumbnailEndpointsTests : IAsyncLifetime
     public async Task UpdateThumbnail_ShouldReturnBadRequest_WhenTheSameValueIsProvidedForPersonIdAndId()
     {
         // Arrange
-        (_, Guid advertisementId) = await CreateTestAdvertisement();
+        (Guid personId, _) = await CreateTestCat();
+        await using Stream imageStream = CreateTestImage();
+        using MultipartFormDataContent content = new();
+        StreamContent imageContent = new(imageStream);
+        imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
+        content.Add(imageContent, "thumbnail", "test.jpg");
+
         // Act
-        HttpResponseMessage response = await _httpClient.GetAsync($"/api/v1/advertisements/{advertisementId}/thumbnail");
+        HttpResponseMessage response = await _httpClient.PutAsync(
+            $"/api/v1/persons/{personId}/cats/{personId}/thumbnail", 
+            content);
         
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        ProblemDetails? problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+        ValidationProblemDetails? problemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         problemDetails.Should().NotBeNull();
         problemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
-        problemDetails.Detail.Should().Be("Thumbnail is not uploaded");
+        problemDetails.Errors.Count.Should().BeGreaterThan(0);
     }
 
-    private async Task<(Guid PersonId, Guid AdvertisementId)> CreateTestAdvertisement()
+    [Theory]
+    [InlineData("image/gif")]
+    [InlineData("image/bmp")]
+    [InlineData("application/pdf")]
+    public async Task UpdateThumbnail_ShouldReturnBadRequest_WhenInvalidFileTypeIsProvided(string contentType)
     {
+        // Arrange
+        (Guid personId, Guid catId) = await CreateTestCat();
+        await using Stream imageStream = CreateTestImage();
+        using MultipartFormDataContent content = new();
+        StreamContent imageContent = new(imageStream);
+        imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
+        content.Add(imageContent, "thumbnail", "test.jpg");
+
+        // Act
+        HttpResponseMessage response = await _httpClient.PutAsync(
+            $"/api/v1/persons/{personId}/cats/{catId}/thumbnail", 
+            content);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        ValidationProblemDetails? problemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        problemDetails.Should().NotBeNull();
+        problemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
+    }
+
+    private async Task<(Guid PersonId, Guid CatId)> CreateTestCat()
+    {
+        // Create person
         CreatePerson.CreatePersonRequest? createPersonRequest = _createPersonRequestGenerator.Generate();
         HttpResponseMessage personResponse = await _httpClient.PostAsJsonAsync("/api/v1/persons", createPersonRequest);
         ApiResponses.CreatedWithIdResponse personResult = await personResponse.GetIdResponseFromResponseMessageAsync();
-        
+
+        // Create cat
         CreateCat.CreateCatRequest? createCatRequest = _createCatRequestGenerator.Generate();
         HttpResponseMessage catResponse = await _httpClient.PostAsJsonAsync(
             $"/api/v1/persons/{personResult.Id}/cats", 
             createCatRequest);
         ApiResponses.CreatedWithIdResponse catResult = await catResponse.GetIdResponseFromResponseMessageAsync();
-        
-        CreateAdvertisement.CreateAdvertisementRequest? createAdvertisementRequest =
-            new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
-                .CustomInstantiator(faker =>
-                    new CreateAdvertisement.CreateAdvertisementRequest(
-                        CatsIdsToAssign: [catResult.Id],
-                        Description: faker.Lorem.Lines(2),
-                        PickupAddressCountry: faker.Address.CountryCode(),
-                        PickupAddressState: faker.Address.State(),
-                        PickupAddressZipCode: faker.Address.ZipCode(),
-                        PickupAddressCity: faker.Address.City(),
-                        PickupAddressStreet: faker.Address.StreetName(),
-                        PickupAddressBuildingNumber: faker.Address.BuildingNumber(),
-                        ContactInfoEmail: faker.Person.Email,
-                        ContactInfoPhoneNumber: faker.Person.Phone
-                    )).Generate();
 
-        HttpResponseMessage advertisementResponse = await _httpClient.PostAsJsonAsync(
-            $"/api/v1/persons/{personResult.Id}/advertisements",
-            createAdvertisementRequest);
-        
-        ApiResponses.CreatedWithIdResponse advertisementResult = await advertisementResponse.GetIdResponseFromResponseMessageAsync();
-
-        return (personResult.Id, advertisementResult.Id);
+        return (personResult.Id, catResult.Id);
     }
 
     private static MemoryStream CreateTestImage(int width = 100, int height = 100)

@@ -91,8 +91,20 @@ public sealed class UpdateCat : IEndpoint
                 medicalHelpUrgency);
             
             await unitOfWork.SaveChangesAsync(cancellationToken);
-            Guid? catAdvertisementId = catOwner.Cats.First(cat => cat.Id == request.Id).AdvertisementId;
-            return new CatHateoasResponse(request.Id, request.PersonId, catAdvertisementId);
+            
+            var catAdvertisementIdAndIsThumbnailUploaded = catOwner.Cats
+                .Where(cat => cat.Id == request.Id)
+                .Select(c => new
+                {
+                    advertisementId = c.AdvertisementId,
+                    isThumbnailUploaded = c.IsThumbnailUploaded
+                }).First();
+            
+            return new CatHateoasResponse(
+                request.Id, 
+                request.PersonId,
+                catAdvertisementIdAndIsThumbnailUploaded.advertisementId,
+                catAdvertisementIdAndIsThumbnailUploaded.isThumbnailUploaded);
         }
     }
     

@@ -17,13 +17,14 @@ public sealed class CatReadModel
     public required int HealthStatus { get; init; }
     public required bool IsCastrated { get; init; }
     public required bool IsAdopted { get; init; }
+    public required bool IsThumbnailUploaded { get; init; }
     public required double PriorityScore { get; init; }
     public required string AdditionalRequirements { get; init; }
     public required string Name { get; init; }
     public required Guid PersonId { get; init; }
-    public PersonReadModel Person { get; private set; } = null!;
-    public Guid? AdvertisementId { get; init; }
-    public AdvertisementReadModel? Advertisement { get; private set; }
+    public PersonReadModel Person { get; private init; } = null!;
+    public required Guid? AdvertisementId { get; init; }
+    public AdvertisementReadModel? Advertisement { get; private init; }
 }
 
 internal sealed class CatReadModelConfiguration : IEntityTypeConfiguration<CatReadModel>, IReadConfiguration

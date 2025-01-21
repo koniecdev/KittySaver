@@ -37,6 +37,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
         services.AddScoped<IThumbnailStorageService, ThumbnailStorageService>();
         services.AddScoped<IAdvertisementFileStorageService, AdvertisementFileStorageService>();
+        services.AddScoped<ICatFileStorageService, CatFileStorageService>();
         services.AddValidatorsFromAssembly(assembly);
         
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

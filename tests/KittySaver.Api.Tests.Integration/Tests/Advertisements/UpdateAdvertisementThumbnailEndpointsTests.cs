@@ -64,8 +64,8 @@ public class UpdateAdvertisementThumbnailEndpointsTests : IAsyncLifetime
         (Guid personId, Guid advertisementId) = await CreateTestAdvertisement();
         
         await using Stream imageStream = CreateTestImage();
-        using MultipartFormDataContent content = new MultipartFormDataContent();
-        StreamContent imageContent = new StreamContent(imageStream);
+        using MultipartFormDataContent content = new();
+        StreamContent imageContent = new(imageStream);
         imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
         content.Add(imageContent, "thumbnail", "test.jpg");
 
@@ -89,8 +89,8 @@ public class UpdateAdvertisementThumbnailEndpointsTests : IAsyncLifetime
         // Arrange
         (Guid personId, _) = await CreateTestAdvertisement();
         await using Stream imageStream = CreateTestImage();
-        using MultipartFormDataContent content = new MultipartFormDataContent();
-        StreamContent imageContent = new StreamContent(imageStream);
+        using MultipartFormDataContent content = new();
+        StreamContent imageContent = new(imageStream);
         imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
         content.Add(imageContent, "thumbnail", "test.jpg");
 
@@ -112,8 +112,8 @@ public class UpdateAdvertisementThumbnailEndpointsTests : IAsyncLifetime
         // Arrange
         (Guid personId, _) = await CreateTestAdvertisement();
         await using Stream imageStream = CreateTestImage();
-        using MultipartFormDataContent content = new MultipartFormDataContent();
-        StreamContent imageContent = new StreamContent(imageStream);
+        using MultipartFormDataContent content = new();
+        StreamContent imageContent = new(imageStream);
         imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
         content.Add(imageContent, "thumbnail", "test.jpg");
 
@@ -139,8 +139,8 @@ public class UpdateAdvertisementThumbnailEndpointsTests : IAsyncLifetime
         // Arrange
         (Guid personId, Guid advertisementId) = await CreateTestAdvertisement();
         await using Stream imageStream = CreateTestImage();
-        using MultipartFormDataContent content = new MultipartFormDataContent();
-        StreamContent imageContent = new StreamContent(imageStream);
+        using MultipartFormDataContent content = new();
+        StreamContent imageContent = new(imageStream);
         imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
         content.Add(imageContent, "thumbnail", "test.jpg");
 

@@ -6,6 +6,7 @@ using FluentAssertions;
 using KittySaver.Api.Features.Advertisements;
 using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Features.Persons;
+using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
 using Microsoft.AspNetCore.Http;
@@ -92,7 +93,12 @@ public class GetCatEndpointsTests : IAsyncLifetime
         cat.IsCastrated.Should().Be(_createCatRequest.IsCastrated);
         cat.PriorityScore.Should().BeGreaterThan(0);
         cat.IsAssignedToAdvertisement.Should().BeFalse();
-        cat.Links.Count.Should().Be(3);
+        cat.Links.Select(x => x.Rel).Should()
+            .BeEquivalentTo(EndpointNames.SelfRel,
+                EndpointNames.UpdateCat.Rel,
+                EndpointNames.DeleteCat.Rel,
+                EndpointNames.UpdateCatThumbnail.Rel);
+        cat.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
     }
 
     [Fact]
@@ -137,7 +143,13 @@ public class GetCatEndpointsTests : IAsyncLifetime
         CatResponse cat = await response.Content.ReadFromJsonAsync<CatResponse>() ?? throw new JsonException();
         cat.Id.Should().Be(catCreateResponse.Id);
         cat.IsAssignedToAdvertisement.Should().BeTrue();
-        cat.Links.Count.Should().Be(4);
+        cat.Links.Select(x => x.Rel).Should()
+            .BeEquivalentTo(EndpointNames.SelfRel,
+                EndpointNames.UpdateCat.Rel,
+                EndpointNames.DeleteCat.Rel,
+                EndpointNames.UpdateCatThumbnail.Rel,
+                EndpointNames.GetAdvertisement.Rel);
+        cat.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
     }
 
     [Fact]
@@ -211,14 +223,24 @@ public class GetCatEndpointsTests : IAsyncLifetime
         CatResponse cat = await response.Content.ReadFromJsonAsync<CatResponse>() ?? throw new JsonException();
         cat.Id.Should().Be(catCreateResponse.Id);
         cat.IsAssignedToAdvertisement.Should().BeFalse();
-        cat.Links.Count.Should().Be(3);
+        cat.Links.Select(x => x.Rel).Should()
+            .BeEquivalentTo(EndpointNames.SelfRel,
+                EndpointNames.UpdateCat.Rel,
+                EndpointNames.DeleteCat.Rel,
+                EndpointNames.UpdateCatThumbnail.Rel);
+        cat.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
 
         responseOfAnotherCat.StatusCode.Should().Be(HttpStatusCode.OK);
         CatResponse anotherCat = await responseOfAnotherCat.Content.ReadFromJsonAsync<CatResponse>() ??
                                  throw new JsonException();
         anotherCat.Id.Should().Be(anotherCat.Id);
         anotherCat.IsAssignedToAdvertisement.Should().BeTrue();
-        anotherCat.Links.Count.Should().Be(4);
+        cat.Links.Select(x => x.Rel).Should()
+            .BeEquivalentTo(EndpointNames.SelfRel,
+                EndpointNames.UpdateCat.Rel,
+                EndpointNames.DeleteCat.Rel,
+                EndpointNames.UpdateCatThumbnail.Rel);
+        cat.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
     }
 
     [Fact]

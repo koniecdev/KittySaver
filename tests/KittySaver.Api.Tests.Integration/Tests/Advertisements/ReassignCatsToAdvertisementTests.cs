@@ -5,6 +5,7 @@ using FluentAssertions;
 using KittySaver.Api.Features.Advertisements;
 using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Features.Persons;
+using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
@@ -22,13 +23,13 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
     public ReassignCatsToAdvertisementTests(KittySaverApiFactory appFactory)
     {
         _httpClient = appFactory.CreateClient();
-        _cleanup = new(_httpClient);
+        _cleanup = new CleanupHelper(_httpClient);
     }
 
     private readonly Faker<CreatePerson.CreatePersonRequest> _createPersonRequestGenerator =
         new Faker<CreatePerson.CreatePersonRequest>()
             .CustomInstantiator(faker =>
-                new(
+                new CreatePerson.CreatePersonRequest(
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
@@ -46,7 +47,7 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
     private readonly Faker<CreateCat.CreateCatRequest> _createCatRequestGenerator =
         new Faker<CreateCat.CreateCatRequest>()
             .CustomInstantiator(faker =>
-                new(
+                new CreateCat.CreateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: true,
                     MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
@@ -75,7 +76,7 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
         CreateAdvertisement.CreateAdvertisementRequest request =
             new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
-                    new(
+                    new CreateAdvertisement.CreateAdvertisementRequest(
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.CountryCode(),
@@ -125,7 +126,16 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
         hateoasResponse!.Id.Should().Be(createAdvertisementResponse.Id);
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
         hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.Active);
-        hateoasResponse.Links.Count.Should().Be(8);
+        hateoasResponse.Links.Select(x => x.Rel).Should()
+            .BeEquivalentTo(EndpointNames.SelfRel,
+                EndpointNames.GetAdvertisementThumbnail.Rel,
+                EndpointNames.DeleteAdvertisement.Rel,
+                EndpointNames.CloseAdvertisement.Rel,
+                EndpointNames.UpdateAdvertisement.Rel,
+                EndpointNames.UpdateAdvertisementThumbnail.Rel,
+                EndpointNames.ReassignCatsToAdvertisement.Rel,
+                EndpointNames.ExpireAdvertisement.Rel); //TODO: Investigate if ExpireAdvertisement is valid at this point
+        hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         
         HttpResponseMessage getAdvertisementResponse =
             await _httpClient.GetAsync($"api/v1/advertisements/{createAdvertisementResponse.Id}");
@@ -174,7 +184,7 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
         CreateAdvertisement.CreateAdvertisementRequest request =
             new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
-                    new(
+                    new CreateAdvertisement.CreateAdvertisementRequest(
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.CountryCode(),
@@ -216,7 +226,16 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
         hateoasResponse!.Id.Should().Be(createAdvertisementResponse.Id);
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
         hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.Active);
-        hateoasResponse.Links.Count.Should().Be(8);
+        hateoasResponse.Links.Select(x => x.Rel).Should()
+            .BeEquivalentTo(EndpointNames.SelfRel,
+                EndpointNames.GetAdvertisementThumbnail.Rel,
+                EndpointNames.DeleteAdvertisement.Rel,
+                EndpointNames.CloseAdvertisement.Rel,
+                EndpointNames.UpdateAdvertisement.Rel,
+                EndpointNames.UpdateAdvertisementThumbnail.Rel,
+                EndpointNames.ReassignCatsToAdvertisement.Rel,
+                EndpointNames.ExpireAdvertisement.Rel);
+        hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         
         HttpResponseMessage getAdvertisementResponse =
             await _httpClient.GetAsync($"api/v1/advertisements/{createAdvertisementResponse.Id}");

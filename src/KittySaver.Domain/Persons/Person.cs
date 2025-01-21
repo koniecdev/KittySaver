@@ -303,6 +303,12 @@ public sealed class Person : AggregateRoot
         return highestPriorityScore;
     }
 
+    public void MarkCatAsThumbnailUploaded(Guid catId)
+    {
+        Cat cat = GetCatById(catId);
+        cat.MarkAsThumbnailUploaded();
+    }
+    
     private void AssignCatToAdvertisement(Guid advertisementId, Guid catId)
     {
         Cat cat = GetCatById(catId);
