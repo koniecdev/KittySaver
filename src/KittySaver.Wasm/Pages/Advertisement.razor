@@ -14,9 +14,58 @@
 }
 else
 {
-    <div class="advertisement-details">
-        <h1>@_advertisement.Title</h1>
-        <!-- rest of your advertisement details -->
+    <div class="advertisement_details_grid">
+        <aside class="advertisement_detail_sidebar">
+            
+        </aside>
+        <article class="advertisement_details_content">
+            <header class="advertisement_details_header">
+                <h1>@_advertisement.Title</h1>
+                <p>
+                    @_advertisement.PickupAddress.City - @_advertisement.PickupAddress.ZipCode @(_advertisement.PickupAddress.State is not null ? $"- {_advertisement.PickupAddress.State}" : "")
+                </p>
+            </header>
+            <section class="advertisement_details_main_info">
+                <div class="advertisement_details_description">
+                    <strong>Opis ogłoszenia</strong>
+                    <p>
+                        @_advertisement.Description
+                    </p>
+                </div>
+                <div class="advertisement_details_advertiser">
+                    <strong>Ogłoszeniodawca</strong>
+                    <p>Tel: @_advertisement.ContactInfoPhoneNumber</p>
+                    <p>Email: @_advertisement.ContactInfoEmail</p>
+                </div>
+                @if (_advertisement.Cats.Count > 1)
+                {
+                    <div class="advertisement_details_reminder">
+                        Prosimy pamiętać, że ogłoszeniodawca chce wydać wszystkie koty z tego ogłoszenia do jednego domu. Nie ma innej możliwości jak adoptować razem wszystkie koty z tego ogłoszenia.
+                    </div>
+                }
+            </section>
+            @if (_cats == null)
+            {
+                <p>Ładowanie kotów...</p>
+            }
+            else
+            {
+                foreach (CatResponse cat in _cats.Items)
+                {
+                    <section class="advertisement_details_cat_section">
+                        <div class="advertisement_details_cat_image">
+                            @if (cat.IsThumbnailUploaded)
+                            {
+                                <img src="@cat.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatThumbnailRel)?.Href">
+                            }
+                        </div>
+                    </section>
+                }
+            }
+        </article>
+        <aside class="advertisement_detail_sidebar">
+
+        </aside>
     </div>
 }
 
@@ -25,6 +74,7 @@ else
     public Guid Id { get; set; }
 
     private AdvertisementResponse? _advertisement;
+    private PagedList<CatResponse>? _cats;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -50,6 +100,16 @@ else
             {
                 string href = discoveryLink.Href.Replace("{id}", Id.ToString());
                 _advertisement = await MainApiClient.GetAsync<AdvertisementResponse>(href);
+            }
+        }
+
+        if (_advertisement is not null)
+        {
+            string? advertisementCatsHref = _advertisement.Links
+                .FirstOrDefault(x => x.Rel == EndpointRels.Advertisement.GetAdvertisementCatsRel)?.Href;
+            if (!string.IsNullOrWhiteSpace(advertisementCatsHref))
+            {
+                _cats = await MainApiClient.GetAsync<PagedList<CatResponse>>(advertisementCatsHref);
             }
         }
     }
