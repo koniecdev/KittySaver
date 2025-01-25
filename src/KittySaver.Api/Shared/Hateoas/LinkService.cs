@@ -146,7 +146,9 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
                     routeValues: new { id },
                     isSelf: true),
                 Generate(endpointInfo: EndpointNames.GetAdvertisementThumbnail,
-                    routeValues: new { id })
+                    routeValues: new { id }),
+                Generate(endpointInfo: EndpointNames.GetAdvertisementCats,
+                    routeValues: new { id, personId })
             ];
             return links;
         }
