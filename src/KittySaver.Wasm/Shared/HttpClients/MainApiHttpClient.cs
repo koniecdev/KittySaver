@@ -1,20 +1,24 @@
-﻿using System.Net.Http.Json;
+﻿using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Text.Json;
 using Polly;
+using Polly.CircuitBreaker;
 using Polly.Extensions.Http;
+using Polly.Retry;
 
 namespace KittySaver.Wasm.Shared.HttpClients;
 
 public interface IApiClient
 {
     Task<TResponse?> GetAsync<TResponse>(string endpoint, CancellationToken cancellationToken = default);
-    Task<TResponse?> PostAsync<TRequest, TResponse>(string endpoint, TRequest request, CancellationToken cancellationToken = default);
+    Task<TResponse?> PostAsync<TRequest, TResponse>(string endpointUrl, TRequest request, CancellationToken cancellationToken = default);
     Task<TResponse?> PutAsync<TRequest, TResponse>(string endpoint, TRequest request, CancellationToken cancellationToken = default);
     Task<TResponse?> DeleteAsync<TResponse>(string endpoint, CancellationToken cancellationToken = default);
 }
 
 public class ApiClient(
     HttpClient httpClient,
+    ILocalStorageService localStorageService,
     ILogger<ApiClient> logger) : IApiClient
 {
     private readonly JsonSerializerOptions _jsonOptions = new()
@@ -27,9 +31,10 @@ public class ApiClient(
     {
         try
         {
+            await SetAuthorizationHeadersIfPresent();
             logger.LogInformation("Making GET request to {Endpoint}", endpoint);
             
-            var response = await httpClient.GetAsync(endpoint, cancellationToken);
+            HttpResponseMessage response = await httpClient.GetAsync(endpoint, cancellationToken);
             await EnsureSuccessStatusCodeWithLoggingAsync(response);
             
             return await response.Content.ReadFromJsonAsync<TResponse>(_jsonOptions, cancellationToken);
@@ -41,20 +46,22 @@ public class ApiClient(
         }
     }
 
-    public async Task<TResponse?> PostAsync<TRequest, TResponse>(string endpoint, TRequest request, CancellationToken cancellationToken = default)
+    public async Task<TResponse?> PostAsync<TRequest, TResponse>(string endpointUrl, TRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
-            logger.LogInformation("Making POST request to {Endpoint}", endpoint);
+            await SetAuthorizationHeadersIfPresent();
+            logger.LogInformation("Making POST request to {Endpoint}", endpointUrl);
             
-            var response = await httpClient.PostAsJsonAsync(endpoint, request, _jsonOptions, cancellationToken);
+            HttpResponseMessage response = await httpClient.PostAsJsonAsync(endpointUrl, request, _jsonOptions, cancellationToken);
             await EnsureSuccessStatusCodeWithLoggingAsync(response);
             
             return await response.Content.ReadFromJsonAsync<TResponse>(_jsonOptions, cancellationToken);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            logger.LogError(ex, "Error making POST request to {Endpoint}", endpoint);
+            //Well, we do need the Result pattern for Response<TResponse || ProblemDetails>
+            logger.LogError(ex, "Error making POST request to {Endpoint}", endpointUrl);
             throw;
         }
     }
@@ -63,9 +70,10 @@ public class ApiClient(
     {
         try
         {
+            await SetAuthorizationHeadersIfPresent();
             logger.LogInformation("Making PUT request to {Endpoint}", endpoint);
             
-            var response = await httpClient.PutAsJsonAsync(endpoint, request, _jsonOptions, cancellationToken);
+            HttpResponseMessage response = await httpClient.PutAsJsonAsync(endpoint, request, _jsonOptions, cancellationToken);
             await EnsureSuccessStatusCodeWithLoggingAsync(response);
             
             return await response.Content.ReadFromJsonAsync<TResponse>(_jsonOptions, cancellationToken);
@@ -81,9 +89,10 @@ public class ApiClient(
     {
         try
         {
+            await SetAuthorizationHeadersIfPresent();
             logger.LogInformation("Making DELETE request to {Endpoint}", endpoint);
             
-            var response = await httpClient.DeleteAsync(endpoint, cancellationToken);
+            HttpResponseMessage response = await httpClient.DeleteAsync(endpoint, cancellationToken);
             await EnsureSuccessStatusCodeWithLoggingAsync(response);
             
             return await response.Content.ReadFromJsonAsync<TResponse>(_jsonOptions, cancellationToken);
@@ -94,12 +103,31 @@ public class ApiClient(
             throw;
         }
     }
+    
+    private async Task SetAuthorizationHeadersIfPresent()
+    {
+        string? token = await localStorageService.GetItemAsStringAsync("token");
+        string? tokenExpiresAsString = await localStorageService.GetItemAsStringAsync("token_expires");
+        if (!string.IsNullOrWhiteSpace(token) && !string.IsNullOrWhiteSpace(tokenExpiresAsString))
+        {
+            DateTimeOffset tokenExpiresAt = DateTimeOffset.Parse(tokenExpiresAsString.Replace("\"", ""));
+            if (DateTimeOffset.Now > tokenExpiresAt)
+            {
+                //Get refresh token => issue new jwt => replace jwt
+                //or if refresh token is expired
+                //remove refresh token from storage && remove jwt from storage => redirect to login page
+                await localStorageService.ClearAsync();
+            }
+            token = token.Replace("\"", "");
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        }
+    }
 
     private async Task EnsureSuccessStatusCodeWithLoggingAsync(HttpResponseMessage response)
     {
         if (!response.IsSuccessStatusCode)
         {
-            var content = await response.Content.ReadAsStringAsync();
+            string content = await response.Content.ReadAsStringAsync();
             logger.LogError("HTTP {StatusCode} response from {RequestUri}: {Content}",
                 (int)response.StatusCode,
                 response.RequestMessage?.RequestUri,
@@ -112,9 +140,7 @@ public class ApiClient(
 
 public static class HttpClientExtensions
 {
-    public static IServiceCollection AddApiClient(
-        this IServiceCollection services,
-        IConfiguration configuration)
+    public static IServiceCollection AddApiClient(this IServiceCollection services)
     {
         services.AddHttpClient<IApiClient, ApiClient>(client =>
             {
@@ -126,7 +152,7 @@ public static class HttpClientExtensions
         return services;
     }
 
-    private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+    private static AsyncRetryPolicy<HttpResponseMessage> GetRetryPolicy()
     {
         return HttpPolicyExtensions
             .HandleTransientHttpError()
@@ -134,7 +160,7 @@ public static class HttpClientExtensions
                 TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)));
     }
 
-    private static IAsyncPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
+    private static AsyncCircuitBreakerPolicy<HttpResponseMessage> GetCircuitBreakerPolicy()
     {
         return HttpPolicyExtensions
             .HandleTransientHttpError()

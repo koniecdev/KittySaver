@@ -1,5 +1,8 @@
 ﻿@using KittySaver.Wasm.Shared.HttpClients.MainApiResponses
 @inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
+@inject ILocalStorageService LocalStorage
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
 <nav class="nav">
     <div class="logo">
         <a href="/">
@@ -29,6 +32,7 @@
         else
         {
             <a href="/profile">Mój profil</a>
+            <button @onclick="Logout">Wyloguj</button>
         }
     </div>
 </nav>
@@ -46,5 +50,11 @@
         {
             _userIsLoggedIn = true;
         }
+    }
+
+    private async Task Logout()
+    {
+        await LocalStorage.RemoveItemAsync("token");
+        await AuthenticationStateProvider.GetAuthenticationStateAsync();
     }
 }

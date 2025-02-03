@@ -4,13 +4,15 @@
 :root{
     --nav_height: 84px;
     --kitty-green: #2F9C26;
+    --kitty-blue: #007fff;
     --kitty-yellow: #fde047;
     --kitty-orange: #D66B1D;
     --kitty-red: #D12F2F;
 }
-body{
+body, input, button{
     margin: 0;
     font-family: "Poppins", sans-serif;
+    font-size: 1rem;
 }
 nav{
     display: grid;
@@ -32,6 +34,10 @@ nav{
     text-transform: uppercase;
     height: inherit;
 }
+.logo h1{
+    font-size: 1rem;
+    font-weight: 400;
+}
 .logo a {
     display: flex;
     height: inherit;
@@ -46,6 +52,9 @@ nav{
     margin-bottom: -30px;
     z-index: 1000;
     height: 100px;
+}
+.logo a:focus {
+    outline: none;
 }
 .hamburger{
     display: none;
@@ -62,7 +71,7 @@ a{
     color: #fff;
     text-decoration: none;
 }
-p{
+h1, h2, h3, h4, h5, h6, p{
     margin: 0;
 }
 .nav_content{
@@ -84,6 +93,9 @@ p{
     grid-gap: 2.75rem;
     padding: 2.75rem;
     grid-auto-rows: max-content;
+}
+.advertisement_grid header{
+    grid-column: 1/-1;
 }
 .advertisement_tile {
     border-left: 10px solid var(--kitty-green);
@@ -126,13 +138,25 @@ img{
     grid-gap: 1.5rem;
     grid-auto-rows: max-content;
 }
-.index_aside input[type="text"], .index_aside select, .index_aside button{
+.index_aside input[type="text"],
+.index_aside select,
+.index_aside button,
+.login_form_tile button,
+.login_form_tile input,
+.default_btn{
     padding: .5rem 1rem;
     border: unset;
     border-radius: 10px;
     font-family: "Poppins", sans-serif;
     display: grid;
     background-color: #fff;
+}
+.default_btn{
+    cursor: pointer;
+    transition: opacity .15s;
+}
+.default_btn:hover{
+    opacity: .9;
 }
 .filtering_tile{
     display: grid;
@@ -316,6 +340,10 @@ select{
     background-color: var(--kitty-green);
     color: #fff;
 }
+.btn_blue{
+    background-color: var(--kitty-blue);
+    color: #fff;
+}
 .btn_orange{
     background-color: var(--kitty-orange);
     color: #fff;
@@ -324,7 +352,62 @@ select{
     background-color: var(--kitty-red);
     color: #fff;
 }
+.tdu{
+    text-decoration: underline;
+}
 .advertisement_details_cat_additional_requirements{
     display: grid;
     grid-gap: .25rem;
 }
+
+/*Login.razor.css*/
+.login_wrapper{
+    display: grid;
+    grid-template-columns: 500px 1fr;
+    min-height: calc(100vh - var(--nav_height));
+}
+.login_photo{
+    display: grid;
+    background-image: url('/imgs/loginbgc.webp');
+    background-size: cover;
+    background-position: center left;
+    background-repeat: no-repeat;
+    height: 100%;
+}
+.login_container{
+    padding: 2rem;
+    display: grid;
+    grid-gap: 2rem;
+    background-color: #242424;
+    grid-auto-rows: max-content;
+}
+.login_form{
+    display: grid;
+    grid-gap: 2rem;
+    width: 75%;
+}
+.login_form_tile{
+    display: grid;
+    grid-gap: .5rem;
+}
+.login_form_tile_checkbox{
+    display: grid;
+    grid-template-columns: repeat(2, max-content);
+    align-items: center;
+    grid-gap: 1rem;
+}
+.login_form_tile_checkbox input{
+    display: block;
+    width: 20px;
+    height: 20px;
+}
+.login_form_tile button{
+    background-color: var(--kitty-green);
+    color: #fff;
+}
+.login_form_tile_buttons{
+    display: grid;
+    grid-gap: 1rem;
+    text-align: center;
+}
+/*/Login.razor.css*/

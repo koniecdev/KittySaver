@@ -1,0 +1,74 @@
+﻿@page "/login"
+@using KittySaver.Wasm.Shared.Auth
+@using KittySaver.Wasm.Shared.HttpClients
+@inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
+@inject IApiClient ApiClient
+@inject ILocalStorageService LocalStorage
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>Uratujkota.pl - Zaloguj się - Bo życie kotków jest priorytetem - Portal adopcyjny dla potrzebujących kotów.</PageTitle>
+
+<div class="login_wrapper">
+    <section class="login_container">
+        <header>
+            <h2>Logowanie do konta</h2>
+        </header>
+        <EditForm Model="_loginRequest" OnSubmit="HandleLogin" class="login_form">
+            <div class="login_form_tile">
+                <label for="email">Twój adres email:</label>
+                <InputText id="email" type="email" @bind-Value="_loginRequest.Email" />
+            </div>
+            <div class="login_form_tile">
+                <label for="password">Twoje hasło:</label>
+                <InputText id="password" type="password" @bind-Value="_loginRequest.Password" />
+                <small class="forgot-password">
+                    <a class="tdu" href="/reset-password">Zapomniałeś hasła?</a>
+                </small>
+            </div>
+            <div class="login_form_tile">
+                <div class="login_form_tile_checkbox">
+                    <label for="remember">Czy zapamiętać hasło?</label>
+                    <InputCheckbox id="remember" @bind-Value="_remember"/>
+                </div>
+            </div>
+            <div class="login_form_tile login_form_tile_buttons">
+                <button class="default_btn" type="submit" disabled="@_isProcessing">
+                    @if (_isProcessing)
+                    {
+                        <span>Logowanie...</span>
+                    }
+                    else
+                    {
+                        <span>Zatwierdź</span>
+                    }
+                </button>
+                <a href="/register" class="default_btn btn_blue">Nie masz konta? Zarejestruj się</a>
+            </div>
+            
+        </EditForm>
+    </section>
+    
+    <aside class="login_photo">
+    </aside>
+</div>
+@code{
+    private readonly LoginRequest _loginRequest = new();
+    private bool _remember = true;
+    private bool _isProcessing;
+    
+    private async Task HandleLogin()
+    {
+        _isProcessing = true;
+        LoginResponse? response = 
+            await ApiClient.PostAsync<LoginRequest, LoginResponse>("https://localhost:44371/api/v1/application-users/login", _loginRequest);
+        
+        if (response is not null)
+        {
+            var parsedToken = response.AccessToken.Replace("\"", string.Empty);
+            await LocalStorage.SetItemAsync("token", parsedToken);
+            await LocalStorage.SetItemAsync("token_expires", response.AccessTokenExpiresAt);
+            await AuthStateProvider.GetAuthenticationStateAsync();
+            await ApiNavigation.ReInitializeAsync();
+        }
+    }
+}
