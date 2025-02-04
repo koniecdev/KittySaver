@@ -1,6 +1,4 @@
-﻿using System.Net.Http.Json;
-
-namespace KittySaver.Wasm.Shared.HttpClients.MainApiResponses;
+﻿namespace KittySaver.Wasm.Shared.HttpClients.MainApiResponses;
 
 public interface IApiNavigationService
 {
@@ -9,13 +7,13 @@ public interface IApiNavigationService
     Link? GetLink(string rel);
 }
 
-public class ApiNavigationService(HttpClient httpClient) : IApiNavigationService
+public class ApiNavigationService(IApiClient apiClient) : IApiNavigationService
 {
     public GetApiDiscoveryV1Response? Response { get; private set; }
 
     public async Task InitializeAsync()
     {
-        Response ??= await httpClient.GetFromJsonAsync<GetApiDiscoveryV1Response>("https://localhost:7127/api/v1/");
+        Response ??= await apiClient.GetAsync<GetApiDiscoveryV1Response>("https://localhost:7127/api/v1/");
     }
 
     public Link? GetLink(string rel) => Response?.Links.FirstOrDefault(x => x.Rel == rel);

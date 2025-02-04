@@ -1,8 +1,13 @@
-﻿@using KittySaver.Wasm.Shared.HttpClients.MainApiResponses
-@inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
+﻿@inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
+@inject ILocalStorageService LocalStorage
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
 <nav class="nav">
     <div class="logo">
-        <a href="/">uratujkota.pl</a>
+        <a href="/">
+            <img src="/imgs/catWhiteTransparent.webp" alt="">
+            uratujkota.pl
+        </a>
     </div>
     <div class="hamburger">
         
@@ -10,38 +15,26 @@
     <div class="nav_content">
         <a href="/">Ogłoszenia</a>
         <a href="/mission">Misja</a>
-        @if (_getPersonCatsLink is not null)
-        {
-            <a href="/my-cats">Moje koty</a>
-        }
-        @if (_getPersonAdvertisementsLink is not null)
-        {
-            <a href="/my-advertisements">Moje ogłoszenia</a>
-        }
-        @if (!_userIsLoggedIn)
-        {
-            <a href="/login">Zaloguj się</a>
-            <a href="/register">Zarejestruj się</a>
-        }
-        else
-        {
-            <a href="/profile">Mój profil</a>
-        }
+        <AuthorizeView>
+            <Authorized>
+                <a href="/my-cats">Moje koty</a>
+                <a href="/my-advertisements">Moje ogłoszenia</a>
+                <a href="/profile">Mój profil</a>
+                <a class="cp" @onclick="Logout">Wyloguj</a>
+            </Authorized>
+            <NotAuthorized>
+                <a href="/login">Zaloguj się</a>
+                <a href="/register">Zarejestruj się</a>
+            </NotAuthorized>
+        </AuthorizeView>
     </div>
 </nav>
 @code
 {
-    private bool _userIsLoggedIn = false;
-    private Link? _getPersonAdvertisementsLink;
-    private Link? _getPersonCatsLink;
-    protected override async Task OnInitializedAsync()
+    private async Task Logout()
     {
-        await base.OnInitializedAsync();
-        _getPersonAdvertisementsLink = ApiNavigation.GetLink(EndpointRels.Advertisement.GetPersonAdvertisementsRel);
-        _getPersonCatsLink = ApiNavigation.GetLink(EndpointRels.Cat.GetCatsRel);
-        if (_getPersonAdvertisementsLink is not null && _getPersonCatsLink is not null)
-        {
-            _userIsLoggedIn = true;
-        }
+        await LocalStorage.RemoveItemAsync("token");
+        await LocalStorage.RemoveItemAsync("token_expires");
+        await AuthenticationStateProvider.GetAuthenticationStateAsync();
     }
 }

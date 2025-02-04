@@ -17,9 +17,11 @@ public static class EndpointRels
     {
         public const string CreateCatRel = "create-cat";
         public const string UpdateCatRel = "update-cat";
+        public const string UpdateCatThumbnailRel = "update-cat-thumbnail";
         public const string DeleteCatRel = "delete-cat";
         public const string GetCatRel = "get-cat";
         public const string GetCatsRel = "get-cats";
+        public const string GetCatThumbnailRel = "get-cat-thumbnail";
     }
 
     public static class Advertisement
@@ -29,6 +31,7 @@ public static class EndpointRels
         public const string DeleteAdvertisementRel = "delete-advertisement";
         public const string GetAdvertisementRel = "get-advertisement";
         public const string GetAdvertisementsRel = "get-advertisements";
+        public const string GetAdvertisementCatsRel = "get-advertisement-cats";
         public const string GetPersonAdvertisementsRel = "get-advertisements-by-personid";
         public const string GetPublicAdvertisementRel = "get-public-advertisement";
         public const string GetPublicAdvertisementsRel = "get-public-advertisements";

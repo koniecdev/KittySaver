@@ -88,6 +88,9 @@ public static class EndpointNames
     
     public static readonly EndpointInfo GetAdvertisementThumbnail = 
         new (Advertisement.GetAdvertisementThumbnailName, Advertisement.GetAdvertisementThumbnailRel, HttpVerbs.Get);
+    
+    public static readonly EndpointInfo GetAdvertisementCats = 
+        new (Advertisement.GetAdvertisementCatsName, Advertisement.GetAdvertisementCatsRel, HttpVerbs.Get);
 
     public static class GroupNames
     {
@@ -114,7 +117,7 @@ public static class EndpointNames
         public const string CreatePersonName = "CreatePerson";
         public const string CreatePersonRel = "create-person";
         
-        public const string UpdatePersonName = "UpdatePersonRel";
+        public const string UpdatePersonName = "UpdatePerson";
         public const string UpdatePersonRel = "update-person";
         
         public const string DeletePersonName = "DeletePerson";
@@ -154,7 +157,7 @@ public static class EndpointNames
         public const string CreateAdvertisementName = "CreateAdvertisement";
         public const string CreateAdvertisementRel = "create-advertisement";
         
-        public const string UpdateAdvertisementName = "UpdateAdvertisementRel";
+        public const string UpdateAdvertisementName = "UpdateAdvertisement";
         public const string UpdateAdvertisementRel = "update-advertisement";
         
         public const string DeleteAdvertisementName = "DeleteAdvertisement";
@@ -163,6 +166,9 @@ public static class EndpointNames
         public const string GetAdvertisementName = "GetAdvertisement";
         public const string GetAdvertisementRel = "get-advertisement";
         
+        public const string GetAdvertisementCatsName = "GetAdvertisementCats";
+        public const string GetAdvertisementCatsRel = "get-advertisement-cats";
+
         public const string GetAdvertisementsName = "GetAdvertisements";
         public const string GetAdvertisementsRel = "get-advertisements";
         public const string GetPersonAdvertisementsRel = "get-advertisements-by-personid";

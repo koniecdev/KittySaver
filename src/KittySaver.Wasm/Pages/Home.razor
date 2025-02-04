@@ -8,6 +8,9 @@
 <PageTitle>Uratujkota.pl - Ogłoszenia - Bo życie kotków jest priorytetem - Portal adopcyjny dla potrzebujących kotów.</PageTitle>
 <div class="index_grid">
     <aside class="index_aside">
+        <header>
+            <h2>Filtrowanie ogłoszeń</h2>
+        </header>
         <div class="filtering_tile">
             <label for="filtering_city">Miasto</label>
             <input type="text" id="filtering_city" class="filtering_input" @bind="City" @bind:event="oninput">
@@ -47,7 +50,14 @@
     }
     else
     {
+        
         <div class="advertisement_grid">
+            <header>
+                <h1>
+                    Uratuj kota - ogłoszenia adopcyjne
+                </h1>
+                <p>Kochasz koty? To tak jak my. Adoptuj i sterylizuj - przerwij łańcuch bezdomności.</p>
+            </header>
             @foreach (AdvertisementResponse ad in _advertisements.Items)
             {
                 <a @onclick="@(() => NavigateToAdvertisement(ad))" @onclick:preventDefault href="/advertisement/@ad.Id" class="advertisement_tile">

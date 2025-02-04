@@ -22,11 +22,11 @@ public sealed class Register : IEndpoint
         string PhoneNumber,
         string Password,
         string DefaultAdvertisementPickupAddressCountry,
-        string DefaultAdvertisementPickupAddressState,
+        string? DefaultAdvertisementPickupAddressState,
         string DefaultAdvertisementPickupAddressZipCode,
         string DefaultAdvertisementPickupAddressCity,
-        string DefaultAdvertisementPickupAddressStreet,
-        string DefaultAdvertisementPickupAddressBuildingNumber,
+        string? DefaultAdvertisementPickupAddressStreet,
+        string? DefaultAdvertisementPickupAddressBuildingNumber,
         string DefaultAdvertisementContactInfoEmail,
         string DefaultAdvertisementContactInfoPhoneNumber);
 
@@ -36,11 +36,11 @@ public sealed class Register : IEndpoint
         string PhoneNumber,
         string Password,
         string DefaultAdvertisementPickupAddressCountry,
-        string DefaultAdvertisementPickupAddressState,
+        string? DefaultAdvertisementPickupAddressState,
         string DefaultAdvertisementPickupAddressZipCode,
         string DefaultAdvertisementPickupAddressCity,
-        string DefaultAdvertisementPickupAddressStreet,
-        string DefaultAdvertisementPickupAddressBuildingNumber,
+        string? DefaultAdvertisementPickupAddressStreet,
+        string? DefaultAdvertisementPickupAddressBuildingNumber,
         string DefaultAdvertisementContactInfoEmail,
         string DefaultAdvertisementContactInfoPhoneNumber) : ICommand<Guid>;
 
@@ -65,13 +65,10 @@ public sealed class Register : IEndpoint
                 .NotEmpty()
                 .Matches(ValidationPatterns.EmailPattern)
                 .MustAsync(async (email, ct) => await IsEmailUniqueAsync(email, ct))
-                .WithMessage("Email is already used by another user.");;
+                .WithMessage("Email is already used by another user.");
             RuleFor(x => x.DefaultAdvertisementPickupAddressCountry).NotEmpty();
-            RuleFor(x => x.DefaultAdvertisementPickupAddressState).NotEmpty();
             RuleFor(x => x.DefaultAdvertisementPickupAddressZipCode).NotEmpty();
             RuleFor(x => x.DefaultAdvertisementPickupAddressCity).NotEmpty();
-            RuleFor(x => x.DefaultAdvertisementPickupAddressStreet).NotEmpty();
-            RuleFor(x => x.DefaultAdvertisementPickupAddressBuildingNumber).NotEmpty();
             RuleFor(x => x.DefaultAdvertisementContactInfoEmail).NotEmpty().EmailAddress();
             RuleFor(x => x.DefaultAdvertisementContactInfoPhoneNumber).NotEmpty();
 
