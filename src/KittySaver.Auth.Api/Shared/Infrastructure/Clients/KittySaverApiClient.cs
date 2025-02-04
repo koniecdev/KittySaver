@@ -36,8 +36,8 @@ public interface IKittySaverApiClient
         string? DefaultAdvertisementPickupAddressState,
         string DefaultAdvertisementPickupAddressZipCode,
         string DefaultAdvertisementPickupAddressCity,
-        string DefaultAdvertisementPickupAddressStreet,
-        string DefaultAdvertisementPickupAddressBuildingNumber,
+        string? DefaultAdvertisementPickupAddressStreet,
+        string? DefaultAdvertisementPickupAddressBuildingNumber,
         string DefaultAdvertisementContactInfoEmail,
         string DefaultAdvertisementContactInfoPhoneNumber);
     public sealed record UpdatePersonDto(
@@ -48,8 +48,8 @@ public interface IKittySaverApiClient
         string? DefaultAdvertisementPickupAddressState,
         string DefaultAdvertisementPickupAddressZipCode,
         string DefaultAdvertisementPickupAddressCity,
-        string DefaultAdvertisementPickupAddressStreet,
-        string DefaultAdvertisementPickupAddressBuildingNumber,
+        string? DefaultAdvertisementPickupAddressStreet,
+        string? DefaultAdvertisementPickupAddressBuildingNumber,
         string DefaultAdvertisementContactInfoEmail,
         string DefaultAdvertisementContactInfoPhoneNumber);
     Task<ICollection<PersonDto>> GetPersons();

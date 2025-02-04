@@ -5,6 +5,7 @@
 @inject IApiClient ApiClient
 @inject ILocalStorageService LocalStorage
 @inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
 
 <PageTitle>Uratujkota.pl - Zaloguj się - Bo życie kotków jest priorytetem - Portal adopcyjny dla potrzebujących kotów.</PageTitle>
 
@@ -24,12 +25,6 @@
                 <small class="forgot-password">
                     <a class="tdu" href="/reset-password">Zapomniałeś hasła?</a>
                 </small>
-            </div>
-            <div class="login_form_tile">
-                <div class="login_form_tile_checkbox">
-                    <label for="remember">Czy zapamiętać hasło?</label>
-                    <InputCheckbox id="remember" @bind-Value="_remember"/>
-                </div>
             </div>
             <div class="login_form_tile login_form_tile_buttons">
                 <button class="default_btn" type="submit" disabled="@_isProcessing">
@@ -53,7 +48,6 @@
 </div>
 @code{
     private readonly LoginRequest _loginRequest = new();
-    private bool _remember = true;
     private bool _isProcessing;
     
     private async Task HandleLogin()
@@ -64,11 +58,11 @@
         
         if (response is not null)
         {
-            var parsedToken = response.AccessToken.Replace("\"", string.Empty);
+            string parsedToken = response.AccessToken.Replace("\"", string.Empty);
             await LocalStorage.SetItemAsync("token", parsedToken);
             await LocalStorage.SetItemAsync("token_expires", response.AccessTokenExpiresAt);
             await AuthStateProvider.GetAuthenticationStateAsync();
-            await ApiNavigation.ReInitializeAsync();
+            NavigationManager.NavigateTo("/");
         }
     }
 }

@@ -135,7 +135,7 @@ img{
     height: 100%;
     padding: 2.75rem;
     display: grid;
-    grid-gap: 1.5rem;
+    grid-gap: 2rem;
     grid-auto-rows: max-content;
 }
 .index_aside input[type="text"],
@@ -359,6 +359,9 @@ select{
     display: grid;
     grid-gap: .25rem;
 }
+.cp{
+    cursor: pointer;
+}
 
 /*Login.razor.css*/
 .login_wrapper{
@@ -375,7 +378,7 @@ select{
     height: 100%;
 }
 .login_container{
-    padding: 2rem;
+    padding: 2.75rem;
     display: grid;
     grid-gap: 2rem;
     background-color: #242424;
