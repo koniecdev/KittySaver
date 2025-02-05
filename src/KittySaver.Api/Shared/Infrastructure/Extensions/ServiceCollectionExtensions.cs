@@ -3,6 +3,7 @@ using System.Text;
 using FluentValidation;
 using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
+using KittySaver.Api.Shared.Abstractions.Clients;
 using KittySaver.Api.Shared.Behaviours;
 using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Shared.Infrastructure.Services;
@@ -30,6 +31,11 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IPaginationLinksService, PaginationLinksService>();
         services.AddScoped<ICurrentEnvironmentService, CurrentEnvironmentService>();
         services.AddScoped<IDateTimeService, DefaultDateTimeService>();
+        services.AddHttpClient<IAuthApiHttpClient, AuthApiHttpClient>(httpClient =>
+        {
+            httpClient.BaseAddress = new Uri(configuration.GetValue<string>("Api:ApiBaseUrl")
+                                             ?? throw new Exception("ApiBaseUrl not found in appsettings"));
+        });
         services.AddScoped<IPersonRepository, PersonRepository>();
         services.AddScoped<IPersonUniquenessChecksRepository, PersonUniquenessChecksRepository>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
