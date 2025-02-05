@@ -9,7 +9,7 @@ namespace KittySaver.Api.Features.Persons;
 
 public sealed class DeletePerson : IEndpoint
 {
-    public sealed record DeletePersonCommand(Guid IdOrUserIdentityId) : ICommand, IAuthorizedRequest, IPersonRequest;
+    public sealed record DeletePersonCommand(Guid IdOrUserIdentityId, string AuthHeader) : ICommand, IAuthorizedRequest, IPersonRequest;
 
     public sealed class DeletePersonCommandValidator : AbstractValidator<DeletePersonCommand>
     {
@@ -39,9 +39,11 @@ public sealed class DeletePerson : IEndpoint
         endpointRouteBuilder.MapDelete("persons/{id:guid}", async (
             Guid id,
             ISender sender,
+            HttpContext httpContext,
             CancellationToken cancellationToken) =>
         {
-            DeletePersonCommand command = new(id);
+            string authHeader = httpContext.Request.Headers.Authorization.ToString();
+            DeletePersonCommand command = new(id, authHeader);
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
         }).RequireAuthorization()

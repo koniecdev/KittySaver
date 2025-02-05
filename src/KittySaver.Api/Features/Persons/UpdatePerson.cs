@@ -38,7 +38,8 @@ public sealed class UpdatePerson : IEndpoint
         string? DefaultAdvertisementPickupAddressStreet,
         string? DefaultAdvertisementPickupAddressBuildingNumber,
         string DefaultAdvertisementContactInfoEmail,
-        string DefaultAdvertisementContactInfoPhoneNumber) : ICommand<PersonHateoasResponse>, IAuthorizedRequest, IPersonRequest;
+        string DefaultAdvertisementContactInfoPhoneNumber,
+        string AuthHeader) : ICommand<PersonHateoasResponse>, IAuthorizedRequest, IPersonRequest;
 
     public sealed class UpdatePersonCommandValidator : AbstractValidator<UpdatePersonCommand>, IAsyncValidator
     {
@@ -141,9 +142,11 @@ public sealed class UpdatePerson : IEndpoint
                 Guid id,
                 UpdatePersonRequest request,
                 ISender sender,
+                HttpContext httpContext,
                 CancellationToken cancellationToken) =>
             {
-                UpdatePersonCommand command = request.MapToUpdatePersonCommand(id);
+                string authHeader = httpContext.Request.Headers.Authorization.ToString();
+                UpdatePersonCommand command = request.MapToUpdatePersonCommand(id, authHeader);
                 PersonHateoasResponse response = await sender.Send(command, cancellationToken);
                 return Results.Ok(response);
             }).RequireAuthorization()
@@ -157,5 +160,6 @@ public static partial class UpdatePersonMapper
 {
     public static partial UpdatePerson.UpdatePersonCommand MapToUpdatePersonCommand(
         this UpdatePerson.UpdatePersonRequest request,
-        Guid idOrUserIdentityId);
+        Guid idOrUserIdentityId,
+        string authHeader);
 }
