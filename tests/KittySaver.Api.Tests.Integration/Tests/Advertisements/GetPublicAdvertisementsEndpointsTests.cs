@@ -34,7 +34,7 @@ public class GetPublicAdvertisementsEndpointsTests : IAsyncLifetime
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
-                    UserIdentityId: Guid.NewGuid(),
+                    Password: "Default123$",
                     DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
                     DefaultAdvertisementPickupAddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
@@ -174,7 +174,8 @@ public class GetPublicAdvertisementsEndpointsTests : IAsyncLifetime
         firstPersonAdvertisement.PriorityScore.Should().BeGreaterThan(0);
         firstPersonAdvertisement.Links.Select(x => x.Rel).Should().BeEquivalentTo(
             EndpointNames.SelfRel,
-            EndpointNames.GetAdvertisementThumbnail.Rel
+            EndpointNames.GetAdvertisementThumbnail.Rel,
+            EndpointNames.GetAdvertisementCats.Rel
         );
         firstPersonAdvertisement.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();        
 
@@ -192,7 +193,8 @@ public class GetPublicAdvertisementsEndpointsTests : IAsyncLifetime
         secondPersonAdvertisement.PriorityScore.Should().BeGreaterThan(0);
         secondPersonAdvertisement.Links.Select(x => x.Rel).Should().BeEquivalentTo(
             EndpointNames.SelfRel,
-            EndpointNames.GetAdvertisementThumbnail.Rel
+            EndpointNames.GetAdvertisementThumbnail.Rel,
+            EndpointNames.GetAdvertisementCats.Rel
         );
         secondPersonAdvertisement.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
     }

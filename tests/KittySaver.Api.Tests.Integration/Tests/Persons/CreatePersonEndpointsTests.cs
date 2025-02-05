@@ -36,7 +36,7 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
-                    UserIdentityId: Guid.NewGuid(),
+                    Password: "Default123$",
                     DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
                     DefaultAdvertisementPickupAddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
@@ -91,7 +91,7 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
-                    UserIdentityId: Guid.NewGuid(),
+                    Password: "Default123$",
                     DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
                     DefaultAdvertisementPickupAddressState: state,
                     DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
@@ -134,7 +134,7 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
                     Nickname: faker.Person.FirstName.ClampLength(Nickname.MaxLength + 1),
                     Email: faker.Person.Email.ClampLength(Email.MaxLength + 1),
                     PhoneNumber: faker.Person.Phone.ClampLength(PhoneNumber.MaxLength + 1),
-                    UserIdentityId: Guid.NewGuid(),
+                    Password: "Default123$",
                     DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode()
                         .ClampLength(Address.CountryMaxLength + 1),
                     DefaultAdvertisementPickupAddressState: faker.Address.ZipCode()
@@ -247,7 +247,7 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
             Nickname: "",
             Email: "",
             PhoneNumber: "",
-            UserIdentityId: Guid.Empty,
+            Password: "",
             DefaultAdvertisementPickupAddressCountry: "",
             DefaultAdvertisementPickupAddressState: "",
             DefaultAdvertisementPickupAddressZipCode: "",
@@ -274,7 +274,7 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
             nameof(CreatePerson.CreatePersonRequest.PhoneNumber),
             nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoEmail),
             nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoPhoneNumber),
-            nameof(CreatePerson.CreatePersonRequest.UserIdentityId),
+            nameof(CreatePerson.CreatePersonRequest.Password),
             nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressCountry),
             nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressZipCode),
             nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressCity)
@@ -303,9 +303,9 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
             .Should()
             .Be("'Default Advertisement Contact Info Phone Number' must not be empty.");
 
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.UserIdentityId)][0]
+        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.Password)][0]
             .Should()
-            .Be("'User Identity Id' must not be empty.");
+            .Be("'Password' must not be empty.");
 
         validationProblemDetails.Errors[
                 nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressCountry)][0]
@@ -334,7 +334,7 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
                     Nickname: faker.Person.FirstName,
                     Email: email,
                     PhoneNumber: faker.Person.Phone,
-                    UserIdentityId: Guid.NewGuid(),
+                    Password: "Default123$",
                     DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
                     DefaultAdvertisementPickupAddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
@@ -379,13 +379,12 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
             await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         validationProblemDetails.Should().NotBeNull();
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
-        validationProblemDetails.Errors.Count.Should().Be(3);
+        validationProblemDetails.Errors.Count.Should().Be(2);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(
             nameof(CreatePerson.CreatePersonRequest.Email),
-            nameof(CreatePerson.CreatePersonRequest.PhoneNumber),
-            nameof(CreatePerson.CreatePersonRequest.UserIdentityId)
+            nameof(CreatePerson.CreatePersonRequest.PhoneNumber)
         );
-        validationProblemDetails.Errors.Values.Count.Should().Be(3);
+        validationProblemDetails.Errors.Values.Count.Should().Be(2);
 
         validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.Email)][0]
             .Should()
@@ -395,9 +394,6 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
             .Should()
             .Be("'Phone Number' is already used by another user.");
 
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.UserIdentityId)][0]
-            .Should()
-            .Be("'User Identity Id' is already used by another user.");
     }
 
     public Task InitializeAsync()

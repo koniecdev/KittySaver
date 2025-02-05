@@ -1,7 +1,9 @@
-﻿using KittySaver.Api.Shared.Infrastructure.Services;
+﻿using KittySaver.Api.Shared.Abstractions.Clients;
+using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Infrastructure.Services.FileServices;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Api.Tests.Integration.Helpers;
+using KittySaver.Auth.Api.Shared.Infrastructure.Clients;
 using KittySaver.Auth.Api.Shared.Infrastructure.Services;
 using KittySaver.Domain.Persons;
 using Microsoft.AspNetCore.Authentication;
@@ -118,6 +120,19 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
             {
                 options.UseSqlServer(_msSqlContainer.GetConnectionString());
             });
+            
+            ServiceDescriptor? clientDescriptor = services.SingleOrDefault(
+                d => d.ServiceType == typeof(IAuthApiHttpClient) &&
+                     d.ImplementationType == typeof(IAuthApiHttpClient));
+
+            if (clientDescriptor is not null)
+            {
+                services.Remove(clientDescriptor);
+            }
+            
+            IAuthApiHttpClient mockKittySaverApiClient = Substitute.For<IAuthApiHttpClient>();
+            mockKittySaverApiClient.RegisterAsync(Arg.Any<IAuthApiHttpClient.RegisterDto>()).Returns(Guid.NewGuid());
+            services.AddSingleton(mockKittySaverApiClient);
             
             ServiceDescriptor? descriptorOfReadDbContext = services
                 .SingleOrDefault(m => m.ServiceType == typeof(DbContextOptions<ApplicationReadDbContext>));
