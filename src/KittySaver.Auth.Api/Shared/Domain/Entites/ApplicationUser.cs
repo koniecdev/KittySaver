@@ -12,14 +12,6 @@ public sealed class ApplicationUser : IdentityUser<Guid>
     private string? _userName;
     private string? _email;
     private string? _phoneNumber;
-    private string _defaultAdvertisementPickupAddressCountry;
-    private string? _defaultAdvertisementPickupAddressState;
-    private string _defaultAdvertisementPickupAddressZipCode;
-    private string _defaultAdvertisementPickupAddressCity;
-    private string _defaultAdvertisementPickupAddressStreet;
-    private string _defaultAdvertisementPickupAddressBuildingNumber;
-    private string _defaultAdvertisementContactInfoEmail;
-    private string _defaultAdvertisementContactInfoPhoneNumber;
 
     public override required string? UserName
     {
@@ -53,87 +45,6 @@ public sealed class ApplicationUser : IdentityUser<Guid>
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(PhoneNumber));
             _phoneNumber = value;
-        }
-    }
-
-    public required string DefaultAdvertisementPickupAddressCountry
-    {
-        get => _defaultAdvertisementPickupAddressCountry;
-        set
-        {
-            ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(DefaultAdvertisementPickupAddressCountry));
-            _defaultAdvertisementPickupAddressCountry = value;   
-        }
-    }
-
-    public required string? DefaultAdvertisementPickupAddressState
-    {
-        get => _defaultAdvertisementPickupAddressState;
-        set
-        {
-            ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(DefaultAdvertisementPickupAddressState));
-
-            _defaultAdvertisementPickupAddressState = value;   
-        }
-    }
-
-    public required string DefaultAdvertisementPickupAddressZipCode
-    {
-        get => _defaultAdvertisementPickupAddressZipCode;
-        set
-        {
-            ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(DefaultAdvertisementPickupAddressZipCode));
-            _defaultAdvertisementPickupAddressZipCode = value;
-        }
-    }
-
-    public required string DefaultAdvertisementPickupAddressCity
-    {
-        get => _defaultAdvertisementPickupAddressCity;
-        set
-        {
-            ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(DefaultAdvertisementPickupAddressCity));
-            _defaultAdvertisementPickupAddressCity = value;
-        }
-    }
-
-    public required string DefaultAdvertisementPickupAddressStreet
-    {
-        get => _defaultAdvertisementPickupAddressStreet;
-        set
-        {
-            ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(DefaultAdvertisementPickupAddressStreet));
-            _defaultAdvertisementPickupAddressStreet = value;
-        }
-    }
-
-    public required string DefaultAdvertisementPickupAddressBuildingNumber
-    {
-        get => _defaultAdvertisementPickupAddressBuildingNumber;
-        set
-        {
-            ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(DefaultAdvertisementPickupAddressBuildingNumber));
-            _defaultAdvertisementPickupAddressBuildingNumber = value;
-        }
-    }
-
-    public required string DefaultAdvertisementContactInfoEmail
-    {
-        get => _defaultAdvertisementContactInfoEmail;
-        set
-        {
-            ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(DefaultAdvertisementContactInfoEmail));
-            _defaultAdvertisementContactInfoEmail = value;
-        }
-    }
-
-    public required string DefaultAdvertisementContactInfoPhoneNumber
-    {
-        get => _defaultAdvertisementContactInfoPhoneNumber;
-        set
-        {
-            ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(DefaultAdvertisementContactInfoPhoneNumber));
-            _defaultAdvertisementContactInfoPhoneNumber = value;
         }
     }
 
@@ -179,46 +90,6 @@ internal class ApplicationUserConfiguration : IEntityTypeConfiguration<Applicati
         builder
             .Property(m => m.PhoneNumber)
             .HasMaxLength(31)
-            .IsRequired();
-
-        builder
-            .Property(m => m.DefaultAdvertisementPickupAddressCountry)
-            .HasMaxLength(100)
-            .IsRequired();
-    
-        builder
-            .Property(m => m.DefaultAdvertisementPickupAddressState)
-            .HasMaxLength(100)
-            .IsRequired();
-    
-        builder
-            .Property(m => m.DefaultAdvertisementPickupAddressZipCode)
-            .HasMaxLength(20)
-            .IsRequired();
-    
-        builder
-            .Property(m => m.DefaultAdvertisementPickupAddressCity)
-            .HasMaxLength(100)
-            .IsRequired();
-    
-        builder
-            .Property(m => m.DefaultAdvertisementPickupAddressStreet)
-            .HasMaxLength(200)
-            .IsRequired();
-    
-        builder
-            .Property(m => m.DefaultAdvertisementPickupAddressBuildingNumber)
-            .HasMaxLength(20)
-            .IsRequired();
-    
-        builder
-            .Property(m => m.DefaultAdvertisementContactInfoEmail)
-            .HasMaxLength(254)  // Same as the main Email field
-            .IsRequired();
-    
-        builder
-            .Property(m => m.DefaultAdvertisementContactInfoPhoneNumber)
-            .HasMaxLength(31)   // Same as the main PhoneNumber field
             .IsRequired();
         
         builder
