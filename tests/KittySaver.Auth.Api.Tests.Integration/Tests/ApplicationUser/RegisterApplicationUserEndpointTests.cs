@@ -21,15 +21,7 @@ public class RegisterApplicationUserEndpointTests(KittySaverAuthApiFactory appFa
                     UserName: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
-                    Password: "Default1234%",
-                    DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
-                    DefaultAdvertisementPickupAddressState: faker.Address.State(),
-                    DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
-                    DefaultAdvertisementPickupAddressCity: faker.Address.City(),
-                    DefaultAdvertisementPickupAddressStreet: faker.Address.StreetName(),
-                    DefaultAdvertisementPickupAddressBuildingNumber: faker.Address.BuildingNumber(),
-                    DefaultAdvertisementContactInfoEmail: faker.Person.Email,
-                    DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
+                    Password: "Default1234%"
                 ));
 
     [Fact]
@@ -60,15 +52,7 @@ public class RegisterApplicationUserEndpointTests(KittySaverAuthApiFactory appFa
                     UserName: faker.Person.FirstName,
                     Email: email,
                     PhoneNumber: faker.Person.Phone,
-                    Password: "Default1234%",
-                    DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
-                    DefaultAdvertisementPickupAddressState: faker.Address.State(),
-                    DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
-                    DefaultAdvertisementPickupAddressCity: faker.Address.City(),
-                    DefaultAdvertisementPickupAddressStreet: faker.Address.StreetName(),
-                    DefaultAdvertisementPickupAddressBuildingNumber: faker.Address.BuildingNumber(),
-                    DefaultAdvertisementContactInfoEmail: faker.Person.Email,
-                    DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
+                    Password: "Default1234%"
                 ));
         
         //Act
@@ -90,15 +74,7 @@ public class RegisterApplicationUserEndpointTests(KittySaverAuthApiFactory appFa
             UserName: "",
             Email: "",
             PhoneNumber: "",
-            Password: "",
-            DefaultAdvertisementPickupAddressCountry: "",
-            DefaultAdvertisementPickupAddressState: "",
-            DefaultAdvertisementPickupAddressZipCode: "",
-            DefaultAdvertisementPickupAddressCity: "",
-            DefaultAdvertisementPickupAddressStreet: "",
-            DefaultAdvertisementPickupAddressBuildingNumber: "",
-            DefaultAdvertisementContactInfoEmail: "",
-            DefaultAdvertisementContactInfoPhoneNumber: ""
+            Password: ""
         );
         
         //Act
@@ -131,15 +107,7 @@ public class RegisterApplicationUserEndpointTests(KittySaverAuthApiFactory appFa
                     UserName: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
-                    Password: password,
-                    DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
-                    DefaultAdvertisementPickupAddressState: faker.Address.State(),
-                    DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
-                    DefaultAdvertisementPickupAddressCity: faker.Address.City(),
-                    DefaultAdvertisementPickupAddressStreet: faker.Address.StreetName(),
-                    DefaultAdvertisementPickupAddressBuildingNumber: faker.Address.BuildingNumber(),
-                    DefaultAdvertisementContactInfoEmail: faker.Person.Email,
-                    DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
+                    Password: password
                 ));
         
         //Act

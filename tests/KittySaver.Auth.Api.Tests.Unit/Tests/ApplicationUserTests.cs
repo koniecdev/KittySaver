@@ -21,15 +21,7 @@ public class ApplicationUserTests
                     {
                         UserName = faker.Person.UserName,
                         Email = emptyEmail,
-                        PhoneNumber = faker.Person.Phone,
-                        DefaultAdvertisementPickupAddressCountry = faker.Address.CountryCode(),
-                        DefaultAdvertisementPickupAddressState = faker.Address.State(),
-                        DefaultAdvertisementPickupAddressZipCode = faker.Address.ZipCode(),
-                        DefaultAdvertisementPickupAddressCity = faker.Address.City(),
-                        DefaultAdvertisementPickupAddressStreet = faker.Address.StreetName(),
-                        DefaultAdvertisementPickupAddressBuildingNumber = faker.Address.BuildingNumber(),
-                        DefaultAdvertisementContactInfoEmail = faker.Person.Email,
-                        DefaultAdvertisementContactInfoPhoneNumber = faker.Person.Phone
+                        PhoneNumber = faker.Person.Phone
                     }).Generate();
         };
         
@@ -44,21 +36,13 @@ public class ApplicationUserTests
         //Act
         Action creation = () =>
         {
-            ApplicationUser sut = new Faker<ApplicationUser>()
+            _ = new Faker<ApplicationUser>()
                 .CustomInstantiator( faker =>
                     new ApplicationUser
                     {
                         UserName = faker.Person.UserName,
                         Email = invalidEmail,
-                        PhoneNumber = faker.Person.Phone,
-                        DefaultAdvertisementPickupAddressCountry = faker.Address.CountryCode(),
-                        DefaultAdvertisementPickupAddressState = faker.Address.State(),
-                        DefaultAdvertisementPickupAddressZipCode = faker.Address.ZipCode(),
-                        DefaultAdvertisementPickupAddressCity = faker.Address.City(),
-                        DefaultAdvertisementPickupAddressStreet = faker.Address.StreetName(),
-                        DefaultAdvertisementPickupAddressBuildingNumber = faker.Address.BuildingNumber(),
-                        DefaultAdvertisementContactInfoEmail = faker.Person.Email,
-                        DefaultAdvertisementContactInfoPhoneNumber = faker.Person.Phone
+                        PhoneNumber = faker.Person.Phone
                     }).Generate();
         };
         
@@ -80,15 +64,7 @@ public class ApplicationUserTests
                     {
                         UserName = faker.Person.UserName,
                         Email = emptyPhoneNumber,
-                        PhoneNumber = faker.Person.Phone,
-                        DefaultAdvertisementPickupAddressCountry = faker.Address.CountryCode(),
-                        DefaultAdvertisementPickupAddressState = faker.Address.State(),
-                        DefaultAdvertisementPickupAddressZipCode = faker.Address.ZipCode(),
-                        DefaultAdvertisementPickupAddressCity = faker.Address.City(),
-                        DefaultAdvertisementPickupAddressStreet = faker.Address.StreetName(),
-                        DefaultAdvertisementPickupAddressBuildingNumber = faker.Address.BuildingNumber(),
-                        DefaultAdvertisementContactInfoEmail = faker.Person.Email,
-                        DefaultAdvertisementContactInfoPhoneNumber = faker.Person.Phone
+                        PhoneNumber = faker.Person.Phone
                     }).Generate();
         };
         

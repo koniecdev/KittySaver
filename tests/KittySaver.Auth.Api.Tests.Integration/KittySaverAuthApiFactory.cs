@@ -1,5 +1,4 @@
-﻿using KittySaver.Auth.Api.Shared.Infrastructure.Clients;
-using KittySaver.Auth.Api.Shared.Infrastructure.Services;
+﻿using KittySaver.Auth.Api.Shared.Infrastructure.Services;
 using KittySaver.Auth.Api.Shared.Persistence;
 using KittySaver.Auth.Api.Shared.Security;
 using Microsoft.AspNetCore.Authentication;
@@ -87,18 +86,6 @@ public class KittySaverAuthApiFactory : WebApplicationFactory<IApiMarker>, IAsyn
             {
                 options.UseSqlServer(_msSqlContainer.GetConnectionString());
             });
-            
-            ServiceDescriptor? clientDescriptor = services.SingleOrDefault(
-                d => d.ServiceType == typeof(IKittySaverApiClient) &&
-                     d.ImplementationType == typeof(KittySaverApiClient));
-
-            if (clientDescriptor is not null)
-            {
-                services.Remove(clientDescriptor);
-            }
-            
-            IKittySaverApiClient mockKittySaverApiClient = Substitute.For<IKittySaverApiClient>();
-            services.AddSingleton(mockKittySaverApiClient);
         });
     }
 
