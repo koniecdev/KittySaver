@@ -50,15 +50,7 @@ public class AdminConfiguration : IEntityTypeConfiguration<ApplicationUser>
             PhoneNumberConfirmed = true,
             SecurityStamp = FixedIdsHelper.AdminStamp.ToString(),
             ConcurrencyStamp = "f581a969-a6e1-44c7-bc00-630b94556ab9",
-            PasswordHash = "AQAAAAIAAYagAAAAELDnCnSS1y6NXPsgFQyW6+5hDyDz/sX9Kfj4phlvmD9W+xoZOgBCzSIENV2vAnJDNA==",
-            DefaultAdvertisementPickupAddressCountry = "DefaultCountry",
-            DefaultAdvertisementPickupAddressState = "DefaultState",
-            DefaultAdvertisementPickupAddressZipCode = "00000",
-            DefaultAdvertisementPickupAddressCity = "DefaultCity",
-            DefaultAdvertisementPickupAddressStreet = "DefaultStreet",
-            DefaultAdvertisementPickupAddressBuildingNumber = "1",
-            DefaultAdvertisementContactInfoEmail = "defaultadmin@koniec.dev",
-            DefaultAdvertisementContactInfoPhoneNumber = "XXXXXXXXX"
+            PasswordHash = "AQAAAAIAAYagAAAAELDnCnSS1y6NXPsgFQyW6+5hDyDz/sX9Kfj4phlvmD9W+xoZOgBCzSIENV2vAnJDNA=="
         };
 
         builder.HasData(admin);
