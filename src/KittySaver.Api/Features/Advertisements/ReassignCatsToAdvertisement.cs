@@ -5,13 +5,13 @@ using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
+using KittySaver.Shared.Requests;
 using MediatR;
 
 namespace KittySaver.Api.Features.Advertisements;
 
 public sealed class ReassignCatsToAdvertisement : IEndpoint
 {
-    public sealed record ReassignCatsToAdvertisementRequest(IEnumerable<Guid> CatIds);
     public sealed record ReassignCatsToAdvertisementCommand(
         Guid PersonId,
         Guid Id,

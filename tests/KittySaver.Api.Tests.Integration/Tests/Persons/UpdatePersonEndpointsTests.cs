@@ -29,10 +29,10 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         _cleanup = new CleanupHelper(_httpClient);
     }
 
-    private readonly CreatePerson.CreatePersonRequest _createPersonRequest =
-        new Faker<CreatePerson.CreatePersonRequest>()
+    private readonly CreatePersonRequest _createPersonRequest =
+        new Faker<CreatePersonRequest>()
             .CustomInstantiator(faker =>
-                new CreatePerson.CreatePersonRequest(
+                new CreatePersonRequest(
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
@@ -60,9 +60,9 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
             ?? throw new JsonException();
         
         //Act
-        UpdatePerson.UpdatePersonRequest request = new Faker<UpdatePerson.UpdatePersonRequest>()
+        UpdatePersonRequest request = new Faker<UpdatePersonRequest>()
             .CustomInstantiator(faker =>
-                new UpdatePerson.UpdatePersonRequest(
+                new UpdatePersonRequest(
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
@@ -115,9 +115,9 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
             await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{registeredPersonResponse.Id}")
             ?? throw new JsonException();
         //Act
-        UpdatePerson.UpdatePersonRequest request = new Faker<UpdatePerson.UpdatePersonRequest>()
+        UpdatePersonRequest request = new Faker<UpdatePersonRequest>()
             .CustomInstantiator(faker =>
-                new UpdatePerson.UpdatePersonRequest(
+                new UpdatePersonRequest(
                     Nickname: person.Nickname,
                     Email: person.Email,
                     PhoneNumber: person.PhoneNumber,
@@ -166,9 +166,9 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         Guid randomId = Guid.NewGuid();
 
         //Act
-        UpdatePerson.UpdatePersonRequest request = new Faker<UpdatePerson.UpdatePersonRequest>()
+        UpdatePersonRequest request = new Faker<UpdatePersonRequest>()
             .CustomInstantiator(faker =>
-                new UpdatePerson.UpdatePersonRequest(
+                new UpdatePersonRequest(
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
@@ -201,7 +201,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
             ?? throw new JsonException();
 
         //Act
-        UpdatePerson.UpdatePersonRequest request = new(
+        UpdatePersonRequest request = new(
             Nickname: "",
             Email: "",
             PhoneNumber: "",
@@ -225,51 +225,51 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
         validationProblemDetails.Errors.Count.Should().Be(8);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(
-            nameof(UpdatePerson.UpdatePersonRequest.Nickname),
-            nameof(UpdatePerson.UpdatePersonRequest.Email),
-            nameof(UpdatePerson.UpdatePersonRequest.PhoneNumber),
-            nameof(UpdatePerson.UpdatePersonRequest.DefaultAdvertisementContactInfoEmail),
-            nameof(UpdatePerson.UpdatePersonRequest.DefaultAdvertisementContactInfoPhoneNumber),
-            nameof(UpdatePerson.UpdatePersonRequest.DefaultAdvertisementPickupAddressCountry),
-            nameof(UpdatePerson.UpdatePersonRequest.DefaultAdvertisementPickupAddressZipCode),
-            nameof(UpdatePerson.UpdatePersonRequest.DefaultAdvertisementPickupAddressCity)
+            nameof(UpdatePersonRequest.Nickname),
+            nameof(UpdatePersonRequest.Email),
+            nameof(UpdatePersonRequest.PhoneNumber),
+            nameof(UpdatePersonRequest.DefaultAdvertisementContactInfoEmail),
+            nameof(UpdatePersonRequest.DefaultAdvertisementContactInfoPhoneNumber),
+            nameof(UpdatePersonRequest.DefaultAdvertisementPickupAddressCountry),
+            nameof(UpdatePersonRequest.DefaultAdvertisementPickupAddressZipCode),
+            nameof(UpdatePersonRequest.DefaultAdvertisementPickupAddressCity)
         );
 
         validationProblemDetails.Errors.Values.Count.Should().Be(8);
 
-        validationProblemDetails.Errors[nameof(UpdatePerson.UpdatePersonRequest.Nickname)][0]
+        validationProblemDetails.Errors[nameof(UpdatePersonRequest.Nickname)][0]
             .Should()
             .Be("'Nickname' must not be empty.");
 
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.Email)][0]
+        validationProblemDetails.Errors[nameof(CreatePersonRequest.Email)][0]
             .Should()
             .Be("'Email' must not be empty.");
 
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.PhoneNumber)][0]
+        validationProblemDetails.Errors[nameof(CreatePersonRequest.PhoneNumber)][0]
             .Should()
             .Be("'Phone Number' must not be empty.");
 
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoEmail)]
+        validationProblemDetails.Errors[nameof(CreatePersonRequest.DefaultAdvertisementContactInfoEmail)]
             [0]
             .Should()
             .Be("'Default Advertisement Contact Info Email' must not be empty.");
 
         validationProblemDetails.Errors[
-                nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoPhoneNumber)][0]
+                nameof(CreatePersonRequest.DefaultAdvertisementContactInfoPhoneNumber)][0]
             .Should()
             .Be("'Default Advertisement Contact Info Phone Number' must not be empty.");
         
         validationProblemDetails.Errors[
-                nameof(UpdatePerson.UpdatePersonRequest.DefaultAdvertisementPickupAddressCountry)][0]
+                nameof(UpdatePersonRequest.DefaultAdvertisementPickupAddressCountry)][0]
             .Should()
             .Be("'Default Advertisement Pickup Address Country' must not be empty.");
 
         validationProblemDetails.Errors[
-                nameof(UpdatePerson.UpdatePersonRequest.DefaultAdvertisementPickupAddressZipCode)][0]
+                nameof(UpdatePersonRequest.DefaultAdvertisementPickupAddressZipCode)][0]
             .Should()
             .Be("'Default Advertisement Pickup Address Zip Code' must not be empty.");
 
-        validationProblemDetails.Errors[nameof(UpdatePerson.UpdatePersonRequest.DefaultAdvertisementPickupAddressCity)]
+        validationProblemDetails.Errors[nameof(UpdatePersonRequest.DefaultAdvertisementPickupAddressCity)]
             [0]
             .Should()
             .Be("'Default Advertisement Pickup Address City' must not be empty.");
@@ -285,9 +285,9 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
             await registerResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
 
-        UpdatePerson.UpdatePersonRequest request = new Faker<UpdatePerson.UpdatePersonRequest>()
+        UpdatePersonRequest request = new Faker<UpdatePersonRequest>()
             .CustomInstantiator(faker =>
-                new UpdatePerson.UpdatePersonRequest(
+                new UpdatePersonRequest(
                     Nickname: faker.Person.FirstName.ClampLength(Nickname.MaxLength + 1),
                     Email: faker.Person.Email.ClampLength(Email.MaxLength + 1),
                     PhoneNumber: faker.Person.Phone.ClampLength(PhoneNumber.MaxLength + 1),
@@ -320,77 +320,77 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
         validationProblemDetails.Errors.Count.Should().Be(11);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(
-            nameof(CreatePerson.CreatePersonRequest.Nickname),
-            nameof(CreatePerson.CreatePersonRequest.Email),
-            nameof(CreatePerson.CreatePersonRequest.PhoneNumber),
-            nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressCountry),
-            nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressState),
-            nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressZipCode),
-            nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressCity),
-            nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressStreet),
-            nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressBuildingNumber),
-            nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoEmail),
-            nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoPhoneNumber)
+            nameof(CreatePersonRequest.Nickname),
+            nameof(CreatePersonRequest.Email),
+            nameof(CreatePersonRequest.PhoneNumber),
+            nameof(CreatePersonRequest.DefaultAdvertisementPickupAddressCountry),
+            nameof(CreatePersonRequest.DefaultAdvertisementPickupAddressState),
+            nameof(CreatePersonRequest.DefaultAdvertisementPickupAddressZipCode),
+            nameof(CreatePersonRequest.DefaultAdvertisementPickupAddressCity),
+            nameof(CreatePersonRequest.DefaultAdvertisementPickupAddressStreet),
+            nameof(CreatePersonRequest.DefaultAdvertisementPickupAddressBuildingNumber),
+            nameof(CreatePersonRequest.DefaultAdvertisementContactInfoEmail),
+            nameof(CreatePersonRequest.DefaultAdvertisementContactInfoPhoneNumber)
         );
         validationProblemDetails.Errors.Values.Count.Should().Be(11);
 
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.Nickname)][0]
+        validationProblemDetails.Errors[nameof(CreatePersonRequest.Nickname)][0]
             .Should()
             .StartWith($"The length of 'Nickname' must be {Nickname.MaxLength} characters or fewer. You entered");
 
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.PhoneNumber)][0]
+        validationProblemDetails.Errors[nameof(CreatePersonRequest.PhoneNumber)][0]
             .Should()
             .StartWith(
                 $"The length of 'Phone Number' must be {PhoneNumber.MaxLength} characters or fewer. You entered");
 
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.Email)][0]
+        validationProblemDetails.Errors[nameof(CreatePersonRequest.Email)][0]
             .Should()
             .StartWith($"The length of 'Email' must be {Email.MaxLength} characters or fewer. You entered");
 
         validationProblemDetails.Errors[
-                nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoPhoneNumber)][0]
+                nameof(CreatePersonRequest.DefaultAdvertisementContactInfoPhoneNumber)][0]
             .Should()
             .StartWith(
                 $"The length of 'Default Advertisement Contact Info Phone Number' must be {PhoneNumber.MaxLength} characters or fewer. You entered");
 
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementContactInfoEmail)]
+        validationProblemDetails.Errors[nameof(CreatePersonRequest.DefaultAdvertisementContactInfoEmail)]
             [0]
             .Should()
             .StartWith(
                 $"The length of 'Default Advertisement Contact Info Email' must be {Email.MaxLength} characters or fewer. You entered");
         
         validationProblemDetails.Errors[
-                nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressCountry)][0]
+                nameof(CreatePersonRequest.DefaultAdvertisementPickupAddressCountry)][0]
             .Should()
             .StartWith(
                 $"The length of 'Default Advertisement Pickup Address Country' must be {Address.CountryMaxLength} characters or fewer. You entered");
 
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressState)]
+        validationProblemDetails.Errors[nameof(CreatePersonRequest.DefaultAdvertisementPickupAddressState)]
             [0]
             .Should()
             .StartWith(
                 $"The length of 'Default Advertisement Pickup Address State' must be {Address.StateMaxLength} characters or fewer. You entered");
 
         validationProblemDetails.Errors[
-                nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressZipCode)][0]
+                nameof(CreatePersonRequest.DefaultAdvertisementPickupAddressZipCode)][0]
             .Should()
             .StartWith(
                 $"The length of 'Default Advertisement Pickup Address Zip Code' must be {Address.ZipCodeMaxLength} characters or fewer. You entered");
 
-        validationProblemDetails.Errors[nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressCity)]
+        validationProblemDetails.Errors[nameof(CreatePersonRequest.DefaultAdvertisementPickupAddressCity)]
             [0]
             .Should()
             .StartWith(
                 $"The length of 'Default Advertisement Pickup Address City' must be {Address.CityMaxLength} characters or fewer. You entered");
 
         validationProblemDetails.Errors[
-                nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressStreet)][0]
+                nameof(CreatePersonRequest.DefaultAdvertisementPickupAddressStreet)][0]
             .Should()
             .StartWith(
                 $"The length of 'Default Advertisement Pickup Address Street' must be {Address.StreetMaxLength} characters or fewer. You entered");
 
         validationProblemDetails.Errors[
-                nameof(CreatePerson.CreatePersonRequest.DefaultAdvertisementPickupAddressBuildingNumber)][0]
+                nameof(CreatePersonRequest.DefaultAdvertisementPickupAddressBuildingNumber)][0]
             .Should()
             .StartWith(
                 $"The length of 'Default Advertisement Pickup Address Building Number' must be {Address.BuildingNumberMaxLength} characters or fewer. You entered");
@@ -410,7 +410,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
             await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{idOfCreatedPersonResponse.Id}")
             ?? throw new JsonException();
 
-        UpdatePerson.UpdatePersonRequest request = new(
+        UpdatePersonRequest request = new(
             Nickname: person.Nickname,
             Email: email,
             PhoneNumber: person.PhoneNumber,
@@ -435,10 +435,10 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
         validationProblemDetails.Errors.Count.Should().Be(1);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo([
-            nameof(UpdatePerson.UpdatePersonRequest.Email)
+            nameof(UpdatePersonRequest.Email)
         ]);
         validationProblemDetails.Errors.Values.Count.Should().Be(1);
-        validationProblemDetails.Errors[nameof(UpdatePerson.UpdatePersonRequest.Email)][0]
+        validationProblemDetails.Errors[nameof(UpdatePersonRequest.Email)][0]
             .Should().Be("'Email' is not in the correct format.");
     }
 
@@ -451,7 +451,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
             await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
 
-        CreatePerson.CreatePersonRequest secondPersonCreateRequest = _createPersonRequest with
+        CreatePersonRequest secondPersonCreateRequest = _createPersonRequest with
         {
             Email = "unique@email.com",
             PhoneNumber = "420420420"
@@ -464,7 +464,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
             ?? throw new JsonException();
 
         //Act
-        UpdatePerson.UpdatePersonRequest firstUserUpdateRequest = new(
+        UpdatePersonRequest firstUserUpdateRequest = new(
             Nickname: firstUser.Nickname,
             Email: secondPersonCreateRequest.Email,
             PhoneNumber: secondPersonCreateRequest.PhoneNumber,
@@ -490,13 +490,13 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
         validationProblemDetails.Errors.Count.Should().Be(2);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo([
-            nameof(UpdatePerson.UpdatePersonRequest.Email),
-            nameof(UpdatePerson.UpdatePersonRequest.PhoneNumber)
+            nameof(UpdatePersonRequest.Email),
+            nameof(UpdatePersonRequest.PhoneNumber)
         ]);
         validationProblemDetails.Errors.Values.Count.Should().Be(2);
-        validationProblemDetails.Errors[nameof(UpdatePerson.UpdatePersonRequest.Email)][0]
+        validationProblemDetails.Errors[nameof(UpdatePersonRequest.Email)][0]
             .Should().Be("'Email' is already used by another user.");
-        validationProblemDetails.Errors[nameof(UpdatePerson.UpdatePersonRequest.PhoneNumber)][0]
+        validationProblemDetails.Errors[nameof(UpdatePersonRequest.PhoneNumber)][0]
             .Should().Be("'Phone Number' is already used by another user.");
     }
 

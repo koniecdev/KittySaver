@@ -24,10 +24,10 @@ public class GetPersonEndpointsTests : IAsyncLifetime
         _cleanup = new CleanupHelper(_httpClient);
     }
 
-    private readonly Faker<CreatePerson.CreatePersonRequest> _createPersonRequestGenerator =
-        new Faker<CreatePerson.CreatePersonRequest>()
+    private readonly Faker<CreatePersonRequest> _createPersonRequestGenerator =
+        new Faker<CreatePersonRequest>()
             .CustomInstantiator(faker =>
-                new CreatePerson.CreatePersonRequest(
+                new CreatePersonRequest(
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
@@ -46,7 +46,7 @@ public class GetPersonEndpointsTests : IAsyncLifetime
     public async Task GetPerson_ShouldReturnPerson_WhenPersonExist()
     {
         //Arrange
-        CreatePerson.CreatePersonRequest request = _createPersonRequestGenerator.Generate();
+        CreatePersonRequest request = _createPersonRequestGenerator.Generate();
         HttpResponseMessage registerResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/persons", request);
         ApiResponses.CreatedWithIdResponse registerResponse =
             await registerResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()

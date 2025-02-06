@@ -48,6 +48,7 @@
         <InternalsVisibleTo Include="KittySaver.Api.Tests.Unit" />
     </ItemGroup>
     <ItemGroup>
+      <ProjectReference Include="..\..\KittySaver.Shared\KittySaver.Shared.csproj" />
       <ProjectReference Include="..\KittySaver.Domain\KittySaver.Domain.csproj" />
     </ItemGroup>
     <ItemGroup>

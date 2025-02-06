@@ -6,6 +6,7 @@ using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.Requests;
 using MediatR;
 using Riok.Mapperly.Abstractions;
 
@@ -13,15 +14,6 @@ namespace KittySaver.Api.Features.Cats;
 
 public sealed class UpdateCat : IEndpoint
 {
-    public sealed record UpdateCatRequest(
-        string Name,
-        bool IsCastrated,
-        string MedicalHelpUrgency,
-        string AgeCategory,
-        string Behavior,
-        string HealthStatus,
-        string? AdditionalRequirements = null);
-    
     public sealed record UpdateCatCommand(
         Guid PersonId,
         Guid Id,
@@ -130,7 +122,7 @@ public sealed class UpdateCat : IEndpoint
 public static partial class UpdateCatMapper
 {
     public static partial UpdateCat.UpdateCatCommand MapToUpdateCatCommand(
-        this UpdateCat.UpdateCatRequest request,
+        this UpdateCatRequest request,
         Guid personId,
         Guid id);
 }

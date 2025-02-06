@@ -7,6 +7,7 @@ using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.Requests;
 using MediatR;
 using Riok.Mapperly.Abstractions;
 
@@ -14,19 +15,6 @@ namespace KittySaver.Api.Features.Advertisements;
 
 public class CreateAdvertisement : IEndpoint
 {
-    public sealed record CreateAdvertisementRequest(
-        IEnumerable<Guid> CatsIdsToAssign,
-        string? Description,
-        string PickupAddressCountry,
-        string? PickupAddressState,
-        string PickupAddressZipCode,
-        string PickupAddressCity,
-        string? PickupAddressStreet,
-        string? PickupAddressBuildingNumber,
-        string ContactInfoEmail,
-        string ContactInfoPhoneNumber
-    );
-
     public sealed record CreateAdvertisementCommand(
         Guid PersonId,
         IEnumerable<Guid> CatsIdsToAssign,
@@ -147,6 +135,6 @@ public class CreateAdvertisement : IEndpoint
 public static partial class CreateAdvertisementMapper
 {
     public static partial CreateAdvertisement.CreateAdvertisementCommand MapToCreateAdvertisementCommand(
-        this CreateAdvertisement.CreateAdvertisementRequest request,
+        this CreateAdvertisementRequest request,
         Guid personId);
 }

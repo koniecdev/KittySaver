@@ -1,4 +1,4 @@
-﻿namespace KittySaver.Wasm.Shared.Auth;
+﻿namespace KittySaver.Shared.Responses;
 
 public sealed class LoginResponse
 {

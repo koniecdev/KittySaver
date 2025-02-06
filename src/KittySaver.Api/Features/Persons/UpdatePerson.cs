@@ -6,6 +6,7 @@ using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.Requests;
 using MediatR;
 using Riok.Mapperly.Abstractions;
 
@@ -13,19 +14,6 @@ namespace KittySaver.Api.Features.Persons;
 
 public sealed class UpdatePerson : IEndpoint
 {
-    public sealed record UpdatePersonRequest(
-        string Nickname,
-        string Email,
-        string PhoneNumber,
-        string DefaultAdvertisementPickupAddressCountry,
-        string? DefaultAdvertisementPickupAddressState,
-        string DefaultAdvertisementPickupAddressZipCode,
-        string DefaultAdvertisementPickupAddressCity,
-        string? DefaultAdvertisementPickupAddressStreet,
-        string? DefaultAdvertisementPickupAddressBuildingNumber,
-        string DefaultAdvertisementContactInfoEmail,
-        string DefaultAdvertisementContactInfoPhoneNumber);
-
     public sealed record UpdatePersonCommand(
         Guid IdOrUserIdentityId,
         string Nickname,
@@ -159,7 +147,7 @@ public sealed class UpdatePerson : IEndpoint
 public static partial class UpdatePersonMapper
 {
     public static partial UpdatePerson.UpdatePersonCommand MapToUpdatePersonCommand(
-        this UpdatePerson.UpdatePersonRequest request,
+        this UpdatePersonRequest request,
         Guid idOrUserIdentityId,
         string authHeader);
 }

@@ -26,5 +26,9 @@
     <ItemGroup>
       <Folder Include="wwwroot\js\" />
     </ItemGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\..\KittySaver.Shared\KittySaver.Shared.csproj" />
+    </ItemGroup>
 
 </Project>

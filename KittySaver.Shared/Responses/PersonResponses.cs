@@ -1,0 +1,2 @@
+﻿namespace KittySaver.Shared.Responses;
+

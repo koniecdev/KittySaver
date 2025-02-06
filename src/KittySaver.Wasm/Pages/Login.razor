@@ -1,4 +1,6 @@
 ﻿@page "/login"
+@using KittySaver.Shared.Requests
+@using KittySaver.Shared.Responses
 @using KittySaver.Wasm.Shared.Auth
 @using KittySaver.Wasm.Shared.HttpClients
 @inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
@@ -14,14 +16,14 @@
         <header>
             <h2>Logowanie do konta</h2>
         </header>
-        <EditForm Model="_loginRequest" OnSubmit="HandleLogin" class="login_form">
+        <EditForm Model="_loginDto" OnSubmit="HandleLogin" class="login_form">
             <div class="login_form_tile">
                 <label for="email">Twój adres email:</label>
-                <InputText id="email" type="email" @bind-Value="_loginRequest.Email" />
+                <InputText id="email" type="email" @bind-Value="_loginDto.Email" />
             </div>
             <div class="login_form_tile">
                 <label for="password">Twoje hasło:</label>
-                <InputText id="password" type="password" @bind-Value="_loginRequest.Password" />
+                <InputText id="password" type="password" @bind-Value="_loginDto.Password" />
                 <small class="forgot-password">
                     <a class="tdu" href="/reset-password">Zapomniałeś hasła?</a>
                 </small>
@@ -39,7 +41,6 @@
                 </button>
                 <a href="/register" class="default_btn btn_blue">Nie masz konta? Zarejestruj się</a>
             </div>
-            
         </EditForm>
     </section>
     
@@ -47,14 +48,15 @@
     </aside>
 </div>
 @code{
-    private readonly LoginRequest _loginRequest = new();
+    private readonly LoginDto _loginDto = new();
     private bool _isProcessing;
     
     private async Task HandleLogin()
     {
         _isProcessing = true;
+        LoginRequest loginRequest = new(Email: _loginDto.Email, Password: _loginDto.Password);
         LoginResponse? response = 
-            await ApiClient.PostAsync<LoginRequest, LoginResponse>("https://localhost:44371/api/v1/application-users/login", _loginRequest);
+            await ApiClient.PostAsync<LoginRequest, LoginResponse>("https://localhost:44371/api/v1/application-users/login", loginRequest);
         
         if (response is not null)
         {
@@ -64,5 +66,11 @@
             await AuthStateProvider.GetAuthenticationStateAsync();
             NavigationManager.NavigateTo("/");
         }
+    }
+    
+    private class LoginDto
+    {
+        public string Email { get; set; } = "";
+        public string Password { get; set; } = "";
     }
 }

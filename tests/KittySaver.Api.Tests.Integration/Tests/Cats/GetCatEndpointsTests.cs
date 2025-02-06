@@ -27,10 +27,10 @@ public class GetCatEndpointsTests : IAsyncLifetime
         _cleanup = new CleanupHelper(_httpClient);
     }
 
-    private readonly CreatePerson.CreatePersonRequest _createPersonRequest =
-        new Faker<CreatePerson.CreatePersonRequest>()
+    private readonly CreatePersonRequest _createPersonRequest =
+        new Faker<CreatePersonRequest>()
             .CustomInstantiator(faker =>
-                new CreatePerson.CreatePersonRequest(
+                new CreatePersonRequest(
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
@@ -45,10 +45,10 @@ public class GetCatEndpointsTests : IAsyncLifetime
                     DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 )).Generate();
 
-    private readonly CreateCat.CreateCatRequest _createCatRequest =
-        new Faker<CreateCat.CreateCatRequest>()
+    private readonly CreateCatRequest _createCatRequest =
+        new Faker<CreateCatRequest>()
             .CustomInstantiator(faker =>
-                new CreateCat.CreateCatRequest(
+                new CreateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: true,
                     MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
@@ -116,10 +116,10 @@ public class GetCatEndpointsTests : IAsyncLifetime
         ApiResponses.CreatedWithIdResponse catCreateResponse =
             await catCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        CreateAdvertisement.CreateAdvertisementRequest request =
-            new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
+        CreateAdvertisementRequest request =
+            new Faker<CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
-                    new CreateAdvertisement.CreateAdvertisementRequest(
+                    new CreateAdvertisementRequest(
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.CountryCode(),
@@ -167,10 +167,10 @@ public class GetCatEndpointsTests : IAsyncLifetime
         ApiResponses.CreatedWithIdResponse catCreateResponse =
             await catCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        CreateAdvertisement.CreateAdvertisementRequest request =
-            new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
+        CreateAdvertisementRequest request =
+            new Faker<CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
-                    new CreateAdvertisement.CreateAdvertisementRequest(
+                    new CreateAdvertisementRequest(
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.CountryCode(),
@@ -187,10 +187,10 @@ public class GetCatEndpointsTests : IAsyncLifetime
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
         ApiResponses.CreatedWithIdResponse advertisementResponse =
             await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
-        CreateCat.CreateCatRequest anotherCatCreateRequest =
-            new Faker<CreateCat.CreateCatRequest>()
+        CreateCatRequest anotherCatCreateRequest =
+            new Faker<CreateCatRequest>()
                 .CustomInstantiator(faker =>
-                    new CreateCat.CreateCatRequest(
+                    new CreateCatRequest(
                         Name: faker.Name.FirstName(),
                         IsCastrated: true,
                         MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
@@ -205,7 +205,7 @@ public class GetCatEndpointsTests : IAsyncLifetime
         ApiResponses.CreatedWithIdResponse anotherCatCreateResponse =
             await anotherCatCreateResponseMessage.GetIdResponseFromResponseMessageAsync();
 
-        ReassignCatsToAdvertisement.ReassignCatsToAdvertisementRequest reassignCatsRequest = new([
+        ReassignCatsToAdvertisementRequest reassignCatsRequest = new([
             anotherCatCreateResponse.Id
         ]);
 

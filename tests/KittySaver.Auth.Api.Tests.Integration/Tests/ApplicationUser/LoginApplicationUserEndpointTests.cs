@@ -1,8 +1,9 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-using Bogus;
 using FluentAssertions;
 using KittySaver.Auth.Api.Features.ApplicationUsers;
+using KittySaver.Shared.Requests;
+using KittySaver.Shared.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
@@ -14,19 +15,11 @@ public class LoginApplicationUserEndpointTests(KittySaverAuthApiFactory appFacto
 {
     private readonly HttpClient _httpClient = appFactory.CreateClient();
 
-    private readonly Faker<Login.LoginRequest> _loginRequestGenerator =
-        new Faker<Login.LoginRequest>()
-            .CustomInstantiator( faker =>
-                new Login.LoginRequest(
-                    Email: faker.Person.Email,
-                    Password: "Default1234%"
-                ));
-
     [Fact]
     public async Task Login_ShouldLoginSuccessfully_WhenValidDataProvided()
     {
         //Arrange
-        Login.LoginRequest request = new Login.LoginRequest(
+        LoginRequest request = new LoginRequest(
             Email: KittySaverAuthApiFactory.DefaultAdminEmail,
             Password: "DefaultPassword123!");
         
@@ -35,7 +28,7 @@ public class LoginApplicationUserEndpointTests(KittySaverAuthApiFactory appFacto
         
         //Assert
         responseMessage.StatusCode.Should().Be(HttpStatusCode.OK);
-        Login.LoginResponse? response = await responseMessage.Content.ReadFromJsonAsync<Login.LoginResponse>();
+        LoginResponse? response = await responseMessage.Content.ReadFromJsonAsync<LoginResponse>();
         response?.AccessToken.Should().NotBeEmpty();
         response?.AccessTokenExpiresAt
             .Should().Be(KittySaverAuthApiFactory.FixedDateTime.AddMinutes(KittySaverAuthApiFactory.FixedMinutesJwtExpire));
@@ -45,7 +38,7 @@ public class LoginApplicationUserEndpointTests(KittySaverAuthApiFactory appFacto
     public async Task Login_ShouldReturnUnauthorized_WhenInvalidPasswordProvided()
     {
         //Arrange
-        Login.LoginRequest request = new Login.LoginRequest(
+        LoginRequest request = new LoginRequest(
             Email: KittySaverAuthApiFactory.DefaultAdminEmail,
             Password: "DefaultPassword123!%");
         
@@ -60,7 +53,7 @@ public class LoginApplicationUserEndpointTests(KittySaverAuthApiFactory appFacto
     public async Task Login_ShouldReturnApplicationUserNotFoundException_WhenNotRegisteredMailProvided()
     {
         //Arrange
-        Login.LoginRequest request = new Login.LoginRequest(
+        LoginRequest request = new LoginRequest(
             Email: "default@proper.mail",
             Password: "DefaultPassword123!%");
         
@@ -78,7 +71,7 @@ public class LoginApplicationUserEndpointTests(KittySaverAuthApiFactory appFacto
     public async Task Login_ShouldReturnValidationProblemDetails_WhenEmptyDataIsProvided()
     {
         //Arrange
-        Login.LoginRequest request = new Login.LoginRequest(
+        LoginRequest request = new LoginRequest(
             Email: "",
             Password: "");
         
@@ -98,7 +91,7 @@ public class LoginApplicationUserEndpointTests(KittySaverAuthApiFactory appFacto
     public async Task Login_ShouldReturnValidationProblemDetails_WhenInvalidEmailIsProvided(string email)
     {
         //Arrange
-        Login.LoginRequest request = new Login.LoginRequest(
+        LoginRequest request = new LoginRequest(
             Email: email,
             Password: "Default123!");
         

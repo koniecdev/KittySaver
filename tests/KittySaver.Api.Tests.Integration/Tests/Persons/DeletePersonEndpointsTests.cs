@@ -26,10 +26,10 @@ public class DeletePersonEndpointsTests : IAsyncLifetime
         _cleanup = new CleanupHelper(_httpClient);
     }
 
-    private readonly Faker<CreatePerson.CreatePersonRequest> _createPersonRequestGenerator =
-        new Faker<CreatePerson.CreatePersonRequest>()
+    private readonly Faker<CreatePersonRequest> _createPersonRequestGenerator =
+        new Faker<CreatePersonRequest>()
             .CustomInstantiator(faker =>
-                new CreatePerson.CreatePersonRequest(
+                new CreatePersonRequest(
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
@@ -44,10 +44,10 @@ public class DeletePersonEndpointsTests : IAsyncLifetime
                     DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 ));
 
-    private readonly Faker<CreateCat.CreateCatRequest> _createCatRequestGenerator =
-        new Faker<CreateCat.CreateCatRequest>()
+    private readonly Faker<CreateCatRequest> _createCatRequestGenerator =
+        new Faker<CreateCatRequest>()
             .CustomInstantiator(faker =>
-                new CreateCat.CreateCatRequest(
+                new CreateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: true,
                     MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
@@ -61,7 +61,7 @@ public class DeletePersonEndpointsTests : IAsyncLifetime
     public async Task DeletePerson_ShouldReturnSuccess_WhenValidDataIsProvided()
     {
         //Arrange
-        CreatePerson.CreatePersonRequest createRequest = _createPersonRequestGenerator.Generate();
+        CreatePersonRequest createRequest = _createPersonRequestGenerator.Generate();
         HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/persons", createRequest);
         ApiResponses.CreatedWithIdResponse registeredPersonResponse =
             await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
@@ -87,7 +87,7 @@ public class DeletePersonEndpointsTests : IAsyncLifetime
     public async Task DeletePerson_ShouldReturnSuccess_WhenValidDataIsProvidedWithUserIdentityId()
     {
         //Arrange
-        CreatePerson.CreatePersonRequest createRequest = _createPersonRequestGenerator.Generate();
+        CreatePersonRequest createRequest = _createPersonRequestGenerator.Generate();
         HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/persons", createRequest);
         ApiResponses.CreatedWithIdResponse registeredPersonResponse =
             await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
@@ -115,23 +115,23 @@ public class DeletePersonEndpointsTests : IAsyncLifetime
     public async Task DeletePerson_ShouldReturnSuccess_WhenUserHaveAdvertisement()
     {
         //Arrange
-        CreatePerson.CreatePersonRequest createPersonRequest = _createPersonRequestGenerator.Generate();
+        CreatePersonRequest createPersonRequest = _createPersonRequestGenerator.Generate();
         HttpResponseMessage createPersonResponseMessage =
             await _httpClient.PostAsJsonAsync("api/v1/persons", createPersonRequest);
         ApiResponses.CreatedWithIdResponse createPersonResponse =
             await createPersonResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        CreateCat.CreateCatRequest catCreateRequest = _createCatRequestGenerator.Generate();
+        CreateCatRequest catCreateRequest = _createCatRequestGenerator.Generate();
         HttpResponseMessage catCreateResponseMessage =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{createPersonResponse.Id}/cats", catCreateRequest);
         ApiResponses.CreatedWithIdResponse catCreateResponse =
             await catCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
 
-        CreateAdvertisement.CreateAdvertisementRequest request =
-            new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
+        CreateAdvertisementRequest request =
+            new Faker<CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
-                    new CreateAdvertisement.CreateAdvertisementRequest(
+                    new CreateAdvertisementRequest(
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.CountryCode(),

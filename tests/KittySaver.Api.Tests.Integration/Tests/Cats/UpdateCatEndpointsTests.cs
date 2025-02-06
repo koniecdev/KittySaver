@@ -33,10 +33,10 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
         _cleanup = new CleanupHelper(_httpClient);
     }
 
-    private readonly CreatePerson.CreatePersonRequest _createPersonRequest =
-        new Faker<CreatePerson.CreatePersonRequest>()
+    private readonly CreatePersonRequest _createPersonRequest =
+        new Faker<CreatePersonRequest>()
             .CustomInstantiator(faker =>
-                new CreatePerson.CreatePersonRequest(
+                new CreatePersonRequest(
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
@@ -51,10 +51,10 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                     DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 )).Generate();
 
-    private readonly CreateCat.CreateCatRequest _createCatRequest =
-        new Faker<CreateCat.CreateCatRequest>()
+    private readonly CreateCatRequest _createCatRequest =
+        new Faker<CreateCatRequest>()
             .CustomInstantiator(faker =>
-                new CreateCat.CreateCatRequest(
+                new CreateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: true,
                     MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
@@ -86,9 +86,9 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
             ?? throw new JsonException();
 
         //Act
-        UpdateCat.UpdateCatRequest request = new Faker<UpdateCat.UpdateCatRequest>()
+        UpdateCatRequest request = new Faker<UpdateCatRequest>()
             .CustomInstantiator(faker =>
-                new UpdateCat.UpdateCatRequest(
+                new UpdateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: false,
                     MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
@@ -141,7 +141,7 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
         ApiResponses.CreatedWithIdResponse createCatResponse =
             await catCreateResponseMessage.GetIdResponseFromResponseMessageAsync();
 
-        CreateAdvertisement.CreateAdvertisementRequest createAdvertisementRequest =
+        CreateAdvertisementRequest createAdvertisementRequest =
             new(
                 CatsIdsToAssign: [createCatResponse.Id],
                 Description: _createCatRequest.AdditionalRequirements,
@@ -164,9 +164,9 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
             ?? throw new JsonException();
 
         //Act
-        UpdateCat.UpdateCatRequest request = new Faker<UpdateCat.UpdateCatRequest>()
+        UpdateCatRequest request = new Faker<UpdateCatRequest>()
             .CustomInstantiator(faker =>
-                new UpdateCat.UpdateCatRequest(
+                new UpdateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: false,
                     MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
@@ -231,9 +231,9 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
             ?? throw new JsonException();
 
         //Act
-        UpdateCat.UpdateCatRequest request = new Faker<UpdateCat.UpdateCatRequest>()
+        UpdateCatRequest request = new Faker<UpdateCatRequest>()
             .CustomInstantiator(faker =>
-                new UpdateCat.UpdateCatRequest(
+                new UpdateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: false,
                     MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
@@ -296,9 +296,9 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
             ?? throw new JsonException();
 
         //Act
-        UpdateCat.UpdateCatRequest request = new Faker<UpdateCat.UpdateCatRequest>()
+        UpdateCatRequest request = new Faker<UpdateCatRequest>()
             .CustomInstantiator(faker =>
-                new UpdateCat.UpdateCatRequest(
+                new UpdateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: false,
                     MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
@@ -351,9 +351,9 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
             ?? throw new JsonException();
 
         //Act
-        UpdateCat.UpdateCatRequest request = new Faker<UpdateCat.UpdateCatRequest>()
+        UpdateCatRequest request = new Faker<UpdateCatRequest>()
             .CustomInstantiator(faker =>
-                new UpdateCat.UpdateCatRequest(
+                new UpdateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: false,
                     MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
@@ -392,9 +392,9 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
             ?? throw new JsonException();
 
         //Act
-        UpdateCat.UpdateCatRequest request = new Faker<UpdateCat.UpdateCatRequest>()
+        UpdateCatRequest request = new Faker<UpdateCatRequest>()
             .CustomInstantiator(faker =>
-                new UpdateCat.UpdateCatRequest(
+                new UpdateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: false,
                     MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
@@ -431,7 +431,7 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
             ?? throw new JsonException();
 
         //Act
-        UpdateCat.UpdateCatRequest request =
+        UpdateCatRequest request =
             new(
                 Name: "",
                 IsCastrated: false,
@@ -452,30 +452,30 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
         validationProblemDetails.Errors.Count.Should().Be(5);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(
-            nameof(UpdateCat.UpdateCatRequest.Name),
-            nameof(UpdateCat.UpdateCatRequest.MedicalHelpUrgency),
-            nameof(UpdateCat.UpdateCatRequest.Behavior),
-            nameof(UpdateCat.UpdateCatRequest.AgeCategory),
-            nameof(UpdateCat.UpdateCatRequest.HealthStatus)
+            nameof(UpdateCatRequest.Name),
+            nameof(UpdateCatRequest.MedicalHelpUrgency),
+            nameof(UpdateCatRequest.Behavior),
+            nameof(UpdateCatRequest.AgeCategory),
+            nameof(UpdateCatRequest.HealthStatus)
         );
         validationProblemDetails.Errors.Values.Count.Should().Be(5);
-        validationProblemDetails.Errors[nameof(UpdateCat.UpdateCatRequest.Name)][0]
+        validationProblemDetails.Errors[nameof(UpdateCatRequest.Name)][0]
             .Should()
             .Be("'Name' must not be empty.");
 
-        validationProblemDetails.Errors[nameof(UpdateCat.UpdateCatRequest.MedicalHelpUrgency)][0]
+        validationProblemDetails.Errors[nameof(UpdateCatRequest.MedicalHelpUrgency)][0]
             .Should()
             .Be("'Medical Help Urgency' must not be empty.");
 
-        validationProblemDetails.Errors[nameof(UpdateCat.UpdateCatRequest.Behavior)][0]
+        validationProblemDetails.Errors[nameof(UpdateCatRequest.Behavior)][0]
             .Should()
             .Be("'Behavior' must not be empty.");
 
-        validationProblemDetails.Errors[nameof(UpdateCat.UpdateCatRequest.AgeCategory)][0]
+        validationProblemDetails.Errors[nameof(UpdateCatRequest.AgeCategory)][0]
             .Should()
             .Be("'Age Category' must not be empty.");
 
-        validationProblemDetails.Errors[nameof(UpdateCat.UpdateCatRequest.HealthStatus)][0]
+        validationProblemDetails.Errors[nameof(UpdateCatRequest.HealthStatus)][0]
             .Should()
             .Be("'Health Status' must not be empty.");
     }
@@ -497,9 +497,9 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
             ?? throw new JsonException();
 
         //Act
-        UpdateCat.UpdateCatRequest request = new Faker<UpdateCat.UpdateCatRequest>()
+        UpdateCatRequest request = new Faker<UpdateCatRequest>()
             .CustomInstantiator(faker =>
-                new UpdateCat.UpdateCatRequest(
+                new UpdateCatRequest(
                     Name: faker.Person.FirstName.ClampLength(CatName.MaxLength + 1),
                     IsCastrated: true,
                     MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
@@ -521,16 +521,16 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
         validationProblemDetails.Errors.Count.Should().Be(2);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(
-            nameof(UpdateCat.UpdateCatRequest.Name),
-            nameof(UpdateCat.UpdateCatRequest.AdditionalRequirements)
+            nameof(UpdateCatRequest.Name),
+            nameof(UpdateCatRequest.AdditionalRequirements)
         );
         validationProblemDetails.Errors.Values.Count.Should().Be(2);
 
-        validationProblemDetails.Errors[nameof(UpdateCat.UpdateCatRequest.Name)][0]
+        validationProblemDetails.Errors[nameof(UpdateCatRequest.Name)][0]
             .Should()
             .StartWith($"The length of 'Name' must be {CatName.MaxLength} characters or fewer. You entered");
 
-        validationProblemDetails.Errors[nameof(UpdateCat.UpdateCatRequest.AdditionalRequirements)][0]
+        validationProblemDetails.Errors[nameof(UpdateCatRequest.AdditionalRequirements)][0]
             .Should()
             .StartWith(
                 $"The length of 'Additional Requirements' must be {Description.MaxLength} characters or fewer. You entered");
