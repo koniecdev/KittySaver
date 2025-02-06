@@ -1,4 +1,6 @@
-﻿namespace KittySaver.Wasm.Shared.HttpClients.MainApiResponses;
+﻿using KittySaver.Shared.Hateoas;
+
+namespace KittySaver.Wasm.Shared.HttpClients.MainApiResponses;
 
 public sealed class PagedList<TResponse>
 {

@@ -2,6 +2,7 @@
 using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Shared.Persistence.ReadModels;
 using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Shared.Hateoas;
 
 namespace KittySaver.Api.Features.Cats.SharedContracts;
 

@@ -2,6 +2,7 @@
 using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Shared.Persistence.ReadModels;
 using KittySaver.Domain.Persons;
+using KittySaver.Shared.Hateoas;
 using Riok.Mapperly.Abstractions;
 
 namespace KittySaver.Api.Features.Advertisements.SharedContracts;

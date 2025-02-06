@@ -1,6 +1,7 @@
 ﻿using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Domain.Persons;
+using KittySaver.Shared.Hateoas;
 
 namespace KittySaver.Api.Shared.Hateoas;
 

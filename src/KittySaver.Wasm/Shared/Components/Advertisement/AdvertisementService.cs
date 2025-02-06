@@ -1,4 +1,5 @@
-﻿using KittySaver.Wasm.Shared.HttpClients.MainApiResponses;
+﻿using KittySaver.Shared.Hateoas;
+using KittySaver.Wasm.Shared.HttpClients.MainApiResponses;
 
 namespace KittySaver.Wasm.Shared.Components.Advertisement;
 

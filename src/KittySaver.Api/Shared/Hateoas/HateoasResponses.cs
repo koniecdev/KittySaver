@@ -1,5 +1,6 @@
 ﻿using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Domain.Persons;
+using KittySaver.Shared.Hateoas;
 
 namespace KittySaver.Api.Shared.Hateoas;
 
