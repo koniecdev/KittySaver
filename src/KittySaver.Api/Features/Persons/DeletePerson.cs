@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Shared.Abstractions;
+using KittySaver.Api.Shared.Abstractions.Clients;
 using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
@@ -28,7 +29,7 @@ public sealed class DeletePerson : IEndpoint
         {
             Person person = await personRepository.GetPersonByIdOrIdentityIdAsync(request.IdOrUserIdentityId, cancellationToken);
             
-            personRepository.Remove(person);
+            await personRepository.RemoveAsync(person, request.AuthHeader);
             
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }

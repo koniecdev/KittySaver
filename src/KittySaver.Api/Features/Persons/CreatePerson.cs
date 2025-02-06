@@ -105,8 +105,7 @@ public sealed class CreatePerson : IEndpoint
     
     internal sealed class CreatePersonCommandHandler(
         IPersonRepository personRepository,
-        IUnitOfWork unitOfWork,
-        IAuthApiHttpClient authApiHttpClient)
+        IUnitOfWork unitOfWork)
         : IRequestHandler<CreatePersonCommand, PersonHateoasResponse>
     {
         public async Task<PersonHateoasResponse> Handle(CreatePersonCommand request, CancellationToken cancellationToken)
@@ -125,20 +124,6 @@ public sealed class CreatePerson : IEndpoint
             
             Email defaultAdvertisementContactInfoEmail = Email.Create(request.DefaultAdvertisementContactInfoEmail);
             PhoneNumber defaultAdvertisementContactInfoPhoneNumber = PhoneNumber.Create(request.DefaultAdvertisementContactInfoPhoneNumber);
-
-            IAuthApiHttpClient.RegisterDto registerDto = new(
-                UserName: nickname.Value,
-                Email: email.Value,
-                PhoneNumber: phoneNumber.Value,
-                Password: request.Password,
-                DefaultAdvertisementPickupAddressCountry: defaultAdvertisementPickupAddress.Country,
-                DefaultAdvertisementPickupAddressState: defaultAdvertisementPickupAddress.State,
-                DefaultAdvertisementPickupAddressZipCode: defaultAdvertisementPickupAddress.ZipCode,
-                DefaultAdvertisementPickupAddressCity: defaultAdvertisementPickupAddress.City,
-                DefaultAdvertisementPickupAddressStreet: defaultAdvertisementPickupAddress.Street,
-                DefaultAdvertisementPickupAddressBuildingNumber: defaultAdvertisementPickupAddress.BuildingNumber,
-                DefaultAdvertisementContactInfoEmail: defaultAdvertisementContactInfoEmail.Value,
-                DefaultAdvertisementContactInfoPhoneNumber: defaultAdvertisementContactInfoPhoneNumber.Value);
             
             Person person = Person.Create(
                 nickname: nickname,
@@ -148,11 +133,7 @@ public sealed class CreatePerson : IEndpoint
                 defaultAdvertisementContactInfoEmail: defaultAdvertisementContactInfoEmail,
                 defaultAdvertisementContactInfoPhoneNumber: defaultAdvertisementContactInfoPhoneNumber);
             
-            Guid userIdentityId = await authApiHttpClient.RegisterAsync(registerDto);
-            
-            person.SetUserIdentityId(userIdentityId);
-            
-            personRepository.Insert(person);
+            await personRepository.InsertAsync(person, request.Password);
             await unitOfWork.SaveChangesAsync(cancellationToken);
             return new PersonHateoasResponse(person.Id);
         }
