@@ -11,6 +11,7 @@ using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Pagination;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Shared.Pagination;
 using Shared;
 
 namespace KittySaver.Api.Tests.Integration.Tests.Advertisements;

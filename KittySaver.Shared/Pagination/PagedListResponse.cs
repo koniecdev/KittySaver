@@ -1,8 +1,6 @@
-﻿using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Hateoas;
-using KittySaver.Shared.Hateoas;
+﻿using KittySaver.Shared.Hateoas;
 
-namespace KittySaver.Api.Shared.Pagination;
+namespace KittySaver.Shared.Pagination;
 
 public interface IPagedList<TResponse>
 {

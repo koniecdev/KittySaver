@@ -6,6 +6,7 @@ using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Pagination;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Api.Shared.Persistence.ReadModels;
+using KittySaver.Shared.Pagination;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
