@@ -55,12 +55,6 @@ public class AdminConfiguration : IEntityTypeConfiguration<ApplicationUser>
 
         builder.HasData(admin);
     }
-
-    private static string PassGenerate(ApplicationUser user)
-    {
-        PasswordHasher<ApplicationUser> passHash = new();
-        return passHash.HashPassword(user, "DefaultPassword123!");
-    }
 }
 
 public class UsersWithRolesConfiguration : IEntityTypeConfiguration<IdentityUserRole<Guid>>
