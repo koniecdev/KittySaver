@@ -9,9 +9,7 @@ namespace KittySaver.Auth.Api.Features.ApplicationUsers;
 
 public sealed class GetApplicationUsers : IEndpoint
 {
-    public sealed class GetApplicationUsersQuery : IQuery<ICollection<ApplicationUserResponse>>
-    {
-    }
+    public sealed class GetApplicationUsersQuery : IQuery<ICollection<ApplicationUserResponse>>;
 
     internal sealed class GetApplicationUsersQueryHandler(ApplicationDbContext db)
         : IRequestHandler<GetApplicationUsersQuery, ICollection<ApplicationUserResponse>>
@@ -28,13 +26,13 @@ public sealed class GetApplicationUsers : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapGet("application-users", async
-            (ISender sender,
-            CancellationToken cancellationToken) =>
-        {
-            GetApplicationUsersQuery query = new();
-            ICollection<ApplicationUserResponse> applicationUsers = await sender.Send(query, cancellationToken);
-            return Results.Ok(applicationUsers);
-        }).RequireAuthorization();
+        // endpointRouteBuilder.MapGet("application-users", async
+        //     (ISender sender,
+        //     CancellationToken cancellationToken) =>
+        // {
+        //     GetApplicationUsersQuery query = new();
+        //     ICollection<ApplicationUserResponse> applicationUsers = await sender.Send(query, cancellationToken);
+        //     return Results.Ok(applicationUsers);
+        // }).RequireAuthorization();
     }
 }

@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
 using KittySaver.Auth.Api.Shared.Domain.Entites;
 using KittySaver.Auth.Api.Shared.Infrastructure.ApiComponents;
-using KittySaver.Auth.Api.Shared.Infrastructure.Clients;
 using KittySaver.Auth.Api.Shared.Infrastructure.Endpoints;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
@@ -22,7 +21,7 @@ public sealed class DeleteApplicationUser : IEndpoint
         }
     }
     
-    internal sealed class DeleteApplicationUserCommandHandler(UserManager<ApplicationUser> userManager, IKittySaverApiClient client)
+    internal sealed class DeleteApplicationUserCommandHandler(UserManager<ApplicationUser> userManager)
         : IRequestHandler<DeleteApplicationUserCommand>
     {
         public async Task Handle(DeleteApplicationUserCommand request, CancellationToken cancellationToken)
@@ -30,7 +29,6 @@ public sealed class DeleteApplicationUser : IEndpoint
             ApplicationUser user = await userManager.Users
                 .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken)
                 ?? throw new ApplicationUser.Exceptions.ApplicationUserNotFoundException();
-            await client.DeletePerson(user.Id);
             await userManager.DeleteAsync(user);
         }
     }

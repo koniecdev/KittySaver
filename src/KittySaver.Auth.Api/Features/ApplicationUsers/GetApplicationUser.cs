@@ -29,14 +29,14 @@ public sealed class GetApplicationUser : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapGet("application-users/{id:guid}", async
-            (Guid id,
-             ISender sender,
-             CancellationToken cancellationToken) =>
-        {
-            GetApplicationUserQuery query = new(id);
-            ApplicationUserResponse applicationUsers = await sender.Send(query, cancellationToken);
-            return Results.Ok(applicationUsers);
-        }).RequireAuthorization();
+        // endpointRouteBuilder.MapGet("application-users/{id:guid}", async
+        //     (Guid id,
+        //      ISender sender,
+        //      CancellationToken cancellationToken) =>
+        // {
+        //     GetApplicationUserQuery query = new(id);
+        //     ApplicationUserResponse applicationUsers = await sender.Send(query, cancellationToken);
+        //     return Results.Ok(applicationUsers);
+        // }).RequireAuthorization();
     }
 }
