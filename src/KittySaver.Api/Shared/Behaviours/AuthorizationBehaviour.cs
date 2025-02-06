@@ -27,7 +27,6 @@ public sealed class AuthorizationBehaviour<TRequest, TResponse>(
         {
             Guid personId = request switch
             {
-                ICreatePersonRequest x => x.UserIdentityId,
                 ICatRequest x => x.PersonId,
                 IPersonRequest x => x.IdOrUserIdentityId,
                 IAdvertisementRequest x => x.PersonId,

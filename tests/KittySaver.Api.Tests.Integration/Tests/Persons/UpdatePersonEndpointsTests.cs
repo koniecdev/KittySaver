@@ -36,7 +36,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
-                    UserIdentityId: Guid.NewGuid(),
+                    Password: "Default123$",
                     DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
                     DefaultAdvertisementPickupAddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
@@ -454,8 +454,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         CreatePerson.CreatePersonRequest secondPersonCreateRequest = _createPersonRequest with
         {
             Email = "unique@email.com",
-            PhoneNumber = "420420420",
-            UserIdentityId = Guid.NewGuid()
+            PhoneNumber = "420420420"
         };
         _ = await _httpClient.PostAsJsonAsync("api/v1/persons", secondPersonCreateRequest);
 

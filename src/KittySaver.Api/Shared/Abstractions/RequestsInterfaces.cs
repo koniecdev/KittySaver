@@ -23,7 +23,6 @@ public interface IAdvertisementRequest
 
 public interface ICreatePersonRequest
 {
-    public Guid UserIdentityId { get; }
 }
 public interface IPersonRequest
 {

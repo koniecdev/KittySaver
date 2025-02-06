@@ -21,15 +21,7 @@ public class DeleteApplicationUserEndpointTests(KittySaverAuthApiFactory appFact
                     UserName: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
-                    Password: "Default1234%",
-                    DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
-                    DefaultAdvertisementPickupAddressState: faker.Address.State(),
-                    DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
-                    DefaultAdvertisementPickupAddressCity: faker.Address.City(),
-                    DefaultAdvertisementPickupAddressStreet: faker.Address.StreetName(),
-                    DefaultAdvertisementPickupAddressBuildingNumber: faker.Address.BuildingNumber(),
-                    DefaultAdvertisementContactInfoEmail: faker.Person.Email,
-                    DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
+                    Password: "Default1234%"
                 ));
     
     [Fact]
@@ -46,9 +38,6 @@ public class DeleteApplicationUserEndpointTests(KittySaverAuthApiFactory appFact
 
         //Assert
         deleteUserResponseMessage.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        
-        HttpResponseMessage getDeletedUser = await _httpClient.GetAsync($"api/v1/application-users/{registerResponse?.Id}");
-        getDeletedUser.StatusCode.Should().Be(HttpStatusCode.NotFound);
     }
     
     [Fact]

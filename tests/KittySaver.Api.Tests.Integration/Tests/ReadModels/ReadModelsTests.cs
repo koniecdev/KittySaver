@@ -33,7 +33,7 @@ public class ReadModelsIntegrationTests : IAsyncLifetime
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
-                    UserIdentityId: Guid.NewGuid(),
+                    Password: "Default123$",
                     DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
                     DefaultAdvertisementPickupAddressState: faker.Address.State(),
                     DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
@@ -75,7 +75,6 @@ public class ReadModelsIntegrationTests : IAsyncLifetime
         
         // Verify all PersonReadModel properties are correctly mapped
         person.Id.Should().NotBeEmpty();
-        person.UserIdentityId.Should().Be(createRequest.UserIdentityId);
         person.Nickname.Should().Be(createRequest.Nickname);
         person.Email.Should().Be(createRequest.Email);
         person.PhoneNumber.Should().Be(createRequest.PhoneNumber);

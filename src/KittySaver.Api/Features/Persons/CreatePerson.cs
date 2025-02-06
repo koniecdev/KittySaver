@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
+using KittySaver.Api.Shared.Abstractions.Clients;
 using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Shared.Persistence;
@@ -17,7 +18,7 @@ public sealed class CreatePerson : IEndpoint
         string Nickname,
         string Email,
         string PhoneNumber,
-        Guid UserIdentityId,
+        string Password,
         string DefaultAdvertisementPickupAddressCountry,
         string? DefaultAdvertisementPickupAddressState,
         string DefaultAdvertisementPickupAddressZipCode,
@@ -31,7 +32,7 @@ public sealed class CreatePerson : IEndpoint
         string Nickname,
         string Email,
         string PhoneNumber,
-        Guid UserIdentityId,
+        string Password,
         string DefaultAdvertisementPickupAddressCountry,
         string? DefaultAdvertisementPickupAddressState,
         string DefaultAdvertisementPickupAddressZipCode,
@@ -39,7 +40,7 @@ public sealed class CreatePerson : IEndpoint
         string? DefaultAdvertisementPickupAddressStreet,
         string? DefaultAdvertisementPickupAddressBuildingNumber,
         string DefaultAdvertisementContactInfoEmail,
-        string DefaultAdvertisementContactInfoPhoneNumber) : ICommand<PersonHateoasResponse>, ICreatePersonRequest, IAuthorizedRequest;
+        string DefaultAdvertisementContactInfoPhoneNumber) : ICommand<PersonHateoasResponse>, ICreatePersonRequest;
 
     public sealed class CreatePersonCommandValidator : AbstractValidator<CreatePersonCommand>, IAsyncValidator
     {
@@ -49,11 +50,12 @@ public sealed class CreatePerson : IEndpoint
                 .NotEmpty()
                 .MaximumLength(Nickname.MaxLength);
             
-            RuleFor(x => x.UserIdentityId)
+            RuleFor(x => x.Password)
                 .NotEmpty()
-                .MustAsync(async (userIdentityId, ct) => 
-                    await personRepository.IsUserIdentityIdUniqueAsync(userIdentityId, ct))
-                .WithMessage("'User Identity Id' is already used by another user.");
+                .MinimumLength(8).WithMessage("'Password' is not in the correct format. Your password length must be at least 8.")
+                .Matches("[A-Z]+").WithMessage("'Password' is not in the correct format. Your password must contain at least one uppercase letter.")
+                .Matches("[a-z]+").WithMessage("'Password' is not in the correct format. Your password must contain at least one lowercase letter.")
+                .Matches("[0-9]+").WithMessage("'Password' is not in the correct format. Your password must contain at least one number.");
             
             RuleFor(x => x.PhoneNumber)
                 .NotEmpty()
@@ -122,9 +124,8 @@ public sealed class CreatePerson : IEndpoint
             
             Email defaultAdvertisementContactInfoEmail = Email.Create(request.DefaultAdvertisementContactInfoEmail);
             PhoneNumber defaultAdvertisementContactInfoPhoneNumber = PhoneNumber.Create(request.DefaultAdvertisementContactInfoPhoneNumber);
-
+            
             Person person = Person.Create(
-                userIdentityId: request.UserIdentityId,
                 nickname: nickname,
                 email: email,
                 phoneNumber: phoneNumber,
@@ -132,7 +133,7 @@ public sealed class CreatePerson : IEndpoint
                 defaultAdvertisementContactInfoEmail: defaultAdvertisementContactInfoEmail,
                 defaultAdvertisementContactInfoPhoneNumber: defaultAdvertisementContactInfoPhoneNumber);
             
-            personRepository.Insert(person);
+            await personRepository.InsertAsync(person, request.Password);
             await unitOfWork.SaveChangesAsync(cancellationToken);
             return new PersonHateoasResponse(person.Id);
         }
@@ -148,7 +149,7 @@ public sealed class CreatePerson : IEndpoint
             CreatePersonCommand command = request.MapToCreatePersonCommand();
             PersonHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
             return Results.Created($"/api/v1/persons/{hateoasResponse.Id}", new { hateoasResponse.Id, hateoasResponse.Links });
-        }).RequireAuthorization()
+        }).AllowAnonymous()
         .WithName(EndpointNames.CreatePerson.EndpointName)
         .WithTags(EndpointNames.GroupNames.PersonGroup);
     }

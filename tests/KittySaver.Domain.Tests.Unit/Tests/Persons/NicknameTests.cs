@@ -47,7 +47,6 @@ public class NicknameTests
         //Act
         Nickname nickname = Nickname.Create(nicknameValue);
         Person sut = Person.Create(
-            userIdentityId: _userIdentityId,
             nickname: nickname,
             email: _defaultProperEmail,
             phoneNumber: _defaultProperPhone,

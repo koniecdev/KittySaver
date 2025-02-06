@@ -9,7 +9,7 @@ namespace KittySaver.Domain.Persons;
 
 public sealed class Person : AggregateRoot
 {
-    private readonly Guid _userIdentityId;
+    private Guid _userIdentityId;
     private readonly List<Cat> _cats = [];
     private readonly List<Advertisement> _advertisements = [];
 
@@ -26,7 +26,7 @@ public sealed class Person : AggregateRoot
     public Guid UserIdentityId
     {
         get => _userIdentityId;
-        init
+        private set
         {
             if (value == Guid.Empty)
             {
@@ -60,7 +60,6 @@ public sealed class Person : AggregateRoot
     }
 
     private Person(
-        Guid userIdentityId,
         Nickname nickname,
         Email email,
         PhoneNumber phoneNumber,
@@ -68,7 +67,6 @@ public sealed class Person : AggregateRoot
         Email defaultAdvertisementContactInfoEmail,
         PhoneNumber defaultAdvertisementContactInfoPhone)
     {
-        UserIdentityId = userIdentityId;
         Nickname = nickname;
         Email = email;
         PhoneNumber = phoneNumber;
@@ -78,7 +76,6 @@ public sealed class Person : AggregateRoot
     }
 
     public static Person Create(
-        Guid userIdentityId,
         Nickname nickname,
         Email email,
         PhoneNumber phoneNumber,
@@ -87,7 +84,6 @@ public sealed class Person : AggregateRoot
         PhoneNumber defaultAdvertisementContactInfoPhoneNumber)
     {
         Person person = new(
-            userIdentityId: userIdentityId,
             nickname: nickname,
             email: email,
             phoneNumber: phoneNumber,
@@ -307,6 +303,11 @@ public sealed class Person : AggregateRoot
     {
         Cat cat = GetCatById(catId);
         cat.MarkAsThumbnailUploaded();
+    }
+    
+    public void SetUserIdentityId(Guid userIdentityId)
+    {
+        UserIdentityId = userIdentityId;
     }
     
     private void AssignCatToAdvertisement(Guid advertisementId, Guid catId)
