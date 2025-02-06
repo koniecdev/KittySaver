@@ -45,7 +45,6 @@ public class AdvertisementTests
     private static readonly Person Person = new Faker<Person>()
         .CustomInstantiator(faker =>
             Person.Create(
-                userIdentityId: Guid.NewGuid(),
                 nickname: Nickname.Create(faker.Person.FirstName),
                 email: Email.Create(faker.Person.Email),
                 phoneNumber: PhoneNumber.Create(faker.Person.Phone),
@@ -273,7 +272,6 @@ public class AdvertisementTests
         Person person = new Faker<Person>()
         .CustomInstantiator(faker =>
             Person.Create(
-                userIdentityId: Guid.NewGuid(),
                 nickname: Nickname.Create(faker.Person.FirstName),
                 email: Email.Create(faker.Person.Email),
                 phoneNumber: PhoneNumber.Create(faker.Person.Phone),

@@ -3,7 +3,6 @@ using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Infrastructure.Services.FileServices;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Api.Tests.Integration.Helpers;
-using KittySaver.Auth.Api.Shared.Infrastructure.Clients;
 using KittySaver.Auth.Api.Shared.Infrastructure.Services;
 using KittySaver.Domain.Persons;
 using Microsoft.AspNetCore.Authentication;

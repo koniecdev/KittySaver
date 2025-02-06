@@ -9,17 +9,6 @@ namespace KittySaver.Domain.Tests.Unit.Tests.Cats;
 
 public class DefaultCatPriorityCalculatorServiceTests
 {
-    private static readonly Address Address = new Faker<Address>()
-        .CustomInstantiator(faker =>
-            Address.Create(
-                country: faker.Address.CountryCode(),
-                state: faker.Address.State(),
-                zipCode: faker.Address.ZipCode(),
-                city: faker.Address.City(),
-                street: faker.Address.StreetName(),
-                buildingNumber: faker.Address.BuildingNumber()
-            )).Generate();
-
     private static readonly Address PickupAddress = new Faker<Address>()
         .CustomInstantiator(faker =>
             Address.Create(
@@ -34,7 +23,6 @@ public class DefaultCatPriorityCalculatorServiceTests
     private static readonly Person Person = new Faker<Person>()
         .CustomInstantiator(faker =>
             Person.Create(
-                userIdentityId: Guid.NewGuid(),
                 nickname: Nickname.Create(faker.Person.FirstName),
                 email: Email.Create(faker.Person.Email),
                 phoneNumber: PhoneNumber.Create(faker.Person.Phone),
