@@ -3,7 +3,6 @@ using System.Text;
 using FluentValidation;
 using KittySaver.Auth.Api.Shared.Behaviours;
 using KittySaver.Auth.Api.Shared.Domain.Entites;
-using KittySaver.Auth.Api.Shared.Infrastructure.Clients;
 using KittySaver.Auth.Api.Shared.Infrastructure.Services;
 using KittySaver.Auth.Api.Shared.Persistence;
 using KittySaver.Auth.Api.Shared.Security;
@@ -31,11 +30,6 @@ public static class ServiceCollectionExtensions
         {
             cfg.RegisterServicesFromAssembly(assembly);
             cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
-        });
-        services.AddHttpClient<IKittySaverApiClient, KittySaverApiClient>(httpClient =>
-        {
-            httpClient.BaseAddress = new Uri(configuration.GetValue<string>("Api:ApiBaseUrl")
-                                             ?? throw new Exception("ApiBaseUrl not found in appsettings"));
         });
         AddAuth();
         
