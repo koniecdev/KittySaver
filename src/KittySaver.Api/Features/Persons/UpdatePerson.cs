@@ -16,7 +16,7 @@ namespace KittySaver.Api.Features.Persons;
 public sealed class UpdatePerson : IEndpoint
 {
     public sealed record UpdatePersonCommand(
-        Guid IdOrUserIdentityId,
+        Guid Id,
         string Nickname,
         string Email,
         string PhoneNumber,
@@ -27,14 +27,13 @@ public sealed class UpdatePerson : IEndpoint
         string? DefaultAdvertisementPickupAddressStreet,
         string? DefaultAdvertisementPickupAddressBuildingNumber,
         string DefaultAdvertisementContactInfoEmail,
-        string DefaultAdvertisementContactInfoPhoneNumber,
-        string AuthHeader) : ICommand<PersonHateoasResponse>, IAuthorizedRequest, IPersonRequest;
+        string DefaultAdvertisementContactInfoPhoneNumber) : ICommand<PersonHateoasResponse>, IAuthorizedRequest, IPersonRequest;
 
     public sealed class UpdatePersonCommandValidator : AbstractValidator<UpdatePersonCommand>, IAsyncValidator
     {
         public UpdatePersonCommandValidator(IPersonUniquenessChecksRepository personRepository)
         {
-            RuleFor(x => x.IdOrUserIdentityId).NotEmpty();
+            RuleFor(x => x.Id).NotEmpty();
 
             RuleFor(x => x.Nickname)
                 .NotEmpty()
@@ -45,14 +44,14 @@ public sealed class UpdatePerson : IEndpoint
                 .MaximumLength(Email.MaxLength)
                 .Matches(Email.RegexPattern)
                 .MustAsync(async (command, email, ct) =>
-                    await personRepository.IsEmailUniqueAsync(email, command.IdOrUserIdentityId, ct))
+                    await personRepository.IsEmailUniqueAsync(email, command.Id, ct))
                 .WithMessage("'Email' is already used by another user.");
 
             RuleFor(x => x.PhoneNumber)
                 .NotEmpty()
                 .MaximumLength(PhoneNumber.MaxLength)
                 .MustAsync(async (command, phoneNumber, ct) =>
-                    await personRepository.IsPhoneNumberUniqueAsync(phoneNumber, command.IdOrUserIdentityId, ct))
+                    await personRepository.IsPhoneNumberUniqueAsync(phoneNumber, command.Id, ct))
                 .WithMessage("'Phone Number' is already used by another user.");
 
             RuleFor(x => x.DefaultAdvertisementContactInfoPhoneNumber)
@@ -94,7 +93,7 @@ public sealed class UpdatePerson : IEndpoint
     {
         public async Task<PersonHateoasResponse> Handle(UpdatePersonCommand request, CancellationToken cancellationToken)
         {
-            Person person = await personRepository.GetPersonByIdOrIdentityIdAsync(request.IdOrUserIdentityId, cancellationToken);
+            Person person = await personRepository.GetPersonByIdAsync(request.Id, cancellationToken);
 
             Nickname nickname = Nickname.Create(request.Nickname);
             Email email = Email.Create(request.Email);
@@ -131,11 +130,9 @@ public sealed class UpdatePerson : IEndpoint
                 Guid id,
                 UpdatePersonRequest request,
                 ISender sender,
-                HttpContext httpContext,
                 CancellationToken cancellationToken) =>
             {
-                string authHeader = httpContext.Request.Headers.Authorization.ToString();
-                UpdatePersonCommand command = request.MapToUpdatePersonCommand(id, authHeader);
+                UpdatePersonCommand command = request.MapToUpdatePersonCommand(id);
                 PersonHateoasResponse response = await sender.Send(command, cancellationToken);
                 return Results.Ok(response);
             }).RequireAuthorization()
@@ -149,6 +146,5 @@ public static partial class UpdatePersonMapper
 {
     public static partial UpdatePerson.UpdatePersonCommand MapToUpdatePersonCommand(
         this UpdatePersonRequest request,
-        Guid idOrUserIdentityId,
-        string authHeader);
+        Guid id);
 }

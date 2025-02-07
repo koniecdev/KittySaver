@@ -106,62 +106,6 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task UpdatePerson_ShouldReturnSuccess_WhenValidDataIsProvidedWithUserIdentityId()
-    {
-        //Arrange
-        HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
-        ApiResponses.CreatedWithIdResponse registeredPersonResponse =
-            await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
-        PersonResponse person =
-            await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{registeredPersonResponse.Id}")
-            ?? throw new JsonException();
-        //Act
-        UpdatePersonRequest request = new Faker<UpdatePersonRequest>()
-            .CustomInstantiator(faker =>
-                new UpdatePersonRequest(
-                    Nickname: person.Nickname,
-                    Email: person.Email,
-                    PhoneNumber: person.PhoneNumber,
-                    DefaultAdvertisementPickupAddressCountry: faker.Address.CountryCode(),
-                    DefaultAdvertisementPickupAddressState: faker.Address.State(),
-                    DefaultAdvertisementPickupAddressZipCode: faker.Address.ZipCode(),
-                    DefaultAdvertisementPickupAddressCity: faker.Address.City(),
-                    DefaultAdvertisementPickupAddressStreet: faker.Address.StreetName(),
-                    DefaultAdvertisementPickupAddressBuildingNumber: faker.Address.BuildingNumber(),
-                    DefaultAdvertisementContactInfoEmail: faker.Person.Email,
-                    DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
-                )).Generate();
-
-        HttpResponseMessage updateResponse =
-            await _httpClient.PutAsJsonAsync($"api/v1/persons/{person.UserIdentityId}", request);
-
-        //Assert
-        updateResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-        PersonHateoasResponse hateoasResponse =
-            await updateResponse.Content.ReadFromJsonAsync<PersonHateoasResponse>()
-            ?? throw new JsonException();
-        hateoasResponse.Links.Select(x => x.Rel).Should()
-            .BeEquivalentTo(EndpointRels.SelfRel,
-                EndpointNames.UpdatePerson.Rel,
-                EndpointNames.DeletePerson.Rel,
-                EndpointNames.GetCats.Rel,
-                EndpointNames.GetAdvertisements.Rel,
-                EndpointNames.CreateCat.Rel,
-                EndpointNames.CreateAdvertisement.Rel);
-        hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
-        hateoasResponse.Id.Should().Be(person.Id);
-        
-        PersonResponse personAfterUpdate =
-            await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{registeredPersonResponse.Id}")
-            ?? throw new JsonException();
-        personAfterUpdate.Should().NotBeEquivalentTo(person);
-        personAfterUpdate.Nickname.Should().Be(request.Nickname);
-        personAfterUpdate.Email.Should().Be(request.Email);
-        personAfterUpdate.PhoneNumber.Should().Be(request.PhoneNumber);
-    }
-
-    [Fact]
     public async Task UpdatePerson_ShouldReturnNotFound_WhenNonRegisteredUserIdProvided()
     {
         //Arrange

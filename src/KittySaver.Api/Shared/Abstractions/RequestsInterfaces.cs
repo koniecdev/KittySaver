@@ -26,7 +26,7 @@ public interface ICreatePersonRequest
 }
 public interface IPersonRequest
 {
-    public Guid IdOrUserIdentityId { get; }
+    public Guid Id { get; }
 }
 
 public interface IPagedQuery;

@@ -85,34 +85,6 @@ public class DeletePersonEndpointsTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task DeletePerson_ShouldReturnSuccess_WhenValidDataIsProvidedWithUserIdentityId()
-    {
-        //Arrange
-        CreatePersonRequest createRequest = _createPersonRequestGenerator.Generate();
-        HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/persons", createRequest);
-        ApiResponses.CreatedWithIdResponse registeredPersonResponse =
-            await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
-        PersonResponse person =
-            await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{registeredPersonResponse.Id}")
-            ?? throw new JsonException();
-
-        //Act
-        HttpResponseMessage deleteResponse = await _httpClient.DeleteAsync($"api/v1/persons/{person.UserIdentityId}");
-
-        //Assert
-        deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-
-        HttpResponseMessage userNotFoundProblemDetailsMessage =
-            await _httpClient.GetAsync($"api/v1/persons/{registeredPersonResponse.Id}");
-        userNotFoundProblemDetailsMessage.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        ProblemDetails? notFoundProblemDetails =
-            await userNotFoundProblemDetailsMessage.Content.ReadFromJsonAsync<ProblemDetails>();
-        notFoundProblemDetails.Should().NotBeNull();
-        notFoundProblemDetails!.Status.Should().Be(StatusCodes.Status404NotFound);
-    }
-
-    [Fact]
     public async Task DeletePerson_ShouldReturnSuccess_WhenUserHaveAdvertisement()
     {
         //Arrange
@@ -195,11 +167,11 @@ public class DeletePersonEndpointsTests : IAsyncLifetime
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
         validationProblemDetails.Errors.Count.Should().Be(1);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo([
-            nameof(DeletePerson.DeletePersonCommand.IdOrUserIdentityId)
+            nameof(DeletePerson.DeletePersonCommand.Id)
         ]);
         validationProblemDetails.Errors.Values.Count.Should().Be(1);
-        validationProblemDetails.Errors[nameof(DeletePerson.DeletePersonCommand.IdOrUserIdentityId)][0]
-            .Should().Be("'Id Or User Identity Id' must not be empty.");
+        validationProblemDetails.Errors[nameof(DeletePerson.DeletePersonCommand.Id)][0]
+            .Should().Be("'Id' must not be empty.");
     }
 
     public Task InitializeAsync()

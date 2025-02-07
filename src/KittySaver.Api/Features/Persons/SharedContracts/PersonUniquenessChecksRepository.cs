@@ -7,7 +7,6 @@ public interface IPersonUniquenessChecksRepository
 {
     public Task<bool> IsPhoneNumberUniqueAsync(string phone, Guid? userToExcludeIdOrIdentityId, CancellationToken cancellationToken);
     public Task<bool> IsEmailUniqueAsync(string email, Guid? userToExcludeIdOrIdentityId, CancellationToken cancellationToken);
-    public Task<bool> IsUserIdentityIdUniqueAsync(Guid userIdentityId, CancellationToken cancellationToken);
 }
 
 public class PersonUniquenessChecksRepository(ApplicationWriteDbContext writeDb) : IPersonUniquenessChecksRepository
@@ -37,9 +36,4 @@ public class PersonUniquenessChecksRepository(ApplicationWriteDbContext writeDb)
                         && x.Id != userToExcludeIdOrIdentityId 
                         && x.UserIdentityId != userToExcludeIdOrIdentityId,
                     cancellationToken);
-
-    public async Task<bool> IsUserIdentityIdUniqueAsync(Guid userIdentityId, CancellationToken cancellationToken) 
-        => !await writeDb.Persons
-            .AsNoTracking()
-            .AnyAsync(person => person.UserIdentityId == userIdentityId, cancellationToken);
 }

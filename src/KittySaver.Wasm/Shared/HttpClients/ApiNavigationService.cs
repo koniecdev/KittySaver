@@ -1,7 +1,7 @@
 ﻿using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.Responses;
 
-namespace KittySaver.Wasm.Shared.HttpClients.MainApiResponses;
+namespace KittySaver.Wasm.Shared.HttpClients;
 
 public interface IApiNavigationService
 {
