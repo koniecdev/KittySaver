@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using KittySaver.Domain.Common.Primitives;
 using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -13,14 +14,6 @@ public sealed class Advertisement : AuditableEntity
 
     private readonly Guid _personId;
     private double _priorityScore;
-
-    public enum AdvertisementStatus
-    {
-        Active,
-        Closed,
-        Expired,
-        ThumbnailNotUploaded
-    }
 
     public required Guid PersonId
     {

@@ -11,7 +11,9 @@ using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Pagination;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.Pagination;
+using KittySaver.Shared.Responses;
 using Shared;
 
 namespace KittySaver.Api.Tests.Integration.Tests.Advertisements;
@@ -163,7 +165,7 @@ public class GetAdvertisementsEndpointsTests : IAsyncLifetime
         advertisements!.Items.Count.Should().Be(0);
         advertisements.Total.Should().Be(0);
         advertisements.Links.Count.Should().Be(2);
-        advertisements.Links.First(x => x.Rel == EndpointNames.SelfRel).Href.Should().Contain("://");
+        advertisements.Links.First(x => x.Rel == EndpointRels.SelfRel).Href.Should().Contain("://");
         advertisements.Links.First(x => x.Rel == "by-page").Href.Should().Contain("://");
     }
 

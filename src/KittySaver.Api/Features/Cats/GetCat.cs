@@ -3,6 +3,7 @@ using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
+using KittySaver.Shared.Responses;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 

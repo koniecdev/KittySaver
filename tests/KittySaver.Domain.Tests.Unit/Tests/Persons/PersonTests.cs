@@ -662,7 +662,7 @@ public class PersonTests
 
         // Assert
         Advertisement? closedAd = sut.Advertisements.Should().ContainSingle().Subject;
-        closedAd.Status.Should().Be(Advertisement.AdvertisementStatus.Closed);
+        closedAd.Status.Should().Be(AdvertisementStatus.Closed);
         closedAd.ClosedOn.Should().Be(currentDate);
     }
 
@@ -708,7 +708,7 @@ public class PersonTests
 
         // Assert
         Advertisement? expiredAd = sut.Advertisements.Should().ContainSingle().Subject;
-        expiredAd.Status.Should().Be(Advertisement.AdvertisementStatus.Expired);
+        expiredAd.Status.Should().Be(AdvertisementStatus.Expired);
     }
 
     [Fact]

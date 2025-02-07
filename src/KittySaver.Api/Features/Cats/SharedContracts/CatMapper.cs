@@ -3,29 +3,11 @@ using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Shared.Persistence.ReadModels;
 using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Shared.Hateoas;
+using KittySaver.Shared.Responses;
 
 namespace KittySaver.Api.Features.Cats.SharedContracts;
 
-public sealed class CatResponse : IHateoasCatResponse
-{
-    public required Guid Id { get; init; }
-    public required Guid PersonId { get; init; }
-    public required Guid? AdvertisementId { get; init; }
-    public required string Name { get; init; }
-    public required string? AdditionalRequirements { get; init; }
-    public required bool IsCastrated { get; init; }
-    public required bool IsAdopted { get; init; }
-    public required bool IsThumbnailUploaded { get; init; }
-    public required bool IsAssignedToAdvertisement { get; init; }
-    public required string MedicalHelpUrgency { get; init; }
-    public required string AgeCategory { get; init; }
-    public required string Behavior { get; init; }
-    public required string HealthStatus { get; init; }
-    public required double PriorityScore { get; init; }
-    public ICollection<Link> Links { get; set; } = new List<Link>();
-}
-
-public static class CatResponseMapper
+public static class CatMapper
 {
     public static IQueryable<CatResponse> ProjectToDto(
         this IQueryable<CatReadModel> cats)

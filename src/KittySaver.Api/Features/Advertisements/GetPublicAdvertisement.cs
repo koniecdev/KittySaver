@@ -4,6 +4,7 @@ using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Persons;
+using KittySaver.Shared.Responses;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,7 +23,7 @@ public class GetPublicAdvertisement : IEndpoint
             AdvertisementResponse advertisement = await db.Advertisements
                 .Where(x => 
                     x.Id == request.Id 
-                    && x.Status == Advertisement.AdvertisementStatus.Active)
+                    && x.Status == AdvertisementStatus.Active)
                 .ProjectToDto()
                 .FirstOrDefaultAsync(cancellationToken)
                 ?? throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);

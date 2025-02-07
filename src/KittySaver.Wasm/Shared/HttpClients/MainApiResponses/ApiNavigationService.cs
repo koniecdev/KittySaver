@@ -1,4 +1,5 @@
 ﻿using KittySaver.Shared.Hateoas;
+using KittySaver.Shared.Responses;
 
 namespace KittySaver.Wasm.Shared.HttpClients.MainApiResponses;
 

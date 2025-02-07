@@ -10,6 +10,8 @@ using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.Persons;
+using KittySaver.Shared.Hateoas;
+using KittySaver.Shared.Responses;
 using Shared;
 
 namespace KittySaver.Api.Tests.Integration.Tests.Advertisements;
@@ -125,9 +127,9 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().Be(createAdvertisementResponse.Id);
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
-        hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.Active);
+        hateoasResponse.Status.Should().Be(AdvertisementStatus.Active);
         hateoasResponse.Links.Select(x => x.Rel).Should()
-            .BeEquivalentTo(EndpointNames.SelfRel,
+            .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.GetAdvertisementThumbnail.Rel,
                 EndpointNames.DeleteAdvertisement.Rel,
                 EndpointNames.CloseAdvertisement.Rel,
@@ -225,9 +227,9 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().Be(createAdvertisementResponse.Id);
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
-        hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.Active);
+        hateoasResponse.Status.Should().Be(AdvertisementStatus.Active);
         hateoasResponse.Links.Select(x => x.Rel).Should()
-            .BeEquivalentTo(EndpointNames.SelfRel,
+            .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.GetAdvertisementThumbnail.Rel,
                 EndpointNames.DeleteAdvertisement.Rel,
                 EndpointNames.CloseAdvertisement.Rel,

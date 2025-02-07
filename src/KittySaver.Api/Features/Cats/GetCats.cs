@@ -8,6 +8,7 @@ using KittySaver.Api.Shared.Persistence;
 using KittySaver.Api.Shared.Persistence.ReadModels;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Shared.Pagination;
+using KittySaver.Shared.Responses;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 

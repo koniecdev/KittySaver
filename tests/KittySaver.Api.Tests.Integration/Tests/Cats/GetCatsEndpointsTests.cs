@@ -10,7 +10,9 @@ using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Pagination;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.Pagination;
+using KittySaver.Shared.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
@@ -85,7 +87,7 @@ public class GetCatsEndpointsTests : IAsyncLifetime
         cats!.Items.Count.Should().BeGreaterThan(0);
         cats.Total.Should().Be(1);
         cats.Links.Count.Should().Be(2);
-        cats.Links.Count(x => x.Rel == EndpointNames.SelfRel).Should().Be(1);
+        cats.Links.Count(x => x.Rel == EndpointRels.SelfRel).Should().Be(1);
         cats.Links.First(x => x.Rel == "by-page").Href.Should().Contain("://");
         
         CatResponse cat = cats.Items.First();
@@ -99,7 +101,7 @@ public class GetCatsEndpointsTests : IAsyncLifetime
         cat.IsCastrated.Should().Be(_createCatRequest.IsCastrated);
         cat.PriorityScore.Should().BeGreaterThan(0);
         cat.Links.Select(x => x.Rel).Should()
-            .BeEquivalentTo(EndpointNames.SelfRel,
+            .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
                 EndpointNames.UpdateCatThumbnail.Rel);
@@ -125,7 +127,7 @@ public class GetCatsEndpointsTests : IAsyncLifetime
         cats.Should().NotBeNull();
         cats!.Total.Should().Be(0);
         cats.Links.Count.Should().Be(2);
-        cats.Links.First(x => x.Rel == EndpointNames.SelfRel).Href.Should().Contain("://");
+        cats.Links.First(x => x.Rel == EndpointRels.SelfRel).Href.Should().Contain("://");
         cats.Links.First(x => x.Rel == "by-page").Href.Should().Contain("://");
         cats.Items.Count.Should().Be(0);
     }

@@ -1,4 +1,4 @@
-﻿namespace KittySaver.Wasm.Shared.HttpClients.MainApiResponses;
+﻿namespace KittySaver.Shared.Hateoas;
 
 public static class EndpointRels
 {

@@ -9,6 +9,7 @@ using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.Hateoas;
 using MediatR;
 using Riok.Mapperly.Abstractions;
 
@@ -65,7 +66,7 @@ public sealed class UpdateAdvertisementThumbnail : IEndpoint
             await fileStorage.SaveThumbnailAsync(request.Thumbnail, request.Id, cancellationToken);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
-            Advertisement.AdvertisementStatus advertisementStatus = owner.Advertisements
+            AdvertisementStatus advertisementStatus = owner.Advertisements
                 .First(x => x.Id == request.Id)
                 .Status;
                 

@@ -12,6 +12,7 @@ using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.Hateoas;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
@@ -104,11 +105,11 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().NotBeEmpty();
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
-        hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.ThumbnailNotUploaded);
+        hateoasResponse.Status.Should().Be(AdvertisementStatus.ThumbnailNotUploaded);
         responseMessage.Headers.Location!.ToString()
             .Should().Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{hateoasResponse.Id}");
         hateoasResponse.Links.Select(x => x.Rel).Should().BeEquivalentTo(
-            EndpointNames.SelfRel,
+            EndpointRels.SelfRel,
             EndpointNames.UpdateAdvertisementThumbnail.Rel,
             EndpointNames.UpdateAdvertisement.Rel,
             EndpointNames.DeleteAdvertisement.Rel,
@@ -166,11 +167,11 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().NotBeEmpty();
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
-        hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.ThumbnailNotUploaded);
+        hateoasResponse.Status.Should().Be(AdvertisementStatus.ThumbnailNotUploaded);
         responseMessage.Headers.Location!.ToString()
             .Should().Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{hateoasResponse.Id}");
         hateoasResponse.Links.Select(x => x.Rel).Should().BeEquivalentTo(
-            EndpointNames.SelfRel,
+            EndpointRels.SelfRel,
             EndpointNames.UpdateAdvertisementThumbnail.Rel,
             EndpointNames.UpdateAdvertisement.Rel,
             EndpointNames.DeleteAdvertisement.Rel,
@@ -224,11 +225,11 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().NotBeEmpty();
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
-        hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.ThumbnailNotUploaded);
+        hateoasResponse.Status.Should().Be(AdvertisementStatus.ThumbnailNotUploaded);
         responseMessage.Headers.Location!.ToString()
             .Should().Contain($"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{hateoasResponse.Id}");
         hateoasResponse.Links.Select(x => x.Rel).Should().BeEquivalentTo(
-            EndpointNames.SelfRel,
+            EndpointRels.SelfRel,
             EndpointNames.UpdateAdvertisementThumbnail.Rel,
             EndpointNames.UpdateAdvertisement.Rel,
             EndpointNames.DeleteAdvertisement.Rel,

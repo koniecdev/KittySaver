@@ -8,7 +8,9 @@ using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Pagination;
 using KittySaver.Api.Tests.Integration.Helpers;
+using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.Pagination;
+using KittySaver.Shared.Responses;
 
 namespace KittySaver.Api.Tests.Integration.Tests.Persons;
 
@@ -57,7 +59,7 @@ public class GetPersonsEndpointsTests : IAsyncLifetime
         persons!.Items.Count.Should().BeGreaterThan(0);
         persons.Total.Should().Be(1);
         persons.Links.Count.Should().Be(2);
-        persons.Links.First(x => x.Rel == EndpointNames.SelfRel).Href.Should().Contain("://");
+        persons.Links.First(x => x.Rel == EndpointRels.SelfRel).Href.Should().Contain("://");
         persons.Links.First(x => x.Rel == "by-page").Href.Should().Contain("://");
         PersonResponse registeredPerson = persons.Items.First();
         registeredPerson.Id.Should().NotBeEmpty();
@@ -77,7 +79,7 @@ public class GetPersonsEndpointsTests : IAsyncLifetime
         PagedList<PersonResponse>? persons = await response.Content.ReadFromJsonAsync<PagedList<PersonResponse>>();
         persons?.Items.Count.Should().Be(0);
         persons!.Links.Count.Should().Be(2);
-        persons.Links.First(x => x.Rel == EndpointNames.SelfRel).Href.Should().Contain("://");
+        persons.Links.First(x => x.Rel == EndpointRels.SelfRel).Href.Should().Contain("://");
         persons.Links.First(x => x.Rel == "by-page").Href.Should().Contain("://");
         persons.Total.Should().Be(0);
     }

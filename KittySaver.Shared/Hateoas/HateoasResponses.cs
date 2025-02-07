@@ -1,8 +1,6 @@
-﻿using KittySaver.Api.Features.Advertisements.SharedContracts;
-using KittySaver.Domain.Persons;
-using KittySaver.Shared.Hateoas;
+﻿using KittySaver.Shared.Common;
 
-namespace KittySaver.Api.Shared.Hateoas;
+namespace KittySaver.Shared.Hateoas;
 
 public interface IHateoasResponse
 {
@@ -26,7 +24,7 @@ public interface IHateoasAdvertisementResponse : IHateoasResponse
 {
     public Guid Id { get; }
     public Guid PersonId { get; }
-    public Advertisement.AdvertisementStatus Status { get; }
+    public AdvertisementStatus Status { get; }
 }
 
 public class PersonHateoasResponse(Guid id) 
@@ -44,11 +42,11 @@ public class CatHateoasResponse(Guid id, Guid personId, Guid? advertisementId, b
     public bool IsThumbnailUploaded { get; } = isThumbnailUploaded;
     public ICollection<Link> Links { get; set; } = new List<Link>();
 }
-public class AdvertisementHateoasResponse(Guid id, Guid personId, Advertisement.AdvertisementStatus status)
+public class AdvertisementHateoasResponse(Guid id, Guid personId, AdvertisementStatus status)
     : IHateoasAdvertisementResponse
 {
     public Guid Id { get; } = id;
     public Guid PersonId { get; } = personId;
-    public Advertisement.AdvertisementStatus Status { get; } = status;
+    public AdvertisementStatus Status { get; } = status;
     public ICollection<Link> Links { get; set; } = new List<Link>();
 }

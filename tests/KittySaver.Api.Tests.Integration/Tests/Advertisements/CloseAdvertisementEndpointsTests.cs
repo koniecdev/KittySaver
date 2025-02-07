@@ -13,6 +13,8 @@ using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.Persons;
+using KittySaver.Shared.Hateoas;
+using KittySaver.Shared.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
@@ -113,10 +115,10 @@ public class CloseAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().Be(advertisementResponse.Id);
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
-        hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.Closed);
+        hateoasResponse.Status.Should().Be(AdvertisementStatus.Closed);
         hateoasResponse.Links.Count.Should().Be(2);
         hateoasResponse.Links.Select(x => x.Rel).Should()
-            .BeEquivalentTo(EndpointNames.SelfRel, EndpointNames.GetAdvertisementThumbnail.Rel);
+            .BeEquivalentTo(EndpointRels.SelfRel, EndpointNames.GetAdvertisementThumbnail.Rel);
         hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
 
         
@@ -128,7 +130,7 @@ public class CloseAdvertisementEndpointsTests : IAsyncLifetime
             await _httpClient.GetFromJsonAsync<AdvertisementResponse>(
                 $"api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}")
             ?? throw new JsonException();
-        advertisement.Status.Should().Be(Advertisement.AdvertisementStatus.Closed);
+        advertisement.Status.Should().Be(AdvertisementStatus.Closed);
     }
     
     [Fact]

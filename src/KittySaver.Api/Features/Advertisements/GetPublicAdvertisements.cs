@@ -9,6 +9,7 @@ using KittySaver.Api.Shared.Persistence;
 using KittySaver.Api.Shared.Persistence.ReadModels;
 using KittySaver.Domain.Persons;
 using KittySaver.Shared.Pagination;
+using KittySaver.Shared.Responses;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,7 +40,7 @@ public sealed class GetPublicAdvertisements : IEndpoint
         public async Task<IPagedList<AdvertisementResponse>> Handle(GetPublicAdvertisementsQuery request, CancellationToken cancellationToken)
         {
             IQueryable<AdvertisementReadModel> query = db.Advertisements
-                .Where(x=>x.Status == Advertisement.AdvertisementStatus.Active);
+                .Where(x=>x.Status == AdvertisementStatus.Active);
             
             int totalRecords = await query.CountAsync(cancellationToken);
             

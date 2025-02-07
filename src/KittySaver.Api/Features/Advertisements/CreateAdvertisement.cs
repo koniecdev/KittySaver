@@ -7,6 +7,7 @@ using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.Requests;
 using MediatR;
 using Riok.Mapperly.Abstractions;

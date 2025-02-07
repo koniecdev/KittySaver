@@ -6,6 +6,7 @@ using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.Requests;
 using MediatR;
 using Riok.Mapperly.Abstractions;
@@ -102,7 +103,7 @@ public sealed class UpdateAdvertisement : IEndpoint
                 contactInfoPhoneNumber: contactInfoPhoneNumber);
             
             await unitOfWork.SaveChangesAsync(cancellationToken);
-            Advertisement.AdvertisementStatus advertisementStatus = owner.Advertisements.First(x => x.Id == request.Id).Status;
+            AdvertisementStatus advertisementStatus = owner.Advertisements.First(x => x.Id == request.Id).Status;
             return new AdvertisementHateoasResponse(request.Id, request.PersonId, advertisementStatus);
         }
     }

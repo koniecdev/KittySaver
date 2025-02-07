@@ -21,4 +21,7 @@
         <HintPath>..\..\..\..\..\..\Program Files\dotnet\shared\Microsoft.AspNetCore.App\8.0.11\Microsoft.AspNetCore.Http.Features.dll</HintPath>
       </Reference>
     </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\..\KittySaver.Shared\KittySaver.Shared.csproj" />
+    </ItemGroup>
 </Project>

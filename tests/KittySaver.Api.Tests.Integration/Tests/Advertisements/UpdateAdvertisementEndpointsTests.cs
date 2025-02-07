@@ -12,6 +12,8 @@ using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.Hateoas;
+using KittySaver.Shared.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
@@ -128,9 +130,9 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().Be(advertisementResponse.Id);
         hateoasResponse.PersonId.Should().Be(createPersonResponse.Id);
-        hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.ThumbnailNotUploaded);
+        hateoasResponse.Status.Should().Be(AdvertisementStatus.ThumbnailNotUploaded);
         hateoasResponse.Links.Select(x => x.Rel).Should().BeEquivalentTo(
-            EndpointNames.SelfRel,
+            EndpointRels.SelfRel,
             EndpointNames.UpdateAdvertisementThumbnail.Rel,
             EndpointNames.DeleteAdvertisement.Rel,
             EndpointNames.UpdateAdvertisement.Rel,

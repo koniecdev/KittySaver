@@ -11,6 +11,8 @@ using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.Persons;
+using KittySaver.Shared.Hateoas;
+using KittySaver.Shared.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
@@ -116,9 +118,9 @@ public class RefreshAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().Be(advertisementResponse.Id);
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
-        hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.Active);
+        hateoasResponse.Status.Should().Be(AdvertisementStatus.Active);
         hateoasResponse.Links.Select(x => x.Rel).Should()
-            .BeEquivalentTo(EndpointNames.SelfRel,
+            .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.GetAdvertisementThumbnail.Rel,
                 EndpointNames.DeleteAdvertisement.Rel,
                 EndpointNames.CloseAdvertisement.Rel,
@@ -130,7 +132,7 @@ public class RefreshAdvertisementEndpointsTests : IAsyncLifetime
         AdvertisementResponse advertisement =
             await _httpClient.GetFromJsonAsync<AdvertisementResponse>(
                 $"api/v1/advertisements/{advertisementResponse.Id}") ?? throw new JsonException();
-        advertisement.Status.Should().Be(Advertisement.AdvertisementStatus.Active);
+        advertisement.Status.Should().Be(AdvertisementStatus.Active);
     }
 
     [Fact]
@@ -188,9 +190,9 @@ public class RefreshAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().Be(advertisementResponse.Id);
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
-        hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.Active);
+        hateoasResponse.Status.Should().Be(AdvertisementStatus.Active);
         hateoasResponse.Links.Select(x => x.Rel).Should()
-            .BeEquivalentTo(EndpointNames.SelfRel,
+            .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.GetAdvertisementThumbnail.Rel,
                 EndpointNames.DeleteAdvertisement.Rel,
                 EndpointNames.CloseAdvertisement.Rel,
@@ -202,7 +204,7 @@ public class RefreshAdvertisementEndpointsTests : IAsyncLifetime
         AdvertisementResponse advertisement =
             await _httpClient.GetFromJsonAsync<AdvertisementResponse>(
                 $"api/v1/advertisements/{advertisementResponse.Id}") ?? throw new JsonException();
-        advertisement.Status.Should().Be(Advertisement.AdvertisementStatus.Active);
+        advertisement.Status.Should().Be(AdvertisementStatus.Active);
     }
 
     [Fact]

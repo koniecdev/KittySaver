@@ -6,6 +6,7 @@ using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
+using KittySaver.Shared.Hateoas;
 using MediatR;
 
 namespace KittySaver.Api.Features.Advertisements;
@@ -40,7 +41,7 @@ public sealed class RefreshAdvertisement : IEndpoint
             Person owner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
             owner.RefreshAdvertisement(request.Id, dateTimeService.Now);
             await unitOfWork.SaveChangesAsync(cancellationToken);
-            Advertisement.AdvertisementStatus advertisementStatus = owner.Advertisements.First(x => x.Id == request.Id).Status;
+            AdvertisementStatus advertisementStatus = owner.Advertisements.First(x => x.Id == request.Id).Status;
             return new AdvertisementHateoasResponse(request.Id, request.PersonId, advertisementStatus);
         }
     }

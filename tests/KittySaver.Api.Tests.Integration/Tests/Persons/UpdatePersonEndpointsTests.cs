@@ -10,6 +10,8 @@ using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.Hateoas;
+using KittySaver.Shared.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
@@ -84,7 +86,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
             await updateResponse.Content.ReadFromJsonAsync<PersonHateoasResponse>()
             ?? throw new JsonException();
         hateoasResponse.Links.Select(x => x.Rel).Should()
-            .BeEquivalentTo(EndpointNames.SelfRel,
+            .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.UpdatePerson.Rel,
                 EndpointNames.DeletePerson.Rel,
                 EndpointNames.GetCats.Rel,
@@ -140,7 +142,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
             await updateResponse.Content.ReadFromJsonAsync<PersonHateoasResponse>()
             ?? throw new JsonException();
         hateoasResponse.Links.Select(x => x.Rel).Should()
-            .BeEquivalentTo(EndpointNames.SelfRel,
+            .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.UpdatePerson.Rel,
                 EndpointNames.DeletePerson.Rel,
                 EndpointNames.GetCats.Rel,

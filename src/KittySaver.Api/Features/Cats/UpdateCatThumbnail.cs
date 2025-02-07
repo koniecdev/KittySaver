@@ -5,6 +5,7 @@ using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Shared.Infrastructure.Services.FileServices;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
+using KittySaver.Shared.Hateoas;
 using MediatR;
 
 namespace KittySaver.Api.Features.Cats;

@@ -8,6 +8,8 @@ using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Shared.Hateoas;
+using KittySaver.Shared.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
@@ -124,7 +126,7 @@ public class GetAdvertisementEndpointsTests : IAsyncLifetime
             }
         ]);
         advertisement.Links.Select(x => x.Rel).Should().BeEquivalentTo(
-            EndpointNames.SelfRel,
+            EndpointRels.SelfRel,
             EndpointNames.UpdateAdvertisementThumbnail.Rel,
             EndpointNames.UpdateAdvertisement.Rel,
             EndpointNames.DeleteAdvertisement.Rel,
@@ -217,7 +219,7 @@ public class GetAdvertisementEndpointsTests : IAsyncLifetime
             }
         ]);
         advertisement.Links.Select(x => x.Rel).Should().BeEquivalentTo(
-            EndpointNames.SelfRel,
+            EndpointRels.SelfRel,
             EndpointNames.UpdateAdvertisementThumbnail.Rel,
             EndpointNames.UpdateAdvertisement.Rel,
             EndpointNames.DeleteAdvertisement.Rel,

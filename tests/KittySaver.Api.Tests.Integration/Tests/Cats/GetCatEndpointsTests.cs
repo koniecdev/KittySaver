@@ -9,6 +9,8 @@ using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Shared.Hateoas;
+using KittySaver.Shared.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
@@ -94,7 +96,7 @@ public class GetCatEndpointsTests : IAsyncLifetime
         cat.PriorityScore.Should().BeGreaterThan(0);
         cat.IsAssignedToAdvertisement.Should().BeFalse();
         cat.Links.Select(x => x.Rel).Should()
-            .BeEquivalentTo(EndpointNames.SelfRel,
+            .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
                 EndpointNames.UpdateCatThumbnail.Rel);
@@ -144,7 +146,7 @@ public class GetCatEndpointsTests : IAsyncLifetime
         cat.Id.Should().Be(catCreateResponse.Id);
         cat.IsAssignedToAdvertisement.Should().BeTrue();
         cat.Links.Select(x => x.Rel).Should()
-            .BeEquivalentTo(EndpointNames.SelfRel,
+            .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
                 EndpointNames.UpdateCatThumbnail.Rel,
@@ -224,7 +226,7 @@ public class GetCatEndpointsTests : IAsyncLifetime
         cat.Id.Should().Be(catCreateResponse.Id);
         cat.IsAssignedToAdvertisement.Should().BeFalse();
         cat.Links.Select(x => x.Rel).Should()
-            .BeEquivalentTo(EndpointNames.SelfRel,
+            .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
                 EndpointNames.UpdateCatThumbnail.Rel);
@@ -236,7 +238,7 @@ public class GetCatEndpointsTests : IAsyncLifetime
         anotherCat.Id.Should().Be(anotherCat.Id);
         anotherCat.IsAssignedToAdvertisement.Should().BeTrue();
         cat.Links.Select(x => x.Rel).Should()
-            .BeEquivalentTo(EndpointNames.SelfRel,
+            .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
                 EndpointNames.UpdateCatThumbnail.Rel);

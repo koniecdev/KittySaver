@@ -11,7 +11,9 @@ using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Pagination;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.Pagination;
+using KittySaver.Shared.Responses;
 using Shared;
 
 namespace KittySaver.Api.Tests.Integration.Tests.Advertisements;
@@ -158,7 +160,7 @@ public class GetPublicAdvertisementsEndpointsTests : IAsyncLifetime
         advertisements!.Items.Count.Should().Be(2);
         advertisements.Total.Should().Be(2);
         advertisements.Links.Count.Should().Be(2);
-        advertisements.Links.First(x => x.Rel == EndpointNames.SelfRel).Href.Should().Contain("://");
+        advertisements.Links.First(x => x.Rel == EndpointRels.SelfRel).Href.Should().Contain("://");
         advertisements.Links.First(x => x.Rel == "by-page").Href.Should().Contain("://");
         
         AdvertisementResponse firstPersonAdvertisement =
@@ -174,7 +176,7 @@ public class GetPublicAdvertisementsEndpointsTests : IAsyncLifetime
         firstPersonAdvertisement.PickupAddress.BuildingNumber.Should().Be(request.PickupAddressBuildingNumber);
         firstPersonAdvertisement.PriorityScore.Should().BeGreaterThan(0);
         firstPersonAdvertisement.Links.Select(x => x.Rel).Should().BeEquivalentTo(
-            EndpointNames.SelfRel,
+            EndpointRels.SelfRel,
             EndpointNames.GetAdvertisementThumbnail.Rel,
             EndpointNames.GetAdvertisementCats.Rel
         );
@@ -193,7 +195,7 @@ public class GetPublicAdvertisementsEndpointsTests : IAsyncLifetime
         secondPersonAdvertisement.PickupAddress.BuildingNumber.Should().Be(secondRequest.PickupAddressBuildingNumber);
         secondPersonAdvertisement.PriorityScore.Should().BeGreaterThan(0);
         secondPersonAdvertisement.Links.Select(x => x.Rel).Should().BeEquivalentTo(
-            EndpointNames.SelfRel,
+            EndpointRels.SelfRel,
             EndpointNames.GetAdvertisementThumbnail.Rel,
             EndpointNames.GetAdvertisementCats.Rel
         );
@@ -214,7 +216,7 @@ public class GetPublicAdvertisementsEndpointsTests : IAsyncLifetime
         advertisements!.Items.Count.Should().Be(0);
         advertisements.Total.Should().Be(0);
         advertisements.Links.Count.Should().Be(2);
-        advertisements.Links.First(x => x.Rel == EndpointNames.SelfRel).Href.Should().Contain("://");
+        advertisements.Links.First(x => x.Rel == EndpointRels.SelfRel).Href.Should().Contain("://");
         advertisements.Links.First(x => x.Rel == "by-page").Href.Should().Contain("://");
     }
 
