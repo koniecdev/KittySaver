@@ -1,17 +1,14 @@
 ﻿using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Bogus;
 using FluentAssertions;
 using KittySaver.Api.Features.Advertisements;
-using KittySaver.Api.Features.Advertisements.SharedContracts;
-using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Shared.Endpoints;
-using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
-using KittySaver.Domain.Persons;
+using KittySaver.Shared.Hateoas;
+using KittySaver.Shared.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
@@ -30,10 +27,10 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
         _cleanup = new CleanupHelper(_httpClient);
     }
 
-    private readonly Faker<CreatePerson.CreatePersonRequest> _createPersonRequestGenerator =
-        new Faker<CreatePerson.CreatePersonRequest>()
+    private readonly Faker<CreatePersonRequest> _createPersonRequestGenerator =
+        new Faker<CreatePersonRequest>()
             .CustomInstantiator(faker =>
-                new CreatePerson.CreatePersonRequest(
+                new CreatePersonRequest(
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
@@ -48,10 +45,10 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
                     DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 ));
 
-    private readonly Faker<CreateCat.CreateCatRequest> _createCatRequestGenerator =
-        new Faker<CreateCat.CreateCatRequest>()
+    private readonly Faker<CreateCatRequest> _createCatRequestGenerator =
+        new Faker<CreateCatRequest>()
             .CustomInstantiator(faker =>
-                new CreateCat.CreateCatRequest(
+                new CreateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: true,
                     MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
@@ -65,22 +62,22 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
     public async Task ExpireAdvertisement_ShouldReturnSuccess_WhenValidDataIsProvided()
     {
         //Arrange
-        CreatePerson.CreatePersonRequest personRegisterRequest = _createPersonRequestGenerator.Generate();
+        CreatePersonRequest personRegisterRequest = _createPersonRequestGenerator.Generate();
         HttpResponseMessage personRegisterResponseMessage =
             await _httpClient.PostAsJsonAsync("api/v1/persons", personRegisterRequest);
         ApiResponses.CreatedWithIdResponse personRegisterResponse =
             await personRegisterResponseMessage.GetIdResponseFromResponseMessageAsync();
         
-        CreateCat.CreateCatRequest catCreateRequest = _createCatRequestGenerator.Generate();
+        CreateCatRequest catCreateRequest = _createCatRequestGenerator.Generate();
         HttpResponseMessage catCreateResponseMessage =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", catCreateRequest);
         ApiResponses.CreatedWithIdResponse catCreateResponse =
             await catCreateResponseMessage.GetIdResponseFromResponseMessageAsync();
 
-        CreateAdvertisement.CreateAdvertisementRequest request =
-            new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
+        CreateAdvertisementRequest request =
+            new Faker<CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
-                    new CreateAdvertisement.CreateAdvertisementRequest(
+                    new CreateAdvertisementRequest(
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.CountryCode(),
@@ -117,10 +114,10 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().Be(advertisementResponse.Id);
         hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
-        hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.Expired);
+        hateoasResponse.Status.Should().Be(AdvertisementStatus.Expired);
         List<string> expectedRels =
         [
-            EndpointNames.SelfRel,
+            EndpointRels.SelfRel,
             EndpointNames.DeleteAdvertisement.Rel,
             EndpointNames.GetAdvertisementThumbnail.Rel,
             EndpointNames.RefreshAdvertisement.Rel
@@ -132,28 +129,28 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
             await _httpClient.GetFromJsonAsync<AdvertisementResponse>
                 ($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}")
             ?? throw new JsonException();
-        advertisement.Status.Should().Be(Advertisement.AdvertisementStatus.Expired);
+        advertisement.Status.Should().Be(AdvertisementStatus.Expired);
     }
 
     [Fact]
     public async Task ExpireAdvertisement_ShouldReturnBadRequest_WhenDuplicatedRequestOccur()
     {
         //Arrange
-        CreatePerson.CreatePersonRequest personRegisterRequest = _createPersonRequestGenerator.Generate();
+        CreatePersonRequest personRegisterRequest = _createPersonRequestGenerator.Generate();
         HttpResponseMessage personRegisterResponseMessage =
             await _httpClient.PostAsJsonAsync("api/v1/persons", personRegisterRequest);
         ApiResponses.CreatedWithIdResponse personRegisterResponse =
             await personRegisterResponseMessage.GetIdResponseFromResponseMessageAsync();
-        CreateCat.CreateCatRequest catCreateRequest = _createCatRequestGenerator.Generate();
+        CreateCatRequest catCreateRequest = _createCatRequestGenerator.Generate();
         HttpResponseMessage catCreateResponseMessage =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", catCreateRequest);
         ApiResponses.CreatedWithIdResponse catCreateResponse =
             await catCreateResponseMessage.GetIdResponseFromResponseMessageAsync();
 
-        CreateAdvertisement.CreateAdvertisementRequest request =
-            new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
+        CreateAdvertisementRequest request =
+            new Faker<CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
-                    new CreateAdvertisement.CreateAdvertisementRequest(
+                    new CreateAdvertisementRequest(
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.CountryCode(),
@@ -206,7 +203,7 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
     public async Task ExpireAdvertisement_ShouldReturnNotFound_WhenInvalidAdvertisementIdIsProvided()
     {
         //Arrange
-        CreatePerson.CreatePersonRequest personRegisterRequest = _createPersonRequestGenerator.Generate();
+        CreatePersonRequest personRegisterRequest = _createPersonRequestGenerator.Generate();
         HttpResponseMessage personRegisterResponseMessage =
             await _httpClient.PostAsJsonAsync("api/v1/persons", personRegisterRequest);
         ApiResponses.CreatedWithIdResponse personRegisterResponse =

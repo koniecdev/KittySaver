@@ -3,9 +3,6 @@ using System.Net;
 using System.Net.Http.Json;
 using Bogus;
 using FluentAssertions;
-using KittySaver.Api.Features.Advertisements;
-using KittySaver.Api.Features.Persons;
-using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
 using Microsoft.AspNetCore.Http;
@@ -26,10 +23,10 @@ public class GetAdvertisementThumbnailEndpointsTests : IAsyncLifetime
         _cleanup = new CleanupHelper(_httpClient);
     }
 
-    private readonly Faker<CreatePerson.CreatePersonRequest> _createPersonRequestGenerator =
-        new Faker<CreatePerson.CreatePersonRequest>()
+    private readonly Faker<CreatePersonRequest> _createPersonRequestGenerator =
+        new Faker<CreatePersonRequest>()
             .CustomInstantiator(faker =>
-                new CreatePerson.CreatePersonRequest(
+                new CreatePersonRequest(
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
@@ -44,10 +41,10 @@ public class GetAdvertisementThumbnailEndpointsTests : IAsyncLifetime
                     DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 ));
 
-    private readonly Faker<CreateCat.CreateCatRequest> _createCatRequestGenerator =
-        new Faker<CreateCat.CreateCatRequest>()
+    private readonly Faker<CreateCatRequest> _createCatRequestGenerator =
+        new Faker<CreateCatRequest>()
             .CustomInstantiator(faker =>
-                new CreateCat.CreateCatRequest(
+                new CreateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: true,
                     MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
@@ -111,20 +108,20 @@ public class GetAdvertisementThumbnailEndpointsTests : IAsyncLifetime
 
     private async Task<(Guid PersonId, Guid AdvertisementId)> CreateTestAdvertisement()
     {
-        CreatePerson.CreatePersonRequest? createPersonRequest = _createPersonRequestGenerator.Generate();
+        CreatePersonRequest? createPersonRequest = _createPersonRequestGenerator.Generate();
         HttpResponseMessage personResponse = await _httpClient.PostAsJsonAsync("/api/v1/persons", createPersonRequest);
         ApiResponses.CreatedWithIdResponse personResult = await personResponse.GetIdResponseFromResponseMessageAsync();
         
-        CreateCat.CreateCatRequest? createCatRequest = _createCatRequestGenerator.Generate();
+        CreateCatRequest? createCatRequest = _createCatRequestGenerator.Generate();
         HttpResponseMessage catResponse = await _httpClient.PostAsJsonAsync(
             $"/api/v1/persons/{personResult.Id}/cats", 
             createCatRequest);
         ApiResponses.CreatedWithIdResponse catResult = await catResponse.GetIdResponseFromResponseMessageAsync();
         
-        CreateAdvertisement.CreateAdvertisementRequest? createAdvertisementRequest =
-            new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
+        CreateAdvertisementRequest? createAdvertisementRequest =
+            new Faker<CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
-                    new CreateAdvertisement.CreateAdvertisementRequest(
+                    new CreateAdvertisementRequest(
                         CatsIdsToAssign: [catResult.Id],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.CountryCode(),

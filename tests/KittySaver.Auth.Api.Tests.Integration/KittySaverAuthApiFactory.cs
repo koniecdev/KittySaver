@@ -1,6 +1,5 @@
 ﻿using KittySaver.Auth.Api.Shared.Infrastructure.Services;
 using KittySaver.Auth.Api.Shared.Persistence;
-using KittySaver.Auth.Api.Shared.Security;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;

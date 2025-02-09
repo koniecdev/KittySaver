@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using KittySaver.Api.Shared.Abstractions;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace KittySaver.Api.Shared.Endpoints;

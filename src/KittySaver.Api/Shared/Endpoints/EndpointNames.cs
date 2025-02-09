@@ -1,96 +1,96 @@
-﻿namespace KittySaver.Api.Shared.Endpoints;
+﻿using KittySaver.Shared.Hateoas;
+
+namespace KittySaver.Api.Shared.Endpoints;
 
 public static class EndpointNames
 {
-    public const string SelfRel = "self";
-    
     public static readonly EndpointInfo GetApiDiscoveryV1 = 
-        new(ApiDiscovery.GetApiDiscoveryV1Name, SelfRel, HttpVerbs.Get);
+        new(ApiDiscovery.GetApiDiscoveryV1Name, EndpointRels.SelfRel, HttpVerbs.Get);
     
     public static readonly EndpointInfo CreatePerson = 
-        new(Person.CreatePersonName, Person.CreatePersonRel, HttpVerbs.Post);
+        new(Person.CreatePersonName, EndpointRels.Person.CreatePersonRel, HttpVerbs.Post);
     
     public static readonly EndpointInfo UpdatePerson = 
-        new (Person.UpdatePersonName, Person.UpdatePersonRel, HttpVerbs.Put);
+        new (Person.UpdatePersonName, EndpointRels.Person.UpdatePersonRel, HttpVerbs.Put);
     
     public static readonly EndpointInfo DeletePerson = 
-        new (Person.DeletePersonName, Person.DeletePersonRel, HttpVerbs.Delete);
+        new (Person.DeletePersonName, EndpointRels.Person.DeletePersonRel, HttpVerbs.Delete);
     
     public static readonly EndpointInfo GetPerson = 
-        new (Person.GetPersonName, Person.GetPersonRel, HttpVerbs.Get);
+        new (Person.GetPersonName, EndpointRels.Person.GetPersonRel, HttpVerbs.Get);
     
     public static readonly EndpointInfo GetPersons = 
-        new (Person.GetPersonsName, Person.GetPersonsRel, HttpVerbs.Get);
+        new (Person.GetPersonsName, EndpointRels.Person.GetPersonsRel, HttpVerbs.Get);
     
         
     public static readonly EndpointInfo CreateCat = 
-        new (Cat.CreateCatName, Cat.CreateCatRel, HttpVerbs.Post);
+        new (Cat.CreateCatName, EndpointRels.Cat.CreateCatRel, HttpVerbs.Post);
     
     public static readonly EndpointInfo UpdateCat = 
-        new (Cat.UpdateCatName, Cat.UpdateCatRel, HttpVerbs.Put);
+        new (Cat.UpdateCatName, EndpointRels.Cat.UpdateCatRel, HttpVerbs.Put);
     
     public static readonly EndpointInfo DeleteCat = 
-        new (Cat.DeleteCatName, Cat.DeleteCatRel, HttpVerbs.Delete);
+        new (Cat.DeleteCatName, EndpointRels.Cat.DeleteCatRel, HttpVerbs.Delete);
     
     public static readonly EndpointInfo GetCat = 
-        new (Cat.GetCatName, Cat.GetCatRel, HttpVerbs.Get);
+        new (Cat.GetCatName, EndpointRels.Cat.GetCatRel, HttpVerbs.Get);
     
     public static readonly EndpointInfo GetCats = 
-        new (Cat.GetCatsName, Cat.GetCatsRel, HttpVerbs.Get);
+        new (Cat.GetCatsName, EndpointRels.Cat.GetCatsRel, HttpVerbs.Get);
     
     public static readonly EndpointInfo UpdateCatThumbnail = 
-        new (Cat.UpdateCatThumbnailName, Cat.UpdateCatThumbnailRel, HttpVerbs.Put);
+        new (Cat.UpdateCatThumbnailName, EndpointRels.Cat.UpdateCatThumbnailRel, HttpVerbs.Put);
     
     public static readonly EndpointInfo GetCatThumbnail = 
-        new (Cat.GetCatThumbnailName, Cat.GetCatThumbnailRel, HttpVerbs.Get);
+        new (Cat.GetCatThumbnailName, EndpointRels.Cat.GetCatThumbnailRel, HttpVerbs.Get);
     
     public static readonly EndpointInfo CreateAdvertisement = 
-        new (Advertisement.CreateAdvertisementName, Advertisement.CreateAdvertisementRel, HttpVerbs.Post);
+        new (Advertisement.CreateAdvertisementName, EndpointRels.Advertisement.CreateAdvertisementRel, HttpVerbs.Post);
     
     public static readonly EndpointInfo UpdateAdvertisement = 
-        new (Advertisement.UpdateAdvertisementName, Advertisement.UpdateAdvertisementRel, HttpVerbs.Put);
+        new (Advertisement.UpdateAdvertisementName, EndpointRels.Advertisement.UpdateAdvertisementRel, HttpVerbs.Put);
     
     public static readonly EndpointInfo DeleteAdvertisement = 
-        new (Advertisement.DeleteAdvertisementName, Advertisement.DeleteAdvertisementRel, HttpVerbs.Delete);
+        new (Advertisement.DeleteAdvertisementName, EndpointRels.Advertisement.DeleteAdvertisementRel, HttpVerbs.Delete);
     
     public static readonly EndpointInfo GetPublicAdvertisement = 
-        new (Advertisement.GetPublicAdvertisementName, Advertisement.GetPublicAdvertisementRel, HttpVerbs.Get);
+        new (Advertisement.GetPublicAdvertisementName, EndpointRels.Advertisement.GetPublicAdvertisementRel, HttpVerbs.Get);
     
     public static readonly EndpointInfo GetPublicAdvertisements = 
-        new (Advertisement.GetPublicAdvertisementsName, Advertisement.GetPublicAdvertisementsRel, HttpVerbs.Get);
+        new (Advertisement.GetPublicAdvertisementsName, EndpointRels.Advertisement.GetPublicAdvertisementsRel, HttpVerbs.Get);
     
     public static readonly EndpointInfo GetPublicPersonAdvertisements = 
-        new (Advertisement.GetPublicAdvertisementsName, Advertisement.GetPublicPersonAdvertisementsRel, HttpVerbs.Get);
+        new (Advertisement.GetPublicAdvertisementsName, EndpointRels.Advertisement.GetPublicPersonAdvertisementsRel, HttpVerbs.Get);
     
     public static readonly EndpointInfo GetAdvertisement = 
-        new (Advertisement.GetAdvertisementName, Advertisement.GetAdvertisementRel, HttpVerbs.Get);
+        new (Advertisement.GetAdvertisementName, EndpointRels.Advertisement.GetAdvertisementRel, HttpVerbs.Get);
     
     public static readonly EndpointInfo GetAdvertisements = 
-        new (Advertisement.GetAdvertisementsName, Advertisement.GetAdvertisementsRel, HttpVerbs.Get);
+        new (Advertisement.GetAdvertisementsName, EndpointRels.Advertisement.GetAdvertisementsRel, HttpVerbs.Get);
     
     public static readonly EndpointInfo GetPersonAdvertisements = 
-        new (Advertisement.GetAdvertisementsName, Advertisement.GetPersonAdvertisementsRel, HttpVerbs.Get);
+        new (Advertisement.GetAdvertisementsName, EndpointRels.Advertisement.GetPersonAdvertisementsRel, HttpVerbs.Get);
     
     public static readonly EndpointInfo CloseAdvertisement = 
-        new (Advertisement.CloseAdvertisementName, Advertisement.CloseAdvertisementRel, HttpVerbs.Post);
+        new (Advertisement.CloseAdvertisementName, EndpointRels.Advertisement.CloseAdvertisementRel, HttpVerbs.Post);
     
     public static readonly EndpointInfo ExpireAdvertisement = 
-        new (Advertisement.ExpireAdvertisementName, Advertisement.ExpireAdvertisementsRel, HttpVerbs.Post);
+        new (Advertisement.ExpireAdvertisementName, EndpointRels.Advertisement.ExpireAdvertisementsRel, HttpVerbs.Post);
     
     public static readonly EndpointInfo RefreshAdvertisement = 
-        new (Advertisement.RefreshAdvertisementName, Advertisement.RefreshAdvertisementRel, HttpVerbs.Post);
+        new (Advertisement.RefreshAdvertisementName, EndpointRels.Advertisement.RefreshAdvertisementRel, HttpVerbs.Post);
     
     public static readonly EndpointInfo ReassignCatsToAdvertisement = 
-        new (Advertisement.ReassignCatsToAdvertisementName, Advertisement.ReassignCatsToAdvertisementRel, HttpVerbs.Put);
+        new (Advertisement.ReassignCatsToAdvertisementName, EndpointRels.Advertisement.ReassignCatsToAdvertisementRel, HttpVerbs.Put);
     
     public static readonly EndpointInfo UpdateAdvertisementThumbnail = 
-        new (Advertisement.UpdateAdvertisementThumbnailName, Advertisement.UpdateAdvertisementThumbnailRel, HttpVerbs.Put);
+        new (Advertisement.UpdateAdvertisementThumbnailName, EndpointRels.Advertisement.UpdateAdvertisementThumbnailRel, HttpVerbs.Put);
     
     public static readonly EndpointInfo GetAdvertisementThumbnail = 
-        new (Advertisement.GetAdvertisementThumbnailName, Advertisement.GetAdvertisementThumbnailRel, HttpVerbs.Get);
+        new (Advertisement.GetAdvertisementThumbnailName, EndpointRels.Advertisement.GetAdvertisementThumbnailRel, HttpVerbs.Get);
     
     public static readonly EndpointInfo GetAdvertisementCats = 
-        new (Advertisement.GetAdvertisementCatsName, Advertisement.GetAdvertisementCatsRel, HttpVerbs.Get);
+        new (Advertisement.GetAdvertisementCatsName, EndpointRels.Advertisement.GetAdvertisementCatsRel, HttpVerbs.Get);
 
     public static class GroupNames
     {
@@ -115,87 +115,36 @@ public static class EndpointNames
     private static class Person
     {
         public const string CreatePersonName = "CreatePerson";
-        public const string CreatePersonRel = "create-person";
-        
         public const string UpdatePersonName = "UpdatePerson";
-        public const string UpdatePersonRel = "update-person";
-        
         public const string DeletePersonName = "DeletePerson";
-        public const string DeletePersonRel = "delete-person";
-        
         public const string GetPersonName = "GetPerson";
-        public const string GetPersonRel = "get-person";
-        
         public const string GetPersonsName = "GetPersons";
-        public const string GetPersonsRel = "get-persons";
     }
     private static class Cat
     {
         public const string CreateCatName = "CreateCat";
-        public const string CreateCatRel = "create-cat";
-        
         public const string UpdateCatName = "UpdateCat";
-        public const string UpdateCatRel = "update-cat";
-        
         public const string DeleteCatName = "DeleteCat";
-        public const string DeleteCatRel = "delete-cat";
-        
         public const string GetCatName = "GetCat";
-        public const string GetCatRel = "get-cat";
-        
         public const string GetCatsName = "GetCats";
-        public const string GetCatsRel = "get-cats";
-        
         public const string UpdateCatThumbnailName = "UpdateCatThumbnail";
-        public const string UpdateCatThumbnailRel = "update-cat-thumbnail";
-        
         public const string GetCatThumbnailName = "GetCatThumbnail";
-        public const string GetCatThumbnailRel = "get-cat-thumbnail";
     }
     private static class Advertisement
     {
         public const string CreateAdvertisementName = "CreateAdvertisement";
-        public const string CreateAdvertisementRel = "create-advertisement";
-        
         public const string UpdateAdvertisementName = "UpdateAdvertisement";
-        public const string UpdateAdvertisementRel = "update-advertisement";
-        
         public const string DeleteAdvertisementName = "DeleteAdvertisement";
-        public const string DeleteAdvertisementRel = "delete-advertisement";
-        
         public const string GetAdvertisementName = "GetAdvertisement";
-        public const string GetAdvertisementRel = "get-advertisement";
-        
         public const string GetAdvertisementCatsName = "GetAdvertisementCats";
-        public const string GetAdvertisementCatsRel = "get-advertisement-cats";
-
         public const string GetAdvertisementsName = "GetAdvertisements";
-        public const string GetAdvertisementsRel = "get-advertisements";
-        public const string GetPersonAdvertisementsRel = "get-advertisements-by-personid";
-        
         public const string GetPublicAdvertisementName = "GetPublicAdvertisement";
-        public const string GetPublicAdvertisementRel = "get-public-advertisement";
-        
         public const string GetPublicAdvertisementsName = "GetPublicAdvertisements";
-        public const string GetPublicAdvertisementsRel = "get-public-advertisements";
-        public const string GetPublicPersonAdvertisementsRel = "get-public-advertisements-by-personid";
-        
         public const string CloseAdvertisementName = "CloseAdvertisement";
-        public const string CloseAdvertisementRel = "close-advertisement";
-        
         public const string ExpireAdvertisementName = "ExpireAdvertisement";
-        public const string ExpireAdvertisementsRel = "expire-advertisement";
-        
         public const string RefreshAdvertisementName = "RefreshAdvertisement";
-        public const string RefreshAdvertisementRel = "refresh-advertisement";
-        
         public const string ReassignCatsToAdvertisementName = "ReassignCatsToAdvertisement";
-        public const string ReassignCatsToAdvertisementRel = "reassign-cats-to-advertisement";
-        
         public const string UpdateAdvertisementThumbnailName = "UpdateAdvertisementThumbnail";
-        public const string UpdateAdvertisementThumbnailRel = "update-advertisement-thumbnail";
-        
         public const string GetAdvertisementThumbnailName = "GetAdvertisementThumbnail";
-        public const string GetAdvertisementThumbnailRel = "get-advertisement-thumbnail";
     }
 }

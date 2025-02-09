@@ -3,12 +3,11 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Bogus;
 using FluentAssertions;
-using KittySaver.Api.Features.Advertisements;
-using KittySaver.Api.Features.Cats.SharedContracts;
-using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Shared.Hateoas;
+using KittySaver.Shared.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
@@ -27,10 +26,10 @@ public class GetCatEndpointsTests : IAsyncLifetime
         _cleanup = new CleanupHelper(_httpClient);
     }
 
-    private readonly CreatePerson.CreatePersonRequest _createPersonRequest =
-        new Faker<CreatePerson.CreatePersonRequest>()
+    private readonly CreatePersonRequest _createPersonRequest =
+        new Faker<CreatePersonRequest>()
             .CustomInstantiator(faker =>
-                new CreatePerson.CreatePersonRequest(
+                new CreatePersonRequest(
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
@@ -45,10 +44,10 @@ public class GetCatEndpointsTests : IAsyncLifetime
                     DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 )).Generate();
 
-    private readonly CreateCat.CreateCatRequest _createCatRequest =
-        new Faker<CreateCat.CreateCatRequest>()
+    private readonly CreateCatRequest _createCatRequest =
+        new Faker<CreateCatRequest>()
             .CustomInstantiator(faker =>
-                new CreateCat.CreateCatRequest(
+                new CreateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: true,
                     MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
@@ -94,7 +93,7 @@ public class GetCatEndpointsTests : IAsyncLifetime
         cat.PriorityScore.Should().BeGreaterThan(0);
         cat.IsAssignedToAdvertisement.Should().BeFalse();
         cat.Links.Select(x => x.Rel).Should()
-            .BeEquivalentTo(EndpointNames.SelfRel,
+            .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
                 EndpointNames.UpdateCatThumbnail.Rel);
@@ -116,10 +115,10 @@ public class GetCatEndpointsTests : IAsyncLifetime
         ApiResponses.CreatedWithIdResponse catCreateResponse =
             await catCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        CreateAdvertisement.CreateAdvertisementRequest request =
-            new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
+        CreateAdvertisementRequest request =
+            new Faker<CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
-                    new CreateAdvertisement.CreateAdvertisementRequest(
+                    new CreateAdvertisementRequest(
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.CountryCode(),
@@ -144,7 +143,7 @@ public class GetCatEndpointsTests : IAsyncLifetime
         cat.Id.Should().Be(catCreateResponse.Id);
         cat.IsAssignedToAdvertisement.Should().BeTrue();
         cat.Links.Select(x => x.Rel).Should()
-            .BeEquivalentTo(EndpointNames.SelfRel,
+            .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
                 EndpointNames.UpdateCatThumbnail.Rel,
@@ -167,10 +166,10 @@ public class GetCatEndpointsTests : IAsyncLifetime
         ApiResponses.CreatedWithIdResponse catCreateResponse =
             await catCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        CreateAdvertisement.CreateAdvertisementRequest request =
-            new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
+        CreateAdvertisementRequest request =
+            new Faker<CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
-                    new CreateAdvertisement.CreateAdvertisementRequest(
+                    new CreateAdvertisementRequest(
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.CountryCode(),
@@ -187,10 +186,10 @@ public class GetCatEndpointsTests : IAsyncLifetime
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
         ApiResponses.CreatedWithIdResponse advertisementResponse =
             await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
-        CreateCat.CreateCatRequest anotherCatCreateRequest =
-            new Faker<CreateCat.CreateCatRequest>()
+        CreateCatRequest anotherCatCreateRequest =
+            new Faker<CreateCatRequest>()
                 .CustomInstantiator(faker =>
-                    new CreateCat.CreateCatRequest(
+                    new CreateCatRequest(
                         Name: faker.Name.FirstName(),
                         IsCastrated: true,
                         MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
@@ -205,7 +204,7 @@ public class GetCatEndpointsTests : IAsyncLifetime
         ApiResponses.CreatedWithIdResponse anotherCatCreateResponse =
             await anotherCatCreateResponseMessage.GetIdResponseFromResponseMessageAsync();
 
-        ReassignCatsToAdvertisement.ReassignCatsToAdvertisementRequest reassignCatsRequest = new([
+        ReassignCatsToAdvertisementRequest reassignCatsRequest = new([
             anotherCatCreateResponse.Id
         ]);
 
@@ -224,7 +223,7 @@ public class GetCatEndpointsTests : IAsyncLifetime
         cat.Id.Should().Be(catCreateResponse.Id);
         cat.IsAssignedToAdvertisement.Should().BeFalse();
         cat.Links.Select(x => x.Rel).Should()
-            .BeEquivalentTo(EndpointNames.SelfRel,
+            .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
                 EndpointNames.UpdateCatThumbnail.Rel);
@@ -236,7 +235,7 @@ public class GetCatEndpointsTests : IAsyncLifetime
         anotherCat.Id.Should().Be(anotherCat.Id);
         anotherCat.IsAssignedToAdvertisement.Should().BeTrue();
         cat.Links.Select(x => x.Rel).Should()
-            .BeEquivalentTo(EndpointNames.SelfRel,
+            .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
                 EndpointNames.UpdateCatThumbnail.Rel);

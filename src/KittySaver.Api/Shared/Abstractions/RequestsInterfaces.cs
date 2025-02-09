@@ -1,5 +1,4 @@
-﻿using KittySaver.Api.Features.Advertisements.SharedContracts;
-using MediatR;
+﻿using MediatR;
 
 namespace KittySaver.Api.Shared.Abstractions;
 
@@ -26,7 +25,7 @@ public interface ICreatePersonRequest
 }
 public interface IPersonRequest
 {
-    public Guid IdOrUserIdentityId { get; }
+    public Guid Id { get; }
 }
 
 public interface IPagedQuery;

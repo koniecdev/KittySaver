@@ -1,9 +1,11 @@
 ﻿@page "/advertisement/{Id:guid}"
 @* @attribute [Authorize] *@
 @* @using Microsoft.AspNetCore.Authorization *@
-@using KittySaver.Wasm.Shared.Components.Advertisement
+@using KittySaver.Shared.Hateoas
+@using KittySaver.Shared.Pagination
+@using KittySaver.Shared.Responses
+@using KittySaver.Wasm.Shared.Components
 @using KittySaver.Wasm.Shared.HttpClients
-@using KittySaver.Wasm.Shared.HttpClients.MainApiResponses
 @inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
 @inject IAdvertisementStateService AdvertisementState
 @inject IApiClient MainApiClient

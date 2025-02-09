@@ -1,4 +1,4 @@
-﻿using KittySaver.Api.Shared.Abstractions.Clients;
+﻿using KittySaver.Api.Shared.Infrastructure.Clients;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Persons;
@@ -15,14 +15,6 @@ public class PersonRepository(ApplicationWriteDbContext writeDb, IAuthApiHttpCli
             .Include(person => person.Advertisements)
             .FirstOrDefaultAsync(cancellationToken) 
             ?? throw new NotFoundExceptions.PersonNotFoundException(id);
-    
-    public async Task<Person> GetPersonByIdOrIdentityIdAsync(Guid idOrUserIdentityId, CancellationToken cancellationToken)
-        => await writeDb.Persons
-               .Where(person => person.Id == idOrUserIdentityId || person.UserIdentityId == idOrUserIdentityId)
-               .Include(person => person.Cats)
-               .Include(person => person.Advertisements)
-               .FirstOrDefaultAsync(cancellationToken)
-               ?? throw new NotFoundExceptions.PersonNotFoundException(idOrUserIdentityId);
     
     public async Task InsertAsync(Person person, string password)
     {

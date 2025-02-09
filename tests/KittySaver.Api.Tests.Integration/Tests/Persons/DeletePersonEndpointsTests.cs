@@ -3,9 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Bogus;
 using FluentAssertions;
-using KittySaver.Api.Features.Advertisements;
 using KittySaver.Api.Features.Persons;
-using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
 using Microsoft.AspNetCore.Http;
@@ -26,10 +24,10 @@ public class DeletePersonEndpointsTests : IAsyncLifetime
         _cleanup = new CleanupHelper(_httpClient);
     }
 
-    private readonly Faker<CreatePerson.CreatePersonRequest> _createPersonRequestGenerator =
-        new Faker<CreatePerson.CreatePersonRequest>()
+    private readonly Faker<CreatePersonRequest> _createPersonRequestGenerator =
+        new Faker<CreatePersonRequest>()
             .CustomInstantiator(faker =>
-                new CreatePerson.CreatePersonRequest(
+                new CreatePersonRequest(
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
@@ -44,10 +42,10 @@ public class DeletePersonEndpointsTests : IAsyncLifetime
                     DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 ));
 
-    private readonly Faker<CreateCat.CreateCatRequest> _createCatRequestGenerator =
-        new Faker<CreateCat.CreateCatRequest>()
+    private readonly Faker<CreateCatRequest> _createCatRequestGenerator =
+        new Faker<CreateCatRequest>()
             .CustomInstantiator(faker =>
-                new CreateCat.CreateCatRequest(
+                new CreateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: true,
                     MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
@@ -61,7 +59,7 @@ public class DeletePersonEndpointsTests : IAsyncLifetime
     public async Task DeletePerson_ShouldReturnSuccess_WhenValidDataIsProvided()
     {
         //Arrange
-        CreatePerson.CreatePersonRequest createRequest = _createPersonRequestGenerator.Generate();
+        CreatePersonRequest createRequest = _createPersonRequestGenerator.Generate();
         HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/persons", createRequest);
         ApiResponses.CreatedWithIdResponse registeredPersonResponse =
             await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
@@ -84,54 +82,26 @@ public class DeletePersonEndpointsTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task DeletePerson_ShouldReturnSuccess_WhenValidDataIsProvidedWithUserIdentityId()
-    {
-        //Arrange
-        CreatePerson.CreatePersonRequest createRequest = _createPersonRequestGenerator.Generate();
-        HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/persons", createRequest);
-        ApiResponses.CreatedWithIdResponse registeredPersonResponse =
-            await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
-        PersonResponse person =
-            await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{registeredPersonResponse.Id}")
-            ?? throw new JsonException();
-
-        //Act
-        HttpResponseMessage deleteResponse = await _httpClient.DeleteAsync($"api/v1/persons/{person.UserIdentityId}");
-
-        //Assert
-        deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
-
-        HttpResponseMessage userNotFoundProblemDetailsMessage =
-            await _httpClient.GetAsync($"api/v1/persons/{registeredPersonResponse.Id}");
-        userNotFoundProblemDetailsMessage.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        ProblemDetails? notFoundProblemDetails =
-            await userNotFoundProblemDetailsMessage.Content.ReadFromJsonAsync<ProblemDetails>();
-        notFoundProblemDetails.Should().NotBeNull();
-        notFoundProblemDetails!.Status.Should().Be(StatusCodes.Status404NotFound);
-    }
-
-    [Fact]
     public async Task DeletePerson_ShouldReturnSuccess_WhenUserHaveAdvertisement()
     {
         //Arrange
-        CreatePerson.CreatePersonRequest createPersonRequest = _createPersonRequestGenerator.Generate();
+        CreatePersonRequest createPersonRequest = _createPersonRequestGenerator.Generate();
         HttpResponseMessage createPersonResponseMessage =
             await _httpClient.PostAsJsonAsync("api/v1/persons", createPersonRequest);
         ApiResponses.CreatedWithIdResponse createPersonResponse =
             await createPersonResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        CreateCat.CreateCatRequest catCreateRequest = _createCatRequestGenerator.Generate();
+        CreateCatRequest catCreateRequest = _createCatRequestGenerator.Generate();
         HttpResponseMessage catCreateResponseMessage =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{createPersonResponse.Id}/cats", catCreateRequest);
         ApiResponses.CreatedWithIdResponse catCreateResponse =
             await catCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
 
-        CreateAdvertisement.CreateAdvertisementRequest request =
-            new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
+        CreateAdvertisementRequest request =
+            new Faker<CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
-                    new CreateAdvertisement.CreateAdvertisementRequest(
+                    new CreateAdvertisementRequest(
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.CountryCode(),
@@ -194,11 +164,11 @@ public class DeletePersonEndpointsTests : IAsyncLifetime
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
         validationProblemDetails.Errors.Count.Should().Be(1);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo([
-            nameof(DeletePerson.DeletePersonCommand.IdOrUserIdentityId)
+            nameof(DeletePerson.DeletePersonCommand.Id)
         ]);
         validationProblemDetails.Errors.Values.Count.Should().Be(1);
-        validationProblemDetails.Errors[nameof(DeletePerson.DeletePersonCommand.IdOrUserIdentityId)][0]
-            .Should().Be("'Id Or User Identity Id' must not be empty.");
+        validationProblemDetails.Errors[nameof(DeletePerson.DeletePersonCommand.Id)][0]
+            .Should().Be("'Id' must not be empty.");
     }
 
     public Task InitializeAsync()

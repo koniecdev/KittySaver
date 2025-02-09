@@ -2,7 +2,7 @@
 using System.Net.Http.Json;
 using Bogus;
 using FluentAssertions;
-using KittySaver.Auth.Api.Features.ApplicationUsers;
+using KittySaver.Shared.Requests;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
@@ -14,10 +14,10 @@ public class RegisterApplicationUserEndpointTests(KittySaverAuthApiFactory appFa
 {
     private readonly HttpClient _httpClient = appFactory.CreateClient();
 
-    private readonly Faker<Register.RegisterRequest> _createApplicationUserRequestGenerator =
-        new Faker<Register.RegisterRequest>()
+    private readonly Faker<RegisterRequest> _createApplicationUserRequestGenerator =
+        new Faker<RegisterRequest>()
             .CustomInstantiator( faker =>
-                new Register.RegisterRequest(
+                new RegisterRequest(
                     UserName: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
@@ -28,7 +28,7 @@ public class RegisterApplicationUserEndpointTests(KittySaverAuthApiFactory appFa
     public async Task Register_ShouldRegisterUser_WhenValidDataIsProvided()
     {
         //Arrange
-        Register.RegisterRequest request = _createApplicationUserRequestGenerator.Generate();
+        RegisterRequest request = _createApplicationUserRequestGenerator.Generate();
         
         //Act
         HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/application-users/register", request);
@@ -46,9 +46,9 @@ public class RegisterApplicationUserEndpointTests(KittySaverAuthApiFactory appFa
     public async Task Register_ShouldReturnBadRequest_WhenInvalidEmailIsProvided(string email)
     {
         //Arrange
-        Register.RegisterRequest request = new Faker<Register.RegisterRequest>()
+        RegisterRequest request = new Faker<RegisterRequest>()
             .CustomInstantiator( faker =>
-                new Register.RegisterRequest(
+                new RegisterRequest(
                     UserName: faker.Person.FirstName,
                     Email: email,
                     PhoneNumber: faker.Person.Phone,
@@ -70,7 +70,7 @@ public class RegisterApplicationUserEndpointTests(KittySaverAuthApiFactory appFa
     public async Task Register_ShouldReturnBadRequest_WhenEmptyDataIsProvided()
     {
         //Arrange
-        Register.RegisterRequest request = new(
+        RegisterRequest request = new(
             UserName: "",
             Email: "",
             PhoneNumber: "",
@@ -101,9 +101,9 @@ public class RegisterApplicationUserEndpointTests(KittySaverAuthApiFactory appFa
     public async Task Register_ShouldReturnBadRequest_WhenInvalidPasswordIsProvided(string password)
     {
         //Arrange
-        Register.RegisterRequest request = new Faker<Register.RegisterRequest>()
+        RegisterRequest request = new Faker<RegisterRequest>()
             .CustomInstantiator( faker =>
-                new Register.RegisterRequest(
+                new RegisterRequest(
                     UserName: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
@@ -125,7 +125,7 @@ public class RegisterApplicationUserEndpointTests(KittySaverAuthApiFactory appFa
     public async Task Register_ShouldReturnBadRequest_WhenDuplicatedRequestOccur()
     {
         //Arrange
-        Register.RegisterRequest request = _createApplicationUserRequestGenerator.Generate();
+        RegisterRequest request = _createApplicationUserRequestGenerator.Generate();
         _ = await _httpClient.PostAsJsonAsync("api/v1/application-users/register", request);
         
         //Act

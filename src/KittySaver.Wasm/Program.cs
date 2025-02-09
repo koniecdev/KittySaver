@@ -3,9 +3,8 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using KittySaver.Wasm;
 using KittySaver.Wasm.Shared.Auth;
-using KittySaver.Wasm.Shared.Components.Advertisement;
+using KittySaver.Wasm.Shared.Components;
 using KittySaver.Wasm.Shared.HttpClients;
-using KittySaver.Wasm.Shared.HttpClients.MainApiResponses;
 using Microsoft.AspNetCore.Components.Authorization;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);

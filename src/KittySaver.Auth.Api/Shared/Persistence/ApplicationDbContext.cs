@@ -1,11 +1,9 @@
 ﻿using KittySaver.Auth.Api.Shared.Domain.Entites;
 using KittySaver.Auth.Api.Shared.Infrastructure.Services;
-using KittySaver.Auth.Api.Shared.Security;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace KittySaver.Auth.Api.Shared.Persistence;
 

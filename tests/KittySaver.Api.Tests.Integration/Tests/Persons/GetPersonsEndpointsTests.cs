@@ -2,12 +2,10 @@
 using System.Net.Http.Json;
 using Bogus;
 using FluentAssertions;
-using KittySaver.Api.Features.Persons;
-using KittySaver.Api.Features.Persons.SharedContracts;
-using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Endpoints;
-using KittySaver.Api.Shared.Pagination;
 using KittySaver.Api.Tests.Integration.Helpers;
+using KittySaver.Shared.Hateoas;
+using KittySaver.Shared.Pagination;
+using KittySaver.Shared.Responses;
 
 namespace KittySaver.Api.Tests.Integration.Tests.Persons;
 
@@ -23,10 +21,10 @@ public class GetPersonsEndpointsTests : IAsyncLifetime
         _cleanup = new CleanupHelper(_httpClient);
     }
 
-    private readonly Faker<CreatePerson.CreatePersonRequest> _createPersonRequestGenerator =
-        new Faker<CreatePerson.CreatePersonRequest>()
+    private readonly Faker<CreatePersonRequest> _createPersonRequestGenerator =
+        new Faker<CreatePersonRequest>()
             .CustomInstantiator(faker =>
-                new CreatePerson.CreatePersonRequest(
+                new CreatePersonRequest(
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
@@ -45,7 +43,7 @@ public class GetPersonsEndpointsTests : IAsyncLifetime
     public async Task GetPersons_ShouldReturnUser_WhenUserExist()
     {
         //Arrange
-        CreatePerson.CreatePersonRequest createRequest = _createPersonRequestGenerator.Generate();
+        CreatePersonRequest createRequest = _createPersonRequestGenerator.Generate();
         await _httpClient.PostAsJsonAsync("api/v1/persons", createRequest);
         //Act
         HttpResponseMessage response = await _httpClient.GetAsync("/api/v1/persons");
@@ -56,7 +54,7 @@ public class GetPersonsEndpointsTests : IAsyncLifetime
         persons!.Items.Count.Should().BeGreaterThan(0);
         persons.Total.Should().Be(1);
         persons.Links.Count.Should().Be(2);
-        persons.Links.First(x => x.Rel == EndpointNames.SelfRel).Href.Should().Contain("://");
+        persons.Links.First(x => x.Rel == EndpointRels.SelfRel).Href.Should().Contain("://");
         persons.Links.First(x => x.Rel == "by-page").Href.Should().Contain("://");
         PersonResponse registeredPerson = persons.Items.First();
         registeredPerson.Id.Should().NotBeEmpty();
@@ -76,7 +74,7 @@ public class GetPersonsEndpointsTests : IAsyncLifetime
         PagedList<PersonResponse>? persons = await response.Content.ReadFromJsonAsync<PagedList<PersonResponse>>();
         persons?.Items.Count.Should().Be(0);
         persons!.Links.Count.Should().Be(2);
-        persons.Links.First(x => x.Rel == EndpointNames.SelfRel).Href.Should().Contain("://");
+        persons.Links.First(x => x.Rel == EndpointRels.SelfRel).Href.Should().Contain("://");
         persons.Links.First(x => x.Rel == "by-page").Href.Should().Contain("://");
         persons.Total.Should().Be(0);
     }
@@ -86,7 +84,7 @@ public class GetPersonsEndpointsTests : IAsyncLifetime
     {
         //Arrange
         // Person 1: Primary resident in Houston with California address
-        CreatePerson.CreatePersonRequest createRequest1 = new(
+        CreatePersonRequest createRequest1 = new(
             Nickname: "Sophia",
             Email: "sophia80@yahoo.com",
             PhoneNumber: "+12774688688",
@@ -102,7 +100,7 @@ public class GetPersonsEndpointsTests : IAsyncLifetime
         );
 
         // Person 2: Miami resident with California mailing address
-        CreatePerson.CreatePersonRequest createRequest2 = new(
+        CreatePersonRequest createRequest2 = new(
             Nickname: "Noah",
             Email: "noah852@gmail.com",
             PhoneNumber: "+19486935859",
@@ -118,7 +116,7 @@ public class GetPersonsEndpointsTests : IAsyncLifetime
         );
 
         // Person 3: Houston resident with New York address
-        CreatePerson.CreatePersonRequest createRequest3 = new(
+        CreatePersonRequest createRequest3 = new(
             Nickname: "Emma",
             Email: "emma413@gmail.com",
             PhoneNumber: "+11869419170",
@@ -134,7 +132,7 @@ public class GetPersonsEndpointsTests : IAsyncLifetime
         );
 
         // Person 4: Miami resident with California address
-        CreatePerson.CreatePersonRequest createRequest4 = new(
+        CreatePersonRequest createRequest4 = new(
             Nickname: "Noah",
             Email: "noah8@gmail.com",
             PhoneNumber: "+18326616873",

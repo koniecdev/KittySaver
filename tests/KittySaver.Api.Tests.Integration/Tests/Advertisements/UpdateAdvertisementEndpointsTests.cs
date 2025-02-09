@@ -2,16 +2,12 @@
 using System.Net.Http.Json;
 using Bogus;
 using FluentAssertions;
-using KittySaver.Api.Features.Advertisements;
-using KittySaver.Api.Features.Advertisements.SharedContracts;
-using KittySaver.Api.Features.Persons;
-using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Shared.Endpoints;
-using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
-using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.Hateoas;
+using KittySaver.Shared.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
@@ -31,10 +27,10 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
         _cleanup = new CleanupHelper(_httpClient);
     }
 
-    private readonly Faker<CreatePerson.CreatePersonRequest> _createPersonRequestGenerator =
-        new Faker<CreatePerson.CreatePersonRequest>()
+    private readonly Faker<CreatePersonRequest> _createPersonRequestGenerator =
+        new Faker<CreatePersonRequest>()
             .CustomInstantiator(faker =>
-                new CreatePerson.CreatePersonRequest(
+                new CreatePersonRequest(
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
@@ -49,10 +45,10 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
                     DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 ));
 
-    private readonly Faker<CreateCat.CreateCatRequest> _createCatRequestGenerator =
-        new Faker<CreateCat.CreateCatRequest>()
+    private readonly Faker<CreateCatRequest> _createCatRequestGenerator =
+        new Faker<CreateCatRequest>()
             .CustomInstantiator(faker =>
-                new CreateCat.CreateCatRequest(
+                new CreateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: true,
                     MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
@@ -66,7 +62,7 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
     public async Task UpdateAdvertisement_ShouldReturnSuccess_WhenValidDataIsProvided()
     {
         //Arrange
-        CreatePerson.CreatePersonRequest? createPersonRequest = _createPersonRequestGenerator.Generate();
+        CreatePersonRequest? createPersonRequest = _createPersonRequestGenerator.Generate();
         HttpResponseMessage createPersonResponseMessage =
             await _httpClient.PostAsJsonAsync("api/v1/persons", createPersonRequest);
         ApiResponses.CreatedWithIdResponse createPersonResponse =
@@ -76,16 +72,16 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
             await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{createPersonResponse.Id}")
             ?? throw new JsonException();
 
-        CreateCat.CreateCatRequest createCatRequest = _createCatRequestGenerator.Generate();
+        CreateCatRequest createCatRequest = _createCatRequestGenerator.Generate();
         HttpResponseMessage createCatResponseMessage =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{person.Id}/cats", createCatRequest);
         ApiResponses.CreatedWithIdResponse createCatResponse =
             await createCatResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        CreateAdvertisement.CreateAdvertisementRequest createAdvertisementRequest =
-            new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
+        CreateAdvertisementRequest createAdvertisementRequest =
+            new Faker<CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
-                    new CreateAdvertisement.CreateAdvertisementRequest(
+                    new CreateAdvertisementRequest(
                         CatsIdsToAssign: [createCatResponse.Id],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.CountryCode(),
@@ -104,10 +100,10 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
             await createAdvertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
 
         //Act
-        UpdateAdvertisement.UpdateAdvertisementRequest request =
-            new Faker<UpdateAdvertisement.UpdateAdvertisementRequest>()
+        UpdateAdvertisementRequest request =
+            new Faker<UpdateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
-                    new UpdateAdvertisement.UpdateAdvertisementRequest(
+                    new UpdateAdvertisementRequest(
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.CountryCode(),
                         PickupAddressState: faker.Address.State(),
@@ -128,9 +124,9 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Id.Should().Be(advertisementResponse.Id);
         hateoasResponse.PersonId.Should().Be(createPersonResponse.Id);
-        hateoasResponse.Status.Should().Be(Advertisement.AdvertisementStatus.ThumbnailNotUploaded);
+        hateoasResponse.Status.Should().Be(AdvertisementStatus.ThumbnailNotUploaded);
         hateoasResponse.Links.Select(x => x.Rel).Should().BeEquivalentTo(
-            EndpointNames.SelfRel,
+            EndpointRels.SelfRel,
             EndpointNames.UpdateAdvertisementThumbnail.Rel,
             EndpointNames.DeleteAdvertisement.Rel,
             EndpointNames.UpdateAdvertisement.Rel,
@@ -142,20 +138,20 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
     public async Task UpdateAdvertisement_ShouldReturnBadRequest_WhenTooLongDataAreProvided()
     {
         //Arrange
-        CreatePerson.CreatePersonRequest personRegisterRequest = _createPersonRequestGenerator.Generate();
+        CreatePersonRequest personRegisterRequest = _createPersonRequestGenerator.Generate();
         HttpResponseMessage personRegisterResponseMessage =
             await _httpClient.PostAsJsonAsync("api/v1/persons", personRegisterRequest);
         ApiResponses.CreatedWithIdResponse personRegisterResponse =
             await personRegisterResponseMessage.GetIdResponseFromResponseMessageAsync();
-        CreateCat.CreateCatRequest catCreateRequest = _createCatRequestGenerator.Generate();
+        CreateCatRequest catCreateRequest = _createCatRequestGenerator.Generate();
         HttpResponseMessage catCreateResponseMessage =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", catCreateRequest);
         ApiResponses.CreatedWithIdResponse catCreateResponse =
             await catCreateResponseMessage.GetIdResponseFromResponseMessageAsync();
-        CreateAdvertisement.CreateAdvertisementRequest createAdvertisementRequest =
-            new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
+        CreateAdvertisementRequest createAdvertisementRequest =
+            new Faker<CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
-                    new CreateAdvertisement.CreateAdvertisementRequest(
+                    new CreateAdvertisementRequest(
                         CatsIdsToAssign: [catCreateResponse.Id],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.CountryCode(),
@@ -173,7 +169,7 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
             await createAdvertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
 
         //Act
-        UpdateAdvertisement.UpdateAdvertisementRequest request = new(
+        UpdateAdvertisementRequest request = new(
             Description: new string('A', Description.MaxLength + 1),
             PickupAddressCountry: new string('A', Address.CountryMaxLength + 1),
             PickupAddressState: new string('A', Address.StateMaxLength + 1),
@@ -196,63 +192,63 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
         validationProblemDetails.Errors.Count.Should().Be(9);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(
-            nameof(UpdateAdvertisement.UpdateAdvertisementRequest.Description),
-            nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressCountry),
-            nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressState),
-            nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressZipCode),
-            nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressCity),
-            nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressStreet),
-            nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressBuildingNumber),
-            nameof(UpdateAdvertisement.UpdateAdvertisementRequest.ContactInfoEmail),
-            nameof(UpdateAdvertisement.UpdateAdvertisementRequest.ContactInfoPhoneNumber)
+            nameof(UpdateAdvertisementRequest.Description),
+            nameof(UpdateAdvertisementRequest.PickupAddressCountry),
+            nameof(UpdateAdvertisementRequest.PickupAddressState),
+            nameof(UpdateAdvertisementRequest.PickupAddressZipCode),
+            nameof(UpdateAdvertisementRequest.PickupAddressCity),
+            nameof(UpdateAdvertisementRequest.PickupAddressStreet),
+            nameof(UpdateAdvertisementRequest.PickupAddressBuildingNumber),
+            nameof(UpdateAdvertisementRequest.ContactInfoEmail),
+            nameof(UpdateAdvertisementRequest.ContactInfoPhoneNumber)
         );
         validationProblemDetails.Errors.Values.Count.Should().Be(9);
-        validationProblemDetails.Errors[nameof(UpdateAdvertisement.UpdateAdvertisementRequest.Description)][0]
+        validationProblemDetails.Errors[nameof(UpdateAdvertisementRequest.Description)][0]
             .Should()
             .StartWith(
-                $"The length of '{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisement.UpdateAdvertisementRequest.Description))}' must be {Description.MaxLength} characters or fewer. You entered");
+                $"The length of '{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisementRequest.Description))}' must be {Description.MaxLength} characters or fewer. You entered");
 
-        validationProblemDetails.Errors[nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressCountry)][0]
+        validationProblemDetails.Errors[nameof(UpdateAdvertisementRequest.PickupAddressCountry)][0]
             .Should()
             .StartWith(
-                $"The length of '{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressCountry))}' must be {Address.CountryMaxLength} characters or fewer. You entered");
+                $"The length of '{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisementRequest.PickupAddressCountry))}' must be {Address.CountryMaxLength} characters or fewer. You entered");
 
-        validationProblemDetails.Errors[nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressState)][0]
+        validationProblemDetails.Errors[nameof(UpdateAdvertisementRequest.PickupAddressState)][0]
             .Should()
             .StartWith(
-                $"The length of '{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressState))}' must be {Address.StateMaxLength} characters or fewer. You entered");
+                $"The length of '{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisementRequest.PickupAddressState))}' must be {Address.StateMaxLength} characters or fewer. You entered");
 
-        validationProblemDetails.Errors[nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressZipCode)][0]
+        validationProblemDetails.Errors[nameof(UpdateAdvertisementRequest.PickupAddressZipCode)][0]
             .Should()
             .StartWith(
-                $"The length of '{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressZipCode))}' must be {Address.ZipCodeMaxLength} characters or fewer. You entered");
+                $"The length of '{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisementRequest.PickupAddressZipCode))}' must be {Address.ZipCodeMaxLength} characters or fewer. You entered");
 
-        validationProblemDetails.Errors[nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressCity)][0]
+        validationProblemDetails.Errors[nameof(UpdateAdvertisementRequest.PickupAddressCity)][0]
             .Should()
             .StartWith(
-                $"The length of '{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressCity))}' must be {Address.CityMaxLength} characters or fewer. You entered");
+                $"The length of '{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisementRequest.PickupAddressCity))}' must be {Address.CityMaxLength} characters or fewer. You entered");
 
-        validationProblemDetails.Errors[nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressStreet)][0]
+        validationProblemDetails.Errors[nameof(UpdateAdvertisementRequest.PickupAddressStreet)][0]
             .Should()
             .StartWith(
-                $"The length of '{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressStreet))}' must be {Address.StreetMaxLength} characters or fewer. You entered");
+                $"The length of '{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisementRequest.PickupAddressStreet))}' must be {Address.StreetMaxLength} characters or fewer. You entered");
 
         validationProblemDetails.Errors[
-                nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressBuildingNumber)][0]
+                nameof(UpdateAdvertisementRequest.PickupAddressBuildingNumber)][0]
             .Should()
             .StartWith(
-                $"The length of '{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressBuildingNumber))}' must be {Address.BuildingNumberMaxLength} characters or fewer. You entered");
+                $"The length of '{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisementRequest.PickupAddressBuildingNumber))}' must be {Address.BuildingNumberMaxLength} characters or fewer. You entered");
 
-        validationProblemDetails.Errors[nameof(UpdateAdvertisement.UpdateAdvertisementRequest.ContactInfoEmail)][0]
+        validationProblemDetails.Errors[nameof(UpdateAdvertisementRequest.ContactInfoEmail)][0]
             .Should()
             .StartWith(
-                $"The length of '{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisement.UpdateAdvertisementRequest.ContactInfoEmail))}' must be {Email.MaxLength} characters or fewer. You entered");
+                $"The length of '{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisementRequest.ContactInfoEmail))}' must be {Email.MaxLength} characters or fewer. You entered");
 
-        validationProblemDetails.Errors[nameof(UpdateAdvertisement.UpdateAdvertisementRequest.ContactInfoPhoneNumber)]
+        validationProblemDetails.Errors[nameof(UpdateAdvertisementRequest.ContactInfoPhoneNumber)]
             [0]
             .Should()
             .StartWith(
-                $"The length of '{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisement.UpdateAdvertisementRequest.ContactInfoPhoneNumber))}' must be {PhoneNumber.MaxLength} characters or fewer. You entered");
+                $"The length of '{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisementRequest.ContactInfoPhoneNumber))}' must be {PhoneNumber.MaxLength} characters or fewer. You entered");
     }
 
     [Fact]
@@ -263,10 +259,10 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
         Guid randomAdvertisementId = Guid.NewGuid();
 
         //Act
-        UpdateAdvertisement.UpdateAdvertisementRequest request =
-            new Faker<UpdateAdvertisement.UpdateAdvertisementRequest>()
+        UpdateAdvertisementRequest request =
+            new Faker<UpdateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
-                    new UpdateAdvertisement.UpdateAdvertisementRequest(
+                    new UpdateAdvertisementRequest(
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.CountryCode(),
                         PickupAddressState: faker.Address.State(),
@@ -295,7 +291,7 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
         Guid fakePersonId = Guid.NewGuid();
         Guid fakeAdvertisementId = Guid.NewGuid();
         //Act
-        UpdateAdvertisement.UpdateAdvertisementRequest request = new(
+        UpdateAdvertisementRequest request = new(
             Description: "",
             PickupAddressCountry: "",
             PickupAddressState: "",
@@ -318,36 +314,36 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
         validationProblemDetails.Errors.Count.Should().Be(5);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(
-            nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressCountry),
-            nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressZipCode),
-            nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressCity),
-            nameof(UpdateAdvertisement.UpdateAdvertisementRequest.ContactInfoEmail),
-            nameof(UpdateAdvertisement.UpdateAdvertisementRequest.ContactInfoPhoneNumber)
+            nameof(UpdateAdvertisementRequest.PickupAddressCountry),
+            nameof(UpdateAdvertisementRequest.PickupAddressZipCode),
+            nameof(UpdateAdvertisementRequest.PickupAddressCity),
+            nameof(UpdateAdvertisementRequest.ContactInfoEmail),
+            nameof(UpdateAdvertisementRequest.ContactInfoPhoneNumber)
         );
         validationProblemDetails.Errors.Values.Count.Should().Be(5);
-        validationProblemDetails.Errors[nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressCountry)][0]
+        validationProblemDetails.Errors[nameof(UpdateAdvertisementRequest.PickupAddressCountry)][0]
             .Should()
             .Be(
-                $"'{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressCountry))}' must not be empty.");
+                $"'{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisementRequest.PickupAddressCountry))}' must not be empty.");
 
-        validationProblemDetails.Errors[nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressZipCode)][0]
+        validationProblemDetails.Errors[nameof(UpdateAdvertisementRequest.PickupAddressZipCode)][0]
             .Should()
             .Be(
-                $"'{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressZipCode))}' must not be empty.");
+                $"'{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisementRequest.PickupAddressZipCode))}' must not be empty.");
 
-        validationProblemDetails.Errors[nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressCity)][0]
+        validationProblemDetails.Errors[nameof(UpdateAdvertisementRequest.PickupAddressCity)][0]
             .Should()
             .Be(
-                $"'{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisement.UpdateAdvertisementRequest.PickupAddressCity))}' must not be empty.");
+                $"'{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisementRequest.PickupAddressCity))}' must not be empty.");
         
-        validationProblemDetails.Errors[nameof(UpdateAdvertisement.UpdateAdvertisementRequest.ContactInfoEmail)][0]
+        validationProblemDetails.Errors[nameof(UpdateAdvertisementRequest.ContactInfoEmail)][0]
             .Should()
             .Be(
-                $"'{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisement.UpdateAdvertisementRequest.ContactInfoEmail))}' must not be empty.");
+                $"'{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisementRequest.ContactInfoEmail))}' must not be empty.");
 
-        validationProblemDetails.Errors[nameof(UpdateAdvertisement.UpdateAdvertisementRequest.ContactInfoPhoneNumber)][0]
+        validationProblemDetails.Errors[nameof(UpdateAdvertisementRequest.ContactInfoPhoneNumber)][0]
             .Should()
-            .Be($"'{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisement.UpdateAdvertisementRequest.ContactInfoPhoneNumber))}' must not be empty.");
+            .Be($"'{Extensions.InsertSpacesIntoCamelCase(nameof(UpdateAdvertisementRequest.ContactInfoPhoneNumber))}' must not be empty.");
     }
 
     public Task InitializeAsync()

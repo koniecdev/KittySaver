@@ -1,9 +1,8 @@
-﻿using KittySaver.Api.Shared.Abstractions.Clients;
+﻿using KittySaver.Api.Shared.Infrastructure.Clients;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Infrastructure.Services.FileServices;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Api.Tests.Integration.Helpers;
-using KittySaver.Auth.Api.Shared.Infrastructure.Services;
 using KittySaver.Domain.Persons;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -56,7 +55,7 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
 
         builder.ConfigureTestServices(services =>
         {
-            services.RemoveAll<IDateTimeProvider>();
+            services.RemoveAll<IDateTimeService>();
             IDateTimeService dateTimeSub = new ApplicationDateTimeService();
             services.AddSingleton<IDateTimeService>(_ => dateTimeSub);
             
@@ -91,7 +90,7 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
             currentUserService.GetCurrentUserIdentityId().Returns(Guid.NewGuid());
             currentUserService.GetCurrentlyLoggedInPersonAsync(Arg.Any<CancellationToken>()).Returns(
                 Task.FromResult<CurrentlyLoggedInPerson?>
-                    (new CurrentlyLoggedInPerson() { PersonId = Guid.NewGuid(), Role = Person.Role.Admin}));
+                    (new CurrentlyLoggedInPerson { PersonId = Guid.NewGuid(), Role = Person.Role.Admin}));
             services.AddSingleton<ICurrentUserService>(_ => currentUserService);
             
             services.RemoveAll<IAuthenticationService>();

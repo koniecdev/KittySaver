@@ -1,16 +1,11 @@
 ﻿using FluentValidation;
-using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Endpoints;
-using KittySaver.Api.Shared.Hateoas;
-using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Infrastructure.Services.FileServices;
 using KittySaver.Api.Shared.Persistence;
-using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Persons;
-using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.Hateoas;
 using MediatR;
-using Riok.Mapperly.Abstractions;
 
 namespace KittySaver.Api.Features.Advertisements;
 
@@ -65,7 +60,7 @@ public sealed class UpdateAdvertisementThumbnail : IEndpoint
             await fileStorage.SaveThumbnailAsync(request.Thumbnail, request.Id, cancellationToken);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
-            Advertisement.AdvertisementStatus advertisementStatus = owner.Advertisements
+            AdvertisementStatus advertisementStatus = owner.Advertisements
                 .First(x => x.Id == request.Id)
                 .Status;
                 

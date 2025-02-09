@@ -1,4 +1,4 @@
-﻿using KittySaver.Wasm.Shared.HttpClients.MainApiResponses;
+﻿using KittySaver.Wasm.Shared.HttpClients;
 using Microsoft.AspNetCore.Components;
 
 namespace KittySaver.Wasm.Shared.Components;

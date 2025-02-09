@@ -10,8 +10,8 @@
     <ItemGroup>
       <PackageReference Include="Ardalis.SmartEnum" Version="8.2.0" />
       <PackageReference Include="MediatR.Contracts" Version="2.0.1" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.1" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.1" />
     </ItemGroup>
     <ItemGroup>
         <InternalsVisibleTo Include="KittySaver.Domain.Tests.Unit" />
@@ -20,5 +20,8 @@
       <Reference Include="Microsoft.AspNetCore.Http.Features">
         <HintPath>..\..\..\..\..\..\Program Files\dotnet\shared\Microsoft.AspNetCore.App\8.0.11\Microsoft.AspNetCore.Http.Features.dll</HintPath>
       </Reference>
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\..\KittySaver.Shared\KittySaver.Shared.csproj" />
     </ItemGroup>
 </Project>

@@ -18,21 +18,21 @@
 
     <ItemGroup>
         <PackageReference Include="Ardalis.SmartEnum" Version="8.2.0" />
-        <PackageReference Include="Ardalis.SmartEnum.EFCore" Version="8.1.0"/>
+        <PackageReference Include="Ardalis.SmartEnum.EFCore" Version="8.2.0" />
         <PackageReference Include="Asp.Versioning.Http" Version="8.1.0"/>
         <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.0"/>
         <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0"/>
         <PackageReference Include="Magick.NET-Q16-AnyCPU" Version="14.4.0" />
         <PackageReference Include="MediatR" Version="12.4.1"/>
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.0" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.1" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.1" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.1" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.1">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.1" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.1">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -48,7 +48,9 @@
         <InternalsVisibleTo Include="KittySaver.Api.Tests.Unit" />
     </ItemGroup>
     <ItemGroup>
+      <ProjectReference Include="..\..\KittySaver.Shared\KittySaver.Shared.csproj" />
       <ProjectReference Include="..\KittySaver.Domain\KittySaver.Domain.csproj" />
+      <ProjectReference Include="..\KittySaver.SharedForApi\KittySaver.SharedForApi.csproj" />
     </ItemGroup>
     <ItemGroup>
       <Folder Include="PrivateFiles\cats\" />

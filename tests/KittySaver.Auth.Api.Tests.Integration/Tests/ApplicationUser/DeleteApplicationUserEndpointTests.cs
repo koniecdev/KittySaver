@@ -2,7 +2,7 @@
 using System.Net.Http.Json;
 using Bogus;
 using FluentAssertions;
-using KittySaver.Auth.Api.Features.ApplicationUsers;
+using KittySaver.Shared.Requests;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
@@ -14,10 +14,10 @@ public class DeleteApplicationUserEndpointTests(KittySaverAuthApiFactory appFact
 {
     private readonly HttpClient _httpClient = appFactory.CreateClient();
 
-    private readonly Faker<Register.RegisterRequest> _createApplicationUserRequestGenerator =
-        new Faker<Register.RegisterRequest>()
+    private readonly Faker<RegisterRequest> _createApplicationUserRequestGenerator =
+        new Faker<RegisterRequest>()
             .CustomInstantiator( faker =>
-                new Register.RegisterRequest(
+                new RegisterRequest(
                     UserName: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
@@ -28,7 +28,7 @@ public class DeleteApplicationUserEndpointTests(KittySaverAuthApiFactory appFact
     public async Task Delete_ShouldDeleteUser_WhenItExists()
     {
         //Arrange
-        Register.RegisterRequest request = _createApplicationUserRequestGenerator.Generate();
+        RegisterRequest request = _createApplicationUserRequestGenerator.Generate();
         HttpResponseMessage userResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/application-users/register", request);
         ApiResponses.CreatedWithIdResponse? registerResponse = 
             await userResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>();

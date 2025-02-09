@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Abstractions.Clients;
 using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
@@ -10,13 +9,13 @@ namespace KittySaver.Api.Features.Persons;
 
 public sealed class DeletePerson : IEndpoint
 {
-    public sealed record DeletePersonCommand(Guid IdOrUserIdentityId, string AuthHeader) : ICommand, IAuthorizedRequest, IPersonRequest;
+    public sealed record DeletePersonCommand(Guid Id, string AuthHeader) : ICommand, IAuthorizedRequest, IPersonRequest;
 
     public sealed class DeletePersonCommandValidator : AbstractValidator<DeletePersonCommand>
     {
         public DeletePersonCommandValidator()
         {
-            RuleFor(x => x.IdOrUserIdentityId).NotEmpty();
+            RuleFor(x => x.Id).NotEmpty();
         }
     }
 
@@ -27,7 +26,7 @@ public sealed class DeletePerson : IEndpoint
     {
         public async Task Handle(DeletePersonCommand request, CancellationToken cancellationToken)
         {
-            Person person = await personRepository.GetPersonByIdOrIdentityIdAsync(request.IdOrUserIdentityId, cancellationToken);
+            Person person = await personRepository.GetPersonByIdAsync(request.Id, cancellationToken);
             
             await personRepository.RemoveAsync(person, request.AuthHeader);
             

@@ -1,10 +1,12 @@
 ﻿using System.Security.Authentication;
 using FluentValidation;
 using KittySaver.Auth.Api.Features.ApplicationUsers.SharedContracts;
+using KittySaver.Auth.Api.Shared.Abstractions;
 using KittySaver.Auth.Api.Shared.Domain.Entites;
-using KittySaver.Auth.Api.Shared.Infrastructure.ApiComponents;
-using KittySaver.Auth.Api.Shared.Infrastructure.Endpoints;
+using KittySaver.Auth.Api.Shared.Endpoints;
 using KittySaver.Auth.Api.Shared.Infrastructure.Services;
+using KittySaver.Shared.Requests;
+using KittySaver.Shared.Responses;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -15,16 +17,6 @@ namespace KittySaver.Auth.Api.Features.ApplicationUsers;
 // ReSharper disable once ClassNeverInstantiated.Global
 public sealed class Login : IEndpoint
 {
-    public sealed class LoginResponse
-    {
-        public required string AccessToken { get; init; }
-        public required DateTimeOffset AccessTokenExpiresAt { get; init; }
-    }
-
-    public sealed record LoginRequest(
-        string Email,
-        string Password);
-
     public sealed record LoginCommand(
         string Email,
         string Password) : ICommand<LoginResponse>;
@@ -88,5 +80,5 @@ public sealed class Login : IEndpoint
 [Mapper]
 public static partial class LoginMapper
 {
-    public static partial Login.LoginCommand ToLoginCommand(this Login.LoginRequest request);
+    public static partial Login.LoginCommand ToLoginCommand(this LoginRequest request);
 }

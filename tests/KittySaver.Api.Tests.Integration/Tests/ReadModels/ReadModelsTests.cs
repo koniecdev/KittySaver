@@ -2,14 +2,9 @@
 using System.Net.Http.Json;
 using Bogus;
 using FluentAssertions;
-using KittySaver.Api.Features.Advertisements;
-using KittySaver.Api.Features.Advertisements.SharedContracts;
-using KittySaver.Api.Features.Cats.SharedContracts;
-using KittySaver.Api.Features.Persons;
-using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
-using KittySaver.Domain.Persons;
+using KittySaver.Shared.Responses;
 using Shared;
 
 namespace KittySaver.Api.Tests.Integration.Tests.ReadModels;
@@ -26,10 +21,10 @@ public class ReadModelsIntegrationTests : IAsyncLifetime
         _cleanup = new CleanupHelper(_httpClient);
     }
 
-    private readonly Faker<CreatePerson.CreatePersonRequest> _createPersonRequestGenerator =
-        new Faker<CreatePerson.CreatePersonRequest>()
+    private readonly Faker<CreatePersonRequest> _createPersonRequestGenerator =
+        new Faker<CreatePersonRequest>()
             .CustomInstantiator(faker =>
-                new CreatePerson.CreatePersonRequest(
+                new CreatePersonRequest(
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
@@ -44,10 +39,10 @@ public class ReadModelsIntegrationTests : IAsyncLifetime
                     DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 ));
 
-    private readonly Faker<CreateCat.CreateCatRequest> _createCatRequestGenerator =
-        new Faker<CreateCat.CreateCatRequest>()
+    private readonly Faker<CreateCatRequest> _createCatRequestGenerator =
+        new Faker<CreateCatRequest>()
             .CustomInstantiator(faker =>
-                new CreateCat.CreateCatRequest(
+                new CreateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: faker.Random.Bool(),
                     MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
@@ -61,7 +56,7 @@ public class ReadModelsIntegrationTests : IAsyncLifetime
     public async Task PersonReadModel_ShouldMapAllProperties_WhenPersonIsCreated()
     {
         // Arrange
-        CreatePerson.CreatePersonRequest createRequest = _createPersonRequestGenerator.Generate();
+        CreatePersonRequest createRequest = _createPersonRequestGenerator.Generate();
 
         // Act
         HttpResponseMessage createResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/persons", createRequest);
@@ -93,11 +88,11 @@ public class ReadModelsIntegrationTests : IAsyncLifetime
     public async Task CatReadModel_ShouldMapAllProperties_WhenCatIsCreated()
     {
         // Arrange
-        CreatePerson.CreatePersonRequest createPersonRequest = _createPersonRequestGenerator.Generate();
+        CreatePersonRequest createPersonRequest = _createPersonRequestGenerator.Generate();
         HttpResponseMessage createPersonResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/persons", createPersonRequest);
         ApiResponses.CreatedWithIdResponse createPersonResponse = await createPersonResponseMessage.GetIdResponseFromResponseMessageAsync();
 
-        CreateCat.CreateCatRequest createCatRequest = _createCatRequestGenerator.Generate();
+        CreateCatRequest createCatRequest = _createCatRequestGenerator.Generate();
 
         // Act
         HttpResponseMessage createCatResponseMessage = await _httpClient.PostAsJsonAsync($"api/v1/persons/{createPersonResponse.Id}/cats", createCatRequest);
@@ -127,19 +122,19 @@ public class ReadModelsIntegrationTests : IAsyncLifetime
     public async Task AdvertisementReadModel_ShouldMapAllProperties_WhenAdvertisementIsCreated()
     {
         // Arrange
-        CreatePerson.CreatePersonRequest createPersonRequest = _createPersonRequestGenerator.Generate();
+        CreatePersonRequest createPersonRequest = _createPersonRequestGenerator.Generate();
         HttpResponseMessage createPersonResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/persons", createPersonRequest);
         ApiResponses.CreatedWithIdResponse createPersonResponse = await createPersonResponseMessage.GetIdResponseFromResponseMessageAsync();
 
-        CreateCat.CreateCatRequest createCatRequest = _createCatRequestGenerator.Generate();
+        CreateCatRequest createCatRequest = _createCatRequestGenerator.Generate();
         HttpResponseMessage createCatResponseMessage = await _httpClient.PostAsJsonAsync($"api/v1/persons/{createPersonResponse.Id}/cats", createCatRequest);
         ApiResponses.CreatedWithIdResponse createCatResponse = await createCatResponseMessage.GetIdResponseFromResponseMessageAsync();
 
         // Act
-        CreateAdvertisement.CreateAdvertisementRequest createAdvertisementRequest = 
-            new Faker<CreateAdvertisement.CreateAdvertisementRequest>()
+        CreateAdvertisementRequest createAdvertisementRequest = 
+            new Faker<CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
-                    new CreateAdvertisement.CreateAdvertisementRequest(
+                    new CreateAdvertisementRequest(
                         CatsIdsToAssign: [createCatResponse.Id],
                         Description: faker.Lorem.Paragraph(),
                         PickupAddressCountry: faker.Address.CountryCode(),
@@ -172,7 +167,7 @@ public class ReadModelsIntegrationTests : IAsyncLifetime
         advertisement.Description.Should().Be(createAdvertisementRequest.Description);
         advertisement.ContactInfoEmail.Should().Be(createAdvertisementRequest.ContactInfoEmail);
         advertisement.ContactInfoPhoneNumber.Should().Be(createAdvertisementRequest.ContactInfoPhoneNumber);
-        advertisement.Status.Should().Be(Advertisement.AdvertisementStatus.ThumbnailNotUploaded);
+        advertisement.Status.Should().Be(AdvertisementStatus.ThumbnailNotUploaded);
         advertisement.PriorityScore.Should().BeGreaterThan(0);
         
         advertisement.PickupAddress.Should().NotBeNull();

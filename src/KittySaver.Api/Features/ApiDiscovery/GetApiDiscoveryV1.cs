@@ -1,24 +1,13 @@
-﻿using KittySaver.Api.Features.Advertisements.SharedContracts;
-using KittySaver.Api.Shared.Abstractions;
+﻿using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Endpoints;
-using KittySaver.Api.Shared.Hateoas;
-using KittySaver.Api.Shared.Infrastructure.Services;
-using KittySaver.Api.Shared.Persistence;
-using KittySaver.Domain.Common.Exceptions;
+using KittySaver.Shared.Responses;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace KittySaver.Api.Features.ApiDiscovery;
 
 public class GetApiDiscoveryV1 : IEndpoint
 {
     public sealed record GetApiDiscoveryV1Query : IQuery<GetApiDiscoveryV1Response>;
-
-    public sealed class GetApiDiscoveryV1Response : IHateoasResponse
-    {
-        public Guid? PersonId { get; set; }
-        public ICollection<Link> Links { get; set; } = new List<Link>();
-    }
     
     internal sealed class GetAdvertisementQueryHandler
         : IRequestHandler<GetApiDiscoveryV1Query, GetApiDiscoveryV1Response>

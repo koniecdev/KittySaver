@@ -28,7 +28,7 @@ public sealed class AuthorizationBehaviour<TRequest, TResponse>(
             Guid personId = request switch
             {
                 ICatRequest x => x.PersonId,
-                IPersonRequest x => x.IdOrUserIdentityId,
+                IPersonRequest x => x.Id,
                 IAdvertisementRequest x => x.PersonId,
                 _ => throw new InvalidOperationException("Report it to admin, there is something wrong with behaviour.")
             };

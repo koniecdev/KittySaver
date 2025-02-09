@@ -1,11 +1,11 @@
 ﻿using FluentValidation;
-using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Endpoints;
-using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.Hateoas;
+using KittySaver.Shared.Requests;
 using MediatR;
 using Riok.Mapperly.Abstractions;
 
@@ -13,17 +13,6 @@ namespace KittySaver.Api.Features.Advertisements;
 
 public sealed class UpdateAdvertisement : IEndpoint
 {
-    public sealed record UpdateAdvertisementRequest(
-        string? Description,
-        string PickupAddressCountry,
-        string? PickupAddressState,
-        string PickupAddressZipCode,
-        string PickupAddressCity,
-        string? PickupAddressStreet,
-        string? PickupAddressBuildingNumber,
-        string ContactInfoEmail,
-        string ContactInfoPhoneNumber);
-
     public sealed record UpdateAdvertisementCommand(
         Guid Id,
         Guid PersonId,
@@ -112,7 +101,7 @@ public sealed class UpdateAdvertisement : IEndpoint
                 contactInfoPhoneNumber: contactInfoPhoneNumber);
             
             await unitOfWork.SaveChangesAsync(cancellationToken);
-            Advertisement.AdvertisementStatus advertisementStatus = owner.Advertisements.First(x => x.Id == request.Id).Status;
+            AdvertisementStatus advertisementStatus = owner.Advertisements.First(x => x.Id == request.Id).Status;
             return new AdvertisementHateoasResponse(request.Id, request.PersonId, advertisementStatus);
         }
     }
@@ -139,7 +128,7 @@ public sealed class UpdateAdvertisement : IEndpoint
 public static partial class UpdateAdvertisementMapper
 {
     public static partial UpdateAdvertisement.UpdateAdvertisementCommand MapToUpdateAdvertisementCommand(
-        this UpdateAdvertisement.UpdateAdvertisementRequest request,
+        this UpdateAdvertisementRequest request,
         Guid personId,
         Guid id);
 }

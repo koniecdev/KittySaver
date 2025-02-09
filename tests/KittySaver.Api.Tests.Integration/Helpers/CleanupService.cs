@@ -1,6 +1,6 @@
 ﻿using System.Net.Http.Json;
-using KittySaver.Api.Features.Persons.SharedContracts;
-using KittySaver.Api.Shared.Pagination;
+using KittySaver.Shared.Pagination;
+using KittySaver.Shared.Responses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KittySaver.Api.Tests.Integration.Helpers;

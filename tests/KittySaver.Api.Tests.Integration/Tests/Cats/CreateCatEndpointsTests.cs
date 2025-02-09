@@ -4,14 +4,13 @@ using System.Text.Json;
 using Bogus;
 using Bogus.Extensions;
 using FluentAssertions;
-using KittySaver.Api.Features.Cats.SharedContracts;
-using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Shared.Endpoints;
-using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.Hateoas;
+using KittySaver.Shared.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
@@ -30,10 +29,10 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         _cleanup = new CleanupHelper(_httpClient);
     }
 
-    private readonly CreatePerson.CreatePersonRequest _createPersonRequest =
-        new Faker<CreatePerson.CreatePersonRequest>()
+    private readonly CreatePersonRequest _createPersonRequest =
+        new Faker<CreatePersonRequest>()
             .CustomInstantiator(faker =>
-                new CreatePerson.CreatePersonRequest(
+                new CreatePersonRequest(
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
@@ -48,10 +47,10 @@ public class CreateCatEndpointsTests : IAsyncLifetime
                     DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 )).Generate();
 
-    private readonly Faker<CreateCat.CreateCatRequest> _createCatRequestGenerator =
-        new Faker<CreateCat.CreateCatRequest>()
+    private readonly Faker<CreateCatRequest> _createCatRequestGenerator =
+        new Faker<CreateCatRequest>()
             .CustomInstantiator(faker =>
-                new CreateCat.CreateCatRequest(
+                new CreateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: true,
                     MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
@@ -70,7 +69,7 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         ApiResponses.CreatedWithIdResponse personRegisterResponse =
             await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        CreateCat.CreateCatRequest request = _createCatRequestGenerator.Generate();
+        CreateCatRequest request = _createCatRequestGenerator.Generate();
 
         //Act
         HttpResponseMessage response =
@@ -83,7 +82,7 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         hateoasResponse!.Id.Should().NotBeEmpty();
         hateoasResponse.PersonId.Should().NotBeEmpty();
         hateoasResponse.Links.Select(x => x.Rel).Should()
-            .BeEquivalentTo(EndpointNames.SelfRel,
+            .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
                 EndpointNames.UpdateCatThumbnail.Rel);
@@ -101,7 +100,7 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         ApiResponses.CreatedWithIdResponse personRegisterResponse =
             await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        CreateCat.CreateCatRequest request = new(
+        CreateCatRequest request = new(
             Name: "Whiskers",
             IsCastrated: true,
             MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
@@ -121,7 +120,7 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         hateoasResponse!.Id.Should().NotBeEmpty();
         hateoasResponse.PersonId.Should().NotBeEmpty();
         hateoasResponse.Links.Select(x => x.Rel).Should()
-            .BeEquivalentTo(EndpointNames.SelfRel,
+            .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
                 EndpointNames.UpdateCatThumbnail.Rel);
@@ -139,7 +138,7 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         ApiResponses.CreatedWithIdResponse personRegisterResponse =
             await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        CreateCat.CreateCatRequest request = new(
+        CreateCatRequest request = new(
             Name: "Whiskers",
             IsCastrated: true,
             MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
@@ -160,7 +159,7 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         hateoasResponse!.Id.Should().NotBeEmpty();
         hateoasResponse.PersonId.Should().NotBeEmpty();
         hateoasResponse.Links.Select(x => x.Rel).Should()
-            .BeEquivalentTo(EndpointNames.SelfRel,
+            .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
                 EndpointNames.UpdateCatThumbnail.Rel);
@@ -184,9 +183,9 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         ApiResponses.CreatedWithIdResponse personRegisterResponse =
             await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        CreateCat.CreateCatRequest request = new Faker<CreateCat.CreateCatRequest>()
+        CreateCatRequest request = new Faker<CreateCatRequest>()
             .CustomInstantiator(faker =>
-                new CreateCat.CreateCatRequest(
+                new CreateCatRequest(
                     Name: faker.Person.FirstName.ClampLength(CatName.MaxLength + 1),
                     IsCastrated: true,
                     MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
@@ -208,16 +207,16 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         validationProblemDetails!.Status.Should().Be(StatusCodes.Status400BadRequest);
         validationProblemDetails.Errors.Count.Should().Be(2);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(
-            nameof(CreateCat.CreateCatRequest.Name),
-            nameof(CreateCat.CreateCatRequest.AdditionalRequirements)
+            nameof(CreateCatRequest.Name),
+            nameof(CreateCatRequest.AdditionalRequirements)
         );
         validationProblemDetails.Errors.Values.Count.Should().Be(2);
 
-        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.Name)][0]
+        validationProblemDetails.Errors[nameof(CreateCatRequest.Name)][0]
             .Should()
             .StartWith($"The length of 'Name' must be {CatName.MaxLength} characters or fewer. You entered");
 
-        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.AdditionalRequirements)][0]
+        validationProblemDetails.Errors[nameof(CreateCatRequest.AdditionalRequirements)][0]
             .Should()
             .StartWith(
                 $"The length of 'Additional Requirements' must be {Description.MaxLength} characters or fewer. You entered");
@@ -232,7 +231,7 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         ApiResponses.CreatedWithIdResponse personRegisterResponse =
             await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        CreateCat.CreateCatRequest request = new(
+        CreateCatRequest request = new(
             Name: "",
             IsCastrated: false,
             MedicalHelpUrgency: "",
@@ -254,31 +253,31 @@ public class CreateCatEndpointsTests : IAsyncLifetime
 
         validationProblemDetails.Errors.Count.Should().Be(5);
         validationProblemDetails.Errors.Keys.Should().BeEquivalentTo(
-            nameof(CreateCat.CreateCatRequest.Name),
-            nameof(CreateCat.CreateCatRequest.MedicalHelpUrgency),
-            nameof(CreateCat.CreateCatRequest.Behavior),
-            nameof(CreateCat.CreateCatRequest.AgeCategory),
-            nameof(CreateCat.CreateCatRequest.HealthStatus)
+            nameof(CreateCatRequest.Name),
+            nameof(CreateCatRequest.MedicalHelpUrgency),
+            nameof(CreateCatRequest.Behavior),
+            nameof(CreateCatRequest.AgeCategory),
+            nameof(CreateCatRequest.HealthStatus)
         );
         validationProblemDetails.Errors.Values.Count.Should().Be(5);
 
-        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.MedicalHelpUrgency)][0]
+        validationProblemDetails.Errors[nameof(CreateCatRequest.MedicalHelpUrgency)][0]
             .Should()
             .Be("'Medical Help Urgency' must not be empty.");
 
-        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.Behavior)][0]
+        validationProblemDetails.Errors[nameof(CreateCatRequest.Behavior)][0]
             .Should()
             .Be("'Behavior' must not be empty.");
 
-        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.AgeCategory)][0]
+        validationProblemDetails.Errors[nameof(CreateCatRequest.AgeCategory)][0]
             .Should()
             .Be("'Age Category' must not be empty.");
 
-        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.HealthStatus)][0]
+        validationProblemDetails.Errors[nameof(CreateCatRequest.HealthStatus)][0]
             .Should()
             .Be("'Health Status' must not be empty.");
 
-        validationProblemDetails.Errors[nameof(CreateCat.CreateCatRequest.Name)][0]
+        validationProblemDetails.Errors[nameof(CreateCatRequest.Name)][0]
             .Should()
             .Be("'Name' must not be empty.");
     }
@@ -287,7 +286,7 @@ public class CreateCatEndpointsTests : IAsyncLifetime
     public async Task CreateCat_ShouldReturnNotFound_WhenNotExistingPersonIsProvided()
     {
         //Arrange
-        CreateCat.CreateCatRequest request = _createCatRequestGenerator.Generate();
+        CreateCatRequest request = _createCatRequestGenerator.Generate();
 
         //Act
         HttpResponseMessage response =

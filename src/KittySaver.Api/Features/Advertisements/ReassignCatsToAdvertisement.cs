@@ -1,17 +1,16 @@
 ﻿using FluentValidation;
-using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Endpoints;
-using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
+using KittySaver.Shared.Hateoas;
+using KittySaver.Shared.Requests;
 using MediatR;
 
 namespace KittySaver.Api.Features.Advertisements;
 
 public sealed class ReassignCatsToAdvertisement : IEndpoint
 {
-    public sealed record ReassignCatsToAdvertisementRequest(IEnumerable<Guid> CatIds);
     public sealed record ReassignCatsToAdvertisementCommand(
         Guid PersonId,
         Guid Id,
@@ -41,7 +40,7 @@ public sealed class ReassignCatsToAdvertisement : IEndpoint
             Person owner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
             owner.ReplaceCatsOfAdvertisement(request.Id, request.CatIds);
             await unitOfWork.SaveChangesAsync(cancellationToken);
-            Advertisement.AdvertisementStatus advertisementStatus = owner.Advertisements.First(x => x.Id == request.Id).Status;
+            AdvertisementStatus advertisementStatus = owner.Advertisements.First(x => x.Id == request.Id).Status;
             return new AdvertisementHateoasResponse(request.Id, request.PersonId, advertisementStatus);
         }
     }

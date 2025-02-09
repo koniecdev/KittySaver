@@ -1,10 +1,8 @@
 ﻿using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Endpoints;
-using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Infrastructure.Services.FileServices;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
-using KittySaver.Domain.Persons;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,20 +20,20 @@ public sealed class GetAdvertisementThumbnail : IEndpoint
             GetAdvertisementThumbnailQuery request, 
             CancellationToken cancellationToken)
         {
-            Advertisement.AdvertisementStatus? status = await db.Advertisements
+            AdvertisementStatus? status = await db.Advertisements
                 .Where(x => x.Id == request.Id)
-                .Select(x=>(Advertisement.AdvertisementStatus?)x.Status)
+                .Select(x=>(AdvertisementStatus?)x.Status)
                 .FirstOrDefaultAsync(cancellationToken);
             
             switch (status)
             {
                 case null:
                     throw new NotFoundExceptions.AdvertisementNotFoundException(request.Id);
-                case Advertisement.AdvertisementStatus.ThumbnailNotUploaded:
+                case AdvertisementStatus.ThumbnailNotUploaded:
                     throw new InvalidOperationException("Thumbnail is not uploaded");
-                case Advertisement.AdvertisementStatus.Active:
-                case Advertisement.AdvertisementStatus.Closed:
-                case Advertisement.AdvertisementStatus.Expired:
+                case AdvertisementStatus.Active:
+                case AdvertisementStatus.Closed:
+                case AdvertisementStatus.Expired:
                     break;
                 default:
                     throw new IndexOutOfRangeException();

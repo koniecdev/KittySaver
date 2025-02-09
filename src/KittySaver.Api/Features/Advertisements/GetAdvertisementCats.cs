@@ -1,13 +1,13 @@
 ﻿using System.Linq.Expressions;
-using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Features.Cats.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.CollectionsQueriesFiltering;
 using KittySaver.Api.Shared.Endpoints;
-using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Pagination;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Api.Shared.Persistence.ReadModels;
+using KittySaver.Shared.Pagination;
+using KittySaver.Shared.Responses;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,12 +1,12 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Abstractions.Clients;
 using KittySaver.Api.Shared.Endpoints;
-using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.Hateoas;
+using KittySaver.Shared.Requests;
 using MediatR;
 using Riok.Mapperly.Abstractions;
 
@@ -14,20 +14,6 @@ namespace KittySaver.Api.Features.Persons;
 
 public sealed class CreatePerson : IEndpoint
 {
-    public sealed record CreatePersonRequest(
-        string Nickname,
-        string Email,
-        string PhoneNumber,
-        string Password,
-        string DefaultAdvertisementPickupAddressCountry,
-        string? DefaultAdvertisementPickupAddressState,
-        string DefaultAdvertisementPickupAddressZipCode,
-        string DefaultAdvertisementPickupAddressCity,
-        string? DefaultAdvertisementPickupAddressStreet,
-        string? DefaultAdvertisementPickupAddressBuildingNumber,
-        string DefaultAdvertisementContactInfoEmail,
-        string DefaultAdvertisementContactInfoPhoneNumber);
-    
     public sealed record CreatePersonCommand(
         string Nickname,
         string Email,
@@ -159,6 +145,6 @@ public sealed class CreatePerson : IEndpoint
 public static partial class CreatePersonMapper
 {
     public static partial CreatePerson.CreatePersonCommand MapToCreatePersonCommand(
-        this CreatePerson.CreatePersonRequest request);
+        this CreatePersonRequest request);
 }
     

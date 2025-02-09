@@ -4,7 +4,6 @@ using System.Text.Json;
 using Bogus;
 using FluentAssertions;
 using KittySaver.Api.Features.Cats;
-using KittySaver.Api.Features.Persons;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
 using Microsoft.AspNetCore.Http;
@@ -25,10 +24,10 @@ public class DeleteCatEndpointsTests : IAsyncLifetime
         _cleanup = new CleanupHelper(_httpClient);
     }
 
-    private readonly CreatePerson.CreatePersonRequest _createPersonRequest =
-        new Faker<CreatePerson.CreatePersonRequest>()
+    private readonly CreatePersonRequest _createPersonRequest =
+        new Faker<CreatePersonRequest>()
             .CustomInstantiator(faker =>
-                new CreatePerson.CreatePersonRequest(
+                new CreatePersonRequest(
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
@@ -43,10 +42,10 @@ public class DeleteCatEndpointsTests : IAsyncLifetime
                     DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 )).Generate();
 
-    private readonly CreateCat.CreateCatRequest _createCatRequest =
-        new Faker<CreateCat.CreateCatRequest>()
+    private readonly CreateCatRequest _createCatRequest =
+        new Faker<CreateCatRequest>()
             .CustomInstantiator(faker =>
-                new CreateCat.CreateCatRequest(
+                new CreateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: true,
                     MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,

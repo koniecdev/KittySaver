@@ -3,13 +3,12 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Bogus;
 using FluentAssertions;
-using KittySaver.Api.Features.Cats.SharedContracts;
-using KittySaver.Api.Features.Persons;
-using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Endpoints;
-using KittySaver.Api.Shared.Pagination;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Shared.Hateoas;
+using KittySaver.Shared.Pagination;
+using KittySaver.Shared.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Shared;
@@ -28,10 +27,10 @@ public class GetCatsEndpointsTests : IAsyncLifetime
         _cleanup = new CleanupHelper(_httpClient);
     }
 
-    private readonly CreatePerson.CreatePersonRequest _createPersonRequest =
-        new Faker<CreatePerson.CreatePersonRequest>()
+    private readonly CreatePersonRequest _createPersonRequest =
+        new Faker<CreatePersonRequest>()
             .CustomInstantiator(faker =>
-                new CreatePerson.CreatePersonRequest(
+                new CreatePersonRequest(
                     Nickname: faker.Person.FirstName,
                     Email: faker.Person.Email,
                     PhoneNumber: faker.Person.Phone,
@@ -46,10 +45,10 @@ public class GetCatsEndpointsTests : IAsyncLifetime
                     DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 )).Generate();
 
-    private readonly CreateCat.CreateCatRequest _createCatRequest =
-        new Faker<CreateCat.CreateCatRequest>()
+    private readonly CreateCatRequest _createCatRequest =
+        new Faker<CreateCatRequest>()
             .CustomInstantiator(faker =>
-                new CreateCat.CreateCatRequest(
+                new CreateCatRequest(
                     Name: faker.Name.FirstName(),
                     IsCastrated: true,
                     MedicalHelpUrgency: MedicalHelpUrgency.NoNeed.Name,
@@ -84,7 +83,7 @@ public class GetCatsEndpointsTests : IAsyncLifetime
         cats!.Items.Count.Should().BeGreaterThan(0);
         cats.Total.Should().Be(1);
         cats.Links.Count.Should().Be(2);
-        cats.Links.Count(x => x.Rel == EndpointNames.SelfRel).Should().Be(1);
+        cats.Links.Count(x => x.Rel == EndpointRels.SelfRel).Should().Be(1);
         cats.Links.First(x => x.Rel == "by-page").Href.Should().Contain("://");
         
         CatResponse cat = cats.Items.First();
@@ -98,7 +97,7 @@ public class GetCatsEndpointsTests : IAsyncLifetime
         cat.IsCastrated.Should().Be(_createCatRequest.IsCastrated);
         cat.PriorityScore.Should().BeGreaterThan(0);
         cat.Links.Select(x => x.Rel).Should()
-            .BeEquivalentTo(EndpointNames.SelfRel,
+            .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
                 EndpointNames.UpdateCatThumbnail.Rel);
@@ -124,7 +123,7 @@ public class GetCatsEndpointsTests : IAsyncLifetime
         cats.Should().NotBeNull();
         cats!.Total.Should().Be(0);
         cats.Links.Count.Should().Be(2);
-        cats.Links.First(x => x.Rel == EndpointNames.SelfRel).Href.Should().Contain("://");
+        cats.Links.First(x => x.Rel == EndpointRels.SelfRel).Href.Should().Contain("://");
         cats.Links.First(x => x.Rel == "by-page").Href.Should().Contain("://");
         cats.Items.Count.Should().Be(0);
     }

@@ -1,9 +1,10 @@
 ﻿using FluentValidation;
 using KittySaver.Auth.Api.Features.ApplicationUsers.SharedContracts;
+using KittySaver.Auth.Api.Shared.Abstractions;
 using KittySaver.Auth.Api.Shared.Domain.Entites;
-using KittySaver.Auth.Api.Shared.Infrastructure.ApiComponents;
-using KittySaver.Auth.Api.Shared.Infrastructure.Endpoints;
+using KittySaver.Auth.Api.Shared.Endpoints;
 using KittySaver.Auth.Api.Shared.Persistence;
+using KittySaver.Shared.Requests;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -14,12 +15,6 @@ namespace KittySaver.Auth.Api.Features.ApplicationUsers;
 // ReSharper disable once ClassNeverInstantiated.Global
 public sealed class Register : IEndpoint
 {
-    public sealed record RegisterRequest(
-        string UserName,
-        string Email,
-        string PhoneNumber,
-        string Password);
-
     public sealed record RegisterCommand(
         string UserName,
         string Email,
@@ -85,6 +80,6 @@ public sealed class Register : IEndpoint
 [Mapper]
 public static partial class RegisterMapper
 {
-    public static partial Register.RegisterCommand ToRegisterCommand(this Register.RegisterRequest request);
+    public static partial Register.RegisterCommand ToRegisterCommand(this RegisterRequest request);
     public static partial ApplicationUser ToEntity(this Register.RegisterCommand command);
 }

@@ -1,11 +1,12 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Endpoints;
-using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.Hateoas;
+using KittySaver.Shared.Requests;
 using MediatR;
 using Riok.Mapperly.Abstractions;
 
@@ -13,15 +14,6 @@ namespace KittySaver.Api.Features.Cats;
 
 public sealed class CreateCat : IEndpoint
 {
-    public sealed record CreateCatRequest(
-        string Name,
-        bool IsCastrated,
-        string MedicalHelpUrgency,
-        string AgeCategory,
-        string Behavior,
-        string HealthStatus,
-        string? AdditionalRequirements = null);
-    
     public sealed record CreateCatCommand(
         Guid PersonId,
         string Name,
@@ -114,6 +106,6 @@ public sealed class CreateCat : IEndpoint
 public static partial class CreateCatMapper
 {
     public static partial CreateCat.CreateCatCommand MapToCreateCatCommand(
-        this CreateCat.CreateCatRequest request,
+        this CreateCatRequest request,
         Guid personId);
 }

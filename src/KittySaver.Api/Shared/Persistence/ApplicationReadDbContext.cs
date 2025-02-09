@@ -1,5 +1,4 @@
 ﻿using KittySaver.Api.Shared.Persistence.ReadModels;
-using KittySaver.Domain;
 using Microsoft.EntityFrameworkCore;
 
 namespace KittySaver.Api.Shared.Persistence;

@@ -14,14 +14,6 @@ public sealed class Advertisement : AuditableEntity
     private readonly Guid _personId;
     private double _priorityScore;
 
-    public enum AdvertisementStatus
-    {
-        Active,
-        Closed,
-        Expired,
-        ThumbnailNotUploaded
-    }
-
     public required Guid PersonId
     {
         get => _personId;

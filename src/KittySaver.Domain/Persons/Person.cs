@@ -224,7 +224,7 @@ public sealed class Person : AggregateRoot
     public void ActivateAdvertisementIfThumbnailIsUploadedForTheFirstTime(Guid advertisementId)
     {
         Advertisement advertisement = GetAdvertisementById(advertisementId);
-        if (advertisement.Status is Advertisement.AdvertisementStatus.ThumbnailNotUploaded)
+        if (advertisement.Status is AdvertisementStatus.ThumbnailNotUploaded)
         {
             advertisement.Activate();
         }

@@ -1,7 +1,9 @@
 ﻿@page "/"
-@using KittySaver.Wasm.Shared.Components.Advertisement
+@using KittySaver.Shared.Hateoas
+@using KittySaver.Shared.Pagination
+@using KittySaver.Shared.Responses
+@using KittySaver.Wasm.Shared.Components
 @using KittySaver.Wasm.Shared.HttpClients
-@using KittySaver.Wasm.Shared.HttpClients.MainApiResponses
 @inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
 @inject IApiClient MainApiClient
 

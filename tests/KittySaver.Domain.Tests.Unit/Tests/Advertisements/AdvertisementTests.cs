@@ -93,7 +93,7 @@ public class AdvertisementTests
         advertisement.ContactInfoPhoneNumber.Should().BeEquivalentTo(contactInfoPhoneNumber);
         advertisement.ExpiresOn.Should().Be(Date.AddDays(30));
         advertisement.Description.Value.Should().Be("Lorem ipsum");
-        advertisement.Status.Should().Be(Advertisement.AdvertisementStatus.ThumbnailNotUploaded);
+        advertisement.Status.Should().Be(AdvertisementStatus.ThumbnailNotUploaded);
         advertisement.PersonId.Should().Be(Person.Id);
         advertisement.PriorityScore.Should().NotBe(0);
     }
@@ -143,7 +143,7 @@ public class AdvertisementTests
         advertisement.Close(closureDate);
 
         //Assert
-        advertisement.Status.Should().Be(Advertisement.AdvertisementStatus.Closed);
+        advertisement.Status.Should().Be(AdvertisementStatus.Closed);
         advertisement.ClosedOn.Should().Be(closureDate);
     }
     
@@ -191,7 +191,7 @@ public class AdvertisementTests
         advertisement.Expire(expirationDate);
         
         //Assert
-        advertisement.Status.Should().Be(Advertisement.AdvertisementStatus.Expired);
+        advertisement.Status.Should().Be(AdvertisementStatus.Expired);
     }
     
     [Fact]
@@ -240,7 +240,7 @@ public class AdvertisementTests
         advertisement.Refresh(refreshDate);
         
         //Assert
-        advertisement.Status.Should().Be(Advertisement.AdvertisementStatus.Active);
+        advertisement.Status.Should().Be(AdvertisementStatus.Active);
     }
     
     [Fact]
