@@ -3,6 +3,7 @@ using Asp.Versioning;
 using Asp.Versioning.Builder;
 using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Exceptions;
+using KittySaver.SharedForApi.Swagger;
 using Serilog;
 
 IConfigurationRoot configuration = new ConfigurationBuilder()

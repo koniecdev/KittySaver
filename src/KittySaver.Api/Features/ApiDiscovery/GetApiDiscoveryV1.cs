@@ -1,14 +1,7 @@
-﻿using KittySaver.Api.Features.Advertisements.SharedContracts;
-using KittySaver.Api.Shared.Abstractions;
+﻿using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Endpoints;
-using KittySaver.Api.Shared.Hateoas;
-using KittySaver.Api.Shared.Infrastructure.Services;
-using KittySaver.Api.Shared.Persistence;
-using KittySaver.Domain.Common.Exceptions;
-using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.Responses;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace KittySaver.Api.Features.ApiDiscovery;
 

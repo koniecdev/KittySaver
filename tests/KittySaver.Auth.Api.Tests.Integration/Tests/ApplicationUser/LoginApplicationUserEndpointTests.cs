@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
-using KittySaver.Auth.Api.Features.ApplicationUsers;
 using KittySaver.Shared.Requests;
 using KittySaver.Shared.Responses;
 using Microsoft.AspNetCore.Http;

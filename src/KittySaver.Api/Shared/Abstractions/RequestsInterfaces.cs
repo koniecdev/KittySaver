@@ -1,5 +1,4 @@
-﻿using KittySaver.Api.Features.Advertisements.SharedContracts;
-using MediatR;
+﻿using MediatR;
 
 namespace KittySaver.Api.Shared.Abstractions;
 

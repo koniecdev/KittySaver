@@ -1,12 +1,9 @@
 ﻿using FluentValidation;
-using KittySaver.Api.Features.Advertisements.SharedContracts;
 using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Endpoints;
-using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
-using KittySaver.Shared.Common;
 using KittySaver.Shared.Hateoas;
 using MediatR;
 

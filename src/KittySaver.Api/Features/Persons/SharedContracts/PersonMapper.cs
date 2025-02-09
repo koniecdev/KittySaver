@@ -1,7 +1,4 @@
-﻿using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Hateoas;
-using KittySaver.Api.Shared.Persistence.ReadModels;
-using KittySaver.Shared.Hateoas;
+﻿using KittySaver.Api.Shared.Persistence.ReadModels;
 using KittySaver.Shared.Responses;
 
 namespace KittySaver.Api.Features.Persons.SharedContracts;

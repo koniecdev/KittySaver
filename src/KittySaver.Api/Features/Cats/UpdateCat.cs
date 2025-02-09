@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Endpoints;
-using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.Persons;

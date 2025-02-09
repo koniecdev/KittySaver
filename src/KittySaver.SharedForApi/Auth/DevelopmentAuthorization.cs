@@ -1,9 +1,10 @@
 ﻿using System.Security.Claims;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace KittySaver.Api.Shared.Infrastructure.Security;
+namespace KittySaver.SharedForApi.Auth;
 
 public class TestAuthHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,
@@ -13,11 +14,10 @@ public class TestAuthHandler(
 {
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        // Here we set up the claims that your application needs
         Claim[] claims = [
-            new Claim(ClaimTypes.NameIdentifier, Guid.Parse("a4018ea1-525a-48eb-a701-a96c1a261e72").ToString()),
-            new Claim(ClaimTypes.Role, "Administrator"),
-            new Claim(ClaimTypes.Email, "defaultadmin@koniec.dev")
+            new(ClaimTypes.NameIdentifier, FixedIdsHelper.AdminId.ToString()),
+            new(ClaimTypes.Role, "Administrator"),
+            new(ClaimTypes.Email, "defaultadmin@koniec.dev")
         ];
 
         ClaimsIdentity identity = new ClaimsIdentity(claims, "DevScheme");
@@ -27,3 +27,4 @@ public class TestAuthHandler(
         return Task.FromResult(AuthenticateResult.Success(ticket));
     }
 }
+

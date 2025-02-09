@@ -1,8 +1,8 @@
 ﻿using FluentValidation;
 using KittySaver.Auth.Api.Features.ApplicationUsers.SharedContracts;
+using KittySaver.Auth.Api.Shared.Abstractions;
 using KittySaver.Auth.Api.Shared.Domain.Entites;
-using KittySaver.Auth.Api.Shared.Infrastructure.ApiComponents;
-using KittySaver.Auth.Api.Shared.Infrastructure.Endpoints;
+using KittySaver.Auth.Api.Shared.Endpoints;
 using KittySaver.Auth.Api.Shared.Persistence;
 using KittySaver.Shared.Requests;
 using MediatR;

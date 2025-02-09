@@ -1,8 +1,7 @@
 ﻿using System.Reflection;
-using KittySaver.Auth.Api.Shared.Infrastructure.Endpoints;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace KittySaver.Auth.Api.Shared.Extensions;
+namespace KittySaver.Auth.Api.Shared.Endpoints;
 
 public static class EndpointExtensions
 {

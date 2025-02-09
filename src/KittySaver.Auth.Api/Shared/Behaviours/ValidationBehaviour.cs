@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
-using KittySaver.Auth.Api.Shared.Infrastructure.ApiComponents;
+using KittySaver.Auth.Api.Shared.Abstractions;
 using MediatR;
 
 namespace KittySaver.Auth.Api.Shared.Behaviours;

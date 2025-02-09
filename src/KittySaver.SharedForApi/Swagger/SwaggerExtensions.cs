@@ -1,18 +1,19 @@
 ﻿using Asp.Versioning.ApiExplorer;
-using KittySaver.Api.Shared.Infrastructure.OpenApi;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace KittySaver.Api.Shared.Infrastructure.Extensions;
+namespace KittySaver.SharedForApi.Swagger;
 
-internal static class SwaggerExtensions
+public static class SwaggerExtensions
 {
-    internal static IServiceCollection AddSwaggerServices(this IServiceCollection serviceCollection)
+    public static IServiceCollection AddSwaggerServices(this IServiceCollection serviceCollection)
     {
         serviceCollection.AddSwaggerGen();
         serviceCollection.ConfigureOptions<ConfigureSwaggerGenOptions>();
         return serviceCollection;
     }
 
-    internal static WebApplication AddSwagger(this WebApplication webApplication)
+    public static WebApplication AddSwagger(this WebApplication webApplication)
     {
         webApplication.UseSwagger();
         webApplication.UseSwaggerUI(options =>

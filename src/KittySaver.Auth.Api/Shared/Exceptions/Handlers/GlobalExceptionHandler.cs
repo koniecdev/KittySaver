@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace KittySaver.Auth.Api.Shared.Infrastructure.ExceptionHandlers;
+namespace KittySaver.Auth.Api.Shared.Exceptions.Handlers;
 
 internal sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
 {

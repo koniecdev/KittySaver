@@ -1,7 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http.Headers;
 using System.Security.Claims;
-using KittySaver.Wasm.Shared.HttpClients;
 using Microsoft.AspNetCore.Components.Authorization;
 
 namespace KittySaver.Wasm.Shared.Auth;

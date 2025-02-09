@@ -5,7 +5,7 @@ using KittySaver.Auth.Api.Shared.Behaviours;
 using KittySaver.Auth.Api.Shared.Domain.Entites;
 using KittySaver.Auth.Api.Shared.Infrastructure.Services;
 using KittySaver.Auth.Api.Shared.Persistence;
-using KittySaver.Auth.Api.Shared.Security;
+using KittySaver.SharedForApi.Auth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
-namespace KittySaver.Auth.Api.Shared.Extensions;
+namespace KittySaver.Auth.Api.Shared.Infrastructure;
 
 public static class ServiceCollectionExtensions
 {

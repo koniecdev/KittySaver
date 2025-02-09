@@ -1,10 +1,9 @@
 ﻿using System.Text.Json;
 using FluentValidation;
-using KittySaver.Auth.Api.Shared.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace KittySaver.Auth.Api.Shared.Infrastructure.ExceptionHandlers;
+namespace KittySaver.Auth.Api.Shared.Exceptions.Handlers;
 
 internal sealed class ValidationExceptionHandler(ILogger<ValidationExceptionHandler> logger) : IExceptionHandler
 {

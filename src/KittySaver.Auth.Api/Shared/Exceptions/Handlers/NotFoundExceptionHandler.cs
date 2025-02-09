@@ -1,8 +1,7 @@
-﻿using KittySaver.Auth.Api.Shared.Exceptions;
-using Microsoft.AspNetCore.Diagnostics;
+﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace KittySaver.Auth.Api.Shared.Infrastructure.ExceptionHandlers;
+namespace KittySaver.Auth.Api.Shared.Exceptions.Handlers;
 
 internal sealed class NotFoundExceptionHandler(ILogger<NotFoundExceptionHandler> logger) : IExceptionHandler
 {

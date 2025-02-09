@@ -2,10 +2,9 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using KittySaver.Api.Shared.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace KittySaver.Api.Shared.Abstractions.Clients;
+namespace KittySaver.Api.Shared.Infrastructure.Clients;
 
 
 public class ApiException(ProblemDetails problemDetails)

@@ -1,8 +1,7 @@
 ﻿using System.Security.Authentication;
 using System.Security.Claims;
-using KittySaver.Auth.Api.Shared.Infrastructure.Services;
 
-namespace KittySaver.Auth.Api.Shared.Security;
+namespace KittySaver.Auth.Api.Shared.Infrastructure.Services;
 
 public interface ICurrentUserService
 {

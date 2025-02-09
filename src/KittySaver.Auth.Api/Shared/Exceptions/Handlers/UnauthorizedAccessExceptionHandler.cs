@@ -1,25 +1,24 @@
-﻿using System.Security.Authentication;
-using Microsoft.AspNetCore.Diagnostics;
+﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace KittySaver.Auth.Api.Shared.Infrastructure.ExceptionHandlers;
+namespace KittySaver.Auth.Api.Shared.Exceptions.Handlers;
 
-internal sealed class UnauthenticatedExceptionHandler(ILogger<UnauthenticatedExceptionHandler> logger) : IExceptionHandler
+internal sealed class UnauthorizedAccessExceptionHandler(ILogger<UnauthorizedAccessExceptionHandler> logger) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
         Exception exception,
         CancellationToken cancellationToken)
     {
-        if (exception is not AuthenticationException)
+        if (exception is not UnauthorizedAccessException)
         {
             return false;
         }
         
         ProblemDetails problemDetails = new()
         {
-            Status = StatusCodes.Status401Unauthorized,
-            Title = "Provided credentials are not valid"
+            Status = StatusCodes.Status403Forbidden,
+            Title = "You do not have permission to modify resource that do not belong to You."
         };
 
         logger.LogError(

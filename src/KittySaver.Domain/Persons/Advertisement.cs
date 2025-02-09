@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using KittySaver.Domain.Common.Primitives;
 using KittySaver.Domain.ValueObjects;
-using KittySaver.Shared.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

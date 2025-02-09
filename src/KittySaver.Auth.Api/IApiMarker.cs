@@ -1,3 +1,3 @@
 ﻿namespace KittySaver.Auth.Api;
 
-public interface IApiMarker { }
+public interface IApiMarker;

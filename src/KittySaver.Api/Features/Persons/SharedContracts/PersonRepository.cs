@@ -1,4 +1,4 @@
-﻿using KittySaver.Api.Shared.Abstractions.Clients;
+﻿using KittySaver.Api.Shared.Infrastructure.Clients;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Persons;
