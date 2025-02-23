@@ -332,6 +332,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
 
         if (personId is null)
         {
+            links.Add(Generate(endpointInfo: EndpointNames.CreatePerson));
             return links;
         }
 
