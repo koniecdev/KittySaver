@@ -4,6 +4,7 @@
 :root{
     --nav_height: 84px;
     --kitty-green: #2F9C26;
+    --kitty-darkgreen: #12390F;
     --kitty-blue: #007fff;
     --kitty-yellow: #fde047;
     --kitty-orange: #D66B1D;
@@ -142,7 +143,9 @@ img{
 .index_aside select,
 .index_aside button,
 .login_form_tile button,
-.login_form_tile input,
+.login_form_tile input:not(input[type="file"]),
+.login_form_tile select,
+.login_form_tile textarea,
 .default_btn{
     padding: .5rem 1rem;
     border: unset;
@@ -150,6 +153,12 @@ img{
     font-family: "Poppins", sans-serif;
     display: grid;
     background-color: #fff;
+}
+.span2{
+    grid-column: span 2;
+}
+.login_form_tile .validation-message {
+    color: var(--kitty-red);
 }
 .default_btn{
     background-color: #3D3A2B;
@@ -461,10 +470,18 @@ select{
     grid-template-columns: repeat(2, 1fr);
     background-color: #181818;
 }
-.login_form, .register_form{
+.login_form, .register_form, .subpage_form{
     display: grid;
     grid-gap: 2rem;
     grid-template-columns: 1fr;
+}
+.subpage_form{
+    grid-template-columns: repeat(2, 1fr);
+}
+.radio_item{
+    display: grid;
+    grid-template-columns: 16px max-content;
+    grid-gap: 1rem;
 }
 .login_form > *:not(.login_form_tile),
 .register_form > *:not(.login_form_tile){
