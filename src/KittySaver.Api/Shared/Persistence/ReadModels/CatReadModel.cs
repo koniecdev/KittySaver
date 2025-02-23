@@ -11,10 +11,10 @@ public sealed class CatReadModel
     public required DateTimeOffset CreatedOn { get; init; }
     public required string? LastModificationBy { get; init; }
     public required DateTimeOffset? LastModificationOn { get; init; }
-    public required int MedicalHelpUrgency { get; init; }
-    public required int AgeCategory { get; init; }
-    public required int Behavior { get; init; }
-    public required int HealthStatus { get; init; }
+    public required string MedicalHelpUrgency { get; init; }
+    public required string AgeCategory { get; init; }
+    public required string Behavior { get; init; }
+    public required string HealthStatus { get; init; }
     public required bool IsCastrated { get; init; }
     public required bool IsAdopted { get; init; }
     public required bool IsThumbnailUploaded { get; init; }

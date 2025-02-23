@@ -17,14 +17,10 @@ public static class CatMapper
                 AdditionalRequirements = entity.AdditionalRequirements,
                 IsCastrated = entity.IsCastrated,
                 IsAdopted = entity.IsAdopted,
-                MedicalHelpUrgency = MedicalHelpUrgency.FromValue(entity.MedicalHelpUrgency)
-                    .ToString(),
-                AgeCategory = AgeCategory.FromValue(entity.AgeCategory)
-                    .ToString(),
-                Behavior = Behavior.FromValue(entity.Behavior)
-                    .ToString(),
-                HealthStatus = HealthStatus.FromValue(entity.HealthStatus)
-                    .ToString(),
+                MedicalHelpUrgency = MedicalHelpUrgency.FromNameOrValue(entity.MedicalHelpUrgency, true).ToString(),
+                AgeCategory = AgeCategory.FromNameOrValue(entity.AgeCategory, true).ToString(),
+                Behavior = Behavior.FromNameOrValue(entity.Behavior, true).ToString(),
+                HealthStatus = HealthStatus.FromNameOrValue(entity.HealthStatus, true).ToString(),
                 PriorityScore = entity.PriorityScore,
                 IsAssignedToAdvertisement = entity.AdvertisementId.HasValue,
                 IsThumbnailUploaded = entity.IsThumbnailUploaded

@@ -66,10 +66,10 @@ public sealed class UpdateCat : IEndpoint
             CatName catName = CatName.Create(request.Name);
             Description additionalRequirements = Description.Create(request.AdditionalRequirements);
             
-            MedicalHelpUrgency medicalHelpUrgency = MedicalHelpUrgency.FromName(request.MedicalHelpUrgency, true);
-            AgeCategory ageCategory = AgeCategory.FromName(request.AgeCategory, true);
-            Behavior behavior = Behavior.FromName(request.Behavior, true);
-            HealthStatus healthStatus = HealthStatus.FromName(request.HealthStatus, true);
+            MedicalHelpUrgency medicalHelpUrgency = MedicalHelpUrgency.FromNameOrValue(request.MedicalHelpUrgency, true);
+            AgeCategory ageCategory = AgeCategory.FromNameOrValue(request.AgeCategory, true);
+            Behavior behavior = Behavior.FromNameOrValue(request.Behavior, true);
+            HealthStatus healthStatus = HealthStatus.FromNameOrValue(request.HealthStatus, true);
             
             catOwner.UpdateCat(
                 request.Id,
