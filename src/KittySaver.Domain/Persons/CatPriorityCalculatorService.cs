@@ -1,4 +1,6 @@
-﻿namespace KittySaver.Domain.Persons;
+﻿using KittySaver.Domain.Common.Primitives.Enums;
+
+namespace KittySaver.Domain.Persons;
 
 public interface ICatPriorityCalculatorService
 {
@@ -18,10 +20,10 @@ public class DefaultCatPriorityCalculatorService : ICatPriorityCalculatorService
 
     public double Calculate(Cat cat)
     {
-        int healthStatusPoints = cat.HealthStatus.MaxScorePoints - cat.HealthStatus.ScorePoints;
-        int behaviourPoints = cat.Behavior.MaxScorePoints - cat.Behavior.ScorePoints;
-        int medicalHelpUrgencyPoints = cat.MedicalHelpUrgency.MaxScorePoints - cat.MedicalHelpUrgency.ScorePoints;
-        int ageCategoryPoints = cat.AgeCategory.MaxScorePoints - cat.AgeCategory.ScorePoints;
+        int healthStatusPoints = HealthStatus.MaxScorePoints - cat.HealthStatus.ScorePoints;
+        int behaviourPoints = Behavior.MaxScorePoints - cat.Behavior.ScorePoints;
+        int medicalHelpUrgencyPoints = MedicalHelpUrgency.MaxScorePoints - cat.MedicalHelpUrgency.ScorePoints;
+        int ageCategoryPoints = Common.Primitives.Enums.AgeCategory.MaxScorePoints - cat.AgeCategory.ScorePoints;
 
         return healthStatusPoints * Weights.Health
                + medicalHelpUrgencyPoints * Weights.MedicalUrgency

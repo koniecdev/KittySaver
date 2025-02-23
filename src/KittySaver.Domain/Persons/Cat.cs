@@ -250,12 +250,31 @@ public sealed class CatConfiguration : IEntityTypeConfiguration<Cat>
         });
 
         builder.Property(x => x.AgeCategory)
+            .HasConversion(
+                v => v.Name,
+                v => AgeCategory.FromNameOrValue(v, true))
+            .HasMaxLength(50)
             .IsRequired();
 
         builder.Property(x => x.Behavior)
+            .HasConversion(
+                v => v.Name,
+                v => Behavior.FromNameOrValue(v, true))
+            .HasMaxLength(50)
             .IsRequired();
 
         builder.Property(x => x.HealthStatus)
+            .HasConversion(
+                v => v.Name,
+                v => HealthStatus.FromNameOrValue(v, true))
+            .HasMaxLength(50)
+            .IsRequired();
+        
+        builder.Property(x => x.MedicalHelpUrgency)
+            .HasConversion(
+                v => v.Name,
+                v => MedicalHelpUrgency.FromNameOrValue(v, true))
+            .HasMaxLength(50)
             .IsRequired();
 
         builder.Property(x => x.PriorityScore)
