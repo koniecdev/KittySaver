@@ -1,7 +1,17 @@
 ﻿@page "/user/cats/create"
 @attribute [Authorize]
+@using System.ComponentModel.DataAnnotations
+@using System.Net.Http.Headers
+@using KittySaver.Shared.Hateoas
+@using KittySaver.Shared.Requests
+@using KittySaver.Wasm.Shared
+@using KittySaver.Wasm.Shared.HttpClients
+@using KittySaver.Wasm.Shared.Validation
 @using Microsoft.AspNetCore.Authorization
-
+@inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
+@inject IApiClient ApiClient
+@inject NavigationManager NavigationManager
+@inject IFileValidationService FileValidationService
 
 <div class="subpage_grid">
     <aside class="subpage_sidebar">
@@ -11,7 +21,7 @@
         <header class="subpage_header">
             <h1>Dodaj nowego kotka</h1>
             <div class="subpage_header_action">
-                <a href="/user/cats/create" class="default_btn btn_red">Anuluj dodawanie kota i wróc do listy kotów.</a>
+                <a href="/user/cats/create" class="default_btn btn_red">Anuluj dodawanie kota</a>
             </div>
         </header>
         <section class="subpage_main_info">
@@ -22,7 +32,103 @@
             </div>
         </section>
         <section class="subpage_form_container">
-            <EditForm Model="_registerDto" OnSubmit="HandleRegister" class="subpage_form">
+            <EditForm EditContext="_editContext" OnSubmit="Handle" class="subpage_form">
+                <DataAnnotationsValidator />
+                
+                <div class="login_form_tile">
+                    <label for="name">Imie kotka:</label>
+                    <InputText id="name" type="text" @bind-Value="_createCatDto.Name"/>
+                    <ValidationMessage For="@(() => _createCatDto.Name)" />
+                </div>
+                <div class="login_form_tile">
+                    <label>Czy kot jest już wysterylizowany/wykastrowany:</label>
+                    <InputRadioGroup @bind-Value="_createCatDto.IsCastrated">
+                        <div class="radio_item">
+                            <InputRadio Value="true" id="r1"/> <label for="r1">Tak</label>
+                        </div>
+                        <div class="radio_item">
+                            <InputRadio Value="false" id="r2"/> <label for="r2">Nie</label>
+                        </div>
+                    </InputRadioGroup>
+                </div>
+                <div class="login_form_tile">
+                    <label for="healthStatus">Stan zdrowia:</label>
+                    <InputSelect id="healthStatus" @bind-Value="_createCatDto.HealthStatus">
+                        <option value="">Kliknij by wybrać stan zdrowia</option>
+                        @foreach (KeyValuePair<string, (string text, string className)> status in Dictionaries.HealthStatusDictionary)
+                        {
+                            <option value="@status.Key">@status.Value.text</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => _createCatDto.HealthStatus)" />
+                </div>
+                <div class="login_form_tile">
+                    <label for="medicalHelp">Pilność pomocy weterynaryjnej:</label>
+                    <InputSelect id="medicalHelp" @bind-Value="_createCatDto.MedicalHelpUrgency">
+                        <option value="">Kliknij by wybrać pilność wizyty u weterynarza</option>
+                        @foreach (KeyValuePair<string, (string text, string className)> urgency in Dictionaries.MedicalHelpUrgencyDictionary)
+                        {
+                            <option value="@urgency.Key">@urgency.Value.text</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => _createCatDto.MedicalHelpUrgency)" />
+                </div>
+                <div class="login_form_tile">
+                    <label for="ageCategory">Kategoria wiekowa:</label>
+                    <InputSelect id="ageCategory" @bind-Value="_createCatDto.AgeCategory">
+                        <option value="">Kliknij by wybrać wiek</option>
+                        @foreach (KeyValuePair<string, (string text, string className)> age in Dictionaries.AgeCategoryDictionary)
+                        {
+                            <option value="@age.Key">@age.Value.text</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => _createCatDto.AgeCategory)" />
+                </div>
+                <div class="login_form_tile">
+                    <label for="behaviour">Zachowanie względem ludzi:</label>
+                    <InputSelect id="behaviour" @bind-Value="_createCatDto.Behavior">
+                        <option value="">Kliknij by wybrać zachowanie</option>
+                        @foreach (KeyValuePair<string, (string text, string className)> age in Dictionaries.BehaviourDictionary)
+                        {
+                            <option value="@age.Key">@age.Value.text</option>
+                        }
+                    </InputSelect>
+                    <ValidationMessage For="@(() => _createCatDto.Behavior)" />
+                </div>
+                <div class="login_form_tile">
+                    <label for="mainPhoto">Główne zdjęcie kota:</label>
+                    <InputFile id="mainPhoto" OnChange="OnMainPhotoSelected" accept=".jpg,.jpeg,.png,.webp"/>
+                    @if (!string.IsNullOrEmpty(_mainPhotoError))
+                    {
+                        <div class="validation-message">@_mainPhotoError</div>
+                    }
+                </div>
+                <div class="login_form_tile">
+                    <label for="gallery">Galeria zdjęć kota:</label>
+                    <InputFile id="gallery" OnChange="OnGalleryPhotosSelected" accept=".jpg,.jpeg,.png,.webp" multiple/>
+                    @if (!string.IsNullOrEmpty(_galleryError))
+                    {
+                        <div class="validation-message">@_galleryError</div>
+                    }
+                </div>
+                <div class="login_form_tile span2">
+                    <label for="additionalRequirements">Opis kota, dodatkowe wymagania:</label>
+                    <InputTextArea id="additionalRequirements" @bind-Value="_createCatDto.AdditionalRequirements" rows="4"/>
+                    <ValidationMessage For="@(() => _createCatDto.AdditionalRequirements)" />
+                </div>
+                <div class="login_form_tile_buttons">
+                    <button class="default_btn btn_green" type="submit" disabled="@_isProcessing">
+                        @if (_isProcessing)
+                        {
+                            <span>Dodajemy twojego kotka, daj nam chwile...</span>
+                        }
+                        else
+                        {
+                            <span>Zatwierdź dane nowego kotka</span>
+                        }
+                    </button>
+                    <a href="/user/cats/create" class="default_btn btn_red">Anuluj dodawanie kota</a>
+                </div>
             </EditForm>
         </section>
     </article>
@@ -30,3 +136,161 @@
 
     </aside>
 </div>
+
+@code{
+    private readonly CreateCatDto _createCatDto = new();
+    private bool _isProcessing;
+    private IBrowserFile? _mainPhoto;
+    private List<IBrowserFile> _galleryPhotos = [];
+    private Link _createCatLink = null!;
+    private ValidationMessageStore? _messageStore;
+    private EditContext? _editContext;
+    private string? _mainPhotoError;
+    private string? _galleryError;
+
+    protected override void OnInitialized()
+    {
+        Link? createPersonLink = ApiNavigation.Response?.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.CreateCatRel);
+        if (createPersonLink is null)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        _createCatLink = createPersonLink;
+        
+        _editContext = new EditContext(_createCatDto);
+        _messageStore = new ValidationMessageStore(_editContext);
+        _editContext.OnValidationRequested += HandleValidationRequested;
+        base.OnInitialized();
+    }
+    
+    private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs args)
+    {
+        _messageStore?.Clear();
+    
+        if (_mainPhoto is not null)
+        {
+            ValidationResult? mainPhotoValidation = FileValidationService.ValidateImageFile(_mainPhoto, false);
+            if (mainPhotoValidation is not null)
+            {
+                _messageStore?.Add(() => _mainPhoto, mainPhotoValidation.ErrorMessage!);
+                _mainPhotoError = mainPhotoValidation.ErrorMessage;
+            }
+            else
+            {
+                _mainPhotoError = null;
+            }
+        }
+
+        if (_galleryPhotos.Any())
+        {
+            foreach (IBrowserFile photo in _galleryPhotos)
+            {
+                ValidationResult? galleryPhotoValidation = FileValidationService.ValidateImageFile(photo, false);
+                if (galleryPhotoValidation == null)
+                {
+                    continue;
+                }
+                _messageStore?.Add(() => _galleryPhotos, galleryPhotoValidation.ErrorMessage!);
+                _galleryError = galleryPhotoValidation.ErrorMessage;
+                break;
+            }
+        }
+    
+        StateHasChanged();
+    }
+
+    private void OnMainPhotoSelected(InputFileChangeEventArgs e) => _mainPhoto = e.File;
+
+    private void OnGalleryPhotosSelected(InputFileChangeEventArgs e) => _galleryPhotos = e.GetMultipleFiles().ToList();
+
+    private async Task Handle()
+    {
+        if (_editContext?.Validate() != true)
+        {
+            return;
+        }
+
+        _isProcessing = true;
+    
+        try
+        {
+            CreateCatRequest createCatRequest = new(
+                _createCatDto.Name,
+                _createCatDto.IsCastrated,
+                _createCatDto.MedicalHelpUrgency,
+                _createCatDto.AgeCategory,
+                _createCatDto.Behavior,
+                _createCatDto.HealthStatus,
+                _createCatDto.AdditionalRequirements);
+
+            CatHateoasResponse? createCatResponse = 
+                await ApiClient.PostAsync<CreateCatRequest, CatHateoasResponse>(_createCatLink.Href, createCatRequest);
+
+            if (_mainPhoto != null)
+            {
+                Link? uploadThumbnailLink = createCatResponse?.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.UpdateCatThumbnailRel);
+                if (uploadThumbnailLink != null)
+                {
+                    using var content = new MultipartFormDataContent();
+                    using var fileContent = new StreamContent(_mainPhoto.OpenReadStream());
+                    fileContent.Headers.ContentType = new MediaTypeHeaderValue(_mainPhoto.ContentType);
+                    content.Add(fileContent, "thumbnail", _mainPhoto.Name);
+
+                    await ApiClient.PutFileAsync<CatHateoasResponse>(uploadThumbnailLink.Href, content);
+                }
+            }
+
+            NavigationManager.NavigateTo("/user/cats");
+        }
+        catch (Exception)
+        {
+            // Handle API errors
+            _messageStore?.Clear();
+            _messageStore?.Add(() => _createCatDto, "Wystąpił błąd podczas zapisywania danych. Spróbuj ponownie później.");
+            StateHasChanged();
+        }
+        finally
+        {
+            _isProcessing = false;
+        }
+    }
+    
+    public void Dispose()
+    {
+        if (_editContext != null)
+        {
+            _editContext.OnValidationRequested -= HandleValidationRequested;
+        }
+    }
+    
+    public sealed class CreateCatDto : IValidatableObject
+    {
+        [Required(ErrorMessage = "Imię kota jest wymagane")]
+        [StringLength(CatValidationConstants.NameMaxLength, ErrorMessage = "Imię kota nie może przekraczać {1} znaków")]
+        public string Name { get; set; } = "";
+
+        public bool IsCastrated { get; set; }
+
+        [Required(ErrorMessage = "Pilność pomocy weterynaryjnej jest wymagana")]
+        public string MedicalHelpUrgency { get; set; } = "";
+
+        [Required(ErrorMessage = "Kategoria wiekowa jest wymagana")]
+        public string AgeCategory { get; set; } = "";
+
+        [Required(ErrorMessage = "Zachowanie względem ludzi jest wymagane")]
+        public string Behavior { get; set; } = "";
+
+        [Required(ErrorMessage = "Stan zdrowia jest wymagany")]
+        public string HealthStatus { get; set; } = "";
+
+        [StringLength(CatValidationConstants.AdditionalRequirementsMaxLength, ErrorMessage = "Opis nie może przekraczać {1} znaków")]
+        public string? AdditionalRequirements { get; set; }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            yield break;
+        }
+    }
+}
