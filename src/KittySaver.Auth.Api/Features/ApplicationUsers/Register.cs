@@ -65,7 +65,7 @@ public sealed class Register : IEndpoint
     
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapPost("application-users/register", async
+        endpointRouteBuilder.MapPost("application-users", async
             (RegisterRequest request,
             ISender sender,
             CancellationToken cancellationToken) =>
