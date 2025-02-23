@@ -5,6 +5,7 @@ using KittySaver.Api.Shared.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -12,9 +13,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KittySaver.Api.Migrations
 {
     [DbContext(typeof(ApplicationWriteDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250220095622_SmartEnumsStoresAsStrings")]
+    partial class SmartEnumsStoresAsStrings
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -179,10 +182,8 @@ namespace KittySaver.Api.Migrations
                     b.Property<DateTimeOffset?>("LastModificationOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("MedicalHelpUrgency")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<int>("MedicalHelpUrgency")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("PersonId")
                         .HasColumnType("uniqueidentifier");
