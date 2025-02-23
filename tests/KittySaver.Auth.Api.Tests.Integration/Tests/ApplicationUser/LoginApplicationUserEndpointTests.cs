@@ -95,7 +95,7 @@ public class LoginApplicationUserEndpointTests(KittySaverAuthApiFactory appFacto
             Password: "Default123!");
         
         //Act
-        HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/application-users/register", request);
+        HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/application-users", request);
         
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
