@@ -120,7 +120,10 @@ public class ApiClient(
             }
             token = token.Replace("\"", "");
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            return;
         }
+        await localStorageService.ClearAsync();
+        httpClient.DefaultRequestHeaders.Authorization = null;
     }
 
     private async Task EnsureSuccessStatusCodeWithLoggingAsync(HttpResponseMessage response)
