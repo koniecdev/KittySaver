@@ -62,7 +62,7 @@ public class AdvertisementTests
                     MedicalHelpUrgency.HaveToSeeVet),
                 ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
                 behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
-                healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
+                healthStatus: faker.PickRandomParam(HealthStatus.Terminal, HealthStatus.ChronicSerious, HealthStatus.ChronicMinor, HealthStatus.Good),
                 isCastrated: faker.PickRandomParam(true, false),
                 additionalRequirements: Description.Create(faker.Lorem.Lines(2))
             ));
@@ -290,7 +290,7 @@ public class AdvertisementTests
                         MedicalHelpUrgency.HaveToSeeVet),
                     ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
                     behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
-                    healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
+                    healthStatus: faker.PickRandomParam(HealthStatus.ChronicSerious, HealthStatus.ChronicMinor, HealthStatus.Good),
                     isCastrated: faker.PickRandomParam(true, false),
                     additionalRequirements: Description.Create(faker.Lorem.Lines(2))
                 )).Generate();

@@ -44,7 +44,7 @@ public class DefaultCatPriorityCalculatorServiceTests
             medicalHelpUrgency: MedicalHelpUrgency.NoNeed,
             ageCategory: AgeCategory.Baby, 
             behavior: Behavior.Friendly,
-            healthStatus: HealthStatus.Good,
+            healthStatus: HealthStatus.Unknown,
             additionalRequirements: Description.Create("Lorem"),
             isCastrated: false
         );
@@ -66,7 +66,7 @@ public class DefaultCatPriorityCalculatorServiceTests
             medicalHelpUrgency: MedicalHelpUrgency.HaveToSeeVet,
             ageCategory: AgeCategory.Senior, 
             behavior: Behavior.Unfriendly,
-            healthStatus: HealthStatus.Critical,
+            healthStatus: HealthStatus.Terminal,
             additionalRequirements: Description.Create("Lorem"),
             isCastrated: false
         );

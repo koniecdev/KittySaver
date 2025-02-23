@@ -190,7 +190,7 @@ public class CreateCatEndpointsTests : IAsyncLifetime
                     IsCastrated: true,
                     MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
                     Behavior: Behavior.Unfriendly.Name,
-                    HealthStatus: HealthStatus.Poor.Name,
+                    HealthStatus: HealthStatus.ChronicMinor.Name,
                     AgeCategory: AgeCategory.Baby.Name,
                     AdditionalRequirements: faker.Address.State().ClampLength(Description.MaxLength + 1)
                 )).Generate();

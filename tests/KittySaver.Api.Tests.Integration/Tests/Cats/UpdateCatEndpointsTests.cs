@@ -89,7 +89,7 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                     IsCastrated: false,
                     MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
                     Behavior: Behavior.Unfriendly.Name,
-                    HealthStatus: HealthStatus.Critical.Name,
+                    HealthStatus: HealthStatus.Terminal.Name,
                     AgeCategory: AgeCategory.Senior.Name,
                     AdditionalRequirements: "Lorem ipsum dolor sit"
                 )).Generate();
@@ -167,7 +167,7 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                     IsCastrated: false,
                     MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
                     Behavior: Behavior.Unfriendly.Name,
-                    HealthStatus: HealthStatus.Critical.Name,
+                    HealthStatus: HealthStatus.Terminal.Name,
                     AgeCategory: AgeCategory.Senior.Name,
                     AdditionalRequirements: "Lorem ipsum dolor sit"
                 )).Generate();
@@ -234,7 +234,7 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                     IsCastrated: false,
                     MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
                     Behavior: Behavior.Unfriendly.Name,
-                    HealthStatus: HealthStatus.Critical.Name,
+                    HealthStatus: HealthStatus.Terminal.Name,
                     AgeCategory: AgeCategory.Senior.Name,
                     AdditionalRequirements: null
                 )).Generate();
@@ -299,7 +299,7 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                     IsCastrated: false,
                     MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
                     Behavior: Behavior.Unfriendly.Name,
-                    HealthStatus: HealthStatus.Critical.Name,
+                    HealthStatus: HealthStatus.Terminal.Name,
                     AgeCategory: AgeCategory.Senior.Name,
                     AdditionalRequirements: " "
                 )).Generate();
@@ -354,7 +354,7 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                     IsCastrated: false,
                     MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
                     Behavior: Behavior.Unfriendly.Name,
-                    HealthStatus: HealthStatus.Critical.Name,
+                    HealthStatus: HealthStatus.Terminal.Name,
                     AgeCategory: AgeCategory.Senior.Name,
                     AdditionalRequirements: "Lorem ipsum dolor sit"
                 )).Generate();
@@ -395,7 +395,7 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                     IsCastrated: false,
                     MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
                     Behavior: Behavior.Unfriendly.Name,
-                    HealthStatus: HealthStatus.Critical.Name,
+                    HealthStatus: HealthStatus.Terminal.Name,
                     AgeCategory: AgeCategory.Senior.Name,
                     AdditionalRequirements: "Lorem ipsum dolor sit"
                 )).Generate();
@@ -500,7 +500,7 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                     IsCastrated: true,
                     MedicalHelpUrgency: MedicalHelpUrgency.ShouldSeeVet.Name,
                     Behavior: Behavior.Unfriendly.Name,
-                    HealthStatus: HealthStatus.Poor.Name,
+                    HealthStatus: HealthStatus.Terminal.Name,
                     AgeCategory: AgeCategory.Baby.Name,
                     AdditionalRequirements: faker.Address.State().ClampLength(Description.MaxLength + 1)
                 )).Generate();
