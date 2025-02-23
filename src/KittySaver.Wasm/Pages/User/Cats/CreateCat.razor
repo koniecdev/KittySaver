@@ -1,0 +1,32 @@
+﻿@page "/user/cats/create"
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Authorization
+
+
+<div class="subpage_grid">
+    <aside class="subpage_sidebar">
+
+    </aside>
+    <article class="subpage_content">
+        <header class="subpage_header">
+            <h1>Dodaj nowego kotka</h1>
+            <div class="subpage_header_action">
+                <a href="/user/cats/create" class="default_btn btn_red">Anuluj dodawanie kota i wróc do listy kotów.</a>
+            </div>
+        </header>
+        <section class="subpage_main_info">
+            <div class="subpage_description advertisement_element advertisement_element_warning">
+                <p>
+                    W tym kroku dodajesz tylko nowego kota do listy twoich kotów. Po utworzeniu, zostaniesz zapytany o utworzenie nowego publicznego ogłoszenia dla tego kota, lub o przypisanie go do już istniejącego ogłoszenia.
+                </p>
+            </div>
+        </section>
+        <section class="subpage_form_container">
+            <EditForm Model="_registerDto" OnSubmit="HandleRegister" class="subpage_form">
+            </EditForm>
+        </section>
+    </article>
+    <aside class="subpage_sidebar">
+
+    </aside>
+</div>
