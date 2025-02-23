@@ -2,6 +2,7 @@
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Persons;
+using KittySaver.Shared.Requests;
 using Microsoft.EntityFrameworkCore;
 
 namespace KittySaver.Api.Features.Persons.SharedContracts;

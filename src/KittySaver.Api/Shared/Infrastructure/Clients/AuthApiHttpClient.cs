@@ -2,6 +2,8 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using KittySaver.Shared.Requests;
+using KittySaver.Shared.Responses;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KittySaver.Api.Shared.Infrastructure.Clients;
