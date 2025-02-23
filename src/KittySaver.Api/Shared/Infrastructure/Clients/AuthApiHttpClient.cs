@@ -23,13 +23,7 @@ public class ApiValidationException(ValidationProblemDetails problemDetails)
 
 public interface IAuthApiHttpClient
 {
-    protected record IdResponse(Guid Id);
-    public sealed record RegisterDto(
-        string UserName,
-        string Email,
-        string PhoneNumber,
-        string Password);
-    public Task<Guid> RegisterAsync(RegisterDto request);
+    public Task<Guid> RegisterAsync(RegisterRequest request);
     public Task DeletePersonAsync(Guid id, string authToken);
 }
 
@@ -41,7 +35,7 @@ public class AuthApiHttpClient(HttpClient client) : IAuthApiHttpClient
             : Exception("Something went wrong with deserialization of external api response");
     }
 
-    public async Task<Guid> RegisterAsync(IAuthApiHttpClient.RegisterDto request)
+    public async Task<Guid> RegisterAsync(RegisterRequest request)
     {
         string serializedRequest = JsonSerializer.Serialize(request);
         StringContent bodyContent = new StringContent(serializedRequest, Encoding.UTF8, "application/json");
@@ -65,7 +59,7 @@ public class AuthApiHttpClient(HttpClient client) : IAuthApiHttpClient
 
             throw new Exceptions.DeserializationOfApiResponseException();
         }
-        IAuthApiHttpClient.IdResponse idResponse = await response.Content.ReadFromJsonAsync<IAuthApiHttpClient.IdResponse>()
+        IdResponse idResponse = await response.Content.ReadFromJsonAsync<IdResponse>()
             ?? throw new Exceptions.DeserializationOfApiResponseException();
         return idResponse.Id;
     }

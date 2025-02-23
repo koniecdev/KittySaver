@@ -21,7 +21,7 @@ public class PersonRepository(ApplicationWriteDbContext writeDb, IAuthApiHttpCli
     {
         writeDb.Persons.Add(person);
         
-        IAuthApiHttpClient.RegisterDto registerDto = new(
+        RegisterRequest registerDto = new(
             UserName: person.Nickname.Value,
             Email: person.Email.Value,
             PhoneNumber: person.PhoneNumber.Value,
