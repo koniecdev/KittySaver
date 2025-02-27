@@ -341,6 +341,11 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
             routeValues: new { personId = personId.Value }));
         
         links.Add(Generate(
+            endpointInfo: EndpointNames.GetCat,
+            isTemplated: true,
+            routeValues: new { personId = UrlPlaceholders.PersonId, id = UrlPlaceholders.Id }));
+        
+        links.Add(Generate(
             endpointInfo: EndpointNames.GetPersonAdvertisements,
             routeValues: new { personId = personId.Value }));
 
