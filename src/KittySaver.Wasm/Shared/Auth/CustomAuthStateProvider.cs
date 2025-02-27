@@ -10,19 +10,40 @@ public class CustomAuthStateProvider(ILocalStorageService localStorageService) :
     {
         string? token = await localStorageService.GetItemAsStringAsync("token");
         ClaimsIdentity identity = new();
+    
         if (!string.IsNullOrWhiteSpace(token))
         {
             token = token.Replace("\"", "");
-            IEnumerable<Claim> claims = ParseClaimsFromJwt(token);
-            identity = new ClaimsIdentity(claims, "jwt");
-        }
         
+            bool isTokenExpired = IsTokenExpired(token);
+        
+            if (!isTokenExpired)
+            {
+                IEnumerable<Claim> claims = ParseClaimsFromJwt(token);
+                identity = new ClaimsIdentity(claims, "jwt");
+            }
+            else
+            {
+                await localStorageService.RemoveItemAsync("token");
+                await localStorageService.RemoveItemAsync("token_expires");
+            }
+        }
+    
         ClaimsPrincipal user = new(identity);
         AuthenticationState state = new(user);
-        
+    
         NotifyAuthenticationStateChanged(Task.FromResult(state));
-
         return state;
+    }
+
+    private static bool IsTokenExpired(string token)
+    {
+        JwtSecurityTokenHandler handler = new();
+        JwtSecurityToken jwtToken = handler.ReadJwtToken(token);
+    
+        DateTime expiry = jwtToken.ValidTo;
+    
+        return expiry < DateTime.UtcNow;
     }
     private static IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
     {
