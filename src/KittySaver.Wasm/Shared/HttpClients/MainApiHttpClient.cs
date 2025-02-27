@@ -14,7 +14,7 @@ public interface IApiClient
     Task<TResponse?> PostAsync<TRequest, TResponse>(string endpointUrl, TRequest request, CancellationToken cancellationToken = default);
     Task<TResponse?> PutAsync<TRequest, TResponse>(string endpoint, TRequest request, CancellationToken cancellationToken = default);
     Task<TResponse?> PutFileAsync<TResponse>(string endpoint, MultipartFormDataContent content, CancellationToken cancellationToken = default);
-    Task<TResponse?> DeleteAsync<TResponse>(string endpoint, CancellationToken cancellationToken = default);
+    Task DeleteAsync(string endpoint, CancellationToken cancellationToken = default);
 }
 
 public class ApiClient(
@@ -86,7 +86,7 @@ public class ApiClient(
         }
     }
 
-    public async Task<TResponse?> DeleteAsync<TResponse>(string endpoint, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(string endpoint, CancellationToken cancellationToken = default)
     {
         try
         {
@@ -95,8 +95,6 @@ public class ApiClient(
             
             HttpResponseMessage response = await httpClient.DeleteAsync(endpoint, cancellationToken);
             await EnsureSuccessStatusCodeWithLoggingAsync(response);
-            
-            return await response.Content.ReadFromJsonAsync<TResponse>(_jsonOptions, cancellationToken);
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
