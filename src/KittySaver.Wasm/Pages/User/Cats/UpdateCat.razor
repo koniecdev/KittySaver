@@ -1,4 +1,276 @@
-﻿@page "/user/cats/update"
+﻿@page "/user/cats/update/{Id:guid}"
 @attribute [Authorize]
+@using System.ComponentModel.DataAnnotations
+@using System.Net.Http.Headers
+@using KittySaver.Shared.Hateoas
+@using KittySaver.Shared.Requests
+@using KittySaver.Shared.Responses
+@using KittySaver.Wasm.Shared
+@using KittySaver.Wasm.Shared.HttpClients
+@using KittySaver.Wasm.Shared.Validation
 @using Microsoft.AspNetCore.Authorization
-<h1>Zaktualizuj dane kotka</h1>
+@inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
+@inject IApiClient ApiClient
+@inject NavigationManager NavigationManager
+@inject IFileValidationService FileValidationService
+
+<div class="subpage_grid">
+    <aside class="subpage_sidebar">
+
+    </aside>
+    @if (_cat is null)
+    {
+        <span>Ładowanie kotka...</span>
+    }
+    else
+    {
+        <article class="subpage_content">
+            <header class="subpage_header">
+                <h1>Edytuj swojego kotka</h1>
+                <div class="subpage_header_action">
+                    <a href="/user/cats" class="default_btn btn_red">Anuluj edycje</a>
+                </div>
+            </header>
+            <section class="subpage_main_info">
+                <div class="subpage_description advertisement_element advertisement_element_warning">
+                    @if (_cat.IsAssignedToAdvertisement)
+                    {
+                        <p>
+                            Zmiany dokonane na kocie, będą odzwierciedlone na istniejącym ogłoszeniu do którego kot jest
+                            przypisany.
+                        </p>
+                    }
+                    else
+                    {
+                        <p>
+                            Ten kot nie jest jeszcze dodany do żadnego ogłoszenia, więc nikt nie może go zobaczyć. Dodaj
+                            ogłoszenie.
+                        </p>
+                    }
+                </div>
+            </section>
+            <section class="subpage_form_container">
+                <EditForm EditContext="_editContext" OnSubmit="Handle" class="subpage_form">
+                    <DataAnnotationsValidator/>
+
+                    <div class="login_form_tile">
+                        <label for="name">Imie kotka:</label>
+                        <InputText id="name" type="text" @bind-Value="_updateCatDto.Name"/>
+                        <ValidationMessage For="@(() => _updateCatDto.Name)"/>
+                    </div>
+                    <div class="login_form_tile">
+                        <label>Czy kot jest już wysterylizowany/wykastrowany:</label>
+                        <InputRadioGroup @bind-Value="_updateCatDto.IsCastrated">
+                            <div class="radio_item">
+                                <InputRadio Value="true" id="r1"/>
+                                <label for="r1">Tak</label>
+                            </div>
+                            <div class="radio_item">
+                                <InputRadio Value="false" id="r2"/>
+                                <label for="r2">Nie</label>
+                            </div>
+                        </InputRadioGroup>
+                    </div>
+                    <div class="login_form_tile">
+                        <label for="healthStatus">Stan zdrowia:</label>
+                        <InputSelect id="healthStatus" @bind-Value="_updateCatDto.HealthStatus">
+                            <option value="">Kliknij by wybrać stan zdrowia</option>
+                            @foreach (KeyValuePair<string, (string text, string className)> status in Dictionaries.HealthStatusDictionary)
+                            {
+                                <option value="@status.Key">@status.Value.text</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(() => _updateCatDto.HealthStatus)"/>
+                    </div>
+                    <div class="login_form_tile">
+                        <label for="medicalHelp">Pilność pomocy weterynaryjnej:</label>
+                        <InputSelect id="medicalHelp" @bind-Value="_updateCatDto.MedicalHelpUrgency">
+                            <option value="">Kliknij by wybrać pilność wizyty u weterynarza</option>
+                            @foreach (KeyValuePair<string, (string text, string className)> urgency in Dictionaries.MedicalHelpUrgencyDictionary)
+                            {
+                                <option value="@urgency.Key">@urgency.Value.text</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(() => _updateCatDto.MedicalHelpUrgency)"/>
+                    </div>
+                    <div class="login_form_tile">
+                        <label for="ageCategory">Kategoria wiekowa:</label>
+                        <InputSelect id="ageCategory" @bind-Value="_updateCatDto.AgeCategory">
+                            <option value="">Kliknij by wybrać wiek</option>
+                            @foreach (KeyValuePair<string, (string text, string className)> age in Dictionaries.AgeCategoryDictionary)
+                            {
+                                <option value="@age.Key">@age.Value.text</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(() => _updateCatDto.AgeCategory)"/>
+                    </div>
+                    <div class="login_form_tile">
+                        <label for="behaviour">Zachowanie względem ludzi:</label>
+                        <InputSelect id="behaviour" @bind-Value="_updateCatDto.Behavior">
+                            <option value="">Kliknij by wybrać zachowanie</option>
+                            @foreach (KeyValuePair<string, (string text, string className)> age in Dictionaries.BehaviourDictionary)
+                            {
+                                <option value="@age.Key">@age.Value.text</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(() => _updateCatDto.Behavior)"/>
+                    </div>
+                    <div class="login_form_tile span2">
+                        <label for="additionalRequirements">Opis kota, dodatkowe wymagania:</label>
+                        <InputTextArea id="additionalRequirements" @bind-Value="_updateCatDto.AdditionalRequirements"
+                                       rows="4"/>
+                        <ValidationMessage For="@(() => _updateCatDto.AdditionalRequirements)"/>
+                    </div>
+                    <div class="login_form_tile_buttons">
+                        <button class="default_btn btn_green" type="submit" disabled="@_isProcessing">
+                            @if (_isProcessing)
+                            {
+                                <span>Aktualizujemy twojego kotka, daj nam chwile...</span>
+                            }
+                            else
+                            {
+                                <span>Zatwierdź nowe dane kotka</span>
+                            }
+                        </button>
+                        <a href="/user/cats" class="default_btn btn_red">Anuluj aktualizacje kota</a>
+                    </div>
+                </EditForm>
+            </section>
+        </article>
+    }
+    <aside class="subpage_sidebar">
+
+    </aside>
+</div>
+
+@code{
+    [Parameter] public Guid Id { get; set; }
+    private UpdateCatDto _updateCatDto = null!;
+    private CatResponse? _cat;
+    private bool _isProcessing;
+    private Link? _updateCatLink;
+    private ValidationMessageStore? _messageStore;
+    private EditContext? _editContext;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Link? getCatLink = ApiNavigation.Response?.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatRel);
+        if (getCatLink is null)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        string href = getCatLink.Templated
+            ? getCatLink.Href
+                .Replace("{personId}", ApiNavigation.Response?.PersonId.ToString())
+                .Replace("{id}", Id.ToString())
+            : getCatLink.Href;
+
+        _cat = await ApiClient.GetAsync<CatResponse>(href);
+        if (_cat is null)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        _updateCatLink = _cat.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.UpdateCatRel);
+        if (_updateCatLink is null)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        _updateCatDto = new UpdateCatDto
+        {
+            Id = Id,
+            Name = _cat.Name,
+            IsCastrated = _cat.IsCastrated,
+            MedicalHelpUrgency = _cat.MedicalHelpUrgency,
+            AgeCategory = _cat.AgeCategory,
+            Behavior = _cat.Behavior,
+            HealthStatus = _cat.HealthStatus,
+            AdditionalRequirements = _cat.AdditionalRequirements
+        };
+
+        _editContext = new EditContext(_updateCatDto);
+        _messageStore = new ValidationMessageStore(_editContext);
+        StateHasChanged();
+        await base.OnInitializedAsync();
+    }
+
+    private async Task Handle()
+    {
+        if (_editContext?.Validate() != true)
+        {
+            return;
+        }
+
+        _isProcessing = true;
+
+        try
+        {
+            UpdateCatRequest updateCatRequest = new(
+                _updateCatDto.Name,
+                _updateCatDto.IsCastrated,
+                _updateCatDto.MedicalHelpUrgency,
+                _updateCatDto.AgeCategory,
+                _updateCatDto.Behavior,
+                _updateCatDto.HealthStatus,
+                _updateCatDto.AdditionalRequirements);
+
+            if (_updateCatLink is null)
+            {
+                NavigationManager.NavigateTo("/");
+                return;
+            }
+            
+            CatHateoasResponse? updateCatResponse =
+                await ApiClient.PutAsync<UpdateCatRequest, CatHateoasResponse>(_updateCatLink.Href, updateCatRequest);
+
+            NavigationManager.NavigateTo("/user/cats");
+        }
+        catch (Exception)
+        {
+            _messageStore?.Clear();
+            _messageStore?.Add(() => _updateCatDto, "Wystąpił błąd podczas zapisywania danych. Spróbuj ponownie później.");
+            StateHasChanged();
+        }
+        finally
+        {
+            _isProcessing = false;
+        }
+    }
+
+    public sealed class UpdateCatDto : IValidatableObject
+    {
+        public required Guid Id { get; init; }
+
+        [Required(ErrorMessage = "Imię kota jest wymagane")]
+        [StringLength(CatValidationConstants.NameMaxLength, ErrorMessage = "Imię kota nie może przekraczać {1} znaków")]
+        public required string Name { get; set; }
+
+        public required bool IsCastrated { get; set; }
+
+        [Required(ErrorMessage = "Pilność pomocy weterynaryjnej jest wymagana")]
+        public required string MedicalHelpUrgency { get; set; }
+
+        [Required(ErrorMessage = "Kategoria wiekowa jest wymagana")]
+        public required string AgeCategory { get; set; }
+
+        [Required(ErrorMessage = "Zachowanie względem ludzi jest wymagane")]
+        public required string Behavior { get; set; }
+
+        [Required(ErrorMessage = "Stan zdrowia jest wymagany")]
+        public required string HealthStatus { get; set; }
+
+        [StringLength(CatValidationConstants.AdditionalRequirementsMaxLength, ErrorMessage = "Opis nie może przekraczać {1} znaków")]
+        public required string? AdditionalRequirements { get; set; }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            yield break;
+        }
+    }
+
+}
