@@ -1,0 +1,102 @@
+﻿@using KittySaver.Shared.Hateoas
+@using KittySaver.Shared.Responses
+
+<div class="advertisement_element subpage_cat_tile">
+    <header class="subpage_cat_tile_header">
+        <div class="subpage_cat_image">
+            @if (Cat.IsThumbnailUploaded)
+            {
+                <img alt="@Cat.Name - uratujkota.pl"
+                     src="@Cat.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatThumbnailRel)?.Href">
+            }
+            else
+            {
+                <img alt="uratujkota.pl" src="/imgs/defaultCat.webp">
+            }
+        </div>
+        <div class="subpage_cat_info">
+            <h2>@Cat.Name</h2>
+            @if (IsManagementView)
+            {
+                <div class="subpage_cat_info_status">
+                    <span>Czy jest dodany do ogłoszenia:</span> <strong class="subpage_cat_info_btn @Dictionaries.IsAssignedToAdvertisementDictionary[Cat.IsAssignedToAdvertisement].className">
+                        @((MarkupString)Dictionaries.IsAssignedToAdvertisementDictionary[Cat.IsAssignedToAdvertisement].text)
+                    </strong>
+                </div>
+            }
+            <div class="subpage_cat_info_status">
+                <span>Stan kota:</span> <strong class="subpage_cat_info_btn @Dictionaries.HealthStatusDictionary[Cat.HealthStatus].className">
+                    @Dictionaries.HealthStatusDictionary[Cat.HealthStatus].text
+                </strong>
+            </div>
+            <div class="subpage_cat_info_status">
+                <span>Potrzeba weterynarza:</span> <strong class="subpage_cat_info_btn @Dictionaries.MedicalHelpUrgencyDictionary[Cat.MedicalHelpUrgency].className">
+                    @Dictionaries.MedicalHelpUrgencyDictionary[Cat.MedicalHelpUrgency].text
+                </strong>
+            </div>
+            <div class="subpage_cat_info_status">
+                <span>Wykastrowany/Wysterylizowany:</span> <strong class=" subpage_cat_info_btn @Dictionaries.IsCastratedDictionary[Cat.IsCastrated].className">
+                    @Dictionaries.IsCastratedDictionary[Cat.IsCastrated].text
+                </strong>
+            </div>
+            <div class="subpage_cat_info_status">
+                <span>Wiek kota:</span> <strong class=" subpage_cat_info_btn @Dictionaries.AgeCategoryDictionary[Cat.AgeCategory].className">
+                    @Dictionaries.AgeCategoryDictionary[Cat.AgeCategory].text
+                </strong>
+            </div>
+        </div>
+    </header>
+    @if (!string.IsNullOrWhiteSpace(Cat.AdditionalRequirements))
+    {
+        <article class="subpage_cat_additional_requirements">
+            <strong>@DescriptionLabel</strong>
+            <p>
+                @Cat.AdditionalRequirements
+            </p>
+        </article>
+    }
+    @if (IsManagementView)
+    {
+        <div class="subpage_cat_actions">
+            @{
+                bool isUpdateCatLinkEnabled = Cat.Links.Any(x => x.Rel == EndpointRels.Cat.UpdateCatRel);
+                bool isUpdateCatThumbnailLinkEnabled = Cat.Links.Any(x => x.Rel == EndpointRels.Cat.UpdateCatThumbnailRel);
+                bool isDeleteCatLinkEnabled = Cat.Links.Any(x => x.Rel == EndpointRels.Cat.DeleteCatRel);
+            }
+            <a href="/user/cats/manage-thumbnail/@Cat.Id" class="default_btn btn_blue @(isUpdateCatThumbnailLinkEnabled ? "" : "link_disabled")">
+                Zmień główne zdjęcie
+            </a>
+            <a href="/user/cats/manage-gallery/@Cat.Id" class="default_btn btn_blue">
+                Zarządzaj galerią kota
+            </a>
+            <a href="/user/cats/update/@Cat.Id" class="default_btn btn_orange @(isUpdateCatLinkEnabled ? "" : "link_disabled")">
+                Edytuj dane
+            </a>
+            <a href="/user/cats/delete/@Cat.Id" class="default_btn btn_red @(isDeleteCatLinkEnabled ? "" : "link_disabled")">
+                Usuń kota
+            </a>
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// The cat data to display in the tile.
+    /// </summary>
+    [Parameter]
+    public CatResponse Cat { get; set; } = default!;
+    
+    /// <summary>
+    /// Determines if this tile is being used in the cat management view.
+    /// When true, shows advertisement status and management buttons.
+    /// When false, hides these elements (for public advertisement view).
+    /// </summary>
+    [Parameter]
+    public bool IsManagementView { get; set; } = false;
+    
+    /// <summary>
+    /// The label to display before the cat's description.
+    /// </summary>
+    [Parameter]
+    public string DescriptionLabel { get; set; } = "Opis kota:";
+}

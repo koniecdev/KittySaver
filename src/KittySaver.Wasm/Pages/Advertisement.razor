@@ -89,99 +89,22 @@ else
                     <div class="subpage_cats_grid_column">
                         @foreach (CatResponse cat in leftColumn)
                         {
-                            <div class="advertisement_element subpage_cat_tile">
-                                <header class="subpage_cat_tile_header">
-                                    <div class="subpage_cat_image">
-                                        @if (cat.IsThumbnailUploaded)
-                                        {
-                                            <img alt="@cat.Name - uratujkota.pl"
-                                                 src="@cat.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatThumbnailRel)?.Href">
-                                        }
-                                        else
-                                        {
-                                            <img alt="uratujkota.pl" src="/imgs/defaultCat.webp">
-                                        }
-                                    </div>
-                                    <div class="subpage_cat_info">
-                                        <h2>@cat.Name</h2>
-                                        <div class="subpage_cat_info_status">
-                                            <span>Stan kota:</span> <strong class="subpage_cat_info_btn @Dictionaries.HealthStatusDictionary[cat.HealthStatus].className">
-                                                @Dictionaries.HealthStatusDictionary[cat.HealthStatus].text
-                                            </strong>
-                                        </div>
-                                        <div class="subpage_cat_info_status">
-                                            <span>Potrzeba weterynarza:</span> <strong class="subpage_cat_info_btn @Dictionaries.MedicalHelpUrgencyDictionary[cat.MedicalHelpUrgency].className">
-                                                @Dictionaries.MedicalHelpUrgencyDictionary[cat.MedicalHelpUrgency].text
-                                            </strong>
-                                        </div>
-                                        <div class="subpage_cat_info_status">
-                                            <span>Wykastrowany/Wysterylizowany:</span> <strong class=" subpage_cat_info_btn @Dictionaries.IsCastratedDictionary[cat.IsCastrated].className">
-                                                @Dictionaries.IsCastratedDictionary[cat.IsCastrated].text
-                                            </strong>
-                                        </div>
-                                    </div>
-                                </header>
-                                @if (!string.IsNullOrWhiteSpace(cat.AdditionalRequirements))
-                                {
-                                    <article class="subpage_cat_additional_requirements">
-                                        <strong>Kilka słów o tym słodkim kotku od właściciela:</strong>
-                                        <p>
-                                            @cat.AdditionalRequirements
-                                        </p>
-                                    </article>
-                                }
-                            </div>
+                            <CatTileComponent 
+                                Cat="cat" 
+                                IsManagementView="false" 
+                                DescriptionLabel="Kilka słów o tym słodkim kotku od właściciela:" />
                         }
                     </div>
                     <div class="subpage_cats_grid_column">
                         @foreach (CatResponse cat in rightColumn)
                         {
-                           <div class="advertisement_element subpage_cat_tile">
-                                <header class="subpage_cat_tile_header">
-                                    <div class="subpage_cat_image">
-                                        @if (cat.IsThumbnailUploaded)
-                                        {
-                                            <img alt="@cat.Name - uratujkota.pl"
-                                                 src="@cat.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatThumbnailRel)?.Href">
-                                        }
-                                        else
-                                        {
-                                            <img alt="uratujkota.pl" src="/imgs/defaultCat.webp">
-                                        }
-                                    </div>
-                                    <div class="subpage_cat_info">
-                                        <h2>@cat.Name</h2>
-                                        <div class="subpage_cat_info_status">
-                                            <span>Stan kota:</span> <strong class="subpage_cat_info_btn @Dictionaries.HealthStatusDictionary[cat.HealthStatus].className">
-                                                @Dictionaries.HealthStatusDictionary[cat.HealthStatus].text
-                                            </strong>
-                                        </div>
-                                        <div class="subpage_cat_info_status">
-                                            <span>Potrzeba weterynarza:</span> <strong class="subpage_cat_info_btn @Dictionaries.MedicalHelpUrgencyDictionary[cat.MedicalHelpUrgency].className">
-                                                @Dictionaries.MedicalHelpUrgencyDictionary[cat.MedicalHelpUrgency].text
-                                            </strong>
-                                        </div>
-                                        <div class="subpage_cat_info_status">
-                                            <span>Wykastrowany/Wysterylizowany:</span> <strong class=" subpage_cat_info_btn @Dictionaries.IsCastratedDictionary[cat.IsCastrated].className">
-                                                @Dictionaries.IsCastratedDictionary[cat.IsCastrated].text
-                                            </strong>
-                                        </div>
-                                    </div>
-                                </header>
-                                @if (!string.IsNullOrWhiteSpace(cat.AdditionalRequirements))
-                                {
-                                    <article class="subpage_cat_additional_requirements">
-                                        <strong>Kilka słów o tym słodkim kotku od właściciela:</strong>
-                                        <p>
-                                            @cat.AdditionalRequirements
-                                        </p>
-                                    </article>
-                                }
-                            </div>
+                            <CatTileComponent 
+                                Cat="cat" 
+                                IsManagementView="false" 
+                                DescriptionLabel="Kilka słów o tym słodkim kotku od właściciela:" />
                         }
                     </div>
                 </section>
-                    
             }
         </article>
         <aside class="subpage_sidebar">
@@ -256,5 +179,4 @@ else
             }
         }
     }
-
 }
