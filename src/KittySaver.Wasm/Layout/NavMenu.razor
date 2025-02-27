@@ -1,6 +1,7 @@
 ﻿@inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
 @inject ILocalStorageService LocalStorage
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
 
 <nav class="nav">
     <div class="logo">
@@ -17,9 +18,9 @@
         <a href="/mission">Misja</a>
         <AuthorizeView>
             <Authorized>
-                <a href="/my-cats">Moje koty</a>
-                <a href="/my-advertisements">Moje ogłoszenia</a>
-                <a href="/profile">Mój profil</a>
+                <a href="/user/cats">Moje koty</a>
+                <a href="/user/advertisements">Moje ogłoszenia</a>
+                <a href="/user/profile">Twój profil</a>
                 <a class="cp" @onclick="Logout">Wyloguj</a>
             </Authorized>
             <NotAuthorized>
@@ -36,5 +37,7 @@
         await LocalStorage.RemoveItemAsync("token");
         await LocalStorage.RemoveItemAsync("token_expires");
         await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        await ApiNavigation.RefreshAsync();
+        NavigationManager.NavigateTo("/");
     }
 }

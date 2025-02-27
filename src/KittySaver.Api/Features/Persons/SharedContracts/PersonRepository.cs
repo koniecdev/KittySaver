@@ -2,6 +2,7 @@
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Persons;
+using KittySaver.Shared.Requests;
 using Microsoft.EntityFrameworkCore;
 
 namespace KittySaver.Api.Features.Persons.SharedContracts;
@@ -20,7 +21,7 @@ public class PersonRepository(ApplicationWriteDbContext writeDb, IAuthApiHttpCli
     {
         writeDb.Persons.Add(person);
         
-        IAuthApiHttpClient.RegisterDto registerDto = new(
+        RegisterRequest registerDto = new(
             UserName: person.Nickname.Value,
             Email: person.Email.Value,
             PhoneNumber: person.PhoneNumber.Value,

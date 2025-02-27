@@ -31,7 +31,7 @@ public class RegisterApplicationUserEndpointTests(KittySaverAuthApiFactory appFa
         RegisterRequest request = _createApplicationUserRequestGenerator.Generate();
         
         //Act
-        HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/application-users/register", request);
+        HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/application-users", request);
         
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -56,7 +56,7 @@ public class RegisterApplicationUserEndpointTests(KittySaverAuthApiFactory appFa
                 ));
         
         //Act
-        HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/application-users/register", request);
+        HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/application-users", request);
         
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -78,7 +78,7 @@ public class RegisterApplicationUserEndpointTests(KittySaverAuthApiFactory appFa
         );
         
         //Act
-        HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/application-users/register", request);
+        HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/application-users", request);
         
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -111,7 +111,7 @@ public class RegisterApplicationUserEndpointTests(KittySaverAuthApiFactory appFa
                 ));
         
         //Act
-        HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/application-users/register", request);
+        HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/application-users", request);
         
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -126,10 +126,10 @@ public class RegisterApplicationUserEndpointTests(KittySaverAuthApiFactory appFa
     {
         //Arrange
         RegisterRequest request = _createApplicationUserRequestGenerator.Generate();
-        _ = await _httpClient.PostAsJsonAsync("api/v1/application-users/register", request);
+        _ = await _httpClient.PostAsJsonAsync("api/v1/application-users", request);
         
         //Act
-        HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/application-users/register", request);
+        HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/application-users", request);
         
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);

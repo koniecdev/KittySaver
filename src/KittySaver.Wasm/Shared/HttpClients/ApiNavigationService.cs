@@ -7,6 +7,7 @@ public interface IApiNavigationService
 {
     GetApiDiscoveryV1Response? Response { get; }
     Task InitializeAsync();
+    Task RefreshAsync();
     Link? GetLink(string rel);
 }
 
@@ -17,6 +18,11 @@ public class ApiNavigationService(IApiClient apiClient) : IApiNavigationService
     public async Task InitializeAsync()
     {
         Response ??= await apiClient.GetAsync<GetApiDiscoveryV1Response>("https://localhost:7127/api/v1/");
+    }
+    
+    public async Task RefreshAsync()
+    {
+        Response = await apiClient.GetAsync<GetApiDiscoveryV1Response>("https://localhost:7127/api/v1/");
     }
 
     public Link? GetLink(string rel) => Response?.Links.FirstOrDefault(x => x.Rel == rel);

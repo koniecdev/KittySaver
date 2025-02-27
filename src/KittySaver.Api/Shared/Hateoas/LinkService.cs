@@ -332,12 +332,18 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
 
         if (personId is null)
         {
+            links.Add(Generate(endpointInfo: EndpointNames.CreatePerson));
             return links;
         }
 
         links.Add(Generate(
             endpointInfo: EndpointNames.GetCats,
             routeValues: new { personId = personId.Value }));
+        
+        links.Add(Generate(
+            endpointInfo: EndpointNames.GetCat,
+            isTemplated: true,
+            routeValues: new { personId = UrlPlaceholders.PersonId, id = UrlPlaceholders.Id }));
         
         links.Add(Generate(
             endpointInfo: EndpointNames.GetPersonAdvertisements,

@@ -10,8 +10,8 @@ public sealed class Address : ValueObject
     private readonly string _country = null!;
     private readonly string _zipCode = null!;
     private readonly string _city = null!;
-    private readonly string? _street = null!;
-    private readonly string? _buildingNumber = null!;
+    private readonly string? _street;
+    private readonly string? _buildingNumber;
     
     public const int StateMaxLength = 100;
     public const int CountryMaxLength = 60;

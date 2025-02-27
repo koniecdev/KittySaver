@@ -1,0 +1,170 @@
+﻿@page "/user/cats/delete/{Id:guid}"
+@attribute [Authorize]
+@using KittySaver.Shared.Hateoas
+@using KittySaver.Shared.Responses
+@using KittySaver.Wasm.Shared
+@using KittySaver.Wasm.Shared.HttpClients
+@using Microsoft.AspNetCore.Authorization
+@inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
+@inject IApiClient ApiClient
+@inject NavigationManager NavigationManager
+
+<div class="subpage_grid">
+    <aside class="subpage_sidebar">
+    </aside>
+    @if (_cat is null)
+    {
+        <span>Ładowanie kotka...</span>
+    }
+    else
+    {
+        <article class="subpage_content">
+            <header class="subpage_header">
+                <h1>Usuń swojego kotka</h1>
+                <div class="subpage_header_action">
+                    <a href="/user/cats" class="default_btn">Powrót do listy kotów</a>
+                </div>
+            </header>
+            <section class="subpage_main_info">
+                <div class="subpage_description advertisement_element advertisement_element_warning">
+                    @if (_cat.IsAssignedToAdvertisement)
+                    {
+                        <p>
+                            Usunięcie tego kota spowoduje również trwałe usunięcie ogłoszenia, do którego jest przypisany.
+                        </p>
+                    }
+                    else
+                    {
+                        <p>
+                            Ten kot zostanie trwale usunięty z systemu.
+                        </p>
+                    }
+                </div>
+            </section>
+            <section class="subpage_form_container">
+                <div class="subpage_form">
+                    <div class="login_form_tile">
+                        <label>Imie kotka:</label>
+                        <strong>@_cat.Name</strong>
+                    </div>
+                    <div class="login_form_tile">
+                        <label>Czy kot jest już wysterylizowany/wykastrowany:</label>
+                        <strong>
+                            @(_cat.IsCastrated ? "Tak" : "Nie")
+                        </strong>
+                    </div>
+                    <div class="login_form_tile">
+                        <label>Stan zdrowia:</label>
+                        <strong>
+                            @Dictionaries.HealthStatusDictionary[_cat.HealthStatus].text
+                        </strong>
+                    </div>
+                    <div class="login_form_tile">
+                        <label>Pilność pomocy weterynaryjnej:</label>
+                        <strong>
+                            @Dictionaries.MedicalHelpUrgencyDictionary[_cat.MedicalHelpUrgency].text
+                        </strong>
+                    </div>
+                    <div class="login_form_tile">
+                        <label>Kategoria wiekowa:</label>
+                        <strong>
+                            @Dictionaries.AgeCategoryDictionary[_cat.AgeCategory].text
+                        </strong>
+                    </div>
+                    <div class="login_form_tile">
+                        <label>Zachowanie względem ludzi:</label>
+                        <strong>
+                            @Dictionaries.BehaviourDictionary[_cat.Behavior].text
+                        </strong>
+                    </div>
+                    <div class="login_form_tile span2">
+                        <label>Opis kota, dodatkowe wymagania:</label>
+                        <strong>
+                            @_cat.AdditionalRequirements
+                        </strong>
+                    </div>
+                    <div class="login_form_tile_buttons">
+                        <button class="default_btn btn_red" @onclick="HandleDelete" disabled="@_isProcessing">
+                            @if (_isProcessing)
+                            {
+                                <span>Usuwamy twojego kotka, daj nam chwilę...</span>
+                            }
+                            else
+                            {
+                                <span>Usuń na zawsze tego kota z systemu</span>
+                            }
+                        </button>
+                        <a href="/user/cats" class="default_btn">Anuluj</a>
+                    </div>
+                </div>
+            </section>
+        </article>
+    }
+    <aside class="subpage_sidebar">
+    </aside>
+</div>
+
+@code{
+    [Parameter] public Guid Id { get; set; }
+    private CatResponse? _cat;
+    private bool _isProcessing;
+    private Link? _deleteCatLink;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Link? getCatLink = ApiNavigation.Response?.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatRel);
+        if (getCatLink is null)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        string href = getCatLink.Templated
+            ? getCatLink.Href
+                .Replace("{personId}", ApiNavigation.Response?.PersonId.ToString())
+                .Replace("{id}", Id.ToString())
+            : getCatLink.Href;
+
+        _cat = await ApiClient.GetAsync<CatResponse>(href);
+        if (_cat is null)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        _deleteCatLink = _cat.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.DeleteCatRel);
+        if (_deleteCatLink is null)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task HandleDelete()
+    {
+        _isProcessing = true;
+
+        try
+        {
+            if (_deleteCatLink is null)
+            {
+                NavigationManager.NavigateTo("/");
+                return;
+            }
+
+            await ApiClient.DeleteAsync(_deleteCatLink.Href);
+            NavigationManager.NavigateTo("/user/cats");
+        }
+        catch (Exception)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+        finally
+        {
+            _isProcessing = false;
+            StateHasChanged();
+        }
+    }
+}

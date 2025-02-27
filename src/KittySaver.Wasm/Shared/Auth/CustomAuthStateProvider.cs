@@ -9,7 +9,7 @@ public class CustomAuthStateProvider(ILocalStorageService localStorageService) :
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
         string? token = await localStorageService.GetItemAsStringAsync("token");
-        ClaimsIdentity identity = new ClaimsIdentity();
+        ClaimsIdentity identity = new();
         if (!string.IsNullOrWhiteSpace(token))
         {
             token = token.Replace("\"", "");

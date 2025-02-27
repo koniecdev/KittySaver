@@ -4,6 +4,7 @@
 :root{
     --nav_height: 84px;
     --kitty-green: #2F9C26;
+    --kitty-darkgreen: #12390F;
     --kitty-blue: #007fff;
     --kitty-yellow: #fde047;
     --kitty-orange: #D66B1D;
@@ -142,7 +143,9 @@ img{
 .index_aside select,
 .index_aside button,
 .login_form_tile button,
-.login_form_tile input,
+.login_form_tile input:not(input[type="file"]),
+.login_form_tile select,
+.login_form_tile textarea,
 .default_btn{
     padding: .5rem 1rem;
     border: unset;
@@ -151,7 +154,15 @@ img{
     display: grid;
     background-color: #fff;
 }
+.span2{
+    grid-column: span 2;
+}
+.login_form_tile .validation-message {
+    color: var(--kitty-red);
+}
 .default_btn{
+    background-color: #3D3A2B;
+    color: #fff;
     cursor: pointer;
     transition: opacity .15s;
 }
@@ -170,50 +181,56 @@ select{
     cursor: pointer;
 }
 .index_aside button{
-    margin-top: 1.25rem;
+    margin-top: 0.75rem;
     background-color: var(--kitty-green);
     font-size: 1rem;
     color: #fff;
     cursor: pointer;
 }
-.advertisement_details_grid{
+.subpage_grid{
     display: grid;
     grid-template-columns: 350px 1fr 350px;
     padding: 2rem 0;
     grid-gap: 2rem;
 }
-.advertisement_details_content{
+.subpage_content{
     display: grid;
     grid-gap: 2rem;
+    grid-auto-rows: max-content;
 }
-.advertisement_details_header{
+.subpage_header{
     display: grid;
     grid-gap: 2rem;
     grid-template-columns: 1fr max-content;
 }
-.advertisement_details_header h1{
+.subpage_header:not(.advertisement_header){
+    align-items: center;
+}
+.subpage_header h1{
     font-size: 3rem;
-    grid-column: 1/-1;
     margin: 0;
 }
-.advertisement_details_header p{
+.advertisement_header h1{
+    grid-column: 1/-1;
+}
+.subpage_header p{
     font-size: 1.75rem;
     margin: 0;
 }
-.advertisement_details_main_info{
+.subpage_main_info{
     display: grid;
     grid-gap: 2rem;
 }
-.advertisement_details_cat_info{
+.subpage_cat_info{
     display: grid;
     grid-auto-rows: max-content;
     grid-gap: .5rem;
 }
-.advertisement_details_cat_info h2{
+.subpage_cat_info h2{
     font-size: 2rem;
     margin: 0;
 }
-.advertisement_details_cat_info p{
+.subpage_cat_info p{
     margin: 0;
     font-size: 1.25rem;
 }
@@ -234,33 +251,33 @@ select{
 .advertisement_element > strong{
     margin-bottom: .25rem;
 }
-.advertisement_details_cat_tile{
+.subpage_cat_tile{
     display: grid;
     height: max-content;
     border-left-color: var(--kitty-green);
     grid-gap: 2rem;
 }
-.advertisement_details_cats_grid{
+.subpage_cats_grid{
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-gap: 2rem;
     grid-auto-rows: max-content;
 }
-.advertisement_details_cats_grid_column{
+.subpage_cats_grid_column{
     display: grid;
     grid-gap: 2rem;
     grid-auto-rows: max-content;
 }
-.advertisement_details_cat_tile_header{
+.subpage_cat_tile_header{
     display: grid;
     grid-gap: 2rem;
     overflow: hidden;
 }
-.advertisement_details_cat_image{
+.subpage_cat_image{
     border-radius: 10px;
     overflow: hidden;
 }
-.advertisement_details_cat_image img{
+.subpage_cat_image img{
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -293,7 +310,7 @@ select{
 .btn_active .clickable_link svg{
     height: 18px;
 }
-.advertisement_details_advertiser{
+.subpage_advertiser{
     display: grid;
     grid-gap: .5rem;
 }
@@ -315,20 +332,20 @@ select{
     align-content: center;
     display: flex;
 }
-.advertisement_details_cat_additional_requirements{
+.subpage_cat_additional_requirements{
     grid-column: 1/-1;
 }
-.advertisement_details_cat_additional_requirements > strong{
+.subpage_cat_additional_requirements > strong{
     font-size: 1.25rem;
 }
-.advertisement_details_cat_additional_requirements > p{
+.subpage_cat_additional_requirements > p{
     font-size: 1.125rem;
 }
-.advertisement_details_cat_info_btn{
+.subpage_cat_info_btn{
     padding: .25rem .75rem;
     border-radius: 10px;
 }
-.advertisement_details_cat_info_status {
+.subpage_cat_info_status {
     display: grid;
     grid-template-columns: 1fr max-content;
     align-items: center;
@@ -355,12 +372,33 @@ select{
 .tdu{
     text-decoration: underline;
 }
-.advertisement_details_cat_additional_requirements{
+.subpage_cat_additional_requirements{
     display: grid;
     grid-gap: .25rem;
 }
 .cp{
     cursor: pointer;
+}
+.two_part_label{
+    display: grid;
+    grid-template-columns: repeat(2, max-content);
+    justify-content: space-between;
+}
+.subpage_header_action{
+    
+}
+.simple_tiles_grid{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 2.75rem;
+    padding: 2.75rem;
+    grid-auto-rows: max-content;
+}
+.subpage_cat_actions{
+    display: grid;
+    grid-gap: 1rem;
+    grid-template-columns: repeat(2, 1fr);
+    text-align: center;
 }
 
 /*Login.razor.css*/
@@ -369,29 +407,39 @@ select{
     grid-template-columns: 500px 1fr;
     min-height: calc(100vh - var(--nav_height));
 }
-.login_photo{
+.login_photo, .register_photo{
     display: grid;
     background-image: url('/imgs/loginbgc.webp');
     background-size: cover;
     background-position: center left;
     background-repeat: no-repeat;
     height: 100%;
+    background-attachment: fixed;
 }
-.login_container{
+.login_container, .register_container {
     padding: 2.75rem;
     display: grid;
     grid-gap: 2rem;
-    background-color: #242424;
+    background-color: #181818;
     grid-auto-rows: max-content;
+    background-attachment: fixed;
+    grid-template-columns: 620px;
+    justify-content: center;
+    align-content: center;
 }
 .login_form{
     display: grid;
     grid-gap: 2rem;
-    width: 75%;
 }
-.login_form_tile{
+.login_form_tile {
     display: grid;
-    grid-gap: .5rem;
+    grid-gap: 1rem;
+    border-left: 10px solid var(--kitty-green);
+    border-radius: 10px;
+    padding: 1rem;
+    background-color: #242424;
+    grid-auto-rows: max-content;
+    align-content: center;
 }
 .login_form_tile_checkbox{
     display: grid;
@@ -410,7 +458,37 @@ select{
 }
 .login_form_tile_buttons{
     display: grid;
-    grid-gap: 1rem;
+    grid-gap: 2rem;
     text-align: center;
+    grid-template-columns: repeat(2, 1fr);
+    grid-column: 1/-1;
 }
 /*/Login.razor.css*/
+/*register*/
+.login_wrapper, .register_wrapper{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    background-color: #181818;
+}
+.login_form, .register_form, .subpage_form{
+    display: grid;
+    grid-gap: 2rem;
+    grid-template-columns: 1fr;
+}
+.subpage_form{
+    grid-template-columns: repeat(2, 1fr);
+}
+.radio_item{
+    display: grid;
+    grid-template-columns: 16px max-content;
+    grid-gap: 1rem;
+}
+.login_form > *:not(.login_form_tile),
+.register_form > *:not(.login_form_tile){
+    grid-column: 1/-1;
+}
+.register_wrapper header{
+    display: grid;
+    grid-gap: .5rem;
+}
+/*/register*/

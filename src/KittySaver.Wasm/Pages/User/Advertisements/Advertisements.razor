@@ -1,0 +1,28 @@
+﻿@page "/user/advertisements"
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Authorization
+
+<PageTitle>
+    Uratujkota.pl - Twoje ogłoszenia
+</PageTitle>
+
+<div class="subpage_grid">
+    <aside class="subpage_sidebar">
+
+    </aside>
+    <article class="subpage_content">
+        <header class="subpage_header">
+            <h1>Twoje ogłoszenia</h1>
+        </header>
+        <section class="subpage_main_info">
+            <div class="subpage_description advertisement_element advertisement_element_warning">
+                <p>
+                    Tylko i wyłącznie ogłoszenia o statusie 'Aktywne' są widoczne publicznie.
+                </p>
+            </div>
+        </section>
+    </article>
+    <aside class="subpage_sidebar">
+
+    </aside>
+</div>

@@ -262,7 +262,7 @@ public class PersonTests
                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
                     ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
                     behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
-                    healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
+                    healthStatus: faker.PickRandomParam(HealthStatus.Terminal, HealthStatus.ChronicMinor, HealthStatus.Good),
                     isCastrated: false));
         Cat cat1 = catGenerator.Generate();
         Cat cat2 = catGenerator.Generate();
@@ -307,7 +307,7 @@ public class PersonTests
                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
                     ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
                     behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
-                    healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
+                    healthStatus: faker.PickRandomParam(HealthStatus.Terminal, HealthStatus.ChronicMinor, HealthStatus.Good),
                     isCastrated: false)).Generate();
         Cat cat2 = new Faker<Cat>()
             .CustomInstantiator(faker =>
@@ -318,7 +318,7 @@ public class PersonTests
                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
                     ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
                     behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
-                    healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
+                    healthStatus: faker.PickRandomParam(HealthStatus.Terminal, HealthStatus.ChronicMinor, HealthStatus.Good),
                     isCastrated: false)).Generate();
         
         //Act
@@ -352,7 +352,7 @@ public class PersonTests
                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
                     ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
                     behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
-                    healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
+                    healthStatus: faker.PickRandomParam(HealthStatus.Terminal, HealthStatus.ChronicMinor, HealthStatus.Good),
                     isCastrated: false)).Generate();
         sut.AddAdvertisement(
             dateOfCreation: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
@@ -441,7 +441,7 @@ public class PersonTests
                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
                     ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
                     behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
-                    healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
+                    healthStatus: faker.PickRandomParam(HealthStatus.Terminal, HealthStatus.ChronicMinor, HealthStatus.Good),
                     isCastrated: false)).Generate();
         sut.AddAdvertisement(
             dateOfCreation: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
@@ -482,7 +482,7 @@ public class PersonTests
                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
                     ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
                     behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
-                    healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
+                    healthStatus: faker.PickRandomParam(HealthStatus.Terminal, HealthStatus.ChronicMinor, HealthStatus.Good),
                     isCastrated: false)).Generate();
         
         //Act
@@ -523,7 +523,7 @@ public class PersonTests
                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
                     ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
                     behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
-                    healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
+                    healthStatus: faker.PickRandomParam(HealthStatus.Terminal, HealthStatus.ChronicMinor, HealthStatus.Good),
                     isCastrated: false)).Generate();
         
         Advertisement advertisement = sut.AddAdvertisement(
@@ -585,7 +585,7 @@ public class PersonTests
                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
                     ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
                     behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
-                    healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
+                    healthStatus: faker.PickRandomParam(HealthStatus.Terminal, HealthStatus.ChronicMinor, HealthStatus.Good),
                     isCastrated: false)).Generate();
         
         //Act
@@ -642,7 +642,7 @@ public class PersonTests
                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
                     ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
                     behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
-                    healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
+                    healthStatus: faker.PickRandomParam(HealthStatus.Terminal, HealthStatus.ChronicMinor, HealthStatus.Good),
                     isCastrated: false)).Generate();
         
         //Act
@@ -690,7 +690,7 @@ public class PersonTests
                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
                     ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
                     behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
-                    healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
+                    healthStatus: faker.PickRandomParam(HealthStatus.Terminal, HealthStatus.ChronicMinor, HealthStatus.Good),
                     isCastrated: false)).Generate();
         
         Advertisement advertisement = sut.AddAdvertisement(
@@ -735,7 +735,7 @@ public class PersonTests
                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
                     ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
                     behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
-                    healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
+                    healthStatus: faker.PickRandomParam(HealthStatus.Terminal, HealthStatus.ChronicMinor, HealthStatus.Good),
                     isCastrated: false)).Generate();
         
         Advertisement advertisement = sut.AddAdvertisement(
@@ -779,7 +779,7 @@ public class PersonTests
                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
                     ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
                     behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
-                    healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
+                    healthStatus: faker.PickRandomParam(HealthStatus.Terminal, HealthStatus.ChronicMinor, HealthStatus.Good),
                     isCastrated: false)).Generate();
         Cat cat2 = new Faker<Cat>()
             .CustomInstantiator(faker =>
@@ -790,7 +790,7 @@ public class PersonTests
                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
                     ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
                     behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
-                    healthStatus: faker.PickRandomParam(HealthStatus.Critical, HealthStatus.Poor, HealthStatus.Good),
+                    healthStatus: faker.PickRandomParam(HealthStatus.Terminal, HealthStatus.ChronicMinor, HealthStatus.Good),
                     isCastrated: false)).Generate();
         
         //Act

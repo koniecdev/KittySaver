@@ -29,7 +29,7 @@ public class DeleteApplicationUserEndpointTests(KittySaverAuthApiFactory appFact
     {
         //Arrange
         RegisterRequest request = _createApplicationUserRequestGenerator.Generate();
-        HttpResponseMessage userResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/application-users/register", request);
+        HttpResponseMessage userResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/application-users", request);
         ApiResponses.CreatedWithIdResponse? registerResponse = 
             await userResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>();
 
