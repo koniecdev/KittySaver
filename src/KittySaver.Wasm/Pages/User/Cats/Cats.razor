@@ -6,6 +6,7 @@
 @using KittySaver.Wasm.Shared
 @using KittySaver.Wasm.Shared.HttpClients
 @using Microsoft.AspNetCore.Authorization
+@using KittySaver.Wasm.Shared.Components
 @inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
 @inject IApiClient MainApiClient
 @inject NavigationManager NavigationManager
@@ -41,137 +42,13 @@
                 <div class="subpage_cats_grid_column">
                     @foreach (CatResponse cat in leftColumn)
                     {
-                        <div class="advertisement_element subpage_cat_tile">
-                            <header class="subpage_cat_tile_header">
-                                <div class="subpage_cat_image">
-                                    @if (cat.IsThumbnailUploaded)
-                                    {
-                                        <img alt="@cat.Name - uratujkota.pl"
-                                             src="@cat.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatThumbnailRel)?.Href">
-                                    }
-                                    else
-                                    {
-                                        <img alt="uratujkota.pl" src="/imgs/defaultCat.webp">
-                                    }
-                                </div>
-                                <div class="subpage_cat_info">
-                                    <h2>@cat.Name</h2>
-                                    <div class="subpage_cat_info_status">
-                                        <span>Czy jest dodany do ogłoszenia:</span> <strong class="subpage_cat_info_btn @Dictionaries.IsAssignedToAdvertisementDictionary[cat.IsAssignedToAdvertisement].className">
-                                            @((MarkupString)Dictionaries.IsAssignedToAdvertisementDictionary[cat.IsAssignedToAdvertisement].text)
-                                        </strong>
-                                    </div>
-                                    <div class="subpage_cat_info_status">
-                                        <span>Stan kota:</span> <strong class="subpage_cat_info_btn @Dictionaries.HealthStatusDictionary[cat.HealthStatus].className">
-                                            @Dictionaries.HealthStatusDictionary[cat.HealthStatus].text
-                                        </strong>
-                                    </div>
-                                    <div class="subpage_cat_info_status">
-                                        <span>Potrzeba weterynarza:</span> <strong class="subpage_cat_info_btn @Dictionaries.MedicalHelpUrgencyDictionary[cat.MedicalHelpUrgency].className">
-                                            @Dictionaries.MedicalHelpUrgencyDictionary[cat.MedicalHelpUrgency].text
-                                        </strong>
-                                    </div>
-                                    <div class="subpage_cat_info_status">
-                                        <span>Wykastrowany/Wysterylizowany:</span> <strong class=" subpage_cat_info_btn @Dictionaries.IsCastratedDictionary[cat.IsCastrated].className">
-                                            @Dictionaries.IsCastratedDictionary[cat.IsCastrated].text
-                                        </strong>
-                                    </div>
-                                    <div class="subpage_cat_info_status">
-                                        <span>Opis kota:</span> <strong class=" subpage_cat_info_btn @Dictionaries.AgeCategoryDictionary[cat.AgeCategory].className">
-                                            @Dictionaries.AgeCategoryDictionary[cat.AgeCategory].text
-                                        </strong>
-                                    </div>
-                                </div>
-                            </header>
-                            @if (!string.IsNullOrWhiteSpace(cat.AdditionalRequirements))
-                            {
-                                <article class="subpage_cat_additional_requirements">
-                                    <strong>Kilka słów o tym słodkim kotku od właściciela:</strong>
-                                    <p>
-                                        @cat.AdditionalRequirements
-                                    </p>
-                                </article>
-                            }
-                            <div class="subpage_cat_actions">
-                                @{
-                                    bool isUpdateCatLinkEnabled = cat.Links.Any(x => x.Rel == EndpointRels.Cat.UpdateCatRel);
-                                    bool isUpdateCatThumbnailLinkEnabled = cat.Links.Any(x => x.Rel == EndpointRels.Cat.UpdateCatThumbnailRel);
-                                    bool isDeleteCatLinkEnabled = cat.Links.Any(x => x.Rel == EndpointRels.Cat.DeleteCatRel);
-                                }
-                                <a href="/user/cats/manage-thumbnail/@cat.Id" class="default_btn btn_blue @(isUpdateCatThumbnailLinkEnabled ? "" : "link_disabled")">Zmień główne zdjęcie kota</a>
-                                <a href="/user/cats/manage-gallery/@cat.Id" class="default_btn btn_blue">Zarządzaj galerią kota</a>
-                                <a href="/user/cats/update/@cat.Id" class="default_btn btn_orange @(isUpdateCatLinkEnabled ? "" : "link_disabled")">Edytuj dane</a>
-                                <a href="/user/cats/delete/@cat.Id" class="default_btn btn_red @(isDeleteCatLinkEnabled ? "" : "link_disabled")">Usuń kota</a>
-                            </div>
-                        </div>
+                        <CatTileComponent Cat="cat" IsManagementView="true" />
                     }
                 </div>
                 <div class="subpage_cats_grid_column">
                     @foreach (CatResponse cat in rightColumn)
                     {
-                        <div class="advertisement_element subpage_cat_tile">
-                            <header class="subpage_cat_tile_header">
-                                <div class="subpage_cat_image">
-                                    @if (cat.IsThumbnailUploaded)
-                                    {
-                                        <img alt="@cat.Name - uratujkota.pl"
-                                             src="@cat.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatThumbnailRel)?.Href">
-                                    }
-                                    else
-                                    {
-                                        <img alt="uratujkota.pl" src="/imgs/defaultCat.webp">
-                                    }
-                                </div>
-                                <div class="subpage_cat_info">
-                                    <h2>@cat.Name</h2>
-                                    <div class="subpage_cat_info_status">
-                                        <span>Czy jest dodany do ogłoszenia:</span> <strong class="subpage_cat_info_btn @Dictionaries.IsAssignedToAdvertisementDictionary[cat.IsAssignedToAdvertisement].className">
-                                            @((MarkupString)Dictionaries.IsAssignedToAdvertisementDictionary[cat.IsAssignedToAdvertisement].text)
-                                        </strong>
-                                    </div>
-                                    <div class="subpage_cat_info_status">
-                                        <span>Stan kota:</span> <strong class="subpage_cat_info_btn @Dictionaries.HealthStatusDictionary[cat.HealthStatus].className">
-                                            @Dictionaries.HealthStatusDictionary[cat.HealthStatus].text
-                                        </strong>
-                                    </div>
-                                    <div class="subpage_cat_info_status">
-                                        <span>Potrzeba weterynarza:</span> <strong class="subpage_cat_info_btn @Dictionaries.MedicalHelpUrgencyDictionary[cat.MedicalHelpUrgency].className">
-                                            @Dictionaries.MedicalHelpUrgencyDictionary[cat.MedicalHelpUrgency].text
-                                        </strong>
-                                    </div>
-                                    <div class="subpage_cat_info_status">
-                                        <span>Wykastrowany/Wysterylizowany:</span> <strong class=" subpage_cat_info_btn @Dictionaries.IsCastratedDictionary[cat.IsCastrated].className">
-                                            @Dictionaries.IsCastratedDictionary[cat.IsCastrated].text
-                                        </strong>
-                                    </div>
-                                    <div class="subpage_cat_info_status">
-                                        <span>Wiek kota:</span> <strong class=" subpage_cat_info_btn @Dictionaries.AgeCategoryDictionary[cat.AgeCategory].className">
-                                            @Dictionaries.AgeCategoryDictionary[cat.AgeCategory].text
-                                        </strong>
-                                    </div>
-                                </div>
-                            </header>
-                            @if (!string.IsNullOrWhiteSpace(cat.AdditionalRequirements))
-                            {
-                                <article class="subpage_cat_additional_requirements">
-                                    <strong>Opis kota:</strong>
-                                    <p>
-                                        @cat.AdditionalRequirements
-                                    </p>
-                                </article>
-                            }
-                            <div class="subpage_cat_actions">
-                                @{
-                                    bool isUpdateCatLinkEnabled = cat.Links.Any(x => x.Rel == EndpointRels.Cat.UpdateCatRel);
-                                    bool isUpdateCatThumbnailLinkEnabled = cat.Links.Any(x => x.Rel == EndpointRels.Cat.UpdateCatThumbnailRel);
-                                    bool isDeleteCatLinkEnabled = cat.Links.Any(x => x.Rel == EndpointRels.Cat.DeleteCatRel);
-                                }
-                                <a href="/user/cats/manage-thumbnail/@cat.Id" class="default_btn btn_blue @(isUpdateCatThumbnailLinkEnabled ? "" : "link_disabled")">Zmień główne zdjęcie kota</a>
-                                <a href="/user/cats/manage-gallery/@cat.Id" class="default_btn btn_blue">Zarządzaj galerią kota</a>
-                                <a href="/user/cats/update/@cat.Id" class="default_btn btn_orange @(isUpdateCatLinkEnabled ? "" : "link_disabled")">Edytuj dane</a>
-                                <a href="/user/cats/delete/@cat.Id" class="default_btn btn_red @(isDeleteCatLinkEnabled ? "" : "link_disabled")">Usuń kota</a>
-                            </div>
-                        </div>
+                        <CatTileComponent Cat="cat" IsManagementView="true" />
                     }
                 </div>
             </section>
@@ -203,5 +80,4 @@
         PagedList<CatResponse>? catsPagedList = await MainApiClient.GetAsync<PagedList<CatResponse>>(ownerCatsLink.Href);
         _cats = catsPagedList?.Items.ToList() ?? [];
     }
-
 }
