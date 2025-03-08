@@ -1,0 +1,171 @@
+﻿@page "/user/advertisements/delete/{Id:guid}"
+@attribute [Authorize]
+@using KittySaver.Shared.Hateoas
+@using KittySaver.Shared.Responses
+@using KittySaver.Wasm.Shared.HttpClients
+@using Microsoft.AspNetCore.Authorization
+@inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
+@inject IApiClient ApiClient
+@inject NavigationManager NavigationManager
+
+<div class="subpage_grid">
+    <aside class="subpage_sidebar">
+    </aside>
+    @if (_advertisement is null)
+    {
+        <article class="subpage_content">
+            <div class="loading-indicator">
+                <p>Ładowanie ogłoszenia...</p>
+            </div>
+        </article>
+    }
+    else
+    {
+        <article class="subpage_content">
+            <header class="subpage_header">
+                <h1>Usuń ogłoszenie</h1>
+                <div class="subpage_header_action">
+                    <a href="/user/advertisements" class="default_btn">Powrót do listy ogłoszeń</a>
+                </div>
+            </header>
+            <section class="subpage_main_info">
+                <div class="subpage_description advertisement_element advertisement_element_warning">
+                    <p>
+                        <strong>Uwaga:</strong> Usunięcie ogłoszenia jest nieodwracalne. 
+                        Wszystkie koty powiązane z tym ogłoszeniem zostaną oznaczone jako niedostępne dla adopcji.
+                    </p>
+                    @if (_advertisement.Cats.Count > 0)
+                    {
+                        <p>
+                            To ogłoszenie zawiera @_advertisement.Cats.Count @(GetCatsCountText(_advertisement.Cats.Count)).
+                            Po usunięciu ogłoszenia będziesz musiał utworzyć nowe ogłoszenie, jeśli chcesz ponownie je wystawić.
+                        </p>
+                    }
+                </div>
+            </section>
+            <section class="subpage_form_container">
+                <div class="advertisement_element">
+                    <h2>@_advertisement.Title</h2>
+                    
+                    <div class="advertisement_details">
+                        <p><strong>Lokalizacja:</strong> @_advertisement.PickupAddress.City, @_advertisement.PickupAddress.State, @_advertisement.PickupAddress.ZipCode</p>
+                        <p><strong>Kontakt:</strong> @_advertisement.ContactInfoEmail | @_advertisement.ContactInfoPhoneNumber</p>
+                    </div>
+                    
+                    <div class="advertisement_description">
+                        <strong>Opis ogłoszenia:</strong>
+                        <p>
+                            @if (string.IsNullOrWhiteSpace(_advertisement.Description))
+                            {
+                                <em>Brak opisu</em>
+                            }
+                            else
+                            {
+                                @_advertisement.Description
+                            }
+                        </p>
+                    </div>
+                    
+                    <div class="advertisement_cats">
+                        <strong>Koty w tym ogłoszeniu:</strong>
+                        <div class="cats_list">
+                            @foreach (var cat in _advertisement.Cats)
+                            {
+                                <div class="cat_item">@cat.Name</div>
+                            }
+                        </div>
+                    </div>
+                    
+                    <div class="login_form_tile_buttons">
+                        <button class="default_btn btn_red" @onclick="HandleDelete" disabled="@_isProcessing">
+                            @if (_isProcessing)
+                            {
+                                <span>Usuwamy ogłoszenie, prosimy czekać...</span>
+                            }
+                            else
+                            {
+                                <span>Usuń na zawsze to ogłoszenie</span>
+                            }
+                        </button>
+                        <a href="/user/advertisements" class="default_btn">Anuluj</a>
+                    </div>
+                </div>
+            </section>
+        </article>
+    }
+    <aside class="subpage_sidebar">
+    </aside>
+</div>
+
+@code{
+    [Parameter] public Guid Id { get; set; }
+    private AdvertisementResponse? _advertisement;
+    private bool _isProcessing;
+    private Link? _deleteAdvertisementLink;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Link? getAdvertisementLink = ApiNavigation.GetLink(EndpointRels.Advertisement.GetPersonAdvertisementRel);
+        if (getAdvertisementLink is null || ApiNavigation.Response?.PersonId is null)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        string href = getAdvertisementLink.Href
+            .Replace("{personId}", ApiNavigation.Response.PersonId.ToString())
+            .Replace("{id}", Id.ToString());
+        _advertisement = await ApiClient.GetAsync<AdvertisementResponse>(href);
+        
+        if (_advertisement is null)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        _deleteAdvertisementLink = _advertisement.Links.FirstOrDefault(x => x.Rel == EndpointRels.Advertisement.DeleteAdvertisementRel);
+        if (_deleteAdvertisementLink is null)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+
+        await base.OnInitializedAsync();
+    }
+
+    private async Task HandleDelete()
+    {
+        _isProcessing = true;
+
+        try
+        {
+            if (_deleteAdvertisementLink is null)
+            {
+                NavigationManager.NavigateTo("/user/advertisements");
+                return;
+            }
+
+            await ApiClient.DeleteAsync(_deleteAdvertisementLink.Href);
+            NavigationManager.NavigateTo("/user/advertisements");
+        }
+        catch (Exception)
+        {
+            NavigationManager.NavigateTo("/user/advertisements");
+        }
+        finally
+        {
+            _isProcessing = false;
+            StateHasChanged();
+        }
+    }
+    
+    private string GetCatsCountText(int count)
+    {
+        return count switch
+        {
+            1 => "kota",
+            2 or 3 or 4 => "koty",
+            _ => "kotów"
+        };
+    }
+}
