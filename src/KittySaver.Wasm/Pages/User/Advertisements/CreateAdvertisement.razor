@@ -35,33 +35,40 @@
         {
             <!-- Step 1: Cat Selection -->
             <section class="subpage_main_info">
+                <div class="subpage_description advertisement_element">
+                    <p>
+                        <strong>Tytuł ogłoszenia</strong> będzie automatycznie stworzony z imion kotów w ogłoszeniu.
+                    </p>
+                </div>
                 <div class="subpage_description advertisement_element advertisement_element_warning">
                     <p>
                         <strong>Ważne:</strong> Wszystkie koty dodane do jednego ogłoszenia muszą być adoptowane razem.
                         Jeśli koty mogą być adoptowane oddzielnie, utwórz osobne ogłoszenie dla każdego kota.
                     </p>
-                    <p>
-                        <strong>Tytuł ogłoszenia</strong> będzie automatycznie stworzony z imion kotów w ogłoszeniu.
-                    </p>
-                    @if (_selectedCats.Count > 0)
+                    
+                </div>
+                <div class="subpage_description advertisement_element">
+                    @if (_selectedCats.Count <= 0)
                     {
                         <p>
-                            <strong>Wybrano kotów: @_selectedCats.Count</strong>
-                            @if (_selectedCats.Count > 3)
-                            {
-                                <span class="warning-text">
-                                    Pamiętaj, że ogłoszenie z wieloma kotami może być trudniejsze do zrealizowania.
-                                </span>
-                            }
+                            <strong>Uwaga:</strong> Musisz wybrać przynajmniej jednego kota.
                         </p>
                     }
                     else
                     {
-                        <p class="warning-text">
-                            <strong>Uwaga:</strong> Musisz wybrać przynajmniej jednego kota.
+                        <p>
+                            <strong>Wybrano kotów: @_selectedCats.Count</strong>
                         </p>
                     }
                 </div>
+                @if (_selectedCats.Count > 3)
+                {
+                    <div class="subpage_description advertisement_element advertisement_element_warning">
+                        <p>
+                            Pamiętaj, że ogłoszenie z wieloma kotami może być trudniejsze do zrealizowania.
+                        </p>
+                    </div>
+                }
                 
                 <div class="cat_selection_container">
                     <!-- Two panel layout -->
@@ -78,18 +85,15 @@
                             }
                             else
                             {
-                                <div class="cat_grid">
-                                    @foreach (var cat in _availableCats)
+                                <div class="cat_selection_grid">
+                                    @foreach (CatResponse cat in _availableCats)
                                     {
-                                        <div class="cat_selection_tile" @onclick="() => ToggleSelectCat(cat)">
-                                            <img src="@GetCatThumbnail(cat)" alt="@cat.Name" />
-                                            <div class="cat_selection_info">
+                                        <div class="cat_selection_grid_tile" @onclick="() => ToggleSelectCat(cat)">
+                                            <img src="@GetCatThumbnail(cat)" alt="@cat.Name">
+                                            <div class="cat_selection_grid_tile_info">
                                                 <strong>@cat.Name</strong>
-                                                <span class="cat_status @Dictionaries.HealthStatusDictionary[cat.HealthStatus].className">
-                                                    @Dictionaries.HealthStatusDictionary[cat.HealthStatus].text
-                                                </span>
+                                                <div class="cat_selection_grid_tile_select_indicator"></div>
                                             </div>
-                                            <div class="select_indicator"></div>
                                         </div>
                                     }
                                 </div>
@@ -107,18 +111,15 @@
                             }
                             else
                             {
-                                <div class="cat_grid">
-                                    @foreach (var cat in _selectedCats)
+                                <div class="cat_selection_grid">
+                                    @foreach (CatResponse cat in _selectedCats)
                                     {
-                                        <div class="cat_selection_tile selected" @onclick="() => ToggleSelectCat(cat)">
-                                            <img src="@GetCatThumbnail(cat)" alt="@cat.Name" />
-                                            <div class="cat_selection_info">
+                                        <div class="cat_selection_grid_tile selected" @onclick="() => ToggleSelectCat(cat)">
+                                            <img src="@GetCatThumbnail(cat)" alt="@cat.Name">
+                                            <div class="cat_selection_grid_tile_info">
                                                 <strong>@cat.Name</strong>
-                                                <span class="cat_status @Dictionaries.HealthStatusDictionary[cat.HealthStatus].className">
-                                                    @Dictionaries.HealthStatusDictionary[cat.HealthStatus].text
-                                                </span>
+                                                <div class="cat_selection_grid_tile_remove_indicator"></div>
                                             </div>
-                                            <div class="remove_indicator"></div>
                                         </div>
                                     }
                                 </div>
