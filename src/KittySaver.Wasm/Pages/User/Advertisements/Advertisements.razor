@@ -1,6 +1,15 @@
 ﻿@page "/user/advertisements"
 @attribute [Authorize]
+@using KittySaver.Shared.Hateoas
+@using KittySaver.Shared.Pagination
+@using KittySaver.Shared.Responses
+@using KittySaver.Wasm.Shared
+@using KittySaver.Wasm.Shared.HttpClients
 @using Microsoft.AspNetCore.Authorization
+@using KittySaver.Wasm.Shared.Components
+@inject IApiClient MainApiClient
+@inject NavigationManager NavigationManager
+@inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
 
 <PageTitle>
     Uratujkota.pl - Twoje ogłoszenia
@@ -13,6 +22,9 @@
     <article class="subpage_content">
         <header class="subpage_header">
             <h1>Twoje ogłoszenia</h1>
+            <div class="subpage_header_action">
+                <a href="/user/advertisements/create" class="default_btn btn_green">+ Dodaj nowe ogłoszenie</a>
+            </div>
         </header>
         <section class="subpage_main_info">
             <div class="subpage_description advertisement_element advertisement_element_warning">
@@ -21,8 +33,61 @@
                 </p>
             </div>
         </section>
+        
+        <!-- Display advertisements using our management component -->
+        @if (_advertisements.Any())
+        {
+            List<AdvertisementResponse> sortedAdvertisements = _advertisements.OrderBy(advertisement => advertisement.Title).ToList();
+            IEnumerable<AdvertisementResponse> leftColumn = sortedAdvertisements.Where((_, index) => index % 2 == 0);
+            IEnumerable<AdvertisementResponse> rightColumn = sortedAdvertisements.Where((_, index) => index % 2 == 1);
+
+            <section class="subpage_cats_grid">
+                <div class="subpage_cats_grid_column"> 
+                    @foreach (AdvertisementResponse advertisement in leftColumn)
+                    {
+                        <AdvertisementTileComponent Advertisement="advertisement" IsManagementView="true" />
+                    }
+                </div>
+                <div class="subpage_cats_grid_column">
+                    @foreach (AdvertisementResponse advertisement in rightColumn)
+                    {
+                        <AdvertisementTileComponent Advertisement="advertisement" IsManagementView="true" />
+                    }
+                </div>
+            </section>
+        }
+        else
+        {
+            <div class="no_advertisements_message">
+                <p>Nie masz jeszcze żadnych ogłoszeń. Kliknij "Dodaj nowe ogłoszenie", aby utworzyć pierwsze.</p>
+            </div>
+        }
     </article>
     <aside class="subpage_sidebar">
 
     </aside>
 </div>
+
+@code{
+    private List<AdvertisementResponse> _advertisements = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await ApiNavigation.RefreshAsync();
+        await LoadAdvertisements();
+    }
+
+    private async Task LoadAdvertisements()
+    {
+        Link? ownerAdvertisementsLink = ApiNavigation.GetLink(EndpointRels.Advertisement.GetPersonAdvertisementsRel);
+        if (ownerAdvertisementsLink is null)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+        PagedList<AdvertisementResponse>? advertisementsPagedList = 
+            await MainApiClient.GetAsync<PagedList<AdvertisementResponse>>(ownerAdvertisementsLink.Href);
+        _advertisements = advertisementsPagedList?.Items.ToList() ?? [];
+    }
+}
