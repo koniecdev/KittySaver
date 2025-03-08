@@ -1,4 +1,544 @@
-﻿@page "/user/advertisements/update"
+﻿@page "/user/advertisements/update/{Id:guid}"
 @attribute [Authorize]
+@using System.ComponentModel.DataAnnotations
+@using KittySaver.Shared.Hateoas
+@using KittySaver.Shared.Pagination
+@using KittySaver.Shared.Requests
+@using KittySaver.Shared.Responses
+@using KittySaver.Wasm.Shared
+@using KittySaver.Wasm.Shared.HttpClients
 @using Microsoft.AspNetCore.Authorization
-<h1>Zaktualizuj ogłoszenie</h1>
+@inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
+@inject IApiClient MainApiClient
+@inject NavigationManager NavigationManager
+
+<PageTitle>Uratujkota.pl - Edytuj ogłoszenie</PageTitle>
+
+<div class="subpage_grid">
+    <aside class="subpage_sidebar"></aside>
+    
+    @if (_isLoading)
+    {
+        <article class="subpage_content">
+            <div class="loading-indicator">
+                <p>Ładowanie danych ogłoszenia...</p>
+            </div>
+        </article>
+    }
+    else
+    {
+        <article class="subpage_content">
+            <header class="subpage_header">
+                <h1>Edytuj ogłoszenie</h1>
+                <div class="subpage_header_action">
+                    <a href="/user/advertisements" class="default_btn btn_red">Anuluj</a>
+                </div>
+            </header>
+
+            <!-- Step indicator -->
+            <div class="advertisement_wizard_steps">
+                <div class="step @(_currentStep == 1 ? "active" : "")">1. Informacje ogłoszenia</div>
+                <div class="step @(_currentStep == 2 ? "active" : "")">2. Zarządzanie kotami</div>
+                <div class="step @(_currentStep == 3 ? "active" : "")">3. Podgląd i zapisanie</div>
+            </div>
+
+            @if (_currentStep == 1)
+            {
+                <!-- Step 1: Update Advertisement Details -->
+                <section class="subpage_main_info">
+                    <div class="subpage_description advertisement_element advertisement_element_warning">
+                        <p>
+                            <strong>Ważne:</strong> Wszystkie koty dodane do jednego ogłoszenia muszą być adoptowane razem.
+                            Jeśli koty mogą być adoptowane oddzielnie, utwórz osobne ogłoszenie dla każdego kota.
+                        </p>
+                    </div>
+                    
+                    <!-- Advertisement form -->
+                    <div class="subpage_form_container">
+                        <EditForm Model="_advertisementDto" class="subpage_form">
+                            <DataAnnotationsValidator />
+                            
+                            <div class="login_form_tile span2">
+                                <label for="description">Opis ogłoszenia:</label>
+                                <InputTextArea id="description" @bind-Value="_advertisementDto.Description" rows="4"/>
+                                <ValidationMessage For="@(() => _advertisementDto.Description)" />
+                            </div>
+                            
+                            <div class="login_form_tile">
+                                <label for="contactEmail">Kontaktowy adres email:</label>
+                                <InputText id="contactEmail" @bind-Value="_advertisementDto.ContactInfoEmail" />
+                                <ValidationMessage For="@(() => _advertisementDto.ContactInfoEmail)" />
+                            </div>
+                            
+                            <div class="login_form_tile">
+                                <label for="contactPhone">Kontaktowy numer telefonu:</label>
+                                <InputText id="contactPhone" @bind-Value="_advertisementDto.ContactInfoPhoneNumber" />
+                                <ValidationMessage For="@(() => _advertisementDto.ContactInfoPhoneNumber)" />
+                            </div>
+                            
+                            <!-- Address fields -->
+                            <div class="login_form_tile">
+                                <label for="country">Kraj:</label>
+                                <InputText id="country" @bind-Value="_advertisementDto.PickupAddressCountry" />
+                                <ValidationMessage For="@(() => _advertisementDto.PickupAddressCountry)" />
+                            </div>
+                            
+                            <div class="login_form_tile">
+                                <label for="state">Województwo:</label>
+                                <InputSelect id="state" @bind-Value="_advertisementDto.PickupAddressState">
+                                    <option value="">Wybierz województwo</option>
+                                    <option value="Dolnośląskie">Dolnośląskie</option>
+                                    <option value="Kujawsko-Pomorskie">Kujawsko-Pomorskie</option>
+                                    <option value="Lubelskie">Lubelskie</option>
+                                    <option value="Lubuskie">Lubuskie</option>
+                                    <option value="Łódzkie">Łódzkie</option>
+                                    <option value="Małopolskie">Małopolskie</option>
+                                    <option value="Mazowieckie">Mazowieckie</option>
+                                    <option value="Opolskie">Opolskie</option>
+                                    <option value="Podkarpackie">Podkarpackie</option>
+                                    <option value="Podlaskie">Podlaskie</option>
+                                    <option value="Pomorskie">Pomorskie</option>
+                                    <option value="Śląskie">Śląskie</option>
+                                    <option value="Świętokrzyskie">Świętokrzyskie</option>
+                                    <option value="Warmińsko-Mazurskie">Warmińsko-Mazurskie</option>
+                                    <option value="Wielkopolskie">Wielkopolskie</option>
+                                    <option value="Zachodniopomorskie">Zachodniopomorskie</option>
+                                </InputSelect>
+                                <ValidationMessage For="@(() => _advertisementDto.PickupAddressState)" />
+                            </div>
+                            
+                            <div class="login_form_tile">
+                                <label for="zipCode">Kod pocztowy:</label>
+                                <InputText id="zipCode" @bind-Value="_advertisementDto.PickupAddressZipCode" />
+                                <ValidationMessage For="@(() => _advertisementDto.PickupAddressZipCode)" />
+                            </div>
+                            
+                            <div class="login_form_tile">
+                                <label for="city">Miasto:</label>
+                                <InputText id="city" @bind-Value="_advertisementDto.PickupAddressCity" />
+                                <ValidationMessage For="@(() => _advertisementDto.PickupAddressCity)" />
+                            </div>
+                            
+                            <div class="login_form_tile">
+                                <label for="street">Ulica:</label>
+                                <InputText id="street" @bind-Value="_advertisementDto.PickupAddressStreet" />
+                                <ValidationMessage For="@(() => _advertisementDto.PickupAddressStreet)" />
+                            </div>
+                            
+                            <div class="login_form_tile">
+                                <label for="buildingNumber">Numer budynku:</label>
+                                <InputText id="buildingNumber" @bind-Value="_advertisementDto.PickupAddressBuildingNumber" />
+                                <ValidationMessage For="@(() => _advertisementDto.PickupAddressBuildingNumber)" />
+                            </div>
+                            
+                            <div class="login_form_tile_buttons">
+                                <button type="button" class="default_btn btn_green" @onclick="() => GoToStep(2)">
+                                    Dalej: Zarządzanie kotami
+                                </button>
+                            </div>
+                        </EditForm>
+                    </div>
+                </section>
+            }
+            else if (_currentStep == 2)
+            {
+                <!-- Step 2: Cat Management -->
+                <section class="subpage_main_info">
+                    <div class="subpage_description advertisement_element advertisement_element_warning">
+                        <p>
+                            <strong>Zarządzanie kotami w ogłoszeniu.</strong> Pamiętaj, że wszystkie wybrane koty muszą 
+                            być adoptowane razem przez jednego adoptującego.
+                        </p>
+                        <p>
+                            <strong>Tytuł ogłoszenia</strong> będzie automatycznie stworzony z imion kotów w ogłoszeniu.
+                        </p>
+                        @if (_advertisementCats.Count > 0)
+                        {
+                            <p>
+                                <strong>Kotów w ogłoszeniu: @_advertisementCats.Count</strong>
+                                @if (_advertisementCats.Count > 3)
+                                {
+                                    <span class="warning-text">
+                                        Pamiętaj, że ogłoszenie z wieloma kotami może być trudniejsze do zrealizowania.
+                                    </span>
+                                }
+                            </p>
+                        }
+                        else
+                        {
+                            <p class="warning-text">
+                                <strong>Uwaga:</strong> Ogłoszenie musi zawierać przynajmniej jednego kota.
+                            </p>
+                        }
+                    </div>
+                    
+                    <div class="cat_selection_container">
+                        <!-- Two panel layout -->
+                        <div class="cat_panels">
+                            <!-- Available cats -->
+                            <div class="cat_panel">
+                                <h3>Dostępne koty</h3>
+                                @if (_availableCats.Count == 0)
+                                {
+                                    <div class="empty_selection">
+                                        <p>Nie masz dostępnych kotów do dodania do tego ogłoszenia.</p>
+                                        <a href="/user/cats/create" class="default_btn btn_blue">Dodaj nowego kota</a>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="cat_grid">
+                                        @foreach (var cat in _availableCats)
+                                        {
+                                            <div class="cat_selection_tile" @onclick="() => AddCatToAdvertisement(cat)">
+                                                <img src="@GetCatThumbnail(cat)" alt="@cat.Name" />
+                                                <div class="cat_selection_info">
+                                                    <strong>@cat.Name</strong>
+                                                    <span class="cat_status @Dictionaries.HealthStatusDictionary[cat.HealthStatus].className">
+                                                        @Dictionaries.HealthStatusDictionary[cat.HealthStatus].text
+                                                    </span>
+                                                </div>
+                                                <div class="select_indicator"></div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            
+                            <!-- Advertisement cats -->
+                            <div class="cat_panel">
+                                <h3>Koty w tym ogłoszeniu</h3>
+                                @if (_advertisementCats.Count == 0)
+                                {
+                                    <div class="empty_selection">
+                                        <p>Kliknij na kota po lewej stronie, aby dodać go do ogłoszenia.</p>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="cat_grid">
+                                        @foreach (var cat in _advertisementCats)
+                                        {
+                                            <div class="cat_selection_tile selected">
+                                                <img src="@GetCatThumbnail(cat)" alt="@cat.Name" />
+                                                <div class="cat_selection_info">
+                                                    <strong>@cat.Name</strong>
+                                                    <span class="cat_status @Dictionaries.HealthStatusDictionary[cat.HealthStatus].className">
+                                                        @Dictionaries.HealthStatusDictionary[cat.HealthStatus].text
+                                                    </span>
+                                                </div>
+                                                <div class="remove_indicator" @onclick="() => RemoveCatFromAdvertisement(cat)"></div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="login_form_tile_buttons">
+                        <button type="button" class="default_btn" @onclick="() => GoToStep(1)">
+                            Wróć
+                        </button>
+                        <button type="button" class="default_btn btn_green @(_advertisementCats.Count == 0 ? "disabled" : "")" 
+                                @onclick="() => GoToStep(3)" disabled="@(_advertisementCats.Count == 0)">
+                            Dalej: Podgląd
+                        </button>
+                    </div>
+                </section>
+            }
+            else if (_currentStep == 3)
+            {
+                <!-- Step 3: Preview & Submit -->
+                <section class="subpage_main_info">
+                    <div class="subpage_description advertisement_element">
+                        <h3>Podgląd zmian w ogłoszeniu</h3>
+                        <p>Tak będzie wyglądało Twoje ogłoszenie po zapisaniu zmian:</p>
+                    </div>
+                    
+                    <div class="advertisement_preview">
+                        <div class="advertisement_element">
+                            <h2>@string.Join(", ", _advertisementCats.Select(c => c.Name))</h2>
+                            <p>@_advertisementDto.Description</p>
+                            
+                            <div class="advertisement_details">
+                                <p><strong>Lokalizacja:</strong> @_advertisementDto.PickupAddressCity, @_advertisementDto.PickupAddressState, @_advertisementDto.PickupAddressZipCode</p>
+                                <p><strong>Kontakt:</strong> @_advertisementDto.ContactInfoEmail | @_advertisementDto.ContactInfoPhoneNumber</p>
+                            </div>
+                            
+                            @if (_advertisementCats.Count > 1)
+                            {
+                                <div class="advertisement_warning">
+                                    <strong>Uwaga:</strong> Ogłoszeniodawca chce wydać wszystkie @_advertisementCats.Count 
+                                    kotów z tego ogłoszenia do jednego domu. Nie ma innej możliwości jak adoptować 
+                                    razem wszystkie koty z tego ogłoszenia.
+                                </div>
+                            }
+                            
+                            <h3>Koty w tym ogłoszeniu:</h3>
+                            <div class="preview_cats_grid">
+                                @foreach (var cat in _advertisementCats)
+                                {
+                                    <div class="preview_cat_tile">
+                                        <img src="@GetCatThumbnail(cat)" alt="@cat.Name" />
+                                        <div class="preview_cat_info">
+                                            <strong>@cat.Name</strong>
+                                            <div class="preview_cat_details">
+                                                <span>Stan: @Dictionaries.HealthStatusDictionary[cat.HealthStatus].text</span>
+                                                <span>Wiek: @Dictionaries.AgeCategoryDictionary[cat.AgeCategory].text</span>
+                                                <span>Zachowanie: @Dictionaries.BehaviourDictionary[cat.Behavior].text</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="login_form_tile_buttons">
+                        <button type="button" class="default_btn" @onclick="() => GoToStep(2)">
+                            Wróć
+                        </button>
+                        <button type="button" class="default_btn btn_green" @onclick="HandleSubmit">
+                            Zapisz zmiany
+                        </button>
+                    </div>
+                </section>
+            }
+        </article>
+    }
+    
+    <aside class="subpage_sidebar"></aside>
+</div>
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+    
+    private bool _isLoading = true;
+    private int _currentStep = 1;
+    private AdvertisementDto _advertisementDto = new();
+    private AdvertisementResponse? _advertisement;
+    private List<CatResponse> _availableCats = [];
+    private List<CatResponse> _advertisementCats = [];
+    private List<CatResponse> _originalAdvertisementCats = [];
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await LoadAdvertisement();
+        await LoadCats();
+        _isLoading = false;
+    }
+    
+    private async Task LoadAdvertisement()
+    {
+        // Get the advertisement details
+        Link? advertisementLink = ApiNavigation.GetLink(EndpointRels.Advertisement.GetPersonAdvertisementRel);
+
+        if (advertisementLink is null || ApiNavigation.Response?.PersonId is null)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+        
+        string href = advertisementLink.Href
+            .Replace("{personId}", ApiNavigation.Response.PersonId.ToString())
+            .Replace("{id}", Id.ToString());
+        _advertisement = await MainApiClient.GetAsync<AdvertisementResponse>(href);
+
+        if (_advertisement is null)
+        {
+            NavigationManager.NavigateTo("/");
+            return;
+        }
+        
+        _advertisementDto = new AdvertisementDto
+        {
+            Description = _advertisement.Description,
+            ContactInfoEmail = _advertisement.ContactInfoEmail,
+            ContactInfoPhoneNumber = _advertisement.ContactInfoPhoneNumber,
+            PickupAddressCountry = _advertisement.PickupAddress.Country,
+            PickupAddressState = _advertisement.PickupAddress.State,
+            PickupAddressZipCode = _advertisement.PickupAddress.ZipCode,
+            PickupAddressCity = _advertisement.PickupAddress.City,
+            PickupAddressStreet = _advertisement.PickupAddress.Street,
+            PickupAddressBuildingNumber = _advertisement.PickupAddress.BuildingNumber
+        };
+
+        // Load the cats in this advertisement
+        string? catsHref = _advertisement.Links
+            .FirstOrDefault(l => l.Rel == EndpointRels.Advertisement.GetAdvertisementCatsRel)?.Href;
+
+        if (!string.IsNullOrEmpty(catsHref))
+        {
+            var catsResult = await MainApiClient.GetAsync<PagedList<CatResponse>>(catsHref);
+            if (catsResult?.Items != null)
+            {
+                _originalAdvertisementCats = catsResult.Items.ToList();
+                _advertisementCats = new List<CatResponse>(_originalAdvertisementCats);
+            }
+        }
+        
+        // Load the advertisement details into the DTO
+
+    }
+    
+    private async Task LoadCats()
+    {
+        // Load all cats that belong to the user but are not in this advertisement
+        Link? ownerCatsLink = ApiNavigation.GetLink(EndpointRels.Cat.GetCatsRel);
+        if (ownerCatsLink != null)
+        {
+            var allCatsResult = await MainApiClient.GetAsync<PagedList<CatResponse>>(ownerCatsLink.Href);
+            if (allCatsResult?.Items != null)
+            {
+                // Exclude cats that are already in this advertisement and cats that are in other advertisements
+                _availableCats = allCatsResult.Items
+                    .Where(cat => !cat.IsAssignedToAdvertisement || 
+                                 _advertisementCats.Any(ac => ac.Id == cat.Id))
+                    .Where(cat => _advertisementCats.All(ac => ac.Id != cat.Id))
+                    .ToList();
+            }
+        }
+    }
+    
+    private void GoToStep(int step)
+    {
+        // Validate current step before moving
+        if (step > _currentStep && !ValidateCurrentStep())
+            return;
+            
+        _currentStep = step;
+    }
+    
+    private bool ValidateCurrentStep()
+    {
+        // Add validation logic for each step
+        switch (_currentStep)
+        {
+            case 1:
+                // Validate advertisement details
+                return !string.IsNullOrWhiteSpace(_advertisementDto.Description) &&
+                       !string.IsNullOrWhiteSpace(_advertisementDto.ContactInfoEmail) &&
+                       !string.IsNullOrWhiteSpace(_advertisementDto.ContactInfoPhoneNumber) &&
+                       !string.IsNullOrWhiteSpace(_advertisementDto.PickupAddressCountry) &&
+                       !string.IsNullOrWhiteSpace(_advertisementDto.PickupAddressZipCode) &&
+                       !string.IsNullOrWhiteSpace(_advertisementDto.PickupAddressCity);
+            case 2:
+                // Validate cat selection
+                return _advertisementCats.Count > 0;
+            default:
+                return true;
+        }
+    }
+    
+    private void AddCatToAdvertisement(CatResponse cat)
+    {
+        _advertisementCats.Add(cat);
+        _availableCats.Remove(cat);
+    }
+    
+    private void RemoveCatFromAdvertisement(CatResponse cat)
+    {
+        _advertisementCats.Remove(cat);
+        
+        // Only add the cat back to available cats if it wasn't originally in another advertisement
+        if (!cat.IsAssignedToAdvertisement || _originalAdvertisementCats.Any(oc => oc.Id == cat.Id))
+        {
+            _availableCats.Add(cat);
+        }
+    }
+    
+    private string GetCatThumbnail(CatResponse cat)
+    {
+        if (cat.IsThumbnailUploaded)
+        {
+            var thumbnailLink = cat.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatThumbnailRel);
+            return thumbnailLink?.Href ?? "/imgs/defaultCat.webp";
+        }
+        return "/imgs/defaultCat.webp";
+    }
+    
+    private async Task HandleSubmit()
+    {
+        if (_advertisement == null) return;
+        
+        try
+        {
+            // Step 1: Update advertisement details
+            UpdateAdvertisementRequest updateRequest = new(
+                Description: _advertisementDto.Description,
+                PickupAddressCountry: _advertisementDto.PickupAddressCountry,
+                PickupAddressState: _advertisementDto.PickupAddressState,
+                PickupAddressZipCode: _advertisementDto.PickupAddressZipCode,
+                PickupAddressCity: _advertisementDto.PickupAddressCity,
+                PickupAddressStreet: _advertisementDto.PickupAddressStreet,
+                PickupAddressBuildingNumber: _advertisementDto.PickupAddressBuildingNumber,
+                ContactInfoEmail: _advertisementDto.ContactInfoEmail,
+                ContactInfoPhoneNumber: _advertisementDto.ContactInfoPhoneNumber
+            );
+            
+            // Get the update link from the advertisement response
+            Link? updateLink = _advertisement.Links.FirstOrDefault(l => l.Rel == EndpointRels.Advertisement.UpdateAdvertisementRel);
+            if (updateLink != null)
+            {
+                var result = await MainApiClient.PutAsync<UpdateAdvertisementRequest, AdvertisementResponse>(
+                    updateLink.Href, updateRequest);
+                
+                if (result != null)
+                {
+                    // Step 2: Update cat assignments if they've changed
+                    if (!_advertisementCats.Select(c => c.Id).SequenceEqual(_originalAdvertisementCats.Select(c => c.Id)))
+                    {
+                        Link? reassignCatsLink = result.Links.FirstOrDefault(l => l.Rel == EndpointRels.Advertisement.ReassignCatsToAdvertisementRel);
+                        if (reassignCatsLink != null)
+                        {
+                            ReassignCatsToAdvertisementRequest reassignRequest = new(
+                                CatIds: _advertisementCats.Select(c => c.Id)
+                            );
+                            
+                            await MainApiClient.PutAsync<ReassignCatsToAdvertisementRequest, AdvertisementResponse>(
+                                reassignCatsLink.Href, reassignRequest);
+                        }
+                    }
+                    
+                    // Success - navigate back to advertisements list
+                    NavigationManager.NavigateTo("/user/advertisements");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle errors
+            Console.Error.WriteLine($"Error updating advertisement: {ex.Message}");
+        }
+    }
+    
+    private class AdvertisementDto
+    {
+        [StringLength(2000, ErrorMessage = "Opis nie może przekraczać {1} znaków")]
+        public string? Description { get; set; }
+        
+        [Required(ErrorMessage = "Email kontaktowy jest wymagany")]
+        [EmailAddress(ErrorMessage = "Wprowadź poprawny adres email")]
+        public string ContactInfoEmail { get; set; } = "";
+        
+        [Required(ErrorMessage = "Numer telefonu kontaktowego jest wymagany")]
+        public string ContactInfoPhoneNumber { get; set; } = "";
+        
+        [Required(ErrorMessage = "Kraj jest wymagany")]
+        public string PickupAddressCountry { get; set; } = "";
+        
+        public string? PickupAddressState { get; set; }
+        
+        [Required(ErrorMessage = "Kod pocztowy jest wymagany")]
+        public string PickupAddressZipCode { get; set; } = "";
+        
+        [Required(ErrorMessage = "Miasto jest wymagane")]
+        public string PickupAddressCity { get; set; } = "";
+        
+        public string? PickupAddressStreet { get; set; }
+        
+        public string? PickupAddressBuildingNumber { get; set; }
+    }
+}
