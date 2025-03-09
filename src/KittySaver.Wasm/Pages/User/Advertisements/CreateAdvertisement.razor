@@ -366,10 +366,10 @@
     {
         // Get user's default advertisement information to pre-fill form
         Link? personLink = ApiNavigation.GetLink(EndpointRels.Person.GetPersonRel);
-        if (personLink != null)
+        if (personLink is not null)
         {
             PersonResponse? person = await MainApiClient.GetAsync<PersonResponse>(personLink.Href);
-            if (person != null)
+            if (person is not null)
             {
                 _userName = person.Nickname;
                 _advertisementDto = new AdvertisementDto

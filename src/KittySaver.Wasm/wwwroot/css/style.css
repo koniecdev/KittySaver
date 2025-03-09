@@ -660,9 +660,7 @@ select{
 }
 
 .advertisement_preview {
-    border: 2px solid var(--kitty-green);
-    border-radius: 10px;
-    padding: 1rem;
+    padding-top: 1rem;
     margin-top: 1rem;
 }
 
@@ -889,13 +887,6 @@ button.disabled {
 }
 
 /* Preview styles */
-.advertisement_preview {
-    border: 2px solid var(--kitty-green);
-    border-radius: 10px;
-    padding: 0.5rem;
-    margin-top: 1rem;
-    background-color: rgba(47, 156, 38, 0.05);
-}
 
 .advertisement_warning {
     background-color: #3D3A2B;
