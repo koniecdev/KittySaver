@@ -84,7 +84,7 @@
     /// The cat data to display in the tile.
     /// </summary>
     [Parameter]
-    public CatResponse Cat { get; set; } = default!;
+    public CatResponse Cat { get; set; } = null!;
     
     /// <summary>
     /// Determines if this tile is being used in the cat management view.
@@ -92,7 +92,7 @@
     /// When false, hides these elements (for public advertisement view).
     /// </summary>
     [Parameter]
-    public bool IsManagementView { get; set; } = false;
+    public bool IsManagementView { get; set; }
     
     /// <summary>
     /// The label to display before the cat's description.
