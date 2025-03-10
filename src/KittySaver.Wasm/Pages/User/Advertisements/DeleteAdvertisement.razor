@@ -241,14 +241,4 @@
             StateHasChanged();
         }
     }
-    
-    private static string GetCatsCountText(int count)
-    {
-        return count switch
-        {
-            1 => "kota",
-            2 or 3 or 4 => "koty",
-            _ => "kotów"
-        };
-    }
 }
