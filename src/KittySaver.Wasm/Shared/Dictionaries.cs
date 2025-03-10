@@ -7,6 +7,13 @@ public static class Dictionaries
     private const string BtnOrangeClassName = "btn_orange";
     private const string BtnRedClassName = "btn_red";
     
+    public static readonly Dictionary<AdvertisementStatus, (string text, string className)> AdvertisementStatusDictionary = new()
+    {
+        { AdvertisementStatus.Active, ("Aktywne", BtnGreenClassName) },
+        { AdvertisementStatus.Closed, ("Zakończone", BtnDarkGreenClassName) },
+        { AdvertisementStatus.Expired, ("Wygasłe", BtnRedClassName) },
+        { AdvertisementStatus.ThumbnailNotUploaded, ("Brak wymaganej miniaturki", BtnRedClassName) },
+    };
     public static readonly Dictionary<bool, (string text, string className)> IsAssignedToAdvertisementDictionary = new()
     {
         { true, ("Tak - kliknij <strong>tutaj</strong> aby wyświetlić", BtnGreenClassName) },

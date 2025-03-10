@@ -1,0 +1,108 @@
+﻿@using KittySaver.Shared.Hateoas
+@using KittySaver.Shared.Responses
+
+<div class="advertisement_element subpage_cat_tile">
+    <header class="subpage_cat_tile_header">
+        <div class="subpage_cat_image">
+            @{
+                Link? getAdThumbnailLink = Advertisement.Links
+                    .FirstOrDefault(x => x.Rel == EndpointRels.Advertisement.GetAdvertisementThumbnailRel);
+                if (getAdThumbnailLink is not null)
+                {
+                    <img alt="@Advertisement.Title - uratujkota.pl" src="@getAdThumbnailLink.Href">
+                }
+                else
+                {
+                    <img alt="uratujkota.pl" src="/imgs/defaultCat.webp">
+                }
+            }
+        </div>
+        <div class="subpage_cat_info">
+            <h2>@Advertisement.Title</h2>
+            @if (IsManagementView)
+            {
+                <div class="subpage_cat_info_status">
+                    <span>
+                        Status ogłoszenia:
+                    </span> 
+                    <strong class="subpage_cat_info_btn @Dictionaries.AdvertisementStatusDictionary[Advertisement.Status].className">
+                        @Dictionaries.AdvertisementStatusDictionary[Advertisement.Status].text
+                    </strong>
+                </div>
+            }
+            <div class="subpage_cat_info_status">
+                <span>
+                    Ilość kotów w ogłoszeniu:
+                </span> 
+                <strong class="subpage_cat_info_btn">
+                    @Advertisement.Cats.Count
+                </strong>
+            </div>
+            <div class="subpage_cat_info_status">
+                <span>Adres odbioru:</span> <strong class="subpage_cat_info_btn">
+                    @Advertisement.PickupAddress.City - @Advertisement.PickupAddress.ZipCode
+                    <br>
+                    @if (!string.IsNullOrWhiteSpace(Advertisement.PickupAddress.State))
+                    {
+                        @Advertisement.PickupAddress.State
+                    }
+                    <br>
+                    @if (!string.IsNullOrWhiteSpace(Advertisement.PickupAddress.Street) 
+                         && !string.IsNullOrWhiteSpace(Advertisement.PickupAddress.BuildingNumber))
+                    {
+                        @Advertisement.PickupAddress.Street @Advertisement.PickupAddress.BuildingNumber
+                    }
+                </strong>
+            </div>
+            
+        </div>
+    </header>
+    @if (!string.IsNullOrWhiteSpace(Advertisement.Description))
+    {
+        <article class="subpage_cat_additional_requirements">
+            <strong>Opis</strong>
+            <p>
+                @(Advertisement.Description.Length > 50 ? Advertisement.Description[..50]+"..." : Advertisement.Description)
+            </p>
+        </article>
+    }
+    @if (IsManagementView)
+    {
+        <div class="subpage_cat_actions">
+            @{
+                bool isUpdateAdvertisementLinkEnabled = Advertisement.Links.Any(x => x.Rel == EndpointRels.Advertisement.UpdateAdvertisementRel);
+                bool isUpdateAdvertisementThumbnailLinkEnabled = Advertisement.Links.Any(x => x.Rel == EndpointRels.Advertisement.UpdateAdvertisementThumbnailRel);
+                bool isDeleteAdvertisementLinkEnabled = Advertisement.Links.Any(x => x.Rel == EndpointRels.Advertisement.DeleteAdvertisementRel);
+                bool isCloseAdvertisementLinkEnabled = Advertisement.Links.Any(x => x.Rel == EndpointRels.Advertisement.CloseAdvertisementRel);
+            }
+            <a href="/user/advertisements/manage-thumbnail/@Advertisement.Id" class="default_btn btn_blue @(isUpdateAdvertisementThumbnailLinkEnabled ? "" : "link_disabled")">
+                Zmień główne zdjęcie
+            </a>
+            <a href="/user/advertisements/close/@Advertisement.Id" class="default_btn btn_blue">
+                Zakończ ogłoszenie
+            </a>
+            <a href="/user/advertisements/update/@Advertisement.Id" class="default_btn btn_orange @(isUpdateAdvertisementLinkEnabled ? "" : "link_disabled")">
+                Edytuj ogłoszenie
+            </a>
+            <a href="/user/advertisements/delete/@Advertisement.Id" class="default_btn btn_red @(isDeleteAdvertisementLinkEnabled ? "" : "link_disabled")">
+                Usuń ogłoszenie
+            </a>
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// The cat data to display in the tile.
+    /// </summary>
+    [Parameter]
+    public AdvertisementResponse Advertisement { get; set; } = null!;
+    
+    /// <summary>
+    /// Determines if this tile is being used in the cat management view.
+    /// When true, shows advertisement status and management buttons.
+    /// When false, hides these elements (for public advertisement view).
+    /// </summary>
+    [Parameter]
+    public bool IsManagementView { get; set; }
+}

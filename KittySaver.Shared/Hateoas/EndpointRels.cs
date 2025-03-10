@@ -29,13 +29,18 @@ public static class EndpointRels
         public const string CreateAdvertisementRel = "create-advertisement";
         public const string UpdateAdvertisementRel = "update-advertisement";
         public const string DeleteAdvertisementRel = "delete-advertisement";
+        
         public const string GetAdvertisementRel = "get-advertisement";
         public const string GetAdvertisementsRel = "get-advertisements";
+        
         public const string GetAdvertisementCatsRel = "get-advertisement-cats";
+        
         public const string GetPersonAdvertisementsRel = "get-advertisements-by-personid";
+        public const string GetPersonAdvertisementRel = "get-advertisement-by-personid";
         public const string GetPublicAdvertisementRel = "get-public-advertisement";
         public const string GetPublicAdvertisementsRel = "get-public-advertisements";
         public const string GetPublicPersonAdvertisementsRel = "get-public-advertisements-by-personid";
+        
         public const string CloseAdvertisementRel = "close-advertisement";
         public const string ExpireAdvertisementsRel = "expire-advertisement";
         public const string RefreshAdvertisementRel = "refresh-advertisement";

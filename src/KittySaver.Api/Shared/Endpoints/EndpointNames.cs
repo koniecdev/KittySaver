@@ -71,6 +71,9 @@ public static class EndpointNames
     public static readonly EndpointInfo GetPersonAdvertisements = 
         new (Advertisement.GetAdvertisementsName, EndpointRels.Advertisement.GetPersonAdvertisementsRel, HttpVerbs.Get);
     
+    public static readonly EndpointInfo GetPersonAdvertisement = 
+        new (Advertisement.GetAdvertisementName, EndpointRels.Advertisement.GetPersonAdvertisementRel, HttpVerbs.Get);
+    
     public static readonly EndpointInfo CloseAdvertisement = 
         new (Advertisement.CloseAdvertisementName, EndpointRels.Advertisement.CloseAdvertisementRel, HttpVerbs.Post);
     

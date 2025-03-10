@@ -11,6 +11,7 @@ namespace KittySaver.Wasm.Shared.HttpClients;
 public interface IApiClient
 {
     Task<TResponse?> GetAsync<TResponse>(string endpoint, CancellationToken cancellationToken = default);
+    Task<TResponse?> PostAsync<TResponse>(string endpointUrl, CancellationToken cancellationToken = default);
     Task<TResponse?> PostAsync<TRequest, TResponse>(string endpointUrl, TRequest request, CancellationToken cancellationToken = default);
     Task<TResponse?> PutAsync<TRequest, TResponse>(string endpoint, TRequest request, CancellationToken cancellationToken = default);
     Task<TResponse?> PutFileAsync<TResponse>(string endpoint, MultipartFormDataContent content, CancellationToken cancellationToken = default);
@@ -47,6 +48,26 @@ public class ApiClient(
         }
     }
 
+    public async Task<TResponse?> PostAsync<TResponse>(string endpointUrl, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await SetAuthorizationHeadersIfPresent();
+            logger.LogInformation("Making POST request to {Endpoint}", endpointUrl);
+            
+            HttpResponseMessage response = await httpClient.PostAsync(endpointUrl, null, cancellationToken);
+            await EnsureSuccessStatusCodeWithLoggingAsync(response);
+            
+            return await response.Content.ReadFromJsonAsync<TResponse>(_jsonOptions, cancellationToken);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            //Well, we do need the Result pattern for Response<TResponse || ProblemDetails>
+            logger.LogError(ex, "Error making POST request to {Endpoint}", endpointUrl);
+            throw;
+        }
+    }
+    
     public async Task<TResponse?> PostAsync<TRequest, TResponse>(string endpointUrl, TRequest request, CancellationToken cancellationToken = default)
     {
         try
