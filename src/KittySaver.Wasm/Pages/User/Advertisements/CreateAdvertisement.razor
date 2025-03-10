@@ -278,7 +278,7 @@
                             }
                         </div>
 
-                        @if (_thumbnailFile != null)
+                        @if (_thumbnailPreviewUrl != null)
                         {
                             <div class="login_form_tile">
                                 <label>Podgląd miniaturki:</label>
@@ -292,7 +292,7 @@
                             <button type="button" class="default_btn" @onclick="() => GoToStep(2)">
                                 Wróć
                             </button>
-                            <button type="button" class="default_btn btn_green" @onclick="ValidateAndGoToPreview" disabled="@(_thumbnailFile == null)">
+                            <button type="button" class="default_btn btn_green" @onclick="ValidateAndGoToPreview" disabled="@(_thumbnailFileData == null)">
                                 Dalej: Podgląd ogłoszenia
                             </button>
                         </div>
@@ -354,7 +354,7 @@
                                 </p>
                             </div>
 
-                            @if (_thumbnailFile != null)
+                            @if (_thumbnailPreviewUrl != null)
                             {
                                 <div class="subpage_description advertisement_element">
                                     <strong>Miniaturka ogłoszenia</strong>
@@ -422,6 +422,11 @@
     private string? _thumbnailError;
     private string? _thumbnailPreviewUrl;
     private bool _isProcessing;
+    
+    // New properties for file handling
+    private byte[]? _thumbnailFileData;
+    private string? _thumbnailFileName;
+    private string? _thumbnailContentType;
 
     protected override async Task OnInitializedAsync()
     {
@@ -506,8 +511,8 @@
                 // This is a backup validation
                 !string.IsNullOrWhiteSpace(_advertisementDto.Description) && !string.IsNullOrWhiteSpace(_advertisementDto.ContactInfoEmail) && !string.IsNullOrWhiteSpace(_advertisementDto.ContactInfoPhoneNumber) && !string.IsNullOrWhiteSpace(_advertisementDto.PickupAddressCountry) && !string.IsNullOrWhiteSpace(_advertisementDto.PickupAddressZipCode) && !string.IsNullOrWhiteSpace(_advertisementDto.PickupAddressCity),
             3 =>
-                // Validate thumbnail
-                _thumbnailFile != null && string.IsNullOrEmpty(_thumbnailError),
+                // Validate thumbnail - now checking the byte array data rather than the file reference
+                _thumbnailFileData != null && string.IsNullOrEmpty(_thumbnailError),
             _ => true
         };
     }
@@ -549,9 +554,19 @@
             return;
         }
 
-        // Create a preview URL
+        // Cache the file data immediately
         try
         {
+            // Save file details
+            _thumbnailFileName = _thumbnailFile.Name;
+            _thumbnailContentType = _thumbnailFile.ContentType;
+            
+            // Read and cache file data
+            using var stream = _thumbnailFile.OpenReadStream(MaxAllowedSize);
+            _thumbnailFileData = new byte[_thumbnailFile.Size];
+            await stream.ReadAsync(_thumbnailFileData);
+
+            // Create a preview URL
             var imageFile = await e.File.RequestImageFileAsync("image/jpeg", 300, 300);
             var buffer = new byte[imageFile.Size];
             await imageFile.OpenReadStream().ReadAsync(buffer);
@@ -566,7 +581,7 @@
 
     private void ValidateAndGoToPreview()
     {
-        if (_thumbnailFile == null)
+        if (_thumbnailFileData == null)
         {
             _thumbnailError = "Miniaturka jest wymagana";
             return;
@@ -609,16 +624,16 @@
                 var result = await MainApiClient.PostAsync<CreateAdvertisementRequest, AdvertisementHateoasResponse>(
                     createLink.Href, createRequest);
 
-                if (result != null && _thumbnailFile != null)
+                if (result != null && _thumbnailFileData != null && !string.IsNullOrEmpty(_thumbnailFileName))
                 {
                     // Step 2: Upload the thumbnail
                     Link? thumbnailLink = result.Links.FirstOrDefault(x => x.Rel == EndpointRels.Advertisement.UpdateAdvertisementThumbnailRel);
                     if (thumbnailLink != null)
                     {
                         using MultipartFormDataContent content = new();
-                        using StreamContent fileContent = new(_thumbnailFile.OpenReadStream(MaxAllowedSize));
-                        fileContent.Headers.ContentType = new MediaTypeHeaderValue(_thumbnailFile.ContentType);
-                        content.Add(fileContent, "thumbnail", _thumbnailFile.Name);
+                        using ByteArrayContent fileContent = new(_thumbnailFileData);
+                        fileContent.Headers.ContentType = new MediaTypeHeaderValue(_thumbnailContentType ?? "image/jpeg");
+                        content.Add(fileContent, "thumbnail", _thumbnailFileName);
 
                         await MainApiClient.PutFileAsync<AdvertisementHateoasResponse>(thumbnailLink.Href, content);
                     }
