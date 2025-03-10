@@ -1,17 +1,20 @@
 ﻿@page "/user/advertisements/create"
 @attribute [Authorize]
 @using System.ComponentModel.DataAnnotations
+@using System.Net.Http.Headers
 @using KittySaver.Shared.Hateoas
 @using KittySaver.Shared.Pagination
 @using KittySaver.Shared.Requests
 @using KittySaver.Shared.Responses
 @using KittySaver.Wasm.Shared
 @using KittySaver.Wasm.Shared.HttpClients
+@using KittySaver.Wasm.Shared.Validation
 @using Microsoft.AspNetCore.Authorization
 @using KittySaver.Wasm.Shared.Components
 @inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
 @inject IApiClient MainApiClient
 @inject NavigationManager NavigationManager
+@inject IFileValidationService FileValidationService
 
 <PageTitle>Uratujkota.pl - Dodaj nowe ogłoszenie</PageTitle>
 
@@ -29,7 +32,8 @@
         <div class="advertisement_wizard_steps">
             <div class="step @(_currentStep == 1 ? "active" : "")">1. Wybór kotów</div>
             <div class="step @(_currentStep == 2 ? "active" : "")">2. Informacje ogłoszenia</div>
-            <div class="step @(_currentStep == 3 ? "active" : "")">3. Podgląd i publikacja</div>
+            <div class="step @(_currentStep == 3 ? "active" : "")">3. Miniaturka ogłoszenia</div>
+            <div class="step @(_currentStep == 4 ? "active" : "")">4. Podgląd i publikacja</div>
         </div>
 
         @if (_currentStep == 1)
@@ -240,16 +244,65 @@
                                 Wróć
                             </button>
                             <button type="submit" class="default_btn btn_green">
-                                Dalej: Podgląd
+                                Dalej: Wybierz miniaturkę
                             </button>
                         </div>
                     </EditForm>
                 </div>
             </section>
         }
-        else @if (_currentStep == 3)
+        else if (_currentStep == 3)
         {
-            <!-- Step 3: Preview & Submit -->
+            <!-- Step 3: Thumbnail Upload -->
+            <section class="subpage_main_info">
+                <div class="subpage_description advertisement_element">
+                    <h3>Miniaturka ogłoszenia</h3>
+                    <p>Dodaj główne zdjęcie dla Twojego ogłoszenia. To zdjęcie będzie widoczne na liście ogłoszeń.</p>
+                </div>
+
+                <div class="subpage_description advertisement_element advertisement_element_warning">
+                    <p>
+                        <strong>Ważne:</strong> Miniaturka jest wymagana, aby ogłoszenie było widoczne publicznie.
+                        Bez niej ogłoszenie będzie miało status "Brak wymaganej miniaturki".
+                    </p>
+                </div>
+
+                <div class="subpage_form_container">
+                    <div class="subpage_form">
+                        <div class="login_form_tile">
+                            <label for="thumbnail">Wybierz zdjęcie miniaturki:</label>
+                            <InputFile id="thumbnail" OnChange="OnThumbnailSelected" accept=".jpg,.jpeg,.png,.webp" />
+                            @if (!string.IsNullOrEmpty(_thumbnailError))
+                            {
+                                <div class="validation-message">@_thumbnailError</div>
+                            }
+                        </div>
+
+                        @if (_thumbnailFile != null)
+                        {
+                            <div class="login_form_tile">
+                                <label>Podgląd miniaturki:</label>
+                                <div class="thumbnail-preview">
+                                    <img src="@_thumbnailPreviewUrl" alt="Podgląd miniaturki" style="max-width: 300px; max-height: 300px;" />
+                                </div>
+                            </div>
+                        }
+
+                        <div class="login_form_tile_buttons">
+                            <button type="button" class="default_btn" @onclick="() => GoToStep(2)">
+                                Wróć
+                            </button>
+                            <button type="button" class="default_btn btn_green" @onclick="ValidateAndGoToPreview" disabled="@(_thumbnailFile == null)">
+                                Dalej: Podgląd ogłoszenia
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        }
+        else if (_currentStep == 4)
+        {
+            <!-- Step 4: Preview & Submit -->
             <section class="subpage_main_info">
                 <div class="subpage_description advertisement_element">
                     <h3>Podgląd ogłoszenia</h3>
@@ -300,6 +353,16 @@
                                     @_advertisementDto.Description
                                 </p>
                             </div>
+
+                            @if (_thumbnailFile != null)
+                            {
+                                <div class="subpage_description advertisement_element">
+                                    <strong>Miniaturka ogłoszenia</strong>
+                                    <div class="thumbnail-preview">
+                                        <img src="@_thumbnailPreviewUrl" alt="Miniaturka ogłoszenia" style="max-width: 300px; max-height: 300px;" />
+                                    </div>
+                                </div>
+                            }
                         </section>
 
                         <!-- Display cats in a grid matching the actual page -->
@@ -315,19 +378,13 @@
                             <div class="subpage_cats_grid_column">
                                 @foreach (CatResponse cat in leftColumn)
                                 {
-                                    <CatTileComponent
-                                        Cat="cat"
-                                        IsManagementView="false"
-                                        DescriptionLabel="Kilka słów o tym słodkim kotku od właściciela:" />
+                                    <CatTileComponent Cat="cat" />
                                 }
                             </div>
                             <div class="subpage_cats_grid_column">
                                 @foreach (CatResponse cat in rightColumn)
                                 {
-                                    <CatTileComponent
-                                        Cat="cat"
-                                        IsManagementView="false"
-                                        DescriptionLabel="Kilka słów o tym słodkim kotku od właściciela:" />
+                                    <CatTileComponent Cat="cat" />
                                 }
                             </div>
                         </section>
@@ -335,11 +392,18 @@
                 </div>
 
                 <div class="login_form_tile_buttons">
-                    <button type="button" class="default_btn" @onclick="() => GoToStep(2)">
+                    <button type="button" class="default_btn" @onclick="() => GoToStep(3)">
                         Wróć
                     </button>
-                    <button type="button" class="default_btn btn_green" @onclick="HandleSubmit">
-                        Opublikuj ogłoszenie
+                    <button type="button" class="default_btn btn_green" @onclick="HandleSubmit" disabled="@_isProcessing">
+                        @if (_isProcessing)
+                        {
+                            <span>Publikowanie ogłoszenia...</span>
+                        }
+                        else
+                        {
+                            <span>Opublikuj ogłoszenie</span>
+                        }
                     </button>
                 </div>
             </section>
@@ -354,14 +418,18 @@
     private readonly List<CatResponse> _selectedCats = [];
     private bool _showValidationErrors;
     private string _userName = "";
-    
+    private IBrowserFile? _thumbnailFile;
+    private string? _thumbnailError;
+    private string? _thumbnailPreviewUrl;
+    private bool _isProcessing;
+
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
         await LoadUserData();
         await LoadAvailableCats();
     }
-    
+
     private async Task LoadUserData()
     {
         // Get user's default advertisement information to pre-fill form
@@ -387,7 +455,7 @@
             }
         }
     }
-    
+
     private async Task LoadAvailableCats()
     {
         // Load cats that are not already in advertisements
@@ -397,7 +465,7 @@
             NavigationManager.NavigateTo("/");
             return;
         }
-        
+
         var catsPagedList = await MainApiClient.GetAsync<PagedList<CatResponse>>(ownerCatsLink.Href);
         if (catsPagedList?.Items != null)
         {
@@ -407,12 +475,12 @@
                 .ToList();
         }
     }
-    
+
     private void GoToStep(int step)
     {
         // Reset validation errors when moving between steps
         _showValidationErrors = false;
-        
+
         // For step 1, just allow navigation
         if (step == 1 || ValidateCurrentStep())
         {
@@ -424,29 +492,26 @@
             _showValidationErrors = true;
         }
     }
-    
+
     private bool ValidateCurrentStep()
     {
         // Add validation logic for each step
-        switch (_currentStep)
+        return _currentStep switch
         {
-            case 1:
+            1 =>
                 // Validate cat selection
-                return _selectedCats.Count > 0;
-            case 2:
+                _selectedCats.Count > 0,
+            2 =>
                 // For step 2, we let the EditForm handle validation via OnValidSubmit
                 // This is a backup validation
-                return !string.IsNullOrWhiteSpace(_advertisementDto.Description) &&
-                       !string.IsNullOrWhiteSpace(_advertisementDto.ContactInfoEmail) &&
-                       !string.IsNullOrWhiteSpace(_advertisementDto.ContactInfoPhoneNumber) &&
-                       !string.IsNullOrWhiteSpace(_advertisementDto.PickupAddressCountry) &&
-                       !string.IsNullOrWhiteSpace(_advertisementDto.PickupAddressZipCode) &&
-                       !string.IsNullOrWhiteSpace(_advertisementDto.PickupAddressCity);
-            default:
-                return true;
-        }
+                !string.IsNullOrWhiteSpace(_advertisementDto.Description) && !string.IsNullOrWhiteSpace(_advertisementDto.ContactInfoEmail) && !string.IsNullOrWhiteSpace(_advertisementDto.ContactInfoPhoneNumber) && !string.IsNullOrWhiteSpace(_advertisementDto.PickupAddressCountry) && !string.IsNullOrWhiteSpace(_advertisementDto.PickupAddressZipCode) && !string.IsNullOrWhiteSpace(_advertisementDto.PickupAddressCity),
+            3 =>
+                // Validate thumbnail
+                _thumbnailFile != null && string.IsNullOrEmpty(_thumbnailError),
+            _ => true
+        };
     }
-    
+
     private void ToggleSelectCat(CatResponse cat)
     {
         if (_selectedCats.Contains(cat))
@@ -460,22 +525,70 @@
             _availableCats.Remove(cat);
         }
     }
-    
-    private string GetCatThumbnail(CatResponse cat)
+
+    private static string GetCatThumbnail(CatResponse cat)
     {
-        if (cat.IsThumbnailUploaded)
+        if (!cat.IsThumbnailUploaded)
         {
-            var thumbnailLink = cat.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatThumbnailRel);
-            return thumbnailLink?.Href ?? "/imgs/defaultCat.webp";
+            return "/imgs/defaultCat.webp";
         }
-        return "/imgs/defaultCat.webp";
+        var thumbnailLink = cat.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatThumbnailRel);
+        return thumbnailLink?.Href ?? "/imgs/defaultCat.webp";
     }
-    
-    private async Task HandleSubmit()
+
+    private async Task OnThumbnailSelected(InputFileChangeEventArgs e)
     {
+        _thumbnailFile = e.File;
+        _thumbnailError = null;
+
+        // Validate file
+        ValidationResult? validationResult = FileValidationService.ValidateImageFile(_thumbnailFile);
+        if (validationResult != null)
+        {
+            _thumbnailError = validationResult.ErrorMessage;
+            return;
+        }
+
+        // Create a preview URL
         try
         {
-            // Create advertisement request
+            var imageFile = await e.File.RequestImageFileAsync("image/jpeg", 300, 300);
+            var buffer = new byte[imageFile.Size];
+            await imageFile.OpenReadStream().ReadAsync(buffer);
+            var imageDataUrl = $"data:image/jpeg;base64,{Convert.ToBase64String(buffer)}";
+            _thumbnailPreviewUrl = imageDataUrl;
+        }
+        catch (Exception ex)
+        {
+            _thumbnailError = $"Błąd podczas tworzenia podglądu: {ex.Message}";
+        }
+    }
+
+    private void ValidateAndGoToPreview()
+    {
+        if (_thumbnailFile == null)
+        {
+            _thumbnailError = "Miniaturka jest wymagana";
+            return;
+        }
+
+        ValidationResult? validationResult = FileValidationService.ValidateImageFile(_thumbnailFile);
+        if (validationResult != null)
+        {
+            _thumbnailError = validationResult.ErrorMessage;
+            return;
+        }
+
+        GoToStep(4);
+    }
+
+    private async Task HandleSubmit()
+    {
+        _isProcessing = true;
+
+        try
+        {
+            // Step 1: Create the advertisement
             CreateAdvertisementRequest createRequest = new(
                 CatsIdsToAssign: _selectedCats.Select(c => c.Id),
                 Description: _advertisementDto.Description,
@@ -488,19 +601,31 @@
                 ContactInfoEmail: _advertisementDto.ContactInfoEmail,
                 ContactInfoPhoneNumber: _advertisementDto.ContactInfoPhoneNumber
             );
-            
+
             // Get the creation link
             Link? createLink = ApiNavigation.GetLink(EndpointRels.Advertisement.CreateAdvertisementRel);
             if (createLink != null)
             {
                 var result = await MainApiClient.PostAsync<CreateAdvertisementRequest, AdvertisementHateoasResponse>(
                     createLink.Href, createRequest);
-                
-                if (result != null)
+
+                if (result != null && _thumbnailFile != null)
                 {
-                    // Success - navigate back to advertisements list
-                    NavigationManager.NavigateTo("/user/advertisements");
+                    // Step 2: Upload the thumbnail
+                    Link? thumbnailLink = result.Links.FirstOrDefault(x => x.Rel == EndpointRels.Advertisement.UpdateAdvertisementThumbnailRel);
+                    if (thumbnailLink != null)
+                    {
+                        using MultipartFormDataContent content = new();
+                        using StreamContent fileContent = new(_thumbnailFile.OpenReadStream(MaxAllowedSize));
+                        fileContent.Headers.ContentType = new MediaTypeHeaderValue(_thumbnailFile.ContentType);
+                        content.Add(fileContent, "thumbnail", _thumbnailFile.Name);
+
+                        await MainApiClient.PutFileAsync<AdvertisementHateoasResponse>(thumbnailLink.Href, content);
+                    }
                 }
+
+                // Success - navigate back to advertisements list
+                NavigationManager.NavigateTo("/user/advertisements");
             }
         }
         catch (Exception ex)
@@ -508,35 +633,42 @@
             // Handle errors
             Console.Error.WriteLine($"Error creating advertisement: {ex.Message}");
         }
+        finally
+        {
+            _isProcessing = false;
+        }
     }
-    
+
+    // Maximum allowed file size in bytes (5MB)
+    private const long MaxAllowedSize = 5 * 1024 * 1024;
+
     private class AdvertisementDto
     {
         [Required(ErrorMessage = "Opis jest wymagany")]
         [StringLength(2000, ErrorMessage = "Opis nie może przekraczać {1} znaków")]
         public string? Description { get; set; }
-        
+
         [Required(ErrorMessage = "Email kontaktowy jest wymagany")]
         [EmailAddress(ErrorMessage = "Wprowadź poprawny adres email")]
         public string ContactInfoEmail { get; set; } = "";
-        
+
         [Required(ErrorMessage = "Numer telefonu kontaktowego jest wymagany")]
         public string ContactInfoPhoneNumber { get; set; } = "";
-        
+
         [Required(ErrorMessage = "Kraj jest wymagany")]
         public string PickupAddressCountry { get; set; } = "";
-        
+
         [Required(ErrorMessage = "Województwo jest wymagane")]
         public string? PickupAddressState { get; set; }
-        
+
         [Required(ErrorMessage = "Kod pocztowy jest wymagany")]
         public string PickupAddressZipCode { get; set; } = "";
-        
+
         [Required(ErrorMessage = "Miasto jest wymagane")]
         public string PickupAddressCity { get; set; } = "";
-        
+
         public string? PickupAddressStreet { get; set; }
-        
+
         public string? PickupAddressBuildingNumber { get; set; }
     }
 }

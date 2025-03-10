@@ -16,40 +16,43 @@
         </div>
         <div class="subpage_cat_info">
             <h2>@Cat.Name</h2>
-            @if (IsManagementView)
+            @if (!IsOnlyEssentialsRequested)
             {
+                @if (IsManagementView)
+                {
+                    <div class="subpage_cat_info_status">
+                        <span>Czy jest dodany do ogłoszenia:</span> <strong class="subpage_cat_info_btn @Dictionaries.IsAssignedToAdvertisementDictionary[Cat.IsAssignedToAdvertisement].className">
+                            @((MarkupString)Dictionaries.IsAssignedToAdvertisementDictionary[Cat.IsAssignedToAdvertisement].text)
+                        </strong>
+                    </div>
+                }
                 <div class="subpage_cat_info_status">
-                    <span>Czy jest dodany do ogłoszenia:</span> <strong class="subpage_cat_info_btn @Dictionaries.IsAssignedToAdvertisementDictionary[Cat.IsAssignedToAdvertisement].className">
-                        @((MarkupString)Dictionaries.IsAssignedToAdvertisementDictionary[Cat.IsAssignedToAdvertisement].text)
+                    <span>Stan kota:</span> <strong class="subpage_cat_info_btn @Dictionaries.HealthStatusDictionary[Cat.HealthStatus].className">
+                        @Dictionaries.HealthStatusDictionary[Cat.HealthStatus].text
+                    </strong>
+                </div>
+                <div class="subpage_cat_info_status">
+                    <span>Potrzeba weterynarza:</span> <strong class="subpage_cat_info_btn @Dictionaries.MedicalHelpUrgencyDictionary[Cat.MedicalHelpUrgency].className">
+                        @Dictionaries.MedicalHelpUrgencyDictionary[Cat.MedicalHelpUrgency].text
+                    </strong>
+                </div>
+                <div class="subpage_cat_info_status">
+                    <span>Wykastrowany/Wysterylizowany:</span> <strong class=" subpage_cat_info_btn @Dictionaries.IsCastratedDictionary[Cat.IsCastrated].className">
+                        @Dictionaries.IsCastratedDictionary[Cat.IsCastrated].text
+                    </strong>
+                </div>
+                <div class="subpage_cat_info_status">
+                    <span>Wiek kota:</span> <strong class="subpage_cat_info_btn @Dictionaries.AgeCategoryDictionary[Cat.AgeCategory].className">
+                        @Dictionaries.AgeCategoryDictionary[Cat.AgeCategory].text
                     </strong>
                 </div>
             }
-            <div class="subpage_cat_info_status">
-                <span>Stan kota:</span> <strong class="subpage_cat_info_btn @Dictionaries.HealthStatusDictionary[Cat.HealthStatus].className">
-                    @Dictionaries.HealthStatusDictionary[Cat.HealthStatus].text
-                </strong>
-            </div>
-            <div class="subpage_cat_info_status">
-                <span>Potrzeba weterynarza:</span> <strong class="subpage_cat_info_btn @Dictionaries.MedicalHelpUrgencyDictionary[Cat.MedicalHelpUrgency].className">
-                    @Dictionaries.MedicalHelpUrgencyDictionary[Cat.MedicalHelpUrgency].text
-                </strong>
-            </div>
-            <div class="subpage_cat_info_status">
-                <span>Wykastrowany/Wysterylizowany:</span> <strong class=" subpage_cat_info_btn @Dictionaries.IsCastratedDictionary[Cat.IsCastrated].className">
-                    @Dictionaries.IsCastratedDictionary[Cat.IsCastrated].text
-                </strong>
-            </div>
-            <div class="subpage_cat_info_status">
-                <span>Wiek kota:</span> <strong class="subpage_cat_info_btn @Dictionaries.AgeCategoryDictionary[Cat.AgeCategory].className">
-                    @Dictionaries.AgeCategoryDictionary[Cat.AgeCategory].text
-                </strong>
-            </div>
         </div>
     </header>
-    @if (!string.IsNullOrWhiteSpace(Cat.AdditionalRequirements))
+    @if (!IsOnlyEssentialsRequested && !string.IsNullOrWhiteSpace(Cat.AdditionalRequirements))
     {
         <article class="subpage_cat_additional_requirements">
-            <strong>@DescriptionLabel</strong>
+            <strong>Opis kota</strong>
             <p>
                 @Cat.AdditionalRequirements
             </p>
@@ -63,18 +66,27 @@
                 bool isUpdateCatThumbnailLinkEnabled = Cat.Links.Any(x => x.Rel == EndpointRels.Cat.UpdateCatThumbnailRel);
                 bool isDeleteCatLinkEnabled = Cat.Links.Any(x => x.Rel == EndpointRels.Cat.DeleteCatRel);
             }
-            <a href="/user/cats/manage-thumbnail/@Cat.Id" class="default_btn btn_blue @(isUpdateCatThumbnailLinkEnabled ? "" : "link_disabled")">
-                Zmień główne zdjęcie
-            </a>
-            <a href="/user/cats/manage-gallery/@Cat.Id" class="default_btn btn_blue">
+            @if (isUpdateCatThumbnailLinkEnabled)
+            {
+                <a href="/user/cats/manage-thumbnail/@Cat.Id" class="default_btn">
+                    Zmień główne zdjęcie
+                </a>
+            }
+            <a href="/user/cats/manage-gallery/@Cat.Id" class="default_btn">
                 Zarządzaj galerią kota
             </a>
-            <a href="/user/cats/update/@Cat.Id" class="default_btn btn_orange @(isUpdateCatLinkEnabled ? "" : "link_disabled")">
-                Edytuj dane
-            </a>
-            <a href="/user/cats/delete/@Cat.Id" class="default_btn btn_red @(isDeleteCatLinkEnabled ? "" : "link_disabled")">
-                Usuń kota
-            </a>
+            @if (isUpdateCatLinkEnabled)
+            {
+                <a href="/user/cats/update/@Cat.Id" class="default_btn">
+                    Edytuj dane
+                </a>
+            }
+            @if (isDeleteCatLinkEnabled)
+            {
+                <a href="/user/cats/delete/@Cat.Id" class="default_btn btn_red">
+                    Usuń kota
+                </a>
+            }
         </div>
     }
 </div>
@@ -94,9 +106,6 @@
     [Parameter]
     public bool IsManagementView { get; set; }
     
-    /// <summary>
-    /// The label to display before the cat's description.
-    /// </summary>
     [Parameter]
-    public string DescriptionLabel { get; set; } = "Opis kota:";
+    public bool IsOnlyEssentialsRequested { get; set; }
 }

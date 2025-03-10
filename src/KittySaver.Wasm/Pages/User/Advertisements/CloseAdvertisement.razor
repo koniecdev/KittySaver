@@ -105,19 +105,13 @@
                             <div class="subpage_cats_grid_column">
                                 @foreach (CatResponse cat in leftColumn)
                                 {
-                                    <CatTileComponent
-                                        Cat="cat"
-                                        IsManagementView="false"
-                                        DescriptionLabel="Kilka słów o tym słodkim kotku od właściciela:" />
+                                    <CatTileComponent Cat="cat" IsOnlyEssentialsRequested="true" />
                                 }
                             </div>
                             <div class="subpage_cats_grid_column">
                                 @foreach (CatResponse cat in rightColumn)
                                 {
-                                    <CatTileComponent
-                                        Cat="cat"
-                                        IsManagementView="false"
-                                        DescriptionLabel="Kilka słów o tym słodkim kotku od właściciela:" />
+                                    <CatTileComponent Cat="cat" IsOnlyEssentialsRequested="true" />
                                 }
                             </div>
                         </section>
