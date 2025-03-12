@@ -65,11 +65,13 @@ public class GetAdvertisementEndpointsTests : IAsyncLifetime
             await _httpClient.PostAsJsonAsync("api/v1/persons", createPersonRequest);
         ApiResponses.CreatedWithIdResponse createPersonResponse =
             await createPersonResponseMessage.GetIdResponseFromResponseMessageAsync();
+        
         CreateCatRequest createCatRequest = _createCatRequestGenerator.Generate();
         HttpResponseMessage createCatResponseMessage =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{createPersonResponse.Id}/cats", createCatRequest);
         ApiResponses.CreatedWithIdResponse createCatResponse =
             await createCatResponseMessage.GetIdResponseFromResponseMessageAsync();
+        
         CreateAdvertisementRequest createAdvertisementRequest =
             new Faker<CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
@@ -85,7 +87,6 @@ public class GetAdvertisementEndpointsTests : IAsyncLifetime
                         ContactInfoEmail: faker.Person.Email,
                         ContactInfoPhoneNumber: faker.Person.Phone
                     )).Generate();
-
         HttpResponseMessage createAdvertisementResponseMessage =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{createPersonResponse.Id}/advertisements", createAdvertisementRequest);
         ApiResponses.CreatedWithIdResponse createAdvertisementResponse =
@@ -106,6 +107,7 @@ public class GetAdvertisementEndpointsTests : IAsyncLifetime
         advertisement.PersonName.Should().Be(createPersonRequest.Nickname);
         advertisement.Description.Should().Be(createAdvertisementRequest.Description);
         advertisement.Title.Should().Be(createCatRequest.Name);
+        advertisement.Status.Should().Be(AdvertisementStatus.ThumbnailNotUploaded);
         advertisement.ContactInfoEmail.Should().Be(createAdvertisementRequest.ContactInfoEmail);
         advertisement.ContactInfoPhoneNumber.Should().Be(createAdvertisementRequest.ContactInfoPhoneNumber);
         advertisement.PickupAddress.Country.Should().Be(createAdvertisementRequest.PickupAddressCountry);
@@ -127,7 +129,8 @@ public class GetAdvertisementEndpointsTests : IAsyncLifetime
             EndpointNames.UpdateAdvertisementThumbnail.Rel,
             EndpointNames.UpdateAdvertisement.Rel,
             EndpointNames.DeleteAdvertisement.Rel,
-            EndpointNames.ReassignCatsToAdvertisement.Rel);
+            EndpointNames.ReassignCatsToAdvertisement.Rel,
+            EndpointNames.GetAdvertisementCats.Rel);
         advertisement.Links.All(x => !string.IsNullOrWhiteSpace(x.Href)).Should().BeTrue();
     }
 
@@ -140,11 +143,13 @@ public class GetAdvertisementEndpointsTests : IAsyncLifetime
             await _httpClient.PostAsJsonAsync("api/v1/persons", createPersonRequest);
         ApiResponses.CreatedWithIdResponse createPersonResponse =
             await createPersonResponseMessage.GetIdResponseFromResponseMessageAsync();
+        
         CreateCatRequest createCatRequest = _createCatRequestGenerator.Generate();
         HttpResponseMessage createCatResponseMessage =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{createPersonResponse.Id}/cats", createCatRequest);
         ApiResponses.CreatedWithIdResponse createCatResponse =
             await createCatResponseMessage.GetIdResponseFromResponseMessageAsync();
+        
         CreateAdvertisementRequest createAdvertisementRequest =
             new Faker<CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
@@ -160,7 +165,6 @@ public class GetAdvertisementEndpointsTests : IAsyncLifetime
                         ContactInfoEmail: faker.Person.Email,
                         ContactInfoPhoneNumber: faker.Person.Phone
                     )).Generate();
-
         HttpResponseMessage createAdvertisementResponseMessage =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{createPersonResponse.Id}/advertisements", createAdvertisementRequest);
         ApiResponses.CreatedWithIdResponse createAdvertisementResponse =
@@ -208,6 +212,7 @@ public class GetAdvertisementEndpointsTests : IAsyncLifetime
         advertisement.PickupAddress.Street.Should().Be(updateAdvertisementRequest.PickupAddressStreet);
         advertisement.PickupAddress.BuildingNumber.Should().Be(updateAdvertisementRequest.PickupAddressBuildingNumber);
         advertisement.PriorityScore.Should().BeGreaterThan(0);
+        advertisement.Status.Should().Be(AdvertisementStatus.ThumbnailNotUploaded);
         advertisement.Cats.Should().BeEquivalentTo([
             new AdvertisementResponse.CatDto
             {
@@ -220,7 +225,8 @@ public class GetAdvertisementEndpointsTests : IAsyncLifetime
             EndpointNames.UpdateAdvertisementThumbnail.Rel,
             EndpointNames.UpdateAdvertisement.Rel,
             EndpointNames.DeleteAdvertisement.Rel,
-            EndpointNames.ReassignCatsToAdvertisement.Rel);
+            EndpointNames.ReassignCatsToAdvertisement.Rel,
+            EndpointNames.GetAdvertisementCats.Rel);
         advertisement.Links.All(x => !string.IsNullOrWhiteSpace(x.Href)).Should().BeTrue();
     }
 

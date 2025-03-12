@@ -117,12 +117,13 @@ public class RefreshAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Status.Should().Be(AdvertisementStatus.Active);
         hateoasResponse.Links.Select(x => x.Rel).Should()
             .BeEquivalentTo(EndpointRels.SelfRel,
+                EndpointNames.UpdateAdvertisement.Rel,
                 EndpointNames.GetAdvertisementThumbnail.Rel,
                 EndpointNames.DeleteAdvertisement.Rel,
-                EndpointNames.CloseAdvertisement.Rel,
-                EndpointNames.UpdateAdvertisement.Rel,
-                EndpointNames.UpdateAdvertisementThumbnail.Rel,
                 EndpointNames.ReassignCatsToAdvertisement.Rel,
+                EndpointNames.GetAdvertisementCats.Rel,
+                EndpointNames.UpdateAdvertisementThumbnail.Rel,
+                EndpointNames.CloseAdvertisement.Rel,
                 EndpointNames.ExpireAdvertisement.Rel);
         hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         AdvertisementResponse advertisement =
@@ -189,12 +190,13 @@ public class RefreshAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Status.Should().Be(AdvertisementStatus.Active);
         hateoasResponse.Links.Select(x => x.Rel).Should()
             .BeEquivalentTo(EndpointRels.SelfRel,
+                EndpointNames.UpdateAdvertisement.Rel,
                 EndpointNames.GetAdvertisementThumbnail.Rel,
                 EndpointNames.DeleteAdvertisement.Rel,
-                EndpointNames.CloseAdvertisement.Rel,
-                EndpointNames.UpdateAdvertisement.Rel,
-                EndpointNames.UpdateAdvertisementThumbnail.Rel,
                 EndpointNames.ReassignCatsToAdvertisement.Rel,
+                EndpointNames.GetAdvertisementCats.Rel,
+                EndpointNames.UpdateAdvertisementThumbnail.Rel,
+                EndpointNames.CloseAdvertisement.Rel,
                 EndpointNames.ExpireAdvertisement.Rel);
         hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         AdvertisementResponse advertisement =
