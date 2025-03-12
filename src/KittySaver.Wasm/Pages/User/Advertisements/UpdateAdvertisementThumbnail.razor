@@ -1,0 +1,281 @@
+@page "/user/advertisements/manage-thumbnail/{AdvertisementId:guid}"
+@attribute [Authorize]
+@using System.ComponentModel.DataAnnotations
+@using System.Net.Http.Headers
+@using KittySaver.Shared.Hateoas
+@using KittySaver.Shared.Pagination
+@using KittySaver.Shared.Responses
+@using KittySaver.Wasm.Shared
+@using KittySaver.Wasm.Shared.HttpClients
+@using KittySaver.Wasm.Shared.Validation
+@using Microsoft.AspNetCore.Authorization
+@inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
+@inject IApiClient MainApiClient
+@inject NavigationManager NavigationManager
+@inject IFileValidationService FileValidationService
+
+<PageTitle>Uratujkota.pl - Aktualizacja miniaturki ogłoszenia</PageTitle>
+
+<div class="subpage_grid">
+    <aside class="subpage_sidebar"></aside>
+    <article class="subpage_content">
+        <header class="subpage_header">
+            <h1>Aktualizacja miniaturki ogłoszenia</h1>
+            <div class="subpage_header_action">
+                <a href="/user/advertisements/@AdvertisementId" class="default_btn btn_red">Anuluj</a>
+            </div>
+        </header>
+
+        <section class="subpage_main_info">
+            <div class="subpage_description advertisement_element">
+                <h3>Miniaturka ogłoszenia</h3>
+                <p>Dodaj lub zaktualizuj główne zdjęcie dla Twojego ogłoszenia. To zdjęcie będzie widoczne na liście ogłoszeń.</p>
+            </div>
+
+            <div class="subpage_description advertisement_element advertisement_element_warning">
+                <p>
+                    <strong>Ważne:</strong> Miniaturka jest wymagana, aby ogłoszenie było widoczne publicznie.
+                    Bez niej ogłoszenie będzie miało status "Brak wymaganej miniaturki".
+                </p>
+            </div>
+
+            @if (_advertisement != null)
+            {
+                <div class="subpage_form_container">
+                    <div class="subpage_form">
+                        @if (_advertisement.Status is not AdvertisementStatus.ThumbnailNotUploaded)
+                        {
+                            <div class="login_form_tile">
+                                <label>Obecna miniaturka:</label>
+                                <div class="thumbnail-preview">
+                                    <img src="@GetCurrentThumbnailUrl()" alt="Obecna miniaturka" style="max-width: 300px; max-height: 300px;" />
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="subpage_description advertisement_element advertisement_element_warning">
+                                <p>
+                                    <strong>Uwaga:</strong> To ogłoszenie nie ma jeszcze miniaturki.
+                                </p>
+                            </div>
+                        }
+
+                        <div class="login_form_tile">
+                            <label for="thumbnail">Wybierz nowe zdjęcie miniaturki:</label>
+                            <InputFile id="thumbnail" OnChange="OnThumbnailSelected" accept=".jpg,.jpeg,.png,.webp" />
+                            @if (!string.IsNullOrEmpty(_thumbnailError))
+                            {
+                                <div class="validation-message">@_thumbnailError</div>
+                            }
+                        </div>
+
+                        @if (_thumbnailPreviewUrl != null)
+                        {
+                            <div class="login_form_tile">
+                                <label>Podgląd nowej miniaturki:</label>
+                                <div class="thumbnail-preview">
+                                    <img src="@_thumbnailPreviewUrl" alt="Podgląd miniaturki" style="max-width: 300px; max-height: 300px;" />
+                                </div>
+                            </div>
+                        }
+
+                        <div class="login_form_tile_buttons">
+                            <button type="button" class="default_btn" @onclick="NavigateBack">
+                                Wróć
+                            </button>
+                            <button type="button" class="default_btn btn_green" @onclick="HandleSubmit" disabled="@(_thumbnailFileData == null || _isProcessing)">
+                                @if (_isProcessing)
+                                {
+                                    <span>Aktualizowanie miniaturki...</span>
+                                }
+                                else
+                                {
+                                    <span>Zapisz nową miniaturkę</span>
+                                }
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (_isLoading)
+            {
+                <div class="loading-indicator">
+                    <p>Ładowanie...</p>
+                </div>
+            }
+            else
+            {
+                <div class="subpage_description advertisement_element advertisement_element_warning">
+                    <p>
+                        <strong>Błąd:</strong> Nie można załadować danych ogłoszenia.
+                    </p>
+                </div>
+                <div class="login_form_tile_buttons">
+                    <button type="button" class="default_btn" @onclick="NavigateBack">
+                        Wróć do listy ogłoszeń
+                    </button>
+                </div>
+            }
+        </section>
+    </article>
+    <aside class="subpage_sidebar"></aside>
+</div>
+
+@code {
+    [Parameter]
+    public Guid AdvertisementId { get; set; }
+
+    private AdvertisementHateoasResponse? _advertisement;
+    private bool _isLoading = true;
+    private IBrowserFile? _thumbnailFile;
+    private string? _thumbnailError;
+    private string? _thumbnailPreviewUrl;
+    private bool _isProcessing;
+    
+    // Properties for file handling
+    private byte[]? _thumbnailFileData;
+    private string? _thumbnailFileName;
+    private string? _thumbnailContentType;
+
+    // Maximum allowed file size in bytes (5MB)
+    private const long MaxAllowedSize = 5 * 1024 * 1024;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await LoadAdvertisement();
+    }
+
+    private async Task LoadAdvertisement()
+    {
+        _isLoading = true;
+        
+        try
+        {
+            // Try to get advertisement data using the links from API Navigation first
+            Link? advertisementLink = ApiNavigation.GetLink(EndpointRels.Advertisement.GetPersonAdvertisementRel);
+            string advertisementUrl;
+            
+            if (advertisementLink != null)
+            {
+                // Replace any template parameter with the actual ID
+                advertisementUrl = advertisementLink.Href
+                    .Replace("{personId}", ApiNavigation.Response?.PersonId.ToString())
+                    .Replace("{id}", AdvertisementId.ToString());
+            }
+            else
+            {
+                // Fallback to direct URL construction
+                advertisementUrl = $"api/advertisements/{AdvertisementId}";
+            }
+            
+            _advertisement = await MainApiClient.GetAsync<AdvertisementHateoasResponse>(advertisementUrl);
+        }
+        catch (Exception)
+        {
+            _advertisement = null;
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private string GetCurrentThumbnailUrl()
+    {
+        if (_advertisement is null || _advertisement.Status is AdvertisementStatus.ThumbnailNotUploaded)
+        {
+            return "/imgs/defaultAd.webp";
+        }
+        
+        var thumbnailLink = _advertisement.Links.FirstOrDefault(x => x.Rel == EndpointRels.Advertisement.GetAdvertisementThumbnailRel);
+        return thumbnailLink?.Href ?? "/imgs/defaultAd.webp";
+    }
+
+    private async Task OnThumbnailSelected(InputFileChangeEventArgs e)
+    {
+        _thumbnailFile = e.File;
+        _thumbnailError = null;
+
+        // Validate file
+        ValidationResult? validationResult = FileValidationService.ValidateImageFile(_thumbnailFile);
+        if (validationResult != null)
+        {
+            _thumbnailError = validationResult.ErrorMessage;
+            return;
+        }
+
+        // Cache the file data immediately
+        try
+        {
+            // Save file details
+            _thumbnailFileName = _thumbnailFile.Name;
+            _thumbnailContentType = _thumbnailFile.ContentType;
+            
+            // Read and cache file data
+            await using var stream = _thumbnailFile.OpenReadStream(MaxAllowedSize);
+            _thumbnailFileData = new byte[_thumbnailFile.Size];
+            await stream.ReadAsync(_thumbnailFileData);
+
+            // Create a preview URL
+            var imageFile = await e.File.RequestImageFileAsync("image/jpeg", 300, 300);
+            var buffer = new byte[imageFile.Size];
+            await imageFile.OpenReadStream().ReadAsync(buffer);
+            var imageDataUrl = $"data:image/jpeg;base64,{Convert.ToBase64String(buffer)}";
+            _thumbnailPreviewUrl = imageDataUrl;
+        }
+        catch (Exception ex)
+        {
+            _thumbnailError = $"Błąd podczas tworzenia podglądu: {ex.Message}";
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (_advertisement == null || _thumbnailFileData == null || string.IsNullOrEmpty(_thumbnailFileName))
+        {
+            return;
+        }
+
+        _isProcessing = true;
+
+        try
+        {
+            // Get the thumbnail update link from the advertisement links
+            Link? thumbnailLink = _advertisement.Links.FirstOrDefault(x => x.Rel == EndpointRels.Advertisement.UpdateAdvertisementThumbnailRel);
+            
+            if (thumbnailLink != null)
+            {
+                using MultipartFormDataContent content = new();
+                using ByteArrayContent fileContent = new(_thumbnailFileData);
+                
+                fileContent.Headers.ContentType = new MediaTypeHeaderValue(_thumbnailContentType ?? "image/jpeg");
+                content.Add(fileContent, "thumbnail", _thumbnailFileName);
+
+                await MainApiClient.PutFileAsync<AdvertisementHateoasResponse>(thumbnailLink.Href, content);
+                
+                NavigateBack();
+            }
+            else
+            {
+                _thumbnailError = "Brak uprawnienia do aktualizacji miniaturki tego ogłoszenia.";
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle errors
+            _thumbnailError = $"Błąd podczas aktualizacji miniaturki: {ex.Message}";
+        }
+        finally
+        {
+            _isProcessing = false;
+        }
+    }
+
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo("/user/advertisements");
+    }
+}

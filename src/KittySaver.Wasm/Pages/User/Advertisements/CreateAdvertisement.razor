@@ -471,7 +471,7 @@
             return;
         }
 
-        var catsPagedList = await MainApiClient.GetAsync<PagedList<CatResponse>>(ownerCatsLink.Href);
+        PagedList<CatResponse>? catsPagedList = await MainApiClient.GetAsync<PagedList<CatResponse>>(ownerCatsLink.Href);
         if (catsPagedList?.Items != null)
         {
             // Filter cats that are not already in advertisements
@@ -537,7 +537,7 @@
         {
             return "/imgs/defaultCat.webp";
         }
-        var thumbnailLink = cat.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatThumbnailRel);
+        Link? thumbnailLink = cat.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatThumbnailRel);
         return thumbnailLink?.Href ?? "/imgs/defaultCat.webp";
     }
 
@@ -548,7 +548,7 @@
 
         // Validate file
         ValidationResult? validationResult = FileValidationService.ValidateImageFile(_thumbnailFile);
-        if (validationResult != null)
+        if (validationResult is not null)
         {
             _thumbnailError = validationResult.ErrorMessage;
             return;
@@ -562,15 +562,15 @@
             _thumbnailContentType = _thumbnailFile.ContentType;
             
             // Read and cache file data
-            using var stream = _thumbnailFile.OpenReadStream(MaxAllowedSize);
+            await using Stream stream = _thumbnailFile.OpenReadStream();
             _thumbnailFileData = new byte[_thumbnailFile.Size];
             await stream.ReadAsync(_thumbnailFileData);
 
             // Create a preview URL
-            var imageFile = await e.File.RequestImageFileAsync("image/jpeg", 300, 300);
-            var buffer = new byte[imageFile.Size];
+            IBrowserFile imageFile = await e.File.RequestImageFileAsync("image/jpeg", 300, 300);
+            byte[] buffer = new byte[imageFile.Size];
             await imageFile.OpenReadStream().ReadAsync(buffer);
-            var imageDataUrl = $"data:image/jpeg;base64,{Convert.ToBase64String(buffer)}";
+            string imageDataUrl = $"data:image/jpeg;base64,{Convert.ToBase64String(buffer)}";
             _thumbnailPreviewUrl = imageDataUrl;
         }
         catch (Exception ex)
@@ -581,14 +581,14 @@
 
     private void ValidateAndGoToPreview()
     {
-        if (_thumbnailFileData == null)
+        if (_thumbnailFileData is null)
         {
             _thumbnailError = "Miniaturka jest wymagana";
             return;
         }
 
         ValidationResult? validationResult = FileValidationService.ValidateImageFile(_thumbnailFile);
-        if (validationResult != null)
+        if (validationResult is not null)
         {
             _thumbnailError = validationResult.ErrorMessage;
             return;
@@ -619,16 +619,16 @@
 
             // Get the creation link
             Link? createLink = ApiNavigation.GetLink(EndpointRels.Advertisement.CreateAdvertisementRel);
-            if (createLink != null)
+            if (createLink is not null)
             {
-                var result = await MainApiClient.PostAsync<CreateAdvertisementRequest, AdvertisementHateoasResponse>(
+                AdvertisementHateoasResponse? result = await MainApiClient.PostAsync<CreateAdvertisementRequest, AdvertisementHateoasResponse>(
                     createLink.Href, createRequest);
 
-                if (result != null && _thumbnailFileData != null && !string.IsNullOrEmpty(_thumbnailFileName))
+                if (result is not null && _thumbnailFileData is not null && !string.IsNullOrEmpty(_thumbnailFileName))
                 {
                     // Step 2: Upload the thumbnail
                     Link? thumbnailLink = result.Links.FirstOrDefault(x => x.Rel == EndpointRels.Advertisement.UpdateAdvertisementThumbnailRel);
-                    if (thumbnailLink != null)
+                    if (thumbnailLink is not null)
                     {
                         using MultipartFormDataContent content = new();
                         using ByteArrayContent fileContent = new(_thumbnailFileData);
@@ -653,9 +653,6 @@
             _isProcessing = false;
         }
     }
-
-    // Maximum allowed file size in bytes (5MB)
-    private const long MaxAllowedSize = 5 * 1024 * 1024;
 
     private class AdvertisementDto
     {
