@@ -75,18 +75,30 @@
                 bool isDeleteAdvertisementLinkEnabled = Advertisement.Links.Any(x => x.Rel == EndpointRels.Advertisement.DeleteAdvertisementRel);
                 bool isCloseAdvertisementLinkEnabled = Advertisement.Links.Any(x => x.Rel == EndpointRels.Advertisement.CloseAdvertisementRel);
             }
-            <a href="/user/advertisements/manage-thumbnail/@Advertisement.Id" class="default_btn btn_blue @(isUpdateAdvertisementThumbnailLinkEnabled ? "" : "link_disabled")">
-                Zmień główne zdjęcie
-            </a>
-            <a href="/user/advertisements/close/@Advertisement.Id" class="default_btn btn_blue">
-                Zakończ ogłoszenie
-            </a>
-            <a href="/user/advertisements/update/@Advertisement.Id" class="default_btn btn_orange @(isUpdateAdvertisementLinkEnabled ? "" : "link_disabled")">
-                Edytuj ogłoszenie
-            </a>
-            <a href="/user/advertisements/delete/@Advertisement.Id" class="default_btn btn_red @(isDeleteAdvertisementLinkEnabled ? "" : "link_disabled")">
-                Usuń ogłoszenie
-            </a>
+            @if (isUpdateAdvertisementThumbnailLinkEnabled)
+            {
+                <a href="/user/advertisements/manage-thumbnail/@Advertisement.Id" class="default_btn @(Advertisement.Status is AdvertisementStatus.ThumbnailNotUploaded ? "btn_green" : "")">
+                    @(Advertisement.Status is AdvertisementStatus.ThumbnailNotUploaded ? "Dodaj główne zdjęcie" : "Zmień główne zdjęcie")
+                </a>
+            }
+            @if (isCloseAdvertisementLinkEnabled)
+            {
+                <a href="/user/advertisements/close/@Advertisement.Id" class="default_btn">
+                    Zakończ ogłoszenie
+                </a>
+            }
+            @if (isUpdateAdvertisementLinkEnabled)
+            {
+                <a href="/user/advertisements/update/@Advertisement.Id" class="default_btn">
+                    Edytuj ogłoszenie
+                </a>
+            }
+            @if (isDeleteAdvertisementLinkEnabled)
+            {
+                <a href="/user/advertisements/delete/@Advertisement.Id" class="default_btn btn_red">
+                    Usuń ogłoszenie
+                </a>
+            }
         </div>
     }
 </div>
