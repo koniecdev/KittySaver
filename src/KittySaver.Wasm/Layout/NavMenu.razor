@@ -7,13 +7,15 @@
     <div class="logo">
         <a href="/">
             <img src="/imgs/catWhiteTransparent.webp" alt="">
-            uratujkota.pl
+            <span>uratujkota.pl</span>
         </a>
     </div>
-    <div class="hamburger">
-        
+    <div class="hamburger" @onclick="ToggleNavMenu">
+        <span></span>
+        <span></span>
+        <span></span>
     </div>
-    <div class="nav_content">
+    <div class="nav_content @(_showNavMenu ? "active" : "")">
         <a href="/">Ogłoszenia</a>
         <a href="/mission">Misja</a>
         <AuthorizeView>
@@ -30,8 +32,15 @@
         </AuthorizeView>
     </div>
 </nav>
-@code
-{
+
+@code {
+    private bool _showNavMenu = false;
+
+    private void ToggleNavMenu()
+    {
+        _showNavMenu = !_showNavMenu;
+    }
+
     private async Task Logout()
     {
         await LocalStorage.RemoveItemAsync("token");
