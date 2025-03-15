@@ -22,14 +22,14 @@ public static class Dictionaries
     
     public static readonly Dictionary<bool, (string text, string className)> IsCastratedDictionary = new()
     {
-        { true, ("Tak", BtnGreenClassName) },
+        { true, ("Tak", "") },
         { false, ("Nie - należy to zrobić", BtnRedClassName) }
     };
 
     public static readonly Dictionary<string, (string text, string className)> HealthStatusDictionary = new()
     {
-        { "Good", ("Dobry", BtnGreenClassName) },
-        { "Unknown", ("Nieznany", BtnDarkGreenClassName) },
+        { "Good", ("Dobry", "") },
+        { "Unknown", ("Nieznany", "") },
         { "ChronicMinor", ("Przewlekle chory - stabilny", BtnOrangeClassName) },
         { "ChronicSerious", ("Poważnie przewlekle chory", BtnRedClassName) },
         { "Terminal", ("Nieuleczalnie chory", BtnRedClassName) }
@@ -37,22 +37,22 @@ public static class Dictionaries
 
     public static readonly Dictionary<string, (string text, string className)> MedicalHelpUrgencyDictionary = new()
     {
-        { "NoNeed", ("Kot nie potrzebuje wizyty", BtnGreenClassName)},
+        { "NoNeed", ("Kot nie potrzebuje wizyty", "")},
         { "ShouldSeeVet", ("Stan niepokojący - zalecana wizyta", BtnOrangeClassName)},
         { "HaveToSeeVet", ("Bardzo pilna - jak najszybsza", BtnRedClassName)}
     };
     
     public static readonly Dictionary<string, (string text, string className)> AgeCategoryDictionary = new()
     {
-        { "Baby", ("Młody", BtnGreenClassName)},
-        { "Adult", ("Dorosły", BtnGreenClassName)},
-        { "Senior", ("Starszy", BtnGreenClassName)}
+        { "Baby", ("Młody", "")},
+        { "Adult", ("Dorosły", "")},
+        { "Senior", ("Starszy", "")}
     };
     
     public static readonly Dictionary<string, (string text, string className)> BehaviourDictionary = new()
     {
-        { "Friendly", ("Przyjazny dla ludzi", BtnGreenClassName)},
-        { "Unfriendly", ("Płochliwy od ludzi", BtnOrangeClassName)},
-        { "Aggressive", ("Agresywny", BtnRedClassName)}
+        { "Friendly", ("Przyjazny dla ludzi", "")},
+        { "Unfriendly", ("Płochliwy od ludzi", "")},
+        { "Aggressive", ("Agresywny", "")}
     };
 }

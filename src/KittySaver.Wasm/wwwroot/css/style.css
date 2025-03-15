@@ -230,8 +230,11 @@ select{
 .subpage_cat_info{
     display: grid;
     grid-auto-rows: max-content;
-    grid-gap: .5rem;
 }
+.subpage_cat_info_sentence{
+    display: grid;
+}
+
 .subpage_cat_info h2{
     font-size: 2rem;
     margin: 0;
@@ -262,6 +265,7 @@ select{
     height: max-content;
     border-left-color: var(--kitty-green);
     grid-gap: 2rem;
+    padding: 1rem 0;
 }
 .subpage_cats_grid{
     display: grid;
@@ -279,9 +283,13 @@ select{
     grid-gap: 2rem;
     overflow: hidden;
 }
+.subpage_cat_image_wrapper{
+    padding: 0 1.5rem;
+}
 .subpage_cat_image{
     border-radius: 10px;
     overflow: hidden;
+    display: flex;
 }
 .subpage_cat_image img{
     width: 100%;
@@ -347,9 +355,9 @@ select{
 .subpage_cat_additional_requirements > p{
     font-size: 1.125rem;
 }
-.subpage_cat_info_btn{
-    padding: .25rem .75rem;
-    border-radius: 10px;
+.subpage_cat_info > *{
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 .subpage_cat_info_status {
     display: grid;
