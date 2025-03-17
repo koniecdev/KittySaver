@@ -1,4 +1,4 @@
-﻿namespace Shared;
+﻿namespace KittySaver.Tests.Shared;
 
 public class InvalidEmailData : TheoryData<string>
 {

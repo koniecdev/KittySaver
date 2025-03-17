@@ -5,7 +5,7 @@ using KittySaver.Shared.Requests;
 using KittySaver.Shared.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Shared;
+using KittySaver.Tests.Shared;
 
 namespace KittySaver.Auth.Api.Tests.Integration.Tests.ApplicationUser;
 

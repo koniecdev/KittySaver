@@ -9,7 +9,7 @@ using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.Pagination;
 using KittySaver.Shared.Responses;
-using Shared;
+using KittySaver.Tests.Shared;
 
 namespace KittySaver.Api.Tests.Integration.Tests.Advertisements;
 

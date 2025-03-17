@@ -22,6 +22,6 @@
       </Reference>
     </ItemGroup>
     <ItemGroup>
-      <ProjectReference Include="..\..\KittySaver.Shared\KittySaver.Shared.csproj" />
+      <ProjectReference Include="..\KittySaver.Shared\KittySaver.Shared.csproj" />
     </ItemGroup>
 </Project>

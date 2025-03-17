@@ -41,8 +41,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\KittySaver.Shared\KittySaver.Shared.csproj" />
       <ProjectReference Include="..\KittySaver.SharedForApi\KittySaver.SharedForApi.csproj" />
+      <ProjectReference Include="..\KittySaver.Shared\KittySaver.Shared.csproj" />
     </ItemGroup>
 
 </Project>
