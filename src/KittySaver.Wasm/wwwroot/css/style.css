@@ -90,7 +90,7 @@ p{
 }
 .advertisement_grid, .subpage_advertisements_grid{
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(auto-fill, 330px);
     grid-gap: 2.75rem;
     padding: 2.75rem;
     grid-auto-rows: max-content;
@@ -98,7 +98,6 @@ p{
 .subpage_advertisements_grid{
     grid-template-columns: repeat(4, 1fr);
     padding: 0;
-    
 }
 .advertisement_grid header{
     grid-column: 1/-1;
@@ -159,6 +158,7 @@ img{
     font-family: "Poppins", sans-serif;
     display: grid;
     background-color: #fff;
+    min-height: 41px;
 }
 .span2{
     grid-column: span 2;
@@ -230,8 +230,11 @@ select{
 .subpage_cat_info{
     display: grid;
     grid-auto-rows: max-content;
-    grid-gap: .5rem;
 }
+.subpage_cat_info_sentence{
+    display: grid;
+}
+
 .subpage_cat_info h2{
     font-size: 2rem;
     margin: 0;
@@ -261,7 +264,8 @@ select{
     display: grid;
     height: max-content;
     border-left-color: var(--kitty-green);
-    grid-gap: 2rem;
+    grid-gap: 1rem;
+    padding: 1rem 0;
 }
 .subpage_cats_grid{
     display: grid;
@@ -279,9 +283,13 @@ select{
     grid-gap: 2rem;
     overflow: hidden;
 }
+.subpage_cat_image_wrapper{
+    padding: 0 1.5rem;
+}
 .subpage_cat_image{
     border-radius: 10px;
     overflow: hidden;
+    display: flex;
 }
 .subpage_cat_image img{
     width: 100%;
@@ -340,6 +348,7 @@ select{
 }
 .subpage_cat_additional_requirements{
     grid-column: 1/-1;
+    padding: 0 1.5rem;
 }
 .subpage_cat_additional_requirements > strong{
     font-size: 1.25rem;
@@ -347,9 +356,9 @@ select{
 .subpage_cat_additional_requirements > p{
     font-size: 1.125rem;
 }
-.subpage_cat_info_btn{
-    padding: .25rem .75rem;
-    border-radius: 10px;
+.subpage_cat_info > *{
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 .subpage_cat_info_status {
     display: grid;
@@ -417,7 +426,7 @@ select{
     display: grid;
     background-image: url('/imgs/loginbgc.webp');
     background-size: cover;
-    background-position: center left;
+    background-position: center right;
     background-repeat: no-repeat;
     height: 100%;
     background-attachment: fixed;
@@ -871,7 +880,6 @@ button.disabled {
     display: grid;
     grid-template-columns: 24px 1fr;
     gap: 0.75rem;
-    margin-bottom: 1rem;
     align-items: center;
 }
 
@@ -1184,4 +1192,184 @@ button.disabled {
     align-items: center;
     min-height: 200px;
     font-size: 1.125rem;
+}
+@media screen and (max-width: 1600px){
+    .subpage_grid{
+        grid-template-columns: 200px 1fr 200px;
+    }
+}
+@media screen and (max-width: 1400px){
+    .subpage_grid{
+        grid-template-columns: 1fr 200px;
+        padding: 1rem;
+    }
+    .subpage_sidebar{
+        order: 1;
+    }
+}
+@media screen and (max-width: 1150px){
+    .advertisement_grid,
+    .subpage_advertisements_grid{
+        padding: 1.5rem;
+        grid-gap: 1.5rem;
+    }
+    .index_grid{
+        grid-template-columns: 1fr;
+    }
+    .index_aside{
+        grid-template-columns: repeat(3, 1fr);
+        grid-auto-rows: max-content;
+        align-items: end;
+    }
+    .index_aside header{
+        grid-column: 1/3;
+    }
+    .filtering_tile{
+        order: 1;
+    }
+    .index_aside{
+        padding: 1.5rem;
+    }
+    .index_aside button{
+        margin-top: 0;
+    }
+    
+    nav {
+        grid-template-columns: 1fr auto;
+        grid-gap: 0 2rem;
+    }
+
+    .hamburger {
+        display: grid;
+        grid-template-rows: repeat(3, 3px);
+        grid-gap: 6px;
+        align-content: center;
+        cursor: pointer;
+        height: 100%;
+        width: 88px;
+        justify-content: center;
+    }
+
+    .hamburger span {
+        width: 30px;
+        height: 3px;
+        background-color: #fff;
+        border-radius: 3px;
+    }
+
+    /* Mobile navigation menu styling */
+    .nav_content {
+        position: sticky;
+        width: 100%;
+        top: var(--nav_height);
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        background-color: #303030;
+        display: none;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        z-index: 499;
+        grid-column: 1/-1;
+        gap: 0;
+    }
+
+    .nav_content.active {
+        display: flex;
+    }
+    .nav_content a:first-of-type {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .nav_content a {
+        text-align: center;
+        padding: 1rem 2.75rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        height: auto;
+        display: block;
+    }
+    .logo{
+        padding: 0 0 0 1.5rem;
+    }
+
+    .subpage_header{
+        grid-template-columns: 1fr;
+    }
+    .subpage_advertiser{
+        grid-template-columns: max-content;
+    }
+    .subpage_cat_additional_requirements > strong,
+    .subpage_cat_additional_requirements > p{
+        font-size: 1rem;
+    }
+}
+@media screen and (max-width: 1000px){
+    .subpage_grid{
+        grid-template-columns: 1fr;
+    }
+    .subpage_sidebar{
+        order: 1;
+    }
+    .login_wrapper, .register_wrapper{
+        grid-template-columns: 1fr;
+    }
+    .login_photo, .register_photo{
+        background-attachment: unset;
+        height: 200px;
+    }
+    .login_container, .register_container{
+        order: 1;
+    }
+}
+@media screen and (max-width: 800px) {
+    .filtering_tile{
+        order: unset;
+    }
+    .index_aside{
+        grid-template-columns: repeat(2, 1fr);
+        grid-gap: 1rem;
+    }
+    .advertisement_grid, .subpage_advertisements_grid{
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .subpage_cats_grid{
+        grid-template-columns: 1fr;
+    }
+    .login_container, .register_container{
+        padding: 1rem;
+    }
+    .login_container, .register_container,
+    .login_form_tile_buttons{
+        grid-template-columns: 1fr;
+    }
+}
+@media screen and (max-width: 500px) {
+    .advertisement_grid, .subpage_advertisements_grid{
+        grid-template-columns: 1fr;
+    }
+    .advertisement_tile_content{
+        font-size: 1.25rem;
+    }
+    .advertisement_tile_content strong{
+        font-size: 1.5rem;
+    }
+    .index_aside{
+        grid-template-columns: 1fr;
+    }
+    .index_aside header{
+        grid-column: span 1;
+    }
+    .logo span{
+        display: none;
+    }
+    .advertisement_header h1{
+        font-size: 2rem;
+    }
+    .subpage_header p{
+        font-size: 1.25rem;
+    }
+    .subpage_advertiser{
+        grid-template-columns: 1fr;
+    }
+    .two_part_label{
+        grid-template-columns: 1fr;
+    }
 }

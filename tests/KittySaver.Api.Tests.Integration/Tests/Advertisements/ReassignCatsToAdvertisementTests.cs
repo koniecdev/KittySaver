@@ -85,7 +85,6 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
                         ContactInfoEmail: faker.Person.Email,
                         ContactInfoPhoneNumber: faker.Person.Phone
                     ));
-
         HttpResponseMessage createAdvertisementResponseMessage =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
         ApiResponses.CreatedWithIdResponse createAdvertisementResponse =
@@ -125,13 +124,14 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
         hateoasResponse.Status.Should().Be(AdvertisementStatus.Active);
         hateoasResponse.Links.Select(x => x.Rel).Should()
             .BeEquivalentTo(EndpointRels.SelfRel,
+                EndpointNames.UpdateAdvertisement.Rel,
                 EndpointNames.GetAdvertisementThumbnail.Rel,
                 EndpointNames.DeleteAdvertisement.Rel,
-                EndpointNames.CloseAdvertisement.Rel,
-                EndpointNames.UpdateAdvertisement.Rel,
-                EndpointNames.UpdateAdvertisementThumbnail.Rel,
                 EndpointNames.ReassignCatsToAdvertisement.Rel,
-                EndpointNames.ExpireAdvertisement.Rel); //TODO: Investigate if ExpireAdvertisement is valid at this point
+                EndpointNames.GetAdvertisementCats.Rel,
+                EndpointNames.UpdateAdvertisementThumbnail.Rel,
+                EndpointNames.CloseAdvertisement.Rel,
+                EndpointNames.ExpireAdvertisement.Rel);
         hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         
         HttpResponseMessage getAdvertisementResponse =
@@ -225,12 +225,13 @@ public class ReassignCatsToAdvertisementTests : IAsyncLifetime
         hateoasResponse.Status.Should().Be(AdvertisementStatus.Active);
         hateoasResponse.Links.Select(x => x.Rel).Should()
             .BeEquivalentTo(EndpointRels.SelfRel,
+                EndpointNames.UpdateAdvertisement.Rel,
                 EndpointNames.GetAdvertisementThumbnail.Rel,
                 EndpointNames.DeleteAdvertisement.Rel,
-                EndpointNames.CloseAdvertisement.Rel,
-                EndpointNames.UpdateAdvertisement.Rel,
-                EndpointNames.UpdateAdvertisementThumbnail.Rel,
                 EndpointNames.ReassignCatsToAdvertisement.Rel,
+                EndpointNames.GetAdvertisementCats.Rel,
+                EndpointNames.UpdateAdvertisementThumbnail.Rel,
+                EndpointNames.CloseAdvertisement.Rel,
                 EndpointNames.ExpireAdvertisement.Rel);
         hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         

@@ -109,7 +109,8 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
             EndpointNames.UpdateAdvertisementThumbnail.Rel,
             EndpointNames.UpdateAdvertisement.Rel,
             EndpointNames.DeleteAdvertisement.Rel,
-            EndpointNames.ReassignCatsToAdvertisement.Rel);
+            EndpointNames.ReassignCatsToAdvertisement.Rel,
+            EndpointNames.GetAdvertisementCats.Rel);
         hateoasResponse.Links.All(x => !string.IsNullOrWhiteSpace(x.Href)).Should().BeTrue();
     }
 
@@ -123,12 +124,14 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
         ApiResponses.CreatedWithIdResponse personRegisterResponse =
             await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
+        
         CreateCatRequest catCreateRequest = _createCatRequestGenerator.Generate();
         HttpResponseMessage catCreateResponseMessage =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", catCreateRequest);
         ApiResponses.CreatedWithIdResponse catCreateResponse =
             await catCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
+        
         CreateCatRequest secondCatCreateRequest = _createCatRequestGenerator.Generate();
         HttpResponseMessage secondCatCreateResponseMessage =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats",
@@ -171,7 +174,8 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
             EndpointNames.UpdateAdvertisementThumbnail.Rel,
             EndpointNames.UpdateAdvertisement.Rel,
             EndpointNames.DeleteAdvertisement.Rel,
-            EndpointNames.ReassignCatsToAdvertisement.Rel);
+            EndpointNames.ReassignCatsToAdvertisement.Rel,
+            EndpointNames.GetAdvertisementCats.Rel);
         hateoasResponse.Links.All(x => !string.IsNullOrWhiteSpace(x.Href)).Should().BeTrue();
     }
 
@@ -229,7 +233,8 @@ public class CreateAdvertisementEndpointsTests : IAsyncLifetime
             EndpointNames.UpdateAdvertisementThumbnail.Rel,
             EndpointNames.UpdateAdvertisement.Rel,
             EndpointNames.DeleteAdvertisement.Rel,
-            EndpointNames.ReassignCatsToAdvertisement.Rel);
+            EndpointNames.ReassignCatsToAdvertisement.Rel,
+            EndpointNames.GetAdvertisementCats.Rel);
         hateoasResponse.Links.All(x => !string.IsNullOrWhiteSpace(x.Href)).Should().BeTrue();
     }
     

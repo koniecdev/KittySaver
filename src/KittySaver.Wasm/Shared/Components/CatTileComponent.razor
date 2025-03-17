@@ -3,16 +3,18 @@
 
 <div class="advertisement_element subpage_cat_tile">
     <header class="subpage_cat_tile_header">
-        <div class="subpage_cat_image">
-            @if (Cat.IsThumbnailUploaded)
-            {
-                <img alt="@Cat.Name - uratujkota.pl"
-                     src="@Cat.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatThumbnailRel)?.Href">
-            }
-            else
-            {
-                <img alt="uratujkota.pl" src="/imgs/defaultCat.webp">
-            }
+        <div class="subpage_cat_image_wrapper">
+            <div class="subpage_cat_image">
+                @if (Cat.IsThumbnailUploaded)
+                {
+                    <img alt="@Cat.Name - uratujkota.pl"
+                         src="@Cat.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatThumbnailRel)?.Href">
+                }
+                else
+                {
+                    <img alt="uratujkota.pl" src="/imgs/defaultCat.webp">
+                }
+            </div>
         </div>
         <div class="subpage_cat_info">
             <h2>@Cat.Name</h2>
@@ -20,30 +22,31 @@
             {
                 @if (IsManagementView)
                 {
-                    <div class="subpage_cat_info_status">
-                        <span>Czy jest dodany do ogłoszenia:</span> <strong class="subpage_cat_info_btn @Dictionaries.IsAssignedToAdvertisementDictionary[Cat.IsAssignedToAdvertisement].className">
-                            @((MarkupString)Dictionaries.IsAssignedToAdvertisementDictionary[Cat.IsAssignedToAdvertisement].text)
+                    <div class="subpage_cat_info_sentence">
+                        <strong class="subpage_cat_info_btn">
+                            @(Cat.IsAssignedToAdvertisement ? "Kot jest dodany do ogłoszenia." : "Kot nie jest dodany do ogłoszenia.")
                         </strong>
                     </div>
                 }
-                <div class="subpage_cat_info_status">
-                    <span>Stan kota:</span> <strong class="subpage_cat_info_btn @Dictionaries.HealthStatusDictionary[Cat.HealthStatus].className">
-                        @Dictionaries.HealthStatusDictionary[Cat.HealthStatus].text
+
+                <div class="subpage_cat_info_sentence @Dictionaries.HealthStatusDictionary[Cat.HealthStatus].className">
+                    <strong class="subpage_cat_info_btn">
+                        @TranslateHealthStatus(Cat.HealthStatus)
                     </strong>
                 </div>
-                <div class="subpage_cat_info_status">
-                    <span>Potrzeba weterynarza:</span> <strong class="subpage_cat_info_btn @Dictionaries.MedicalHelpUrgencyDictionary[Cat.MedicalHelpUrgency].className">
-                        @Dictionaries.MedicalHelpUrgencyDictionary[Cat.MedicalHelpUrgency].text
+                <div class="subpage_cat_info_sentence">
+                    <strong class="subpage_cat_info_btn">
+                        @(Cat.IsCastrated ? "Wykastrowany/wysterylizowany." : "Niewykastrowany/niewysterylizowany.")
                     </strong>
                 </div>
-                <div class="subpage_cat_info_status">
-                    <span>Wykastrowany/Wysterylizowany:</span> <strong class=" subpage_cat_info_btn @Dictionaries.IsCastratedDictionary[Cat.IsCastrated].className">
-                        @Dictionaries.IsCastratedDictionary[Cat.IsCastrated].text
+                <div class="subpage_cat_info_sentence @Dictionaries.MedicalHelpUrgencyDictionary[Cat.MedicalHelpUrgency].className">
+                    <strong class="subpage_cat_info_btn">
+                        @TranslateMedicalUrgency(Cat.MedicalHelpUrgency)
                     </strong>
                 </div>
-                <div class="subpage_cat_info_status">
-                    <span>Wiek kota:</span> <strong class="subpage_cat_info_btn @Dictionaries.AgeCategoryDictionary[Cat.AgeCategory].className">
-                        @Dictionaries.AgeCategoryDictionary[Cat.AgeCategory].text
+                <div class="subpage_cat_info_sentence">
+                    <strong class="subpage_cat_info_btn">
+                        @TranslateAgeCategory(Cat.AgeCategory)
                     </strong>
                 </div>
             }
@@ -72,9 +75,6 @@
                     Zmień główne zdjęcie
                 </a>
             }
-            <a href="/user/cats/manage-gallery/@Cat.Id" class="default_btn">
-                Zarządzaj galerią kota
-            </a>
             @if (isUpdateCatLinkEnabled)
             {
                 <a href="/user/cats/update/@Cat.Id" class="default_btn">
@@ -91,13 +91,15 @@
     }
 </div>
 
-@code {
+@code 
+{
+
     /// <summary>
     /// The cat data to display in the tile.
     /// </summary>
     [Parameter]
     public CatResponse Cat { get; set; } = null!;
-    
+
     /// <summary>
     /// Determines if this tile is being used in the cat management view.
     /// When true, shows advertisement status and management buttons.
@@ -105,7 +107,49 @@
     /// </summary>
     [Parameter]
     public bool IsManagementView { get; set; }
-    
-    [Parameter]
-    public bool IsOnlyEssentialsRequested { get; set; }
+
+    [Parameter] public bool IsOnlyEssentialsRequested { get; set; }
+
+    /// <summary>
+    /// Tłumaczy status zdrowia kota bez powtarzania słowa "kot"
+    /// </summary>
+    private string TranslateHealthStatus(string status)
+    {
+        return status.ToLower() switch
+        {
+            "good" => "Wolny od chorób.",
+            "unknown" => "Nie został zbadany pod względem chorób.",
+            "chronicminor" => "Posiada choroby przewlekłe.",
+            "chronicserious" => "Posiada poważne choroby przewlekłe.",
+            "terminal" => "Jest śmiertelnie chory.",
+            _ => status.StartsWith("Kot") ? status.Replace("Kot ", "") : status
+        };
+    }
+
+    /// <summary>
+    /// Tłumaczy kategorię wiekową kota bez powtarzania słowa "kot"
+    /// </summary>
+    private string TranslateAgeCategory(string ageCategory)
+    {
+        return ageCategory.ToLower() switch
+        {
+            "baby" => "Kociak.",
+            "adult" => "Dorosły.",
+            "senior" => "Senior.",
+            _ => ageCategory.StartsWith("Kot ") ? ageCategory.Replace("Kot ", "") : ageCategory
+        };
+    }
+
+    /// <summary>
+    /// Tłumaczy informację o potrzebie pomocy weterynaryjnej bez powtarzania słowa "kot"
+    /// </summary>
+    private string TranslateMedicalUrgency(string urgency)
+    {
+        return urgency.ToLower() switch
+        {
+            "havetoseevet" => "Musi zostać pokazany weterynarzowi.",
+            "shouldseevet" => "Powinien zostać pokazany weterynarzowi.",
+            _ => urgency.StartsWith("Kot ") ? urgency.Replace("Kot ", "") : urgency
+        };
+    }
 }
