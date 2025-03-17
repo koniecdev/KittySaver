@@ -34,7 +34,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\src\KittySaver.Api\KittySaver.Api.csproj" />
-      <ProjectReference Include="..\Shared\Shared.csproj" />
+      <ProjectReference Include="..\KittySaver.Tests.Shared\KittySaver.Tests.Shared.csproj" />
     </ItemGroup>
 
 </Project>

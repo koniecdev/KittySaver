@@ -11,7 +11,7 @@ using KittySaver.Domain.ValueObjects;
 using KittySaver.Shared.Hateoas;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Shared;
+using KittySaver.Tests.Shared;
 
 namespace KittySaver.Api.Tests.Integration.Tests.Advertisements;
 

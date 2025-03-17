@@ -7,7 +7,7 @@ using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.Responses;
-using Shared;
+using KittySaver.Tests.Shared;
 
 namespace KittySaver.Api.Tests.Integration.Tests.Advertisements;
 

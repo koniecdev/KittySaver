@@ -10,7 +10,7 @@ using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Shared;
+using KittySaver.Tests.Shared;
 using JsonException = System.Text.Json.JsonException;
 
 namespace KittySaver.Api.Tests.Integration.Tests.Advertisements;

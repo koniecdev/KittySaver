@@ -1,6 +1,6 @@
 using FluentAssertions;
 using KittySaver.Domain.ValueObjects;
-using Shared;
+using KittySaver.Tests.Shared;
 
 namespace KittySaver.Domain.Tests.Unit.Tests.Persons;
 

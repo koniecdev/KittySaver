@@ -11,7 +11,7 @@ using KittySaver.Shared.Pagination;
 using KittySaver.Shared.Responses;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Shared;
+using KittySaver.Tests.Shared;
 
 namespace KittySaver.Api.Tests.Integration.Tests.Cats;
 

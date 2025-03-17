@@ -1,4 +1,4 @@
-﻿namespace Shared;
+﻿namespace KittySaver.Tests.Shared;
 
 public sealed class ApiResponses
 {

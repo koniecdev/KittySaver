@@ -1,7 +1,7 @@
 ﻿using Bogus;
 using FluentAssertions;
 using KittySaver.Auth.Api.Shared.Domain.Entites;
-using Shared;
+using KittySaver.Tests.Shared;
 
 namespace KittySaver.Auth.Api.Tests.Unit.Tests;
 
