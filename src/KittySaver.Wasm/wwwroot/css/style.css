@@ -264,7 +264,7 @@ select{
     display: grid;
     height: max-content;
     border-left-color: var(--kitty-green);
-    grid-gap: 2rem;
+    grid-gap: 1rem;
     padding: 1rem 0;
 }
 .subpage_cats_grid{
@@ -348,6 +348,7 @@ select{
 }
 .subpage_cat_additional_requirements{
     grid-column: 1/-1;
+    padding: 0 1.5rem;
 }
 .subpage_cat_additional_requirements > strong{
     font-size: 1.25rem;
@@ -425,7 +426,7 @@ select{
     display: grid;
     background-image: url('/imgs/loginbgc.webp');
     background-size: cover;
-    background-position: center left;
+    background-position: center right;
     background-repeat: no-repeat;
     height: 100%;
     background-attachment: fixed;
@@ -1192,7 +1193,20 @@ button.disabled {
     min-height: 200px;
     font-size: 1.125rem;
 }
-
+@media screen and (max-width: 1600px){
+    .subpage_grid{
+        grid-template-columns: 200px 1fr 200px;
+    }
+}
+@media screen and (max-width: 1400px){
+    .subpage_grid{
+        grid-template-columns: 1fr 200px;
+        padding: 1rem;
+    }
+    .subpage_sidebar{
+        order: 1;
+    }
+}
 @media screen and (max-width: 1150px){
     .advertisement_grid,
     .subpage_advertisements_grid{
@@ -1275,6 +1289,35 @@ button.disabled {
     .logo{
         padding: 0 0 0 1.5rem;
     }
+
+    .subpage_header{
+        grid-template-columns: 1fr;
+    }
+    .subpage_advertiser{
+        grid-template-columns: max-content;
+    }
+    .subpage_cat_additional_requirements > strong,
+    .subpage_cat_additional_requirements > p{
+        font-size: 1rem;
+    }
+}
+@media screen and (max-width: 1000px){
+    .subpage_grid{
+        grid-template-columns: 1fr;
+    }
+    .subpage_sidebar{
+        order: 1;
+    }
+    .login_wrapper, .register_wrapper{
+        grid-template-columns: 1fr;
+    }
+    .login_photo, .register_photo{
+        background-attachment: unset;
+        height: 200px;
+    }
+    .login_container, .register_container{
+        order: 1;
+    }
 }
 @media screen and (max-width: 800px) {
     .filtering_tile{
@@ -1286,6 +1329,16 @@ button.disabled {
     }
     .advertisement_grid, .subpage_advertisements_grid{
         grid-template-columns: repeat(2, 1fr);
+    }
+    .subpage_cats_grid{
+        grid-template-columns: 1fr;
+    }
+    .login_container, .register_container{
+        padding: 1rem;
+    }
+    .login_container, .register_container,
+    .login_form_tile_buttons{
+        grid-template-columns: 1fr;
     }
 }
 @media screen and (max-width: 500px) {
@@ -1306,5 +1359,17 @@ button.disabled {
     }
     .logo span{
         display: none;
+    }
+    .advertisement_header h1{
+        font-size: 2rem;
+    }
+    .subpage_header p{
+        font-size: 1.25rem;
+    }
+    .subpage_advertiser{
+        grid-template-columns: 1fr;
+    }
+    .two_part_label{
+        grid-template-columns: 1fr;
     }
 }

@@ -7,6 +7,11 @@ public static class Dictionaries
     private const string BtnOrangeClassName = "btn_orange";
     private const string BtnRedClassName = "btn_red";
     
+    public static readonly Dictionary<string, (string text, string className)> GenderDictionary = new()
+    {
+        { "Male", ("Kot", "") },
+        { "Female", ("Kotka", "") }
+    };
     public static readonly Dictionary<AdvertisementStatus, (string text, string className)> AdvertisementStatusDictionary = new()
     {
         { AdvertisementStatus.Active, ("Aktywne", BtnGreenClassName) },
