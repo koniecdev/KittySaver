@@ -58,18 +58,21 @@ public sealed class UpdateCatThumbnail : IEndpoint
             await catThumbnailService.SaveThumbnailAsync(request.Thumbnail, request.Id, cancellationToken);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
-            var catAdvertisementIdAndIsThumbnailUploaded = catOwner.Cats
+            var catProperties = catOwner.Cats
                 .Where(cat => cat.Id == request.Id)
                 .Select(c => new
                 {
                     advertisementId = c.AdvertisementId,
-                    isThumbnailUploaded = c.IsThumbnailUploaded
+                    isThumbnailUploaded = c.IsThumbnailUploaded,
+                    isAdopted = c.IsAdopted
                 }).First();
+            
             return new CatHateoasResponse(
                 request.Id,
                 request.PersonId,
-                catAdvertisementIdAndIsThumbnailUploaded.advertisementId,
-                catAdvertisementIdAndIsThumbnailUploaded.isThumbnailUploaded);
+                catProperties.advertisementId,
+                catProperties.isThumbnailUploaded,
+                catProperties.isAdopted);
         }
     }
 

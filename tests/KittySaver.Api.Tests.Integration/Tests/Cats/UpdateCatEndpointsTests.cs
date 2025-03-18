@@ -109,6 +109,8 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                 EndpointNames.DeleteCat.Rel,
                 EndpointNames.UpdateCatThumbnail.Rel,
                 EndpointNames.GetCatGallery.Rel,
+                EndpointNames.AddPicturesToCatGallery.Rel,
+                EndpointNames.RemovePictureFromCatGallery.Rel,
                 EndpointNames.GetCatGalleryPicture.Rel);
         hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         CatResponse catAfterUpdate =
@@ -189,6 +191,8 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                 EndpointNames.UpdateCatThumbnail.Rel,
                 EndpointNames.GetAdvertisement.Rel,
                 EndpointNames.GetCatGallery.Rel,
+                EndpointNames.AddPicturesToCatGallery.Rel,
+                EndpointNames.RemovePictureFromCatGallery.Rel,
                 EndpointNames.GetCatGalleryPicture.Rel);
         hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         CatResponse catAfterUpdate =
@@ -259,6 +263,8 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                 EndpointNames.DeleteCat.Rel,
                 EndpointNames.UpdateCatThumbnail.Rel,
                 EndpointNames.GetCatGallery.Rel,
+                EndpointNames.AddPicturesToCatGallery.Rel,
+                EndpointNames.RemovePictureFromCatGallery.Rel,
                 EndpointNames.GetCatGalleryPicture.Rel);
         hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         
@@ -325,6 +331,8 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                 EndpointNames.DeleteCat.Rel,
                 EndpointNames.UpdateCatThumbnail.Rel,
                 EndpointNames.GetCatGallery.Rel,
+                EndpointNames.AddPicturesToCatGallery.Rel,
+                EndpointNames.RemovePictureFromCatGallery.Rel,
                 EndpointNames.GetCatGalleryPicture.Rel);
         hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         

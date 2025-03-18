@@ -98,6 +98,8 @@ public class GetCatEndpointsTests : IAsyncLifetime
                 EndpointNames.DeleteCat.Rel,
                 EndpointNames.UpdateCatThumbnail.Rel,
                 EndpointNames.GetCatGallery.Rel,
+                EndpointNames.AddPicturesToCatGallery.Rel,
+                EndpointNames.RemovePictureFromCatGallery.Rel,
                 EndpointNames.GetCatGalleryPicture.Rel);
         cat.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
     }
@@ -117,6 +119,7 @@ public class GetCatEndpointsTests : IAsyncLifetime
         ApiResponses.CreatedWithIdResponse catCreateResponse =
             await catCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
+        
         CreateAdvertisementRequest request =
             new Faker<CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
@@ -132,7 +135,6 @@ public class GetCatEndpointsTests : IAsyncLifetime
                         ContactInfoEmail: faker.Person.Email,
                         ContactInfoPhoneNumber: faker.Person.Phone
                     ));
-
         await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
 
         //Act
@@ -151,6 +153,8 @@ public class GetCatEndpointsTests : IAsyncLifetime
                 EndpointNames.UpdateCatThumbnail.Rel,
                 EndpointNames.GetAdvertisement.Rel,
                 EndpointNames.GetCatGallery.Rel,
+                EndpointNames.AddPicturesToCatGallery.Rel,
+                EndpointNames.RemovePictureFromCatGallery.Rel,
                 EndpointNames.GetCatGalleryPicture.Rel);
         cat.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
     }
@@ -170,6 +174,7 @@ public class GetCatEndpointsTests : IAsyncLifetime
         ApiResponses.CreatedWithIdResponse catCreateResponse =
             await catCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
+        
         CreateAdvertisementRequest request =
             new Faker<CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
@@ -185,11 +190,11 @@ public class GetCatEndpointsTests : IAsyncLifetime
                         ContactInfoEmail: faker.Person.Email,
                         ContactInfoPhoneNumber: faker.Person.Phone
                     ));
-
         HttpResponseMessage advertisementResponseMessage =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
         ApiResponses.CreatedWithIdResponse advertisementResponse =
             await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
+        
         CreateCatRequest anotherCatCreateRequest =
             new Faker<CreateCatRequest>()
                 .CustomInstantiator(faker =>
@@ -232,6 +237,8 @@ public class GetCatEndpointsTests : IAsyncLifetime
                 EndpointNames.DeleteCat.Rel,
                 EndpointNames.UpdateCatThumbnail.Rel,
                 EndpointNames.GetCatGallery.Rel,
+                EndpointNames.AddPicturesToCatGallery.Rel,
+                EndpointNames.RemovePictureFromCatGallery.Rel,
                 EndpointNames.GetCatGalleryPicture.Rel);
         cat.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
 
@@ -245,6 +252,8 @@ public class GetCatEndpointsTests : IAsyncLifetime
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
                 EndpointNames.UpdateCatThumbnail.Rel,
+                EndpointNames.AddPicturesToCatGallery.Rel,
+                EndpointNames.RemovePictureFromCatGallery.Rel,
                 EndpointNames.GetCatGallery.Rel,
                 EndpointNames.GetCatGalleryPicture.Rel);
         cat.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();

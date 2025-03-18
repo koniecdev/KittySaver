@@ -102,6 +102,8 @@ public class GetCatsEndpointsTests : IAsyncLifetime
                 EndpointNames.DeleteCat.Rel,
                 EndpointNames.UpdateCatThumbnail.Rel,
                 EndpointNames.GetCatGallery.Rel,
+                EndpointNames.AddPicturesToCatGallery.Rel,
+                EndpointNames.RemovePictureFromCatGallery.Rel,
                 EndpointNames.GetCatGalleryPicture.Rel);
         cat.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
     }

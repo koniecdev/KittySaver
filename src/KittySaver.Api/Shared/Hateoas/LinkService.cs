@@ -13,6 +13,7 @@ public interface ILinkService
         Guid personId,
         Guid? advertisementId,
         bool isThumbnailUploaded,
+        bool isAdopted,
         CurrentlyLoggedInPerson? currentlyLoggedInPerson);
 
     public List<Link> GenerateAdvertisementRelatedLinks(Guid id,
@@ -83,6 +84,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         Guid personId,
         Guid? advertisementId,
         bool isThumbnailUploaded,
+        bool isAdopted,
         CurrentlyLoggedInPerson? currentlyLoggedInPerson)
     {
         List<Link> links =
@@ -113,9 +115,21 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
             return links;
         }
 
-        links.Add(Generate(
-            endpointInfo: EndpointNames.UpdateCatThumbnail,
-            routeValues: new { id, personId }));
+        if (!isAdopted)
+        {
+            links.Add(Generate(
+                endpointInfo: EndpointNames.UpdateCatThumbnail,
+                routeValues: new { id, personId }));
+            links.Add(Generate(endpointInfo: EndpointNames.AddPicturesToCatGallery,
+                routeValues: new { id, personId }));
+            links.Add(Generate(endpointInfo: EndpointNames.RemovePictureFromCatGallery,
+                routeValues: new
+                {
+                    id = UrlPlaceholders.Id, personId = UrlPlaceholders.PersonId, filename = UrlPlaceholders.Filename
+                },
+                isTemplated: true));
+        }
+        
         
         links.Add(Generate(
             endpointInfo: EndpointNames.UpdateCat,

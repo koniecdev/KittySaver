@@ -66,19 +66,21 @@ public sealed class AddPicturesToCatGallery : IEndpoint
             
             await catGalleryService.SaveGalleryImagesAsync(request.GalleryFiles, request.Id, cancellationToken);
             
-            var catAdvertisementIdAndIsThumbnailUploaded = catOwner.Cats
+            var catProperties = catOwner.Cats
                 .Where(cat => cat.Id == request.Id)
                 .Select(c => new
                 {
                     advertisementId = c.AdvertisementId,
-                    isThumbnailUploaded = c.IsThumbnailUploaded
+                    isThumbnailUploaded = c.IsThumbnailUploaded,
+                    isAdopted = c.IsAdopted
                 }).First();
             
             return new CatHateoasResponse(
                 request.Id,
                 request.PersonId,
-                catAdvertisementIdAndIsThumbnailUploaded.advertisementId,
-                catAdvertisementIdAndIsThumbnailUploaded.isThumbnailUploaded);
+                catProperties.advertisementId,
+                catProperties.isThumbnailUploaded,
+                catProperties.isAdopted);
         }
     }
     
