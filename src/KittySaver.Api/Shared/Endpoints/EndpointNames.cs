@@ -44,6 +44,19 @@ public static class EndpointNames
     public static readonly EndpointInfo GetCatThumbnail = 
         new (Cat.GetCatThumbnailName, EndpointRels.Cat.GetCatThumbnailRel, HttpVerbs.Get);
     
+    public static readonly EndpointInfo AddPicturesToCatGallery = 
+        new (Cat.AddPicturesToCatGalleryName, EndpointRels.Cat.AddPicturesToCatGalleryRel, HttpVerbs.Post);
+    
+    public static readonly EndpointInfo RemovePictureFromCatGallery = 
+        new (Cat.RemovePictureFromCatGalleryName, EndpointRels.Cat.RemovePictureFromCatGalleryRel, HttpVerbs.Delete);
+    
+    public static readonly EndpointInfo GetCatGallery = 
+        new (Cat.GetCatGalleryName, EndpointRels.Cat.GetCatGalleryRel, HttpVerbs.Get);
+    
+    public static readonly EndpointInfo GetCatGalleryPicture = 
+        new (Cat.GetCatGalleryPictureName, EndpointRels.Cat.GetCatGalleryPictureRel, HttpVerbs.Get);
+    
+    
     public static readonly EndpointInfo CreateAdvertisement = 
         new (Advertisement.CreateAdvertisementName, EndpointRels.Advertisement.CreateAdvertisementRel, HttpVerbs.Post);
     
@@ -131,7 +144,11 @@ public static class EndpointNames
         public const string GetCatName = "GetCat";
         public const string GetCatsName = "GetCats";
         public const string UpdateCatThumbnailName = "UpdateCatThumbnail";
+        public const string AddPicturesToCatGalleryName = "AddPicturesToCatGallery";
+        public const string RemovePictureFromCatGalleryName = "RemovePictureFromCatGallery";
         public const string GetCatThumbnailName = "GetCatThumbnail";
+        public const string GetCatGalleryName = "GetCatGallery";
+        public const string GetCatGalleryPictureName = "GetCatGalleryPicture";
     }
     private static class Advertisement
     {

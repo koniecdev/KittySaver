@@ -81,12 +81,7 @@ public class ThumbnailStorageService(
         return fileStorage.GetFileStream(files[0]);
     }
     
-    public string GetContentType(string fileName)
-    {
-        string extension = Path.GetExtension(fileName).ToLowerInvariant();
-        return IThumbnailStorageService.Constants.AllowedThumbnailTypes
-            .GetValueOrDefault(extension, "application/octet-stream");
-    }
+    public string GetContentType(string fileName) => fileStorage.GetContentType(fileName, IThumbnailStorageService.Constants.AllowedThumbnailTypes);
 
     public void DeleteThumbnail(string entityType, Guid entityId)
     {

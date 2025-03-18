@@ -107,7 +107,11 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
             .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
-                EndpointNames.UpdateCatThumbnail.Rel);
+                EndpointNames.UpdateCatThumbnail.Rel,
+                EndpointNames.GetCatGallery.Rel,
+                EndpointNames.AddPicturesToCatGallery.Rel,
+                EndpointNames.RemovePictureFromCatGallery.Rel,
+                EndpointNames.GetCatGalleryPicture.Rel);
         hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         CatResponse catAfterUpdate =
             await _httpClient.GetFromJsonAsync<CatResponse>(
@@ -185,7 +189,11 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
                 EndpointNames.UpdateCatThumbnail.Rel,
-                EndpointNames.GetAdvertisement.Rel);
+                EndpointNames.GetAdvertisement.Rel,
+                EndpointNames.GetCatGallery.Rel,
+                EndpointNames.AddPicturesToCatGallery.Rel,
+                EndpointNames.RemovePictureFromCatGallery.Rel,
+                EndpointNames.GetCatGalleryPicture.Rel);
         hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         CatResponse catAfterUpdate =
             await _httpClient.GetFromJsonAsync<CatResponse>(
@@ -253,7 +261,11 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
             .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
-                EndpointNames.UpdateCatThumbnail.Rel);
+                EndpointNames.UpdateCatThumbnail.Rel,
+                EndpointNames.GetCatGallery.Rel,
+                EndpointNames.AddPicturesToCatGallery.Rel,
+                EndpointNames.RemovePictureFromCatGallery.Rel,
+                EndpointNames.GetCatGalleryPicture.Rel);
         hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         
         CatResponse catAfterUpdate =
@@ -317,7 +329,11 @@ public class UpdateCatEndpointsTests : IAsyncLifetime
             .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
-                EndpointNames.UpdateCatThumbnail.Rel);
+                EndpointNames.UpdateCatThumbnail.Rel,
+                EndpointNames.GetCatGallery.Rel,
+                EndpointNames.AddPicturesToCatGallery.Rel,
+                EndpointNames.RemovePictureFromCatGallery.Rel,
+                EndpointNames.GetCatGalleryPicture.Rel);
         hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         
         CatResponse catAfterUpdate =

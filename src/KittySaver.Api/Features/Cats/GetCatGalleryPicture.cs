@@ -4,37 +4,32 @@ using KittySaver.Api.Shared.Infrastructure.Services.FileServices;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace KittySaver.Api.Features.Cats;
-public sealed class GetCatThumbnail : IEndpoint
+public sealed class GetCatGalleryPicture : IEndpoint
 {
-    public sealed record GetCatThumbnailQuery(Guid PersonId, Guid Id) : IQuery<(FileStream Stream, string ContentType)>;
+    public sealed record GetCatGalleryPictureQuery(Guid PersonId, Guid Id, string Filename) : IQuery<(FileStream Stream, string ContentType)>;
 
-    internal sealed class GetCatThumbnailQueryHandler(
+    internal sealed class GetCatGalleryPictureQueryHandler(
         ApplicationReadDbContext db,
-        ICatThumbnailService catThumbnailService)
-        : IRequestHandler<GetCatThumbnailQuery, (FileStream Stream, string ContentType)>
+        ICatGalleryService catGalleryService)
+        : IRequestHandler<GetCatGalleryPictureQuery, (FileStream Stream, string ContentType)>
     {
         public async Task<(FileStream Stream, string ContentType)> Handle(
-            GetCatThumbnailQuery request, 
+            GetCatGalleryPictureQuery request, 
             CancellationToken cancellationToken)
         {
-            bool? isThumbnailUploaded = await db.Cats
-                .Where(x => x.PersonId == request.PersonId && x.Id == request.Id)
-                .Select(x=>(bool?)x.IsThumbnailUploaded)
-                .FirstOrDefaultAsync(cancellationToken);
-            
-            switch (isThumbnailUploaded)
+            if (!await db.Cats
+                    .Where(x => x.PersonId == request.PersonId && x.Id == request.Id)
+                    .AnyAsync(cancellationToken))
             {
-                case null:
-                    throw new NotFoundExceptions.CatNotFoundException(request.Id);
-                case false:
-                    throw new InvalidOperationException("Thumbnail is not uploaded");
+                throw new NotFoundExceptions.CatNotFoundException(request.Id);
             }
 
-            FileStream fileStream = catThumbnailService.GetThumbnail(request.Id);
-            string contentType = catThumbnailService.GetContentType(fileStream.Name);
+            FileStream fileStream = catGalleryService.GetGalleryImage(request.Id, request.Filename);
+            string contentType = catGalleryService.GetContentType(fileStream.Name);
         
             return (fileStream, contentType);
         }
@@ -42,13 +37,14 @@ public sealed class GetCatThumbnail : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapGet("/persons/{personId:guid}/cats/{id:guid}/thumbnail", async (
+        endpointRouteBuilder.MapGet("/persons/{personId:guid}/cats/{id:guid}/gallery/{filename}", async (
                 Guid personId,
                 Guid id,
+                string filename,
                 ISender sender,
                 CancellationToken cancellationToken) =>
             {
-                GetCatThumbnailQuery query = new(personId, id);
+                GetCatGalleryPictureQuery query = new(personId, id, filename);
                 (FileStream fileStream, string contentType) = await sender.Send(query, cancellationToken);
                 
                 return Results.Stream(
@@ -57,7 +53,7 @@ public sealed class GetCatThumbnail : IEndpoint
                     enableRangeProcessing: true);
             })
             .AllowAnonymous()
-            .WithName(EndpointNames.GetCatThumbnail.EndpointName)
+            .WithName(EndpointNames.GetCatGalleryPicture.EndpointName)
             .WithTags(EndpointNames.GroupNames.CatGroup)
             .Produces<FileStream>()
             .Produces(StatusCodes.Status404NotFound)

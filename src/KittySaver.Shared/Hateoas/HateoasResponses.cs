@@ -18,6 +18,7 @@ public interface IHateoasCatResponse : IHateoasResponse
     public Guid PersonId { get; }
     public Guid? AdvertisementId { get; }
     public bool IsThumbnailUploaded { get; }
+    public bool IsAdopted { get; }
 }
 
 public interface IHateoasAdvertisementResponse : IHateoasResponse
@@ -33,13 +34,14 @@ public class PersonHateoasResponse(Guid id)
     public Guid Id { get; } = id;
     public ICollection<Link> Links { get; set; } = new List<Link>();
 }
-public class CatHateoasResponse(Guid id, Guid personId, Guid? advertisementId, bool isThumbnailUploaded)
+public class CatHateoasResponse(Guid id, Guid personId, Guid? advertisementId, bool isThumbnailUploaded, bool isAdopted)
     : IHateoasCatResponse
 {
     public Guid Id { get; } = id;
     public Guid PersonId { get; } = personId;
     public Guid? AdvertisementId { get; } = advertisementId;
     public bool IsThumbnailUploaded { get; } = isThumbnailUploaded;
+    public bool IsAdopted { get; } = isAdopted;
     public ICollection<Link> Links { get; set; } = new List<Link>();
 }
 public class AdvertisementHateoasResponse(Guid id, Guid personId, AdvertisementStatus status)

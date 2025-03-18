@@ -6,6 +6,7 @@ public interface IFileStorageService
     FileStream GetFileStream(string filePath);
     FileStream GetFileStream(string subdirectoryPath, string fileName);
     void DeleteFile(string path);
+    string GetContentType(string fileName, IReadOnlyDictionary<string, string> allowedTypes);
 }
 
 public sealed class LocalFileStorageService(IWebHostEnvironment webHostEnvironment) : IFileStorageService
@@ -65,5 +66,12 @@ public sealed class LocalFileStorageService(IWebHostEnvironment webHostEnvironme
         }
 
         File.Delete(fullPath);
+    }
+    
+    public string GetContentType(string fileName, IReadOnlyDictionary<string ,string> allowedTypes)
+    {
+        string extension = Path.GetExtension(fileName).ToLowerInvariant();
+        return IThumbnailStorageService.Constants.AllowedThumbnailTypes
+            .GetValueOrDefault(extension, "application/octet-stream");
     }
 }

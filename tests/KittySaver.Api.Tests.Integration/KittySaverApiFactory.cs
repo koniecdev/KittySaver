@@ -71,8 +71,8 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
                 .Returns("image/jpeg");
             services.AddSingleton<IAdvertisementFileStorageService>(_ => advertisementFileStorageService);
             
-            services.RemoveAll<ICatFileStorageService>();
-            ICatFileStorageService catFileStorageService = Substitute.For<ICatFileStorageService>();
+            services.RemoveAll<ICatThumbnailService>();
+            ICatThumbnailService catFileStorageService = Substitute.For<ICatThumbnailService>();
             TestableFileStream testStream1 = new("test/path/image.jpg");
             catFileStorageService
                 .GetThumbnail(Arg.Any<Guid>())
@@ -81,7 +81,7 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
             catFileStorageService
                 .GetContentType("test/path/image.jpg")
                 .Returns("image/jpeg");
-            services.AddSingleton<ICatFileStorageService>(_ => catFileStorageService);
+            services.AddSingleton<ICatThumbnailService>(_ => catFileStorageService);
             
             services.RemoveAll<ICurrentUserService>();
             ICurrentUserService currentUserService = Substitute.For<ICurrentUserService>();

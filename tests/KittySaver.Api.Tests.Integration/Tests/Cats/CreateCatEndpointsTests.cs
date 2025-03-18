@@ -69,9 +69,9 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         ApiResponses.CreatedWithIdResponse personRegisterResponse =
             await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
-        CreateCatRequest request = _createCatRequestGenerator.Generate();
 
         //Act
+        CreateCatRequest request = _createCatRequestGenerator.Generate();
         HttpResponseMessage response =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", request);
 
@@ -85,7 +85,11 @@ public class CreateCatEndpointsTests : IAsyncLifetime
             .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
-                EndpointNames.UpdateCatThumbnail.Rel);
+                EndpointNames.UpdateCatThumbnail.Rel,
+                EndpointNames.AddPicturesToCatGallery.Rel,
+                EndpointNames.RemovePictureFromCatGallery.Rel,
+                EndpointNames.GetCatGallery.Rel,
+                EndpointNames.GetCatGalleryPicture.Rel);
         hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         response.Headers.Location!.ToString().Should()
             .Contain($"/api/v1/persons/{hateoasResponse.PersonId}/cats/{hateoasResponse.Id}");
@@ -100,6 +104,8 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         ApiResponses.CreatedWithIdResponse personRegisterResponse =
             await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
+
+        //Act
         CreateCatRequest request = new(
             Name: "Whiskers",
             IsCastrated: true,
@@ -108,8 +114,6 @@ public class CreateCatEndpointsTests : IAsyncLifetime
             HealthStatus: HealthStatus.Good.Name,
             AgeCategory: AgeCategory.Adult.Name
         );
-
-        //Act
         HttpResponseMessage response =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", request);
 
@@ -123,7 +127,11 @@ public class CreateCatEndpointsTests : IAsyncLifetime
             .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
-                EndpointNames.UpdateCatThumbnail.Rel);
+                EndpointNames.UpdateCatThumbnail.Rel,
+                EndpointNames.GetCatGallery.Rel,
+                EndpointNames.AddPicturesToCatGallery.Rel,
+                EndpointNames.RemovePictureFromCatGallery.Rel,
+                EndpointNames.GetCatGalleryPicture.Rel);
         hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         response.Headers.Location!.ToString().Should()
             .Contain($"/api/v1/persons/{hateoasResponse.PersonId}/cats/{hateoasResponse.Id}");
@@ -138,6 +146,8 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         ApiResponses.CreatedWithIdResponse personRegisterResponse =
             await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
             ?? throw new JsonException();
+
+        //Act
         CreateCatRequest request = new(
             Name: "Whiskers",
             IsCastrated: true,
@@ -147,8 +157,6 @@ public class CreateCatEndpointsTests : IAsyncLifetime
             AgeCategory: AgeCategory.Adult.Name,
             AdditionalRequirements: " "
         );
-
-        //Act
         HttpResponseMessage response =
             await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", request);
 
@@ -162,7 +170,11 @@ public class CreateCatEndpointsTests : IAsyncLifetime
             .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
-                EndpointNames.UpdateCatThumbnail.Rel);
+                EndpointNames.UpdateCatThumbnail.Rel,
+                EndpointNames.AddPicturesToCatGallery.Rel,
+                EndpointNames.RemovePictureFromCatGallery.Rel,
+                EndpointNames.GetCatGallery.Rel,
+                EndpointNames.GetCatGalleryPicture.Rel);
         hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         response.Headers.Location!.ToString().Should()
             .Contain($"/api/v1/persons/{hateoasResponse.PersonId}/cats/{hateoasResponse.Id}");

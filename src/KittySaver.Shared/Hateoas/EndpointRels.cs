@@ -18,10 +18,14 @@ public static class EndpointRels
         public const string CreateCatRel = "create-cat";
         public const string UpdateCatRel = "update-cat";
         public const string UpdateCatThumbnailRel = "update-cat-thumbnail";
+        public const string AddPicturesToCatGalleryRel = "add-pictures-to-cat-gallery";
+        public const string RemovePictureFromCatGalleryRel = "remove-picture-from-cat-gallery";
         public const string DeleteCatRel = "delete-cat";
         public const string GetCatRel = "get-cat";
         public const string GetCatsRel = "get-cats";
         public const string GetCatThumbnailRel = "get-cat-thumbnail";
+        public const string GetCatGalleryRel = "get-cat-gallery";
+        public const string GetCatGalleryPictureRel = "get-cat-gallery-picture";
     }
 
     public static class Advertisement
