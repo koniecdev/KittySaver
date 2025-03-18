@@ -41,8 +41,12 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICatPriorityCalculatorService, DefaultCatPriorityCalculatorService>();
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
         services.AddScoped<IThumbnailStorageService, ThumbnailStorageService>();
+        services.AddScoped<IGalleryStorageService, GalleryStorageService>();
         services.AddScoped<IAdvertisementFileStorageService, AdvertisementFileStorageService>();
-        services.AddScoped<ICatFileStorageService, CatFileStorageService>();
+        services.AddScoped<CatFileStorageService>()
+                .AddScoped<ICatThumbnailService>(sp => sp.GetRequiredService<CatFileStorageService>())
+                .AddScoped<ICatGalleryService>(sp => sp.GetRequiredService<CatFileStorageService>());
+
         services.AddValidatorsFromAssembly(assembly);
         
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
