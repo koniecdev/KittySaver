@@ -96,7 +96,9 @@ public class GetCatEndpointsTests : IAsyncLifetime
             .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
-                EndpointNames.UpdateCatThumbnail.Rel);
+                EndpointNames.UpdateCatThumbnail.Rel,
+                EndpointNames.GetCatGallery.Rel,
+                EndpointNames.GetCatGalleryPicture.Rel);
         cat.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
     }
 
@@ -147,7 +149,9 @@ public class GetCatEndpointsTests : IAsyncLifetime
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
                 EndpointNames.UpdateCatThumbnail.Rel,
-                EndpointNames.GetAdvertisement.Rel);
+                EndpointNames.GetAdvertisement.Rel,
+                EndpointNames.GetCatGallery.Rel,
+                EndpointNames.GetCatGalleryPicture.Rel);
         cat.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
     }
 
@@ -226,7 +230,9 @@ public class GetCatEndpointsTests : IAsyncLifetime
             .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
-                EndpointNames.UpdateCatThumbnail.Rel);
+                EndpointNames.UpdateCatThumbnail.Rel,
+                EndpointNames.GetCatGallery.Rel,
+                EndpointNames.GetCatGalleryPicture.Rel);
         cat.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
 
         responseOfAnotherCat.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -238,7 +244,9 @@ public class GetCatEndpointsTests : IAsyncLifetime
             .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
-                EndpointNames.UpdateCatThumbnail.Rel);
+                EndpointNames.UpdateCatThumbnail.Rel,
+                EndpointNames.GetCatGallery.Rel,
+                EndpointNames.GetCatGalleryPicture.Rel);
         cat.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
     }
 

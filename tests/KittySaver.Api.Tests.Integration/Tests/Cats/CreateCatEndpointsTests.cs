@@ -85,7 +85,9 @@ public class CreateCatEndpointsTests : IAsyncLifetime
             .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
-                EndpointNames.UpdateCatThumbnail.Rel);
+                EndpointNames.UpdateCatThumbnail.Rel,
+                EndpointNames.GetCatGallery.Rel,
+                EndpointNames.GetCatGalleryPicture.Rel);
         hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         response.Headers.Location!.ToString().Should()
             .Contain($"/api/v1/persons/{hateoasResponse.PersonId}/cats/{hateoasResponse.Id}");
@@ -123,7 +125,9 @@ public class CreateCatEndpointsTests : IAsyncLifetime
             .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
-                EndpointNames.UpdateCatThumbnail.Rel);
+                EndpointNames.UpdateCatThumbnail.Rel,
+                EndpointNames.GetCatGallery.Rel,
+                EndpointNames.GetCatGalleryPicture.Rel);
         hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         response.Headers.Location!.ToString().Should()
             .Contain($"/api/v1/persons/{hateoasResponse.PersonId}/cats/{hateoasResponse.Id}");
@@ -162,7 +166,9 @@ public class CreateCatEndpointsTests : IAsyncLifetime
             .BeEquivalentTo(EndpointRels.SelfRel,
                 EndpointNames.UpdateCat.Rel,
                 EndpointNames.DeleteCat.Rel,
-                EndpointNames.UpdateCatThumbnail.Rel);
+                EndpointNames.UpdateCatThumbnail.Rel,
+                EndpointNames.GetCatGallery.Rel,
+                EndpointNames.GetCatGalleryPicture.Rel);
         hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         response.Headers.Location!.ToString().Should()
             .Contain($"/api/v1/persons/{hateoasResponse.PersonId}/cats/{hateoasResponse.Id}");
