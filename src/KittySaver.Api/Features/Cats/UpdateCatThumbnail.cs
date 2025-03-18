@@ -14,7 +14,7 @@ public sealed class UpdateCatThumbnail : IEndpoint
     public sealed record UpdateCatThumbnailCommand(
         Guid PersonId,
         Guid Id,
-        IFormFile Thumbnail) : ICommand<CatHateoasResponse>, IAuthorizedRequest, IAdvertisementRequest;
+        IFormFile Thumbnail) : ICommand<CatHateoasResponse>, IAuthorizedRequest, ICatRequest;
 
     public sealed class UpdateAdvertisementThumbnailCommandValidator
         : AbstractValidator<UpdateCatThumbnailCommand>
@@ -45,7 +45,7 @@ public sealed class UpdateCatThumbnail : IEndpoint
 
     internal sealed class UpdateCatThumbnailCommandHandler(
         IPersonRepository personRepository,
-        ICatFileStorageService fileStorage,
+        ICatThumbnailService catThumbnailService,
         IUnitOfWork unitOfWork)
         : IRequestHandler<UpdateCatThumbnailCommand, CatHateoasResponse>
     {
@@ -55,7 +55,7 @@ public sealed class UpdateCatThumbnail : IEndpoint
 
             catOwner.MarkCatAsThumbnailUploaded(request.Id);
             
-            await fileStorage.SaveThumbnailAsync(request.Thumbnail, request.Id, cancellationToken);
+            await catThumbnailService.SaveThumbnailAsync(request.Thumbnail, request.Id, cancellationToken);
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
             var catAdvertisementIdAndIsThumbnailUploaded = catOwner.Cats

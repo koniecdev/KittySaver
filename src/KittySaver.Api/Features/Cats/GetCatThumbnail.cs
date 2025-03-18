@@ -13,7 +13,7 @@ public sealed class GetCatThumbnail : IEndpoint
 
     internal sealed class GetCatThumbnailQueryHandler(
         ApplicationReadDbContext db,
-        ICatFileStorageService fileStorage)
+        ICatThumbnailService catThumbnailService)
         : IRequestHandler<GetCatThumbnailQuery, (FileStream Stream, string ContentType)>
     {
         public async Task<(FileStream Stream, string ContentType)> Handle(
@@ -33,8 +33,8 @@ public sealed class GetCatThumbnail : IEndpoint
                     throw new InvalidOperationException("Thumbnail is not uploaded");
             }
 
-            FileStream fileStream = fileStorage.GetThumbnail(request.Id);
-            string contentType = fileStorage.GetContentType(fileStream.Name);
+            FileStream fileStream = catThumbnailService.GetThumbnail(request.Id);
+            string contentType = catThumbnailService.GetContentType(fileStream.Name);
         
             return (fileStream, contentType);
         }
