@@ -1,0 +1,253 @@
+﻿@using KittySaver.Shared.Hateoas
+@using KittySaver.Shared.Responses
+@using KittySaver.Wasm.Shared.HttpClients
+@inject IApiClient ApiClient
+
+<div class="cat-gallery-viewer">
+    @if (_isLoading)
+    {
+        <div class="loading-gallery">
+            Ładowanie galerii zdjęć...
+        </div>
+    }
+    else if (_errorMessage != null)
+    {
+        <div class="gallery-error">
+            @_errorMessage
+        </div>
+    }
+    else if (!_galleryImages.Any())
+    {
+        <div class="empty-gallery">
+            <p>Ten kot nie ma jeszcze żadnych zdjęć w galerii.</p>
+        </div>
+    }
+    else
+    {
+        <div class="gallery-slider">
+            <div class="main-image-container">
+                <img src="@GetGalleryImageUrl(_currentImageIndex)" alt="Zdjęcie kota" class="main-image" />
+                
+                @if (_galleryImages.Count > 1)
+                {
+                    <button class="gallery-nav-btn prev-btn" @onclick="PreviousImage">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                    <button class="gallery-nav-btn next-btn" @onclick="NextImage">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
+                }
+            </div>
+            
+            @if (_galleryImages.Count > 1)
+            {
+                <div class="thumbnails-container">
+                    @for (int i = 0; i < _galleryImages.Count; i++)
+                    {
+                        var index = i;
+                        <div class="thumbnail @(_currentImageIndex == index ? "active" : "")" @onclick="() => SelectImage(index)">
+                            <img src="@GetGalleryImageUrl(index)" alt="Miniatura zdjęcia kota" />
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<style>
+    .cat-gallery-viewer {
+        margin: 20px 0;
+    }
+    
+    .loading-gallery, .gallery-error, .empty-gallery {
+        text-align: center;
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .gallery-error {
+        color: #721c24;
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+    }
+    
+    .gallery-slider {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .main-image-container {
+        position: relative;
+        overflow: hidden;
+        border-radius: 8px;
+        height: 400px;
+        background: #f0f0f0;
+    }
+    
+    .main-image {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+    
+    .gallery-nav-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.8);
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 2;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .prev-btn {
+        left: 10px;
+    }
+    
+    .next-btn {
+        right: 10px;
+    }
+    
+    .thumbnails-container {
+        display: flex;
+        overflow-x: auto;
+        gap: 8px;
+        padding: 5px 0;
+    }
+    
+    .thumbnail {
+        width: 80px;
+        height: 80px;
+        border-radius: 4px;
+        overflow: hidden;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: opacity 0.3s, transform 0.3s;
+        flex-shrink: 0;
+    }
+    
+    .thumbnail:hover {
+        opacity: 0.9;
+        transform: scale(1.05);
+    }
+    
+    .thumbnail.active {
+        opacity: 1;
+        box-shadow: 0 0 0 2px #007bff;
+    }
+    
+    .thumbnail img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+</style>
+
+@code {
+    [Parameter] public Guid CatId { get; set; }
+    [Parameter] public Guid PersonId { get; set; }
+    [Parameter] public Link? GalleryLink { get; set; }
+    [Parameter] public Link? GalleryImageLink { get; set; }
+    
+    private bool _isLoading = true;
+    private string? _errorMessage;
+    private List<PictureResponse> _galleryImages = [];
+    private int _currentImageIndex;
+    
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadGalleryImages();
+    }
+    
+    private async Task LoadGalleryImages()
+    {
+        if (GalleryLink is null)
+        {
+            _errorMessage = "Nie można załadować galerii zdjęć.";
+            _isLoading = false;
+            return;
+        }
+        
+        try
+        {
+            _isLoading = true;
+            var response = await ApiClient.GetAsync<List<PictureResponse>>(GalleryLink.Href);
+            _galleryImages = response ?? [];
+            _currentImageIndex = 0;
+        }
+        catch (Exception)
+        {
+            _errorMessage = "Wystąpił błąd podczas ładowania galerii zdjęć.";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+    
+    private string GetGalleryImageUrl(int index)
+    {
+        if (index < 0 || index >= _galleryImages.Count || GalleryImageLink is null)
+        {
+            return "";
+        }
+        
+        return GetGalleryImageUrl(_galleryImages[index].FilenameWithExtension);
+    }
+    
+    private string GetGalleryImageUrl(string filename)
+    {
+        if (GalleryImageLink is null)
+        {
+            return "";
+        }
+        
+        return GalleryImageLink.Href
+            .Replace("{personId}", PersonId.ToString())
+            .Replace("{id}", CatId.ToString())
+            .Replace("{filename}", filename);
+    }
+    
+    private void NextImage()
+    {
+        if (_galleryImages.Count <= 1)
+        {
+            return;
+        }
+        
+        _currentImageIndex = (_currentImageIndex + 1) % _galleryImages.Count;
+    }
+    
+    private void PreviousImage()
+    {
+        if (_galleryImages.Count <= 1)
+        {
+            return;
+        }
+        
+        _currentImageIndex = (_currentImageIndex - 1 + _galleryImages.Count) % _galleryImages.Count;
+    }
+    
+    private void SelectImage(int index)
+    {
+        if (index >= 0 && index < _galleryImages.Count)
+        {
+            _currentImageIndex = index;
+        }
+    }
+}
