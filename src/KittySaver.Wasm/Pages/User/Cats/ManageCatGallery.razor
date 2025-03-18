@@ -15,23 +15,23 @@
 
 <div class="subpage_grid">
     <aside class="subpage_sidebar"></aside>
-    
     <article class="subpage_content">
         <header class="subpage_header">
-            <h1>@(_catName ?? "Galeria zdjęć kota")</h1>
+            <h1>@($"Zarządzanie galerią kota - {_catName}")</h1>
             <div class="subpage_header_action">
-                <a href="/user/cats" class="default_btn btn_red">Powrót do listy kotów</a>
+                <a href="/user/cats/@Id" class="default_btn">Anuluj</a>
             </div>
         </header>
-        
+
         <section class="subpage_main_info">
-            @if (_isLoading)
-            {
-                <div class="loading-indicator">
-                    <p>Ładowanie galerii zdjęć...</p>
-                </div>
-            }
-            else if (!string.IsNullOrEmpty(_errorMessage))
+            <div class="subpage_description advertisement_element">
+                <p>
+                    Zdjęcia w galerii pomogą potencjalnym opiekunom lepiej poznać kota.
+                    Im więcej zdjęć, tym większa szansa na znalezienie domu.
+                </p>
+            </div>
+
+            @if (!_isLoading && !string.IsNullOrEmpty(_errorMessage))
             {
                 <div class="subpage_description advertisement_element advertisement_element_warning">
                     <p><strong>Błąd:</strong> @_errorMessage</p>
@@ -41,40 +41,43 @@
                     <a href="/user/cats" class="default_btn">Powrót do listy kotów</a>
                 </div>
             }
+            else if (_isLoading)
+            {
+                <div class="loading-indicator">
+                    <p>Ładowanie...</p>
+                </div>
+            }
             else
             {
-                <!-- Formularz dodawania zdjęć -->
-                <div class="subpage_description advertisement_element">
-                    <h3>Dodaj nowe zdjęcia</h3>
-                    <p>Wybierz zdjęcia, które chcesz dodać do galerii kota. Możesz wybrać wiele zdjęć jednocześnie.</p>
-                    
-                    <div class="subpage_form_container">
-                        <div class="subpage_form">
-                            <div class="login_form_tile">
-                                <label for="newImages">Wybierz zdjęcia:</label>
-                                <InputFile id="newImages" OnChange="OnGalleryPhotosSelected" accept=".jpg,.jpeg,.png,.webp" multiple />
-                                @if (!string.IsNullOrEmpty(_galleryError))
+                <div class="subpage_form_container">
+                    <div class="subpage_form">
+                        <div class="login_form_tile">
+                            <label for="newImages">Wybierz zdjęcia do dodania:</label>
+                            <InputFile id="newImages" OnChange="OnGalleryPhotosSelected" accept=".jpg,.jpeg,.png,.webp" multiple />
+                            @if (!string.IsNullOrEmpty(_galleryError))
+                            {
+                                <div class="validation-message">@_galleryError</div>
+                            }
+                        </div>
+
+                        <div class="login_form_tile_buttons">
+                            <button type="button" class="default_btn" @onclick="NavigateBack">
+                                Wróć
+                            </button>
+                            <button type="button" class="default_btn btn_green" @onclick="UploadGalleryPhotos" disabled="@(_selectedFiles.Count == 0 || _isUploading)">
+                                @if (_isUploading)
                                 {
-                                    <div class="validation-message">@_galleryError</div>
+                                    <span>Przesyłanie zdjęć...</span>
                                 }
-                            </div>
-                            <div class="login_form_tile_buttons">
-                                <button class="default_btn btn_green" @onclick="UploadGalleryPhotos" disabled="@(_selectedFiles.Count == 0 || _isUploading)">
-                                    @if (_isUploading)
-                                    {
-                                        <span>Przesyłanie zdjęć...</span>
-                                    }
-                                    else
-                                    {
-                                        <span>Dodaj wybrane zdjęcia (@_selectedFiles.Count)</span>
-                                    }
-                                </button>
-                            </div>
+                                else
+                                {
+                                    <span>Dodaj wybrane zdjęcia (@_selectedFiles.Count)</span>
+                                }
+                            </button>
                         </div>
                     </div>
                 </div>
-                
-                <!-- Galeria zdjęć -->
+
                 <div class="subpage_description advertisement_element">
                     <h3>Aktualne zdjęcia w galerii</h3>
                     
@@ -85,13 +88,13 @@
                     else
                     {
                         <div class="gallery-grid">
-                            @foreach (var image in _galleryImages)
+                            @foreach (PictureResponse image in _galleryImages)
                             {
                                 <div class="gallery-item">
                                     <div class="gallery-image-wrapper">
                                         <img src="@GetGalleryImageUrl(image.FilenameWithExtension)" alt="Zdjęcie kota" class="gallery-image" />
                                         <div class="gallery-buttons">
-                                            <button class="default_btn btn_red" @onclick="() => DeleteGalleryImage(image.FilenameWithExtension)" disabled="@_isDeleting">
+                                            <button type="button" class="default_btn btn_red" @onclick="() => DeleteGalleryImage(image.FilenameWithExtension)" disabled="@(_isDeleting)">
                                                 @if (_isDeleting && _currentlyDeletingImage == image.FilenameWithExtension)
                                                 {
                                                     <span>Usuwanie...</span>
@@ -108,17 +111,9 @@
                         </div>
                     }
                 </div>
-                
-                @if (_successMessage != null)
-                {
-                    <div class="subpage_description advertisement_element">
-                        <p class="success-message">@_successMessage</p>
-                    </div>
-                }
             }
         </section>
     </article>
-    
     <aside class="subpage_sidebar"></aside>
 </div>
 
@@ -155,15 +150,6 @@
         border-top: 1px solid #eee;
     }
     
-    .success-message {
-        color: #155724;
-        background-color: #d4edda;
-        border: 1px solid #c3e6cb;
-        border-radius: 4px;
-        padding: 10px;
-        margin-top: 10px;
-    }
-    
     .validation-message {
         color: #721c24;
         margin-top: 5px;
@@ -179,10 +165,9 @@
     [Parameter] public Guid Id { get; set; }
     
     private bool _isLoading = true;
-    private bool _isUploading = false;
-    private bool _isDeleting = false;
+    private bool _isUploading;
+    private bool _isDeleting;
     private string? _errorMessage;
-    private string? _successMessage;
     private string? _catName;
     private string? _galleryError;
     private string? _currentlyDeletingImage;
@@ -192,6 +177,9 @@
     private Link? _getGalleryImageLink;
     private Link? _addToGalleryLink;
     private Link? _removeFromGalleryLink;
+    
+    // Maksymalny rozmiar pliku w bajtach (10MB)
+    private const long MaxAllowedSize = 10 * 1024 * 1024;
     
     protected override async Task OnInitializedAsync()
     {
@@ -287,12 +275,11 @@
     {
         _selectedFiles = e.GetMultipleFiles().ToList();
         _galleryError = null;
-        _successMessage = null;
         
         // Validate files
         foreach (var file in _selectedFiles)
         {
-            var validationResult = FileValidationService.ValidateImageFile(file, false);
+            var validationResult = FileValidationService.ValidateImageFile(file);
             if (validationResult != null)
             {
                 _galleryError = validationResult.ErrorMessage;
@@ -312,11 +299,7 @@
         try
         {
             _isUploading = true;
-            _successMessage = null;
             _galleryError = null;
-            
-            // Zwiększamy maksymalny rozmiar pliku do 10MB
-            const long maxFileSize = 10 * 1024 * 1024; // 10MB w bajtach
             
             using var content = new MultipartFormDataContent();
             
@@ -324,13 +307,13 @@
             foreach (var file in _selectedFiles)
             {
                 // Otwieramy strumień z określonym maksymalnym rozmiarem
-                var stream = file.OpenReadStream(maxFileSize);
+                var stream = file.OpenReadStream(MaxAllowedSize);
                 
                 // Tworzymy bufor o rozmiarze pliku
                 byte[] buffer = new byte[file.Size];
                 
                 // Odczytujemy całą zawartość pliku do bufora
-                await stream.ReadAsync(buffer, 0, buffer.Length);
+                await stream.ReadExactlyAsync(buffer, 0, buffer.Length);
                 
                 // Używamy ByteArrayContent zamiast StreamContent
                 var fileContent = new ByteArrayContent(buffer);
@@ -346,8 +329,6 @@
             // Clear selection and reload images
             _selectedFiles.Clear();
             await LoadGalleryImages();
-            
-            _successMessage = "Zdjęcia zostały dodane do galerii.";
         }
         catch (Exception ex)
         {
@@ -370,7 +351,6 @@
         {
             _isDeleting = true;
             _currentlyDeletingImage = filename;
-            _successMessage = null;
             
             string deleteUrl = _removeFromGalleryLink.Href
                 .Replace("{personId}", ApiNavigation.Response?.PersonId.ToString())
@@ -381,8 +361,6 @@
             
             // Reload gallery after deletion
             await LoadGalleryImages();
-            
-            _successMessage = "Zdjęcie zostało usunięte z galerii.";
         }
         catch (Exception ex)
         {
@@ -393,5 +371,10 @@
             _isDeleting = false;
             _currentlyDeletingImage = null;
         }
+    }
+    
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo($"/user/cats/{Id}");
     }
 }
