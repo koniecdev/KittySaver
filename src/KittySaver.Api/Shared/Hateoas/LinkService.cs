@@ -89,7 +89,12 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         [
             Generate(endpointInfo: EndpointNames.GetCat,
                     routeValues: new { id, personId },
-                    isSelf: true)
+                    isSelf: true),
+            Generate(endpointInfo: EndpointNames.GetCatGallery,
+                    routeValues: new {id, personId }),
+            Generate(endpointInfo: EndpointNames.GetCatGalleryPicture,
+                routeValues: new { id = UrlPlaceholders.Id, personId = UrlPlaceholders.PersonId, filename = UrlPlaceholders.Filename },
+                isTemplated: true)
         ];
 
         if (isThumbnailUploaded)
@@ -265,7 +270,8 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         {
             href = href
                 .Replace(UrlPlaceholders.Id.ToString(), "{id}")
-                .Replace(UrlPlaceholders.PersonId.ToString(), "{personId}");
+                .Replace(UrlPlaceholders.PersonId.ToString(), "{personId}")
+                .Replace(UrlPlaceholders.Filename.ToString(), "{filename}");
         }
 
         Link link = new Link(
@@ -378,4 +384,5 @@ public static class UrlPlaceholders
 {
     public static readonly Guid Id = Guid.Empty;
     public static readonly Guid PersonId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+    public static readonly Guid Filename = Guid.Parse("22222222-2222-2222-2222-222222222222");
 }
