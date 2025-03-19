@@ -75,12 +75,9 @@
                     Zmień główne zdjęcie
                 </a>
             }
-            @if (isUpdateCatThumbnailLinkEnabled)
-            {
-                <a href="/user/cats/gallery/@Cat.Id" class="default_btn">
-                    Galeria kota
-                </a>
-            }
+            <a href="/user/cats/gallery/@Cat.Id" class="default_btn">
+                Galeria kota
+            </a>
             @if (isUpdateCatLinkEnabled)
             {
                 <a href="/user/cats/update/@Cat.Id" class="default_btn">

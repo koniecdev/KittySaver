@@ -7,9 +7,9 @@
 @using KittySaver.Wasm.Shared.HttpClients
 @using Microsoft.AspNetCore.Authorization
 @using KittySaver.Wasm.Shared.Components
+@inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
 @inject IApiClient MainApiClient
 @inject NavigationManager NavigationManager
-@inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
 
 <PageTitle>
     Uratujkota.pl - Twoje ogłoszenia
@@ -33,16 +33,13 @@
                 </p>
             </div>
         </section>
-        
-        <!-- Display advertisements using our management component -->
-        @if (_advertisements.Any())
-        {
-            List<AdvertisementResponse> sortedAdvertisements = _advertisements.OrderBy(advertisement => advertisement.Title).ToList();
+        @{
+            List<AdvertisementResponse> sortedAdvertisements = _advertisements.OrderByDescending(adv => adv.Title).ToList();
             IEnumerable<AdvertisementResponse> leftColumn = sortedAdvertisements.Where((_, index) => index % 2 == 0);
             IEnumerable<AdvertisementResponse> rightColumn = sortedAdvertisements.Where((_, index) => index % 2 == 1);
 
             <section class="subpage_cats_grid">
-                <div class="subpage_cats_grid_column"> 
+                <div class="subpage_cats_grid_column">
                     @foreach (AdvertisementResponse advertisement in leftColumn)
                     {
                         <AdvertisementTileComponent Advertisement="advertisement" IsManagementView="true" />
@@ -55,12 +52,6 @@
                     }
                 </div>
             </section>
-        }
-        else
-        {
-            <div class="no_advertisements_message">
-                <p>Nie masz jeszcze żadnych ogłoszeń. Kliknij "Dodaj nowe ogłoszenie", aby utworzyć pierwsze.</p>
-            </div>
         }
     </article>
     <aside class="subpage_sidebar">

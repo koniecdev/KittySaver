@@ -27,7 +27,7 @@
 
         <!-- Wskaźnik postępu -->
         <div class="advertisement_wizard_steps">
-            <div class="step @(_currentStep == WizardStep.CatInfo ? "active" : "")" 
+            <div class="step @(_currentStep == WizardStep.CatInfo ? "active" : "")"
                  @onclick="async () => await NavigateToStepAsync(WizardStep.CatInfo)">
                 1. Dane kota
             </div>
@@ -59,7 +59,7 @@
                 <section class="subpage_form_container">
                     <EditForm EditContext="_editContext" OnSubmit="HandleCreateCat" class="subpage_form">
                         <DataAnnotationsValidator />
-                        
+
                         <div class="login_form_tile">
                             <label for="name">Imie kotka:</label>
                             <InputText id="name" type="text" @bind-Value="_createCatDto.Name"/>
@@ -140,7 +140,7 @@
                     </EditForm>
                 </section>
                 break;
-                
+
             case WizardStep.MainPhoto:
                 <section class="subpage_main_info">
                     <div class="subpage_description advertisement_element">
@@ -168,7 +168,7 @@
                                     </div>
                                 </div>
                             }
-                            
+
                             <div class="login_form_tile">
                                 <label for="mainPhoto">Wybierz zdjęcie główne:</label>
                                 <InputFile id="mainPhoto" OnChange="OnMainPhotoSelected" accept=".jpg,.jpeg,.png,.webp" />
@@ -192,25 +192,34 @@
                                 <button type="button" class="default_btn" @onclick="async () => await NavigateToStepAsync(WizardStep.CatInfo)">
                                     Wróć
                                 </button>
-                                <button type="button" class="default_btn btn_green" @onclick="HandleUploadMainPhoto" disabled="@(_mainPhotoFileData == null || _isProcessing)">
-                                    @if (_isProcessing)
-                                    {
-                                        <span>Zapisujemy zdjęcie...</span>
-                                    }
-                                    else
-                                    {
-                                        <span>Zapisz i przejdź dalej</span>
-                                    }
-                                </button>
-                                <button type="button" class="default_btn" @onclick="async () => await NavigateToStepAsync(WizardStep.Gallery)">
-                                    Pomiń ten krok
-                                </button>
+
+                                @if (_mainPhotoFileData == null)
+                                {
+                                    <!-- Gdy nie ma wybranego zdjęcia, pokazujemy tylko opcję pominięcia -->
+                                    <button type="button" class="default_btn" @onclick="async () => await NavigateToStepAsync(WizardStep.Gallery)">
+                                        Pomiń ten krok
+                                    </button>
+                                }
+                                else
+                                {
+                                    <!-- Gdy zdjęcie jest wybrane, pokazujemy tylko przycisk zapisu -->
+                                    <button type="button" class="default_btn btn_green" @onclick="HandleUploadMainPhoto" disabled="@_isProcessing">
+                                        @if (_isProcessing)
+                                        {
+                                            <span>Zapisujemy zdjęcie...</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Zapisz i przejdź dalej</span>
+                                        }
+                                    </button>
+                                }
                             </div>
                         </div>
                     </div>
                 </section>
                 break;
-                
+
             case WizardStep.Gallery:
                 <section class="subpage_main_info">
                     <div class="subpage_description advertisement_element">
@@ -236,18 +245,20 @@
                                 <button type="button" class="default_btn" @onclick="async () => await NavigateToStepAsync(WizardStep.MainPhoto)">
                                     Wróć
                                 </button>
-                                <button type="button" class="default_btn btn_green" @onclick="HandleUploadGalleryPhotos" disabled="@(_selectedGalleryFiles.Count == 0 || _isUploading)">
+                                <button type="button" class="default_btn @(_galleryImages.Any() ? "btn_green" : "")" @onclick="async () => await NavigateToStepAsync(WizardStep.Advertisement)">
                                     @if (_isUploading)
                                     {
-                                        <span>Przesyłanie zdjęć...</span>
+                                        <!-- Pokazujemy informację o przesyłaniu -->
+                                        <div class="upload-status">
+                                            <span>Przesyłanie zdjęć...</span>
+                                        </div>
                                     }
                                     else
                                     {
-                                        <span>Dodaj wybrane zdjęcia (@_selectedGalleryFiles.Count)</span>
+                                        <span>
+                                            Przejdź dalej @(_galleryImages.Any() ? "" : "(bez zdjęć)")
+                                        </span>
                                     }
-                                </button>
-                                <button type="button" class="default_btn" @onclick="async () => await NavigateToStepAsync(WizardStep.Advertisement)">
-                                    Przejdź dalej
                                 </button>
                             </div>
                         </div>
@@ -287,7 +298,7 @@
                     </div>
                 </section>
                 break;
-                
+
             case WizardStep.Advertisement:
                 <section class="subpage_main_info">
                     <div class="subpage_description advertisement_element">
@@ -302,7 +313,7 @@
                             <div class="login_form_tile span2">
                                 <h4>Wybierz opcję:</h4>
                                 <div class="cat_advertisement_options">
-                                    <div class="cat_advertisement_option @(_advertisementOption == AdvertisementOption.CreateNew ? "active" : "")" 
+                                    <div class="cat_advertisement_option @(_advertisementOption == AdvertisementOption.CreateNew ? "active" : "")"
                                          @onclick="() => _advertisementOption = AdvertisementOption.CreateNew">
                                         <div class="cat_advertisement_option_icon">
                                             <i class="fas fa-plus-circle"></i>
@@ -312,7 +323,7 @@
                                             <p>Utworzenie nowego ogłoszenia z tym kotem</p>
                                         </div>
                                     </div>
-                                    
+
                                     <div class="cat_advertisement_option @(_advertisementOption == AdvertisementOption.AddToExisting ? "active" : "")"
                                          @onclick="() => _advertisementOption = AdvertisementOption.AddToExisting">
                                         <div class="cat_advertisement_option_icon">
@@ -323,8 +334,8 @@
                                             <p>Dodaj kota do istniejącego ogłoszenia z listy</p>
                                         </div>
                                     </div>
-                                    
-                                    <div class="cat_advertisement_option @(_advertisementOption == AdvertisementOption.Later ? "active" : "")" 
+
+                                    <div class="cat_advertisement_option @(_advertisementOption == AdvertisementOption.Later ? "active" : "")"
                                          @onclick="() => _advertisementOption = AdvertisementOption.Later">
                                         <div class="cat_advertisement_option_icon">
                                             <i class="fas fa-clock"></i>
@@ -388,19 +399,19 @@
         color: #721c24;
         margin-top: 5px;
     }
-    
+
     .loading-indicator {
         text-align: center;
         padding: 20px;
     }
-    
+
     .advertisement_wizard_steps {
         display: flex;
         border-radius: 5px;
         overflow: hidden;
         margin-bottom: 20px;
     }
-    
+
     .advertisement_wizard_steps .step {
         flex: 1;
         padding: 12px 10px;
@@ -408,36 +419,36 @@
         cursor: pointer;
         transition: background-color 0.3s;
     }
-    
+
     .advertisement_wizard_steps .step:last-child {
         border-right: none;
     }
-    
+
     .advertisement_wizard_steps .step.active {
         background-color: #28a745;
         color: white;
         font-weight: bold;
     }
-    
+
     .advertisement_wizard_steps .step.disabled {
         pointer-events: none;
         opacity: 0.6;
     }
-    
+
     .thumbnail-preview {
         margin-top: 10px;
         padding: 5px;
         border-radius: 4px;
         display: inline-block;
     }
-    
+
     .cat_advertisement_options {
         display: flex;
         flex-direction: column;
         gap: 15px;
         margin-top: 10px;
     }
-    
+
     .cat_advertisement_option {
         display: flex;
         padding: 15px;
@@ -446,15 +457,15 @@
         cursor: pointer;
         transition: all 0.3s;
     }
-    
+
     .cat_advertisement_option:hover {
         border-color: #28a745;
     }
-    
+
     .cat_advertisement_option.active {
         border-color: #28a745;
     }
-    
+
     .cat_advertisement_option_icon {
         margin-right: 15px;
         font-size: 24px;
@@ -462,12 +473,12 @@
         display: flex;
         align-items: center;
     }
-    
+
     .cat_advertisement_option_content h5 {
         margin: 0 0 5px 0;
         font-size: 16px;
     }
-    
+
     .cat_advertisement_option_content p {
         margin: 0;
         color: #666;
@@ -484,7 +495,7 @@
         Gallery,
         Advertisement
     }
-    
+
     // Opcje dla ogłoszenia
     private enum AdvertisementOption
     {
@@ -492,10 +503,10 @@
         AddToExisting,
         Later
     }
-    
+
     private WizardStep _currentStep = WizardStep.CatInfo;
     private AdvertisementOption _advertisementOption = AdvertisementOption.CreateNew;
-    
+
     // Dane z pierwszego etapu (podstawowe informacje o kocie)
     private readonly CreateCatDto _createCatDto = new();
     private bool _isProcessing;
@@ -503,7 +514,7 @@
     private Link _createCatLink = null!;
     private EditContext? _editContext;
     private ValidationMessageStore? _messageStore;
-    
+
     // Dane dla etapu zdjęcia głównego
     private bool _hasThumbnail;
     private IBrowserFile? _mainPhoto;
@@ -512,7 +523,7 @@
     private byte[]? _mainPhotoFileData;
     private string? _mainPhotoFileName;
     private string? _mainPhotoContentType;
-    
+
     // Dane dla etapu galerii
     private List<IBrowserFile> _selectedGalleryFiles = [];
     private List<PictureResponse> _galleryImages = [];
@@ -521,13 +532,10 @@
     private bool _isDeleting;
     private string? _currentlyDeletingImage;
     private int _inputFileKey;
-    
+
     // Dane dla etapu ogłoszenia
     private List<AdvertisementResponse> _availableAdvertisements = [];
     private string? _selectedAdvertisementId;
-    
-    // Maksymalny rozmiar pliku
-    private const long MaxAllowedSize = 10 * 1024 * 1024;
 
     protected override void OnInitialized()
     {
@@ -539,17 +547,17 @@
         }
 
         _createCatLink = createPersonLink;
-        
+
         _editContext = new EditContext(_createCatDto);
         _messageStore = new ValidationMessageStore(_editContext);
         _editContext.OnValidationRequested += HandleValidationRequested;
         base.OnInitialized();
     }
-    
+
     private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs args)
     {
         _messageStore?.Clear();
-        
+
         if (_mainPhoto is not null)
         {
             ValidationResult? mainPhotoValidation = FileValidationService.ValidateImageFile(_mainPhoto, false);
@@ -566,7 +574,7 @@
 
         StateHasChanged();
     }
-    
+
     private string GetStepTitle()
     {
         return _currentStep switch
@@ -578,7 +586,7 @@
             _ => "Dodaj nowego kotka"
         };
     }
-    
+
     private async Task NavigateToStepAsync(WizardStep step)
     {
         // Jeśli próbujemy przejść do etapu, który wymaga wcześniejszego utworzenia kota
@@ -586,16 +594,16 @@
         {
             return;
         }
-        
+
         _currentStep = step;
-        
+
         // Jeśli przechodzimy do etapu ogłoszenia, załaduj dostępne ogłoszenia
         if (step == WizardStep.Advertisement)
         {
             await LoadAvailableAdvertisements();
         }
     }
-    
+
     // Obsługa pierwszego etapu - podstawowe informacje o kocie
     private async Task HandleCreateCat()
     {
@@ -605,7 +613,7 @@
         }
 
         _isProcessing = true;
-    
+
         try
         {
             CreateCatRequest createCatRequest = new(
@@ -617,7 +625,7 @@
                 _createCatDto.HealthStatus,
                 _createCatDto.AdditionalRequirements);
 
-            _createdCatResponse = 
+            _createdCatResponse =
                 await ApiClient.PostAsync<CreateCatRequest, CatHateoasResponse>(_createCatLink.Href, createCatRequest);
 
             // Przejdź do następnego etapu
@@ -635,7 +643,7 @@
             _isProcessing = false;
         }
     }
-    
+
     // Obsługa etapu zdjęcia głównego (thumbnail)
     private async Task OnMainPhotoSelected(InputFileChangeEventArgs e)
     {
@@ -656,17 +664,17 @@
             // Save file details
             _mainPhotoFileName = _mainPhoto.Name;
             _mainPhotoContentType = _mainPhoto.ContentType;
-            
+
             // Read and cache file data
-            await using var stream = _mainPhoto.OpenReadStream(MaxAllowedSize);
+            await using Stream stream = _mainPhoto.OpenReadStream();
             _mainPhotoFileData = new byte[_mainPhoto.Size];
             await stream.ReadAsync(_mainPhotoFileData);
 
             // Create a preview URL
-            var imageFile = await e.File.RequestImageFileAsync("image/jpeg", 300, 300);
-            var buffer = new byte[imageFile.Size];
+            IBrowserFile imageFile = await e.File.RequestImageFileAsync("image/jpeg", 300, 300);
+            byte[] buffer = new byte[imageFile.Size];
             await imageFile.OpenReadStream().ReadAsync(buffer);
-            var imageDataUrl = $"data:image/jpeg;base64,{Convert.ToBase64String(buffer)}";
+            string imageDataUrl = $"data:image/jpeg;base64,{Convert.ToBase64String(buffer)}";
             _mainPhotoPreviewUrl = imageDataUrl;
         }
         catch (Exception ex)
@@ -674,7 +682,7 @@
             _mainPhotoError = $"Błąd podczas tworzenia podglądu: {ex.Message}";
         }
     }
-    
+
     private async Task HandleUploadMainPhoto()
     {
         if (_createdCatResponse == null || _mainPhotoFileData == null)
@@ -690,16 +698,16 @@
             Link? uploadThumbnailLink = _createdCatResponse.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.UpdateCatThumbnailRel);
             if (uploadThumbnailLink != null)
             {
-                using var content = new MultipartFormDataContent();
-                using var fileContent = new ByteArrayContent(_mainPhotoFileData);
+                using MultipartFormDataContent content = new MultipartFormDataContent();
+                using ByteArrayContent fileContent = new ByteArrayContent(_mainPhotoFileData);
                 fileContent.Headers.ContentType = new MediaTypeHeaderValue(_mainPhotoContentType ?? "image/jpeg");
                 content.Add(fileContent, "thumbnail", _mainPhotoFileName ?? "thumbnail.jpg");
 
                 await ApiClient.PutFileAsync<CatHateoasResponse>(uploadThumbnailLink.Href, content);
-                
+
                 // Oznacz, że kot ma miniaturkę
                 _hasThumbnail = true;
-                
+
                 // Przejdź do następnego etapu
                 await NavigateToStepAsync(WizardStep.Gallery);
             }
@@ -717,81 +725,90 @@
             _isProcessing = false;
         }
     }
-    
+
     private string GetCurrentThumbnailUrl()
     {
         if (_createdCatResponse == null || !_hasThumbnail)
         {
             return "/imgs/defaultCat.webp";
         }
-        
+
         Link? thumbnailLink = _createdCatResponse.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatThumbnailRel);
         return thumbnailLink?.Href ?? "/imgs/defaultCat.webp";
     }
-    
-    // Obsługa etapu galerii
-    private void OnGalleryPhotosSelected(InputFileChangeEventArgs e)
+
+    // Obsługa etapu galerii - zmodyfikowana metoda dla automatycznego uploadu
+    private async Task OnGalleryPhotosSelected(InputFileChangeEventArgs e)
     {
         _selectedGalleryFiles = e.GetMultipleFiles().ToList();
         _galleryError = null;
-        
+
         // Validate files
-        foreach (var file in _selectedGalleryFiles)
+        foreach (IBrowserFile file in _selectedGalleryFiles)
         {
-            var validationResult = FileValidationService.ValidateImageFile(file);
-            if (validationResult != null)
+            ValidationResult? validationResult = FileValidationService.ValidateImageFile(file);
+            if (validationResult == null)
             {
-                _galleryError = validationResult.ErrorMessage;
-                _selectedGalleryFiles.Clear();
-                break;
+                continue;
             }
+            _galleryError = validationResult.ErrorMessage;
+            _selectedGalleryFiles.Clear();
+            StateHasChanged();
+            return; // Wyjdź z metody, jeśli walidacja nie przeszła
+        }
+
+        // Automatycznie uruchom upload, jeśli walidacja przeszła pomyślnie
+        if (_selectedGalleryFiles.Count > 0)
+        {
+            await HandleUploadGalleryPhotos();
         }
     }
-    
+
     private async Task HandleUploadGalleryPhotos()
     {
         if (_createdCatResponse == null || _selectedGalleryFiles.Count == 0)
         {
             return;
         }
-        
+
         Link? addToGalleryLink = _createdCatResponse.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.AddPicturesToCatGalleryRel);
         if (addToGalleryLink == null)
         {
             _galleryError = "Brak uprawnienia do dodawania zdjęć do galerii";
             return;
         }
-        
+
         try
         {
             _isUploading = true;
             _galleryError = null;
-            
-            using var content = new MultipartFormDataContent();
-            
+            StateHasChanged(); // Dodajemy odświeżenie UI, żeby pokazać status przesyłania
+
+            using MultipartFormDataContent content = new MultipartFormDataContent();
+
             // Przetwarzamy każdy plik osobno
-            foreach (var file in _selectedGalleryFiles)
+            foreach (IBrowserFile file in _selectedGalleryFiles)
             {
                 // Otwieramy strumień z określonym maksymalnym rozmiarem
-                var stream = file.OpenReadStream(MaxAllowedSize);
-                
+                Stream stream = file.OpenReadStream();
+
                 // Tworzymy bufor o rozmiarze pliku
                 byte[] buffer = new byte[file.Size];
-                
+
                 // Odczytujemy całą zawartość pliku do bufora
                 await stream.ReadExactlyAsync(buffer, 0, buffer.Length);
-                
+
                 // Używamy ByteArrayContent zamiast StreamContent
-                var fileContent = new ByteArrayContent(buffer);
+                ByteArrayContent fileContent = new ByteArrayContent(buffer);
                 fileContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
-                
+
                 // Dodajemy zawartość do formularza
                 content.Add(fileContent, "galleryFiles", file.Name);
             }
-            
+
             // Upload files
             await ApiClient.PostFileAsync<CatHateoasResponse>(addToGalleryLink.Href, content);
-            
+
             // Clear selection and reload images
             _selectedGalleryFiles.Clear();
             _inputFileKey++;
@@ -804,25 +821,26 @@
         finally
         {
             _isUploading = false;
+            StateHasChanged(); // Odświeżamy UI po zakończeniu przesyłania
         }
     }
-    
+
     private async Task LoadGalleryImages()
     {
         if (_createdCatResponse == null)
         {
             return;
         }
-        
+
         Link? getGalleryLink = _createdCatResponse.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatGalleryRel);
         if (getGalleryLink == null)
         {
             return;
         }
-        
+
         try
         {
-            var response = await ApiClient.GetAsync<List<PictureResponse>>(getGalleryLink.Href);
+            List<PictureResponse>? response = await ApiClient.GetAsync<List<PictureResponse>>(getGalleryLink.Href);
             _galleryImages = response ?? [];
         }
         catch (Exception ex)
@@ -830,51 +848,51 @@
             _galleryError = $"Błąd podczas ładowania galerii: {ex.Message}";
         }
     }
-    
+
     private string GetGalleryImageUrl(string filename)
     {
         if (_createdCatResponse == null || ApiNavigation.Response?.PersonId == null)
         {
             return "";
         }
-        
+
         Link? getGalleryImageLink = _createdCatResponse.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatGalleryPictureRel);
         if (getGalleryImageLink == null)
         {
             return "";
         }
-        
+
         return getGalleryImageLink.Href
             .Replace("{personId}", ApiNavigation.Response.PersonId.ToString())
             .Replace("{id}", _createdCatResponse.Id.ToString())
             .Replace("{filename}", filename);
     }
-    
+
     private async Task DeleteGalleryImage(string filename)
     {
         if (_createdCatResponse == null || ApiNavigation.Response?.PersonId == null)
         {
             return;
         }
-        
+
         Link? removeFromGalleryLink = _createdCatResponse.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.RemovePictureFromCatGalleryRel);
         if (removeFromGalleryLink == null)
         {
             return;
         }
-        
+
         try
         {
             _isDeleting = true;
             _currentlyDeletingImage = filename;
-            
+
             string deleteUrl = removeFromGalleryLink.Href
                 .Replace("{personId}", ApiNavigation.Response.PersonId.ToString())
                 .Replace("{id}", _createdCatResponse.Id.ToString())
                 .Replace("{filename}", filename);
-                
+
             await ApiClient.DeleteAsync(deleteUrl);
-            
+
             // Reload gallery after deletion
             await LoadGalleryImages();
         }
@@ -888,7 +906,7 @@
             _currentlyDeletingImage = null;
         }
     }
-    
+
     // Obsługa etapu ogłoszenia
     private async Task LoadAvailableAdvertisements()
     {
@@ -898,7 +916,7 @@
             Link? advertisementsLink = ApiNavigation.GetLink(EndpointRels.Advertisement.GetPersonAdvertisementsRel);
             if (advertisementsLink != null)
             {
-                var result = await ApiClient.GetAsync<PagedList<AdvertisementResponse>>(advertisementsLink.Href);
+                PagedList<AdvertisementResponse>? result = await ApiClient.GetAsync<PagedList<AdvertisementResponse>>(advertisementsLink.Href);
                 if (result?.Items != null)
                 {
                     // Filtruj tylko aktywne ogłoszenia
@@ -914,39 +932,39 @@
             _availableAdvertisements = [];
         }
     }
-    
+
     private void HandleAdvertisementOption()
     {
         if (_createdCatResponse == null)
         {
             return;
         }
-        
+
         switch (_advertisementOption)
         {
             case AdvertisementOption.CreateNew:
                 // Przekieruj do strony tworzenia ogłoszenia z predefiniowanym kotem
                 NavigationManager.NavigateTo($"/user/advertisements/create?catId={_createdCatResponse.Id}");
                 break;
-                
+
             case AdvertisementOption.AddToExisting:
                 if (string.IsNullOrEmpty(_selectedAdvertisementId))
                 {
                     // Brak wybranego ogłoszenia
                     return;
                 }
-                
+
                 // Przekieruj do strony edycji ogłoszenia
                 NavigationManager.NavigateTo($"/user/advertisements/update/{_selectedAdvertisementId}?addCatId={_createdCatResponse.Id}");
                 break;
-                
+
             case AdvertisementOption.Later:
                 // Zakończ proces i przekieruj do listy kotów
                 NavigationManager.NavigateTo("/user/cats");
                 break;
         }
     }
-    
+
     public void Dispose()
     {
         if (_editContext != null)
@@ -954,7 +972,7 @@
             _editContext.OnValidationRequested -= HandleValidationRequested;
         }
     }
-    
+
     public sealed class CreateCatDto : IValidatableObject
     {
         [Required(ErrorMessage = "Imię kota jest wymagane")]

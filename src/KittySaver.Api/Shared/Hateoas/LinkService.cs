@@ -128,24 +128,24 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
                     id = UrlPlaceholders.Id, personId = UrlPlaceholders.PersonId, filename = UrlPlaceholders.Filename
                 },
                 isTemplated: true));
+            links.Add(Generate(
+                endpointInfo: EndpointNames.UpdateCat,
+                routeValues: new { id, personId }));
         }
         
         
-        links.Add(Generate(
-            endpointInfo: EndpointNames.UpdateCat,
-            routeValues: new { id, personId }));
-
-        links.Add(Generate(
-            endpointInfo: EndpointNames.DeleteCat,
-            routeValues: new { id, personId }));
-
-        if (advertisementId is not null)
+        if (advertisementId is null)
         {
             links.Add(Generate(
-                endpointInfo: EndpointNames.GetAdvertisement,
-                routeValues: new { id = advertisementId.Value, personId }));
+                endpointInfo: EndpointNames.DeleteCat,
+                routeValues: new { id, personId }));
+            return links;
         }
-
+        
+        links.Add(Generate(
+            endpointInfo: EndpointNames.GetAdvertisement,
+            routeValues: new { id = advertisementId.Value, personId }));
+        
         return links;
     }
 
