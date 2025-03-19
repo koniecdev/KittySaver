@@ -18,9 +18,6 @@
     <article class="subpage_content">
         <header class="subpage_header">
             <h1>@($"Zarządzanie galerią kota - {_catName}")</h1>
-            <div class="subpage_header_action">
-                <a href="/user/cats/@Id" class="default_btn">Anuluj</a>
-            </div>
         </header>
 
         <section class="subpage_main_info">
@@ -53,7 +50,7 @@
                     <div class="subpage_form">
                         <div class="login_form_tile">
                             <label for="newImages">Wybierz zdjęcia do dodania:</label>
-                            <InputFile id="newImages" OnChange="OnGalleryPhotosSelected" accept=".jpg,.jpeg,.png,.webp" multiple />
+                            <InputFile id="newImages" @key="_inputFileKey" OnChange="OnGalleryPhotosSelected" accept=".jpg,.jpeg,.png,.webp" multiple />
                             @if (!string.IsNullOrEmpty(_galleryError))
                             {
                                 <div class="validation-message">@_galleryError</div>
@@ -78,33 +75,32 @@
                     </div>
                 </div>
 
-                <div class="subpage_description advertisement_element">
+                <div class="subpage_description advertisement_element manage_gallery_container">
                     <h3>Aktualne zdjęcia w galerii</h3>
-                    
                     @if (!_galleryImages.Any())
                     {
                         <p>Galeria jest pusta. Dodaj zdjęcia używając formularza powyżej.</p>
                     }
                     else
                     {
-                        <div class="gallery-grid">
+                        <div class="manage_gallery_grid">
                             @foreach (PictureResponse image in _galleryImages)
                             {
-                                <div class="gallery-item">
-                                    <div class="gallery-image-wrapper">
-                                        <img src="@GetGalleryImageUrl(image.FilenameWithExtension)" alt="Zdjęcie kota" class="gallery-image" />
-                                        <div class="gallery-buttons">
-                                            <button type="button" class="default_btn btn_red" @onclick="() => DeleteGalleryImage(image.FilenameWithExtension)" disabled="@(_isDeleting)">
-                                                @if (_isDeleting && _currentlyDeletingImage == image.FilenameWithExtension)
-                                                {
-                                                    <span>Usuwanie...</span>
-                                                }
-                                                else
-                                                {
-                                                    <span>Usuń</span>
-                                                }
-                                            </button>
-                                        </div>
+                                <div class="manage_gallery_grid_tile">
+                                    <div class="manage_gallery_grid_tile_wrapper">
+                                        <img src="@GetGalleryImageUrl(image.FilenameWithExtension)" alt="Zdjęcie kota @_catName" class="manage_gallery_grid_tile_image">
+                                    </div>
+                                    <div class="manage_gallery_grid_tile_buttons">
+                                        <button type="button" class="default_btn btn_red" @onclick="() => DeleteGalleryImage(image.FilenameWithExtension)" disabled="@(_isDeleting)">
+                                            @if (_isDeleting && _currentlyDeletingImage == image.FilenameWithExtension)
+                                            {
+                                                <span>Usuwanie...</span>
+                                            }
+                                            else
+                                            {
+                                                <span>Usuń</span>
+                                            }
+                                        </button>
                                     </div>
                                 </div>
                             }
@@ -118,38 +114,6 @@
 </div>
 
 <style>
-    .gallery-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 16px;
-        margin-top: 20px;
-    }
-    
-    .gallery-item {
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        overflow: hidden;
-        background: #fff;
-    }
-    
-    .gallery-image-wrapper {
-        position: relative;
-    }
-    
-    .gallery-image {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-        display: block;
-    }
-    
-    .gallery-buttons {
-        padding: 8px;
-        display: flex;
-        justify-content: center;
-        border-top: 1px solid #eee;
-    }
-    
     .validation-message {
         color: #721c24;
         margin-top: 5px;
@@ -171,8 +135,9 @@
     private string? _catName;
     private string? _galleryError;
     private string? _currentlyDeletingImage;
-    private List<PictureResponse> _galleryImages = new();
-    private List<IBrowserFile> _selectedFiles = new();
+    private int _inputFileKey;
+    private List<PictureResponse> _galleryImages = [];
+    private List<IBrowserFile> _selectedFiles = [];
     private Link? _getGalleryLink;
     private Link? _getGalleryImageLink;
     private Link? _addToGalleryLink;
@@ -250,7 +215,7 @@
         try
         {
             var response = await ApiClient.GetAsync<List<PictureResponse>>(_getGalleryLink.Href);
-            _galleryImages = response ?? new List<PictureResponse>();
+            _galleryImages = response ?? [];
         }
         catch (Exception ex)
         {
@@ -328,6 +293,7 @@
             
             // Clear selection and reload images
             _selectedFiles.Clear();
+            _inputFileKey++;
             await LoadGalleryImages();
         }
         catch (Exception ex)
@@ -375,6 +341,6 @@
     
     private void NavigateBack()
     {
-        NavigationManager.NavigateTo($"/user/cats/{Id}");
+        NavigationManager.NavigateTo("/user/cats");
     }
 }

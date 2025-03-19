@@ -117,6 +117,7 @@
                     <ValidationMessage For="@(() => _createCatDto.AdditionalRequirements)" />
                 </div>
                 <div class="login_form_tile_buttons">
+                    <a href="/user/cats/create" class="default_btn btn_red">Anuluj dodawanie kota</a>
                     <button class="default_btn btn_green" type="submit" disabled="@_isProcessing">
                         @if (_isProcessing)
                         {
@@ -127,7 +128,6 @@
                             <span>Zatwierdź dane nowego kotka</span>
                         }
                     </button>
-                    <a href="/user/cats/create" class="default_btn btn_red">Anuluj dodawanie kota</a>
                 </div>
             </EditForm>
         </section>
