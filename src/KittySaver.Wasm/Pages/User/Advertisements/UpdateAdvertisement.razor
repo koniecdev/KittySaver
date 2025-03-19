@@ -355,7 +355,12 @@
 </div>
 
 @code {
-    [Parameter] public Guid Id { get; set; }
+    [Parameter]
+    public Guid Id { get; set; }
+    
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public Guid? AddCatId { get; set; }
     
     private bool _isLoading = true;
     private int _currentStep = 1;
@@ -451,6 +456,40 @@
                                  _advertisementCats.Any(ac => ac.Id == cat.Id))
                     .Where(cat => _advertisementCats.All(ac => ac.Id != cat.Id))
                     .ToList();
+            }
+        }
+        
+        if (AddCatId.HasValue)
+        {
+            // Najpierw sprawdź w dostępnych kotach
+            var catToAdd = _availableCats.FirstOrDefault(c => c.Id == AddCatId.Value);
+            if (catToAdd != null)
+            {
+                AddCatToAdvertisement(catToAdd);
+            }
+            else
+            {
+                // Jeśli kot nie znajduje się na liście dostępnych kotów, spróbuj go pobrać bezpośrednio
+                try
+                {
+                    Link? getCatLink = ApiNavigation.GetLink(EndpointRels.Cat.GetCatRel);
+                    if (getCatLink != null && ApiNavigation.Response?.PersonId != null)
+                    {
+                        string catUrl = getCatLink.Href
+                            .Replace("{personId}", ApiNavigation.Response.PersonId.ToString())
+                            .Replace("{id}", AddCatId.Value.ToString());
+                    
+                        var cat = await MainApiClient.GetAsync<CatResponse>(catUrl);
+                        if (cat != null)
+                        {
+                            _advertisementCats.Add(cat);
+                        }
+                    }
+                }
+                catch
+                {
+                    // Kot mógł nie zostać znaleziony - cicha obsługa błędu
+                }
             }
         }
     }
