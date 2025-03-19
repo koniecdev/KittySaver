@@ -148,7 +148,7 @@ img{
 .index_aside select,
 .index_aside button,
 .login_form_tile button,
-.login_form_tile input:not(input[type="file"]),
+.login_form_tile input:not(input[type="file"],input[type="radio"]),
 .login_form_tile select,
 .login_form_tile textarea,
 .default_btn{
@@ -280,7 +280,6 @@ select{
 }
 .subpage_cat_tile_header{
     display: grid;
-    grid-gap: 2rem;
     overflow: hidden;
 }
 .subpage_cat_image_wrapper{
@@ -414,6 +413,7 @@ select{
     grid-gap: 1rem;
     grid-template-columns: repeat(2, 1fr);
     text-align: center;
+    padding: 0 1.5rem;
 }
 
 /*Login.razor.css*/
@@ -866,6 +866,47 @@ button.disabled {
 
 .empty_selection .default_btn {
     margin-top: 1rem;
+}
+
+.manage_gallery_grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 200px);
+    grid-auto-rows: max-content;
+    align-items: center;
+    grid-gap: 1rem;
+}
+.manage_gallery_container{
+    display: grid;
+    grid-gap: 1rem;
+    background-color: #242424;
+    border-left: 10px solid var(--kitty-green);
+    border-radius: 10px;
+    padding: 1rem 1.5rem;
+    align-content: center;
+    grid-auto-rows: max-content;
+}
+.manage_gallery_grid_tile{
+    background-color: #3d3a2b;
+    border-radius: 15px;
+    overflow: hidden;
+    padding: 1rem;
+    display: grid;
+    grid-gap: 1rem;
+}
+.manage_gallery_grid_tile_wrapper{
+    border-radius: 15px;
+    overflow: hidden;
+    display: flex;
+}
+.manage_gallery_grid_tile_buttons{
+    display: grid;
+}
+.manage_gallery_grid_tile_buttons button{
+    width: 100%;
+}
+
+.manage_gallery_grid_tile{
+    display: grid;
 }
 
 /* Grouping reason styles */

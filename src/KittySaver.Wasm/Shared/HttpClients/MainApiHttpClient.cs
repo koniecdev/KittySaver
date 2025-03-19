@@ -14,6 +14,7 @@ public interface IApiClient
     Task<TResponse?> PostAsync<TResponse>(string endpointUrl, CancellationToken cancellationToken = default);
     Task<TResponse?> PostAsync<TRequest, TResponse>(string endpointUrl, TRequest request, CancellationToken cancellationToken = default);
     Task<TResponse?> PutAsync<TRequest, TResponse>(string endpoint, TRequest request, CancellationToken cancellationToken = default);
+    Task<TResponse?> PostFileAsync<TResponse>(string endpoint, MultipartFormDataContent content, CancellationToken cancellationToken = default);
     Task<TResponse?> PutFileAsync<TResponse>(string endpoint, MultipartFormDataContent content, CancellationToken cancellationToken = default);
     Task DeleteAsync(string endpoint, CancellationToken cancellationToken = default);
 }
@@ -120,6 +121,25 @@ public class ApiClient(
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
             logger.LogError(ex, "Error making DELETE request to {Endpoint}", endpoint);
+            throw;
+        }
+    }
+    
+    public async Task<TResponse?> PostFileAsync<TResponse>(string endpoint, MultipartFormDataContent content, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await SetAuthorizationHeadersIfPresent();
+            logger.LogInformation("Making POST FILE request to {Endpoint}", endpoint);
+            
+            HttpResponseMessage response = await httpClient.PostAsync(endpoint, content, cancellationToken);
+            await EnsureSuccessStatusCodeWithLoggingAsync(response);
+            TResponse? toReturn = await response.Content.ReadFromJsonAsync<TResponse>(cancellationToken);
+            return toReturn;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            logger.LogError(ex, "Error making PUT FILE request to {Endpoint}", endpoint);
             throw;
         }
     }

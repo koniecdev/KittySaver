@@ -84,6 +84,7 @@
                         </strong>
                     </div>
                     <div class="login_form_tile_buttons">
+                        <a href="/user/cats" class="default_btn">Anuluj</a>
                         <button class="default_btn btn_red" @onclick="HandleDelete" disabled="@_isProcessing">
                             @if (_isProcessing)
                             {
@@ -94,7 +95,6 @@
                                 <span>Usuń na zawsze tego kota z systemu</span>
                             }
                         </button>
-                        <a href="/user/cats" class="default_btn">Anuluj</a>
                     </div>
                 </div>
             </section>

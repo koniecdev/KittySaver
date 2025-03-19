@@ -3,7 +3,9 @@
 @using System.ComponentModel.DataAnnotations
 @using System.Net.Http.Headers
 @using KittySaver.Shared.Hateoas
+@using KittySaver.Shared.Pagination
 @using KittySaver.Shared.Requests
+@using KittySaver.Shared.Responses
 @using KittySaver.Wasm.Shared
 @using KittySaver.Wasm.Shared.HttpClients
 @using KittySaver.Wasm.Shared.Validation
@@ -14,139 +16,526 @@
 @inject IFileValidationService FileValidationService
 
 <div class="subpage_grid">
-    <aside class="subpage_sidebar">
-
-    </aside>
+    <aside class="subpage_sidebar"></aside>
     <article class="subpage_content">
         <header class="subpage_header">
-            <h1>Dodaj nowego kotka</h1>
+            <h1>@GetStepTitle()</h1>
             <div class="subpage_header_action">
                 <a href="/user/cats" class="default_btn btn_red">Anuluj dodawanie kota</a>
             </div>
         </header>
-        <section class="subpage_main_info">
-            <div class="subpage_description advertisement_element advertisement_element_warning">
-                <p>
-                    W tym kroku dodajesz tylko nowego kota do listy twoich kotów. Po utworzeniu, zostaniesz zapytany o utworzenie nowego publicznego ogłoszenia dla tego kota, lub o przypisanie go do już istniejącego ogłoszenia.
-                </p>
+
+        <!-- Wskaźnik postępu -->
+        <div class="advertisement_wizard_steps">
+            <div class="step @(_currentStep == WizardStep.CatInfo ? "active" : "")"
+                 @onclick="async () => await NavigateToStepAsync(WizardStep.CatInfo)">
+                1. Dane kota
             </div>
-        </section>
-        <section class="subpage_form_container">
-            <EditForm EditContext="_editContext" OnSubmit="Handle" class="subpage_form">
-                <DataAnnotationsValidator />
-                
-                <div class="login_form_tile">
-                    <label for="name">Imie kotka:</label>
-                    <InputText id="name" type="text" @bind-Value="_createCatDto.Name"/>
-                    <ValidationMessage For="@(() => _createCatDto.Name)" />
-                </div>
-                <div class="login_form_tile">
-                    <label>Czy kot jest już wysterylizowany/wykastrowany:</label>
-                    <InputRadioGroup @bind-Value="_createCatDto.IsCastrated">
-                        <div class="radio_item">
-                            <InputRadio Value="true" id="r1"/> <label for="r1">Tak</label>
+            <div class="step @(_currentStep == WizardStep.MainPhoto ? "active" : "") @(_createdCatResponse == null ? "disabled" : "")"
+                 @onclick="async () => await NavigateToStepAsync(WizardStep.MainPhoto)">
+                2. Zdjęcie główne
+            </div>
+            <div class="step @(_currentStep == WizardStep.Gallery ? "active" : "") @(_createdCatResponse == null ? "disabled" : "")"
+                 @onclick="async () => await NavigateToStepAsync(WizardStep.Gallery)">
+                3. Galeria zdjęć
+            </div>
+            <div class="step @(_currentStep == WizardStep.Advertisement ? "active" : "") @(_createdCatResponse == null ? "disabled" : "")"
+                 @onclick="async () => await NavigateToStepAsync(WizardStep.Advertisement)">
+                4. Ogłoszenie
+            </div>
+        </div>
+
+        <!-- Zawartość etapu -->
+        @switch (_currentStep)
+        {
+            case WizardStep.CatInfo:
+                <section class="subpage_main_info">
+                    <div class="subpage_description advertisement_element advertisement_element_warning">
+                        <p>
+                            W tym kroku dodajesz podstawowe informacje o kocie. Po zapisaniu, będziesz mógł dodać zdjęcia i utworzyć ogłoszenie.
+                        </p>
+                    </div>
+                </section>
+                <section class="subpage_form_container">
+                    <EditForm EditContext="_editContext" OnSubmit="HandleCreateCat" class="subpage_form">
+                        <DataAnnotationsValidator />
+
+                        <div class="login_form_tile">
+                            <label for="name">Imie kotka:</label>
+                            <InputText id="name" type="text" @bind-Value="_createCatDto.Name"/>
+                            <ValidationMessage For="@(() => _createCatDto.Name)" />
                         </div>
-                        <div class="radio_item">
-                            <InputRadio Value="false" id="r2"/> <label for="r2">Nie</label>
+                        <div class="login_form_tile">
+                            <label>Czy kot jest już wysterylizowany/wykastrowany:</label>
+                            <InputRadioGroup @bind-Value="_createCatDto.IsCastrated">
+                                <div class="radio_item">
+                                    <InputRadio Value="true" id="r1"/> <label for="r1">Tak</label>
+                                </div>
+                                <div class="radio_item">
+                                    <InputRadio Value="false" id="r2"/> <label for="r2">Nie</label>
+                                </div>
+                            </InputRadioGroup>
                         </div>
-                    </InputRadioGroup>
-                </div>
-                <div class="login_form_tile">
-                    <label for="healthStatus">Stan zdrowia:</label>
-                    <InputSelect id="healthStatus" @bind-Value="_createCatDto.HealthStatus">
-                        <option value="">Kliknij by wybrać stan zdrowia</option>
-                        @foreach (KeyValuePair<string, (string text, string className)> status in Dictionaries.HealthStatusDictionary)
+                        <div class="login_form_tile">
+                            <label for="healthStatus">Stan zdrowia:</label>
+                            <InputSelect id="healthStatus" @bind-Value="_createCatDto.HealthStatus">
+                                <option value="">Kliknij by wybrać stan zdrowia</option>
+                                @foreach (KeyValuePair<string, (string text, string className)> status in Dictionaries.HealthStatusDictionary)
+                                {
+                                    <option value="@status.Key">@status.Value.text</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => _createCatDto.HealthStatus)" />
+                        </div>
+                        <div class="login_form_tile">
+                            <label for="medicalHelp">Pilność pomocy weterynaryjnej:</label>
+                            <InputSelect id="medicalHelp" @bind-Value="_createCatDto.MedicalHelpUrgency">
+                                <option value="">Kliknij by wybrać pilność wizyty u weterynarza</option>
+                                @foreach (KeyValuePair<string, (string text, string className)> urgency in Dictionaries.MedicalHelpUrgencyDictionary)
+                                {
+                                    <option value="@urgency.Key">@urgency.Value.text</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => _createCatDto.MedicalHelpUrgency)" />
+                        </div>
+                        <div class="login_form_tile">
+                            <label for="ageCategory">Kategoria wiekowa:</label>
+                            <InputSelect id="ageCategory" @bind-Value="_createCatDto.AgeCategory">
+                                <option value="">Kliknij by wybrać wiek</option>
+                                @foreach (KeyValuePair<string, (string text, string className)> age in Dictionaries.AgeCategoryDictionary)
+                                {
+                                    <option value="@age.Key">@age.Value.text</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => _createCatDto.AgeCategory)" />
+                        </div>
+                        <div class="login_form_tile">
+                            <label for="behaviour">Zachowanie względem ludzi:</label>
+                            <InputSelect id="behaviour" @bind-Value="_createCatDto.Behavior">
+                                <option value="">Kliknij by wybrać zachowanie</option>
+                                @foreach (KeyValuePair<string, (string text, string className)> age in Dictionaries.BehaviourDictionary)
+                                {
+                                    <option value="@age.Key">@age.Value.text</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => _createCatDto.Behavior)" />
+                        </div>
+                        <div class="login_form_tile span2">
+                            <label for="additionalRequirements">Opis kota, dodatkowe wymagania:</label>
+                            <InputTextArea id="additionalRequirements" @bind-Value="_createCatDto.AdditionalRequirements" rows="4"/>
+                            <ValidationMessage For="@(() => _createCatDto.AdditionalRequirements)" />
+                        </div>
+                        <div class="login_form_tile_buttons">
+                            <button class="default_btn btn_green" type="submit" disabled="@_isProcessing">
+                                @if (_isProcessing)
+                                {
+                                    <span>Dodajemy twojego kotka, daj nam chwile...</span>
+                                }
+                                else
+                                {
+                                    <span>Zapisz i przejdź dalej</span>
+                                }
+                            </button>
+                        </div>
+                    </EditForm>
+                </section>
+                break;
+
+            case WizardStep.MainPhoto:
+                <section class="subpage_main_info">
+                    <div class="subpage_description advertisement_element">
+                        <h3>Główne zdjęcie kota</h3>
+                        <p>
+                            Dodaj lub zaktualizuj główne zdjęcie dla Twojego kota. To zdjęcie będzie widoczne jako główne zdjęcie kota w ogłoszeniu.
+                        </p>
+                    </div>
+
+                    <div class="subpage_description advertisement_element advertisement_element_warning">
+                        <p>
+                            <strong>Ważne:</strong> Miniaturka jest wymagana, aby kot był widoczny poprawnie.
+                            Bez niej kot będzie miał domyślne zdjęcie zastępcze.
+                        </p>
+                    </div>
+
+                    <div class="subpage_form_container">
+                        <div class="subpage_form">
+                            @if (_hasThumbnail)
+                            {
+                                <div class="login_form_tile">
+                                    <label>Obecna miniaturka:</label>
+                                    <div class="thumbnail-preview">
+                                        <img src="@GetCurrentThumbnailUrl()" alt="Obecna miniaturka" style="max-width: 300px; max-height: 300px;" />
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="login_form_tile">
+                                <label for="mainPhoto">Wybierz zdjęcie główne:</label>
+                                <InputFile id="mainPhoto" OnChange="OnMainPhotoSelected" accept=".jpg,.jpeg,.png,.webp" />
+                                @if (!string.IsNullOrEmpty(_mainPhotoError))
+                                {
+                                    <div class="validation-message">@_mainPhotoError</div>
+                                }
+                            </div>
+
+                            @if (_mainPhotoPreviewUrl != null)
+                            {
+                                <div class="login_form_tile">
+                                    <label>Podgląd nowej miniaturki:</label>
+                                    <div class="thumbnail-preview">
+                                        <img src="@_mainPhotoPreviewUrl" alt="Podgląd miniaturki" style="max-width: 300px; max-height: 300px;" />
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="login_form_tile_buttons">
+                                <button type="button" class="default_btn" @onclick="async () => await NavigateToStepAsync(WizardStep.CatInfo)">
+                                    Wróć
+                                </button>
+
+                                @if (_mainPhotoFileData == null)
+                                {
+                                    <!-- Gdy nie ma wybranego zdjęcia, pokazujemy tylko opcję pominięcia -->
+                                    <button type="button" class="default_btn" @onclick="async () => await NavigateToStepAsync(WizardStep.Gallery)">
+                                        Pomiń ten krok
+                                    </button>
+                                }
+                                else
+                                {
+                                    <!-- Gdy zdjęcie jest wybrane, pokazujemy tylko przycisk zapisu -->
+                                    <button type="button" class="default_btn btn_green" @onclick="HandleUploadMainPhoto" disabled="@_isProcessing">
+                                        @if (_isProcessing)
+                                        {
+                                            <span>Zapisujemy zdjęcie...</span>
+                                        }
+                                        else
+                                        {
+                                            <span>Zapisz i przejdź dalej</span>
+                                        }
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                break;
+
+            case WizardStep.Gallery:
+                <section class="subpage_main_info">
+                    <div class="subpage_description advertisement_element">
+                        <h3>Galeria zdjęć kota</h3>
+                        <p>
+                            Zdjęcia w galerii pomogą potencjalnym opiekunom lepiej poznać kota.
+                            Im więcej zdjęć, tym większa szansa na znalezienie domu.
+                        </p>
+                    </div>
+
+                    <div class="subpage_form_container">
+                        <div class="subpage_form">
+                            <div class="login_form_tile">
+                                <label for="galleryPhotos">Wybierz zdjęcia do dodania:</label>
+                                <InputFile id="galleryPhotos" @key="_inputFileKey" OnChange="OnGalleryPhotosSelected" accept=".jpg,.jpeg,.png,.webp" multiple />
+                                @if (!string.IsNullOrEmpty(_galleryError))
+                                {
+                                    <div class="validation-message">@_galleryError</div>
+                                }
+                            </div>
+
+                            <div class="login_form_tile_buttons">
+                                <button type="button" class="default_btn" @onclick="async () => await NavigateToStepAsync(WizardStep.MainPhoto)">
+                                    Wróć
+                                </button>
+                                <button type="button" class="default_btn @(_galleryImages.Any() ? "btn_green" : "")" @onclick="async () => await NavigateToStepAsync(WizardStep.Advertisement)">
+                                    @if (_isUploading)
+                                    {
+                                        <!-- Pokazujemy informację o przesyłaniu -->
+                                        <div class="upload-status">
+                                            <span>Przesyłanie zdjęć...</span>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span>
+                                            Przejdź dalej @(_galleryImages.Any() ? "" : "(bez zdjęć)")
+                                        </span>
+                                    }
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="subpage_description advertisement_element manage_gallery_container">
+                        <h3>Aktualne zdjęcia w galerii</h3>
+                        @if (!_galleryImages.Any())
                         {
-                            <option value="@status.Key">@status.Value.text</option>
-                        }
-                    </InputSelect>
-                    <ValidationMessage For="@(() => _createCatDto.HealthStatus)" />
-                </div>
-                <div class="login_form_tile">
-                    <label for="medicalHelp">Pilność pomocy weterynaryjnej:</label>
-                    <InputSelect id="medicalHelp" @bind-Value="_createCatDto.MedicalHelpUrgency">
-                        <option value="">Kliknij by wybrać pilność wizyty u weterynarza</option>
-                        @foreach (KeyValuePair<string, (string text, string className)> urgency in Dictionaries.MedicalHelpUrgencyDictionary)
-                        {
-                            <option value="@urgency.Key">@urgency.Value.text</option>
-                        }
-                    </InputSelect>
-                    <ValidationMessage For="@(() => _createCatDto.MedicalHelpUrgency)" />
-                </div>
-                <div class="login_form_tile">
-                    <label for="ageCategory">Kategoria wiekowa:</label>
-                    <InputSelect id="ageCategory" @bind-Value="_createCatDto.AgeCategory">
-                        <option value="">Kliknij by wybrać wiek</option>
-                        @foreach (KeyValuePair<string, (string text, string className)> age in Dictionaries.AgeCategoryDictionary)
-                        {
-                            <option value="@age.Key">@age.Value.text</option>
-                        }
-                    </InputSelect>
-                    <ValidationMessage For="@(() => _createCatDto.AgeCategory)" />
-                </div>
-                <div class="login_form_tile">
-                    <label for="behaviour">Zachowanie względem ludzi:</label>
-                    <InputSelect id="behaviour" @bind-Value="_createCatDto.Behavior">
-                        <option value="">Kliknij by wybrać zachowanie</option>
-                        @foreach (KeyValuePair<string, (string text, string className)> age in Dictionaries.BehaviourDictionary)
-                        {
-                            <option value="@age.Key">@age.Value.text</option>
-                        }
-                    </InputSelect>
-                    <ValidationMessage For="@(() => _createCatDto.Behavior)" />
-                </div>
-                <div class="login_form_tile">
-                    <label for="mainPhoto">Główne zdjęcie kota:</label>
-                    <InputFile id="mainPhoto" OnChange="OnMainPhotoSelected" accept=".jpg,.jpeg,.png,.webp"/>
-                    @if (!string.IsNullOrEmpty(_mainPhotoError))
-                    {
-                        <div class="validation-message">@_mainPhotoError</div>
-                    }
-                </div>
-                <div class="login_form_tile">
-                    <label for="gallery">Galeria zdjęć kota:</label>
-                    <InputFile id="gallery" OnChange="OnGalleryPhotosSelected" accept=".jpg,.jpeg,.png,.webp" multiple/>
-                    @if (!string.IsNullOrEmpty(_galleryError))
-                    {
-                        <div class="validation-message">@_galleryError</div>
-                    }
-                </div>
-                <div class="login_form_tile span2">
-                    <label for="additionalRequirements">Opis kota, dodatkowe wymagania:</label>
-                    <InputTextArea id="additionalRequirements" @bind-Value="_createCatDto.AdditionalRequirements" rows="4"/>
-                    <ValidationMessage For="@(() => _createCatDto.AdditionalRequirements)" />
-                </div>
-                <div class="login_form_tile_buttons">
-                    <button class="default_btn btn_green" type="submit" disabled="@_isProcessing">
-                        @if (_isProcessing)
-                        {
-                            <span>Dodajemy twojego kotka, daj nam chwile...</span>
+                            <p>Galeria jest pusta. Dodaj zdjęcia używając formularza powyżej.</p>
                         }
                         else
                         {
-                            <span>Zatwierdź dane nowego kotka</span>
+                            <div class="manage_gallery_grid">
+                                @foreach (PictureResponse image in _galleryImages)
+                                {
+                                    <div class="manage_gallery_grid_tile">
+                                        <div class="manage_gallery_grid_tile_wrapper">
+                                            <img src="@GetGalleryImageUrl(image.FilenameWithExtension)" alt="Zdjęcie kota" class="manage_gallery_grid_tile_image">
+                                        </div>
+                                        <div class="manage_gallery_grid_tile_buttons">
+                                            <button type="button" class="default_btn btn_red" @onclick="() => DeleteGalleryImage(image.FilenameWithExtension)" disabled="@(_isDeleting)">
+                                                @if (_isDeleting && _currentlyDeletingImage == image.FilenameWithExtension)
+                                                {
+                                                    <span>Usuwanie...</span>
+                                                }
+                                                else
+                                                {
+                                                    <span>Usuń</span>
+                                                }
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
                         }
-                    </button>
-                    <a href="/user/cats/create" class="default_btn btn_red">Anuluj dodawanie kota</a>
-                </div>
-            </EditForm>
-        </section>
-    </article>
-    <aside class="subpage_sidebar">
+                    </div>
+                </section>
+                break;
 
-    </aside>
+            case WizardStep.Advertisement:
+                <section class="subpage_main_info">
+                    <div class="subpage_description advertisement_element">
+                        <h3>Ogłoszenie dla kota</h3>
+                        <p>
+                            Możesz utworzyć nowe ogłoszenie dla tego kota lub dodać go do istniejącego ogłoszenia.
+                        </p>
+                    </div>
+
+                    <div class="subpage_form_container">
+                        <div class="subpage_form">
+                            <div class="login_form_tile span2">
+                                <h4>Wybierz opcję:</h4>
+                                <div class="cat_advertisement_options">
+                                    <div class="cat_advertisement_option @(_advertisementOption == AdvertisementOption.CreateNew ? "active" : "")"
+                                         @onclick="() => _advertisementOption = AdvertisementOption.CreateNew">
+                                        <div class="cat_advertisement_option_icon">
+                                            <i class="fas fa-plus-circle"></i>
+                                        </div>
+                                        <div class="cat_advertisement_option_content">
+                                            <h5>Utwórz nowe ogłoszenie</h5>
+                                            <p>Utworzenie nowego ogłoszenia z tym kotem</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="cat_advertisement_option @(_advertisementOption == AdvertisementOption.AddToExisting ? "active" : "")"
+                                         @onclick="() => _advertisementOption = AdvertisementOption.AddToExisting">
+                                        <div class="cat_advertisement_option_icon">
+                                            <i class="fas fa-clipboard-list"></i>
+                                        </div>
+                                        <div class="cat_advertisement_option_content">
+                                            <h5>Dodaj do istniejącego ogłoszenia</h5>
+                                            <p>Dodaj kota do istniejącego ogłoszenia z listy</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="cat_advertisement_option @(_advertisementOption == AdvertisementOption.Later ? "active" : "")"
+                                         @onclick="() => _advertisementOption = AdvertisementOption.Later">
+                                        <div class="cat_advertisement_option_icon">
+                                            <i class="fas fa-clock"></i>
+                                        </div>
+                                        <div class="cat_advertisement_option_content">
+                                            <h5>Utworzę ogłoszenie później</h5>
+                                            <p>Kot będzie dostępny na liście twoich kotów, ale nie w ogłoszeniu</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @if (_advertisementOption == AdvertisementOption.AddToExisting)
+                            {
+                                <div class="login_form_tile span2">
+                                    <label for="existingAdvertisement">Wybierz ogłoszenie:</label>
+                                    <select id="existingAdvertisement" @bind="_selectedAdvertisementId">
+                                        <option value="">Wybierz ogłoszenie</option>
+                                        @foreach (var ad in _availableAdvertisements)
+                                        {
+                                            <option value="@ad.Id">@ad.Title</option>
+                                        }
+                                    </select>
+                                    @if (_availableAdvertisements.Count == 0)
+                                    {
+                                        <div class="validation-message">Nie masz dostępnych ogłoszeń. Utwórz nowe lub wybierz inną opcję.</div>
+                                    }
+                                </div>
+                            }
+
+                            <div class="login_form_tile_buttons">
+                                <button type="button" class="default_btn" @onclick="async () => await NavigateToStepAsync(WizardStep.Gallery)">
+                                    Wróć
+                                </button>
+                                <button type="button" class="default_btn btn_green" @onclick="HandleAdvertisementOption">
+                                    @if (_advertisementOption == AdvertisementOption.CreateNew)
+                                    {
+                                        <span>Utwórz nowe ogłoszenie</span>
+                                    }
+                                    else if (_advertisementOption == AdvertisementOption.AddToExisting)
+                                    {
+                                        <span>Dodaj do wybranego ogłoszenia</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Zakończ proces</span>
+                                    }
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                break;
+        }
+    </article>
+    <aside class="subpage_sidebar"></aside>
 </div>
 
-@code{
+<style>
+    .validation-message {
+        color: #721c24;
+        margin-top: 5px;
+    }
+
+    .loading-indicator {
+        text-align: center;
+        padding: 20px;
+    }
+
+    .advertisement_wizard_steps {
+        display: flex;
+        border-radius: 5px;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+
+    .advertisement_wizard_steps .step {
+        flex: 1;
+        padding: 12px 10px;
+        text-align: center;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .advertisement_wizard_steps .step:last-child {
+        border-right: none;
+    }
+
+    .advertisement_wizard_steps .step.active {
+        background-color: #28a745;
+        color: white;
+        font-weight: bold;
+    }
+
+    .advertisement_wizard_steps .step.disabled {
+        pointer-events: none;
+        opacity: 0.6;
+    }
+
+    .thumbnail-preview {
+        margin-top: 10px;
+        padding: 5px;
+        border-radius: 4px;
+        display: inline-block;
+    }
+
+    .cat_advertisement_options {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 10px;
+    }
+
+    .cat_advertisement_option {
+        display: flex;
+        padding: 15px;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+
+    .cat_advertisement_option:hover {
+        border-color: #28a745;
+    }
+
+    .cat_advertisement_option.active {
+        border-color: #28a745;
+    }
+
+    .cat_advertisement_option_icon {
+        margin-right: 15px;
+        font-size: 24px;
+        color: #28a745;
+        display: flex;
+        align-items: center;
+    }
+
+    .cat_advertisement_option_content h5 {
+        margin: 0 0 5px 0;
+        font-size: 16px;
+    }
+
+    .cat_advertisement_option_content p {
+        margin: 0;
+        color: #666;
+        font-size: 14px;
+    }
+</style>
+
+@code {
+    // Etapy kreatora
+    private enum WizardStep
+    {
+        CatInfo,
+        MainPhoto,
+        Gallery,
+        Advertisement
+    }
+
+    // Opcje dla ogłoszenia
+    private enum AdvertisementOption
+    {
+        CreateNew,
+        AddToExisting,
+        Later
+    }
+
+    private WizardStep _currentStep = WizardStep.CatInfo;
+    private AdvertisementOption _advertisementOption = AdvertisementOption.CreateNew;
+
+    // Dane z pierwszego etapu (podstawowe informacje o kocie)
     private readonly CreateCatDto _createCatDto = new();
     private bool _isProcessing;
-    private IBrowserFile? _mainPhoto;
-    private List<IBrowserFile> _galleryPhotos = [];
+    private CatHateoasResponse? _createdCatResponse;
     private Link _createCatLink = null!;
-    private ValidationMessageStore? _messageStore;
     private EditContext? _editContext;
+    private ValidationMessageStore? _messageStore;
+
+    // Dane dla etapu zdjęcia głównego
+    private bool _hasThumbnail;
+    private IBrowserFile? _mainPhoto;
     private string? _mainPhotoError;
+    private string? _mainPhotoPreviewUrl;
+    private byte[]? _mainPhotoFileData;
+    private string? _mainPhotoFileName;
+    private string? _mainPhotoContentType;
+
+    // Dane dla etapu galerii
+    private List<IBrowserFile> _selectedGalleryFiles = [];
+    private List<PictureResponse> _galleryImages = [];
     private string? _galleryError;
+    private bool _isUploading;
+    private bool _isDeleting;
+    private string? _currentlyDeletingImage;
+    private int _inputFileKey;
+
+    // Dane dla etapu ogłoszenia
+    private List<AdvertisementResponse> _availableAdvertisements = [];
+    private string? _selectedAdvertisementId;
 
     protected override void OnInitialized()
     {
@@ -158,17 +547,17 @@
         }
 
         _createCatLink = createPersonLink;
-        
+
         _editContext = new EditContext(_createCatDto);
         _messageStore = new ValidationMessageStore(_editContext);
         _editContext.OnValidationRequested += HandleValidationRequested;
         base.OnInitialized();
     }
-    
+
     private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs args)
     {
         _messageStore?.Clear();
-    
+
         if (_mainPhoto is not null)
         {
             ValidationResult? mainPhotoValidation = FileValidationService.ValidateImageFile(_mainPhoto, false);
@@ -183,29 +572,40 @@
             }
         }
 
-        if (_galleryPhotos.Any())
-        {
-            foreach (IBrowserFile photo in _galleryPhotos)
-            {
-                ValidationResult? galleryPhotoValidation = FileValidationService.ValidateImageFile(photo, false);
-                if (galleryPhotoValidation == null)
-                {
-                    continue;
-                }
-                _messageStore?.Add(() => _galleryPhotos, galleryPhotoValidation.ErrorMessage!);
-                _galleryError = galleryPhotoValidation.ErrorMessage;
-                break;
-            }
-        }
-    
         StateHasChanged();
     }
 
-    private void OnMainPhotoSelected(InputFileChangeEventArgs e) => _mainPhoto = e.File;
+    private string GetStepTitle()
+    {
+        return _currentStep switch
+        {
+            WizardStep.CatInfo => "Dodaj nowego kotka",
+            WizardStep.MainPhoto => "Dodaj zdjęcie główne kota",
+            WizardStep.Gallery => "Zarządzaj galerią zdjęć kota",
+            WizardStep.Advertisement => "Dodaj kota do ogłoszenia",
+            _ => "Dodaj nowego kotka"
+        };
+    }
 
-    private void OnGalleryPhotosSelected(InputFileChangeEventArgs e) => _galleryPhotos = e.GetMultipleFiles().ToList();
+    private async Task NavigateToStepAsync(WizardStep step)
+    {
+        // Jeśli próbujemy przejść do etapu, który wymaga wcześniejszego utworzenia kota
+        if (step > WizardStep.CatInfo && _createdCatResponse == null)
+        {
+            return;
+        }
 
-    private async Task Handle()
+        _currentStep = step;
+
+        // Jeśli przechodzimy do etapu ogłoszenia, załaduj dostępne ogłoszenia
+        if (step == WizardStep.Advertisement)
+        {
+            await LoadAvailableAdvertisements();
+        }
+    }
+
+    // Obsługa pierwszego etapu - podstawowe informacje o kocie
+    private async Task HandleCreateCat()
     {
         if (_editContext?.Validate() != true)
         {
@@ -213,7 +613,7 @@
         }
 
         _isProcessing = true;
-    
+
         try
         {
             CreateCatRequest createCatRequest = new(
@@ -225,24 +625,11 @@
                 _createCatDto.HealthStatus,
                 _createCatDto.AdditionalRequirements);
 
-            CatHateoasResponse? createCatResponse = 
+            _createdCatResponse =
                 await ApiClient.PostAsync<CreateCatRequest, CatHateoasResponse>(_createCatLink.Href, createCatRequest);
 
-            if (_mainPhoto != null)
-            {
-                Link? uploadThumbnailLink = createCatResponse?.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.UpdateCatThumbnailRel);
-                if (uploadThumbnailLink != null)
-                {
-                    using var content = new MultipartFormDataContent();
-                    using var fileContent = new StreamContent(_mainPhoto.OpenReadStream());
-                    fileContent.Headers.ContentType = new MediaTypeHeaderValue(_mainPhoto.ContentType);
-                    content.Add(fileContent, "thumbnail", _mainPhoto.Name);
-
-                    await ApiClient.PutFileAsync<CatHateoasResponse>(uploadThumbnailLink.Href, content);
-                }
-            }
-
-            NavigationManager.NavigateTo("/user/cats");
+            // Przejdź do następnego etapu
+            await NavigateToStepAsync(WizardStep.MainPhoto);
         }
         catch (Exception)
         {
@@ -256,7 +643,328 @@
             _isProcessing = false;
         }
     }
-    
+
+    // Obsługa etapu zdjęcia głównego (thumbnail)
+    private async Task OnMainPhotoSelected(InputFileChangeEventArgs e)
+    {
+        _mainPhoto = e.File;
+        _mainPhotoError = null;
+
+        // Validate file
+        ValidationResult? validationResult = FileValidationService.ValidateImageFile(_mainPhoto, false);
+        if (validationResult != null)
+        {
+            _mainPhotoError = validationResult.ErrorMessage;
+            return;
+        }
+
+        // Cache the file data immediately
+        try
+        {
+            // Save file details
+            _mainPhotoFileName = _mainPhoto.Name;
+            _mainPhotoContentType = _mainPhoto.ContentType;
+
+            // Read and cache file data
+            await using Stream stream = _mainPhoto.OpenReadStream();
+            _mainPhotoFileData = new byte[_mainPhoto.Size];
+            await stream.ReadAsync(_mainPhotoFileData);
+
+            // Create a preview URL
+            IBrowserFile imageFile = await e.File.RequestImageFileAsync("image/jpeg", 300, 300);
+            byte[] buffer = new byte[imageFile.Size];
+            await imageFile.OpenReadStream().ReadAsync(buffer);
+            string imageDataUrl = $"data:image/jpeg;base64,{Convert.ToBase64String(buffer)}";
+            _mainPhotoPreviewUrl = imageDataUrl;
+        }
+        catch (Exception ex)
+        {
+            _mainPhotoError = $"Błąd podczas tworzenia podglądu: {ex.Message}";
+        }
+    }
+
+    private async Task HandleUploadMainPhoto()
+    {
+        if (_createdCatResponse == null || _mainPhotoFileData == null)
+        {
+            _mainPhotoError = "Brak zdjęcia lub kota do aktualizacji";
+            return;
+        }
+
+        _isProcessing = true;
+
+        try
+        {
+            Link? uploadThumbnailLink = _createdCatResponse.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.UpdateCatThumbnailRel);
+            if (uploadThumbnailLink != null)
+            {
+                using MultipartFormDataContent content = new MultipartFormDataContent();
+                using ByteArrayContent fileContent = new ByteArrayContent(_mainPhotoFileData);
+                fileContent.Headers.ContentType = new MediaTypeHeaderValue(_mainPhotoContentType ?? "image/jpeg");
+                content.Add(fileContent, "thumbnail", _mainPhotoFileName ?? "thumbnail.jpg");
+
+                await ApiClient.PutFileAsync<CatHateoasResponse>(uploadThumbnailLink.Href, content);
+
+                // Oznacz, że kot ma miniaturkę
+                _hasThumbnail = true;
+
+                // Przejdź do następnego etapu
+                await NavigateToStepAsync(WizardStep.Gallery);
+            }
+            else
+            {
+                _mainPhotoError = "Brak uprawnienia do aktualizacji miniaturki kota";
+            }
+        }
+        catch (Exception ex)
+        {
+            _mainPhotoError = $"Błąd podczas aktualizacji miniaturki: {ex.Message}";
+        }
+        finally
+        {
+            _isProcessing = false;
+        }
+    }
+
+    private string GetCurrentThumbnailUrl()
+    {
+        if (_createdCatResponse == null || !_hasThumbnail)
+        {
+            return "/imgs/defaultCat.webp";
+        }
+
+        Link? thumbnailLink = _createdCatResponse.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatThumbnailRel);
+        return thumbnailLink?.Href ?? "/imgs/defaultCat.webp";
+    }
+
+    // Obsługa etapu galerii - zmodyfikowana metoda dla automatycznego uploadu
+    private async Task OnGalleryPhotosSelected(InputFileChangeEventArgs e)
+    {
+        _selectedGalleryFiles = e.GetMultipleFiles().ToList();
+        _galleryError = null;
+
+        // Validate files
+        foreach (IBrowserFile file in _selectedGalleryFiles)
+        {
+            ValidationResult? validationResult = FileValidationService.ValidateImageFile(file);
+            if (validationResult == null)
+            {
+                continue;
+            }
+            _galleryError = validationResult.ErrorMessage;
+            _selectedGalleryFiles.Clear();
+            StateHasChanged();
+            return; // Wyjdź z metody, jeśli walidacja nie przeszła
+        }
+
+        // Automatycznie uruchom upload, jeśli walidacja przeszła pomyślnie
+        if (_selectedGalleryFiles.Count > 0)
+        {
+            await HandleUploadGalleryPhotos();
+        }
+    }
+
+    private async Task HandleUploadGalleryPhotos()
+    {
+        if (_createdCatResponse == null || _selectedGalleryFiles.Count == 0)
+        {
+            return;
+        }
+
+        Link? addToGalleryLink = _createdCatResponse.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.AddPicturesToCatGalleryRel);
+        if (addToGalleryLink == null)
+        {
+            _galleryError = "Brak uprawnienia do dodawania zdjęć do galerii";
+            return;
+        }
+
+        try
+        {
+            _isUploading = true;
+            _galleryError = null;
+            StateHasChanged(); // Dodajemy odświeżenie UI, żeby pokazać status przesyłania
+
+            using MultipartFormDataContent content = new MultipartFormDataContent();
+
+            // Przetwarzamy każdy plik osobno
+            foreach (IBrowserFile file in _selectedGalleryFiles)
+            {
+                // Otwieramy strumień z określonym maksymalnym rozmiarem
+                Stream stream = file.OpenReadStream();
+
+                // Tworzymy bufor o rozmiarze pliku
+                byte[] buffer = new byte[file.Size];
+
+                // Odczytujemy całą zawartość pliku do bufora
+                await stream.ReadExactlyAsync(buffer, 0, buffer.Length);
+
+                // Używamy ByteArrayContent zamiast StreamContent
+                ByteArrayContent fileContent = new ByteArrayContent(buffer);
+                fileContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
+
+                // Dodajemy zawartość do formularza
+                content.Add(fileContent, "galleryFiles", file.Name);
+            }
+
+            // Upload files
+            await ApiClient.PostFileAsync<CatHateoasResponse>(addToGalleryLink.Href, content);
+
+            // Clear selection and reload images
+            _selectedGalleryFiles.Clear();
+            _inputFileKey++;
+            await LoadGalleryImages();
+        }
+        catch (Exception ex)
+        {
+            _galleryError = $"Błąd podczas przesyłania zdjęć: {ex.Message}";
+        }
+        finally
+        {
+            _isUploading = false;
+            StateHasChanged(); // Odświeżamy UI po zakończeniu przesyłania
+        }
+    }
+
+    private async Task LoadGalleryImages()
+    {
+        if (_createdCatResponse == null)
+        {
+            return;
+        }
+
+        Link? getGalleryLink = _createdCatResponse.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatGalleryRel);
+        if (getGalleryLink == null)
+        {
+            return;
+        }
+
+        try
+        {
+            List<PictureResponse>? response = await ApiClient.GetAsync<List<PictureResponse>>(getGalleryLink.Href);
+            _galleryImages = response ?? [];
+        }
+        catch (Exception ex)
+        {
+            _galleryError = $"Błąd podczas ładowania galerii: {ex.Message}";
+        }
+    }
+
+    private string GetGalleryImageUrl(string filename)
+    {
+        if (_createdCatResponse == null || ApiNavigation.Response?.PersonId == null)
+        {
+            return "";
+        }
+
+        Link? getGalleryImageLink = _createdCatResponse.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatGalleryPictureRel);
+        if (getGalleryImageLink == null)
+        {
+            return "";
+        }
+
+        return getGalleryImageLink.Href
+            .Replace("{personId}", ApiNavigation.Response.PersonId.ToString())
+            .Replace("{id}", _createdCatResponse.Id.ToString())
+            .Replace("{filename}", filename);
+    }
+
+    private async Task DeleteGalleryImage(string filename)
+    {
+        if (_createdCatResponse == null || ApiNavigation.Response?.PersonId == null)
+        {
+            return;
+        }
+
+        Link? removeFromGalleryLink = _createdCatResponse.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.RemovePictureFromCatGalleryRel);
+        if (removeFromGalleryLink == null)
+        {
+            return;
+        }
+
+        try
+        {
+            _isDeleting = true;
+            _currentlyDeletingImage = filename;
+
+            string deleteUrl = removeFromGalleryLink.Href
+                .Replace("{personId}", ApiNavigation.Response.PersonId.ToString())
+                .Replace("{id}", _createdCatResponse.Id.ToString())
+                .Replace("{filename}", filename);
+
+            await ApiClient.DeleteAsync(deleteUrl);
+
+            // Reload gallery after deletion
+            await LoadGalleryImages();
+        }
+        catch (Exception ex)
+        {
+            _galleryError = $"Błąd podczas usuwania zdjęcia: {ex.Message}";
+        }
+        finally
+        {
+            _isDeleting = false;
+            _currentlyDeletingImage = null;
+        }
+    }
+
+    // Obsługa etapu ogłoszenia
+    private async Task LoadAvailableAdvertisements()
+    {
+        try
+        {
+            // Pobierz listę ogłoszeń użytkownika, które są aktywne
+            Link? advertisementsLink = ApiNavigation.GetLink(EndpointRels.Advertisement.GetPersonAdvertisementsRel);
+            if (advertisementsLink != null)
+            {
+                PagedList<AdvertisementResponse>? result = await ApiClient.GetAsync<PagedList<AdvertisementResponse>>(advertisementsLink.Href);
+                if (result?.Items != null)
+                {
+                    // Filtruj tylko aktywne ogłoszenia
+                    _availableAdvertisements = result.Items
+                        .Where(a => a.Status is AdvertisementStatus.Active or AdvertisementStatus.ThumbnailNotUploaded)
+                        .ToList();
+                }
+            }
+        }
+        catch (Exception)
+        {
+            // Obsługa błędów
+            _availableAdvertisements = [];
+        }
+    }
+
+    private void HandleAdvertisementOption()
+    {
+        if (_createdCatResponse == null)
+        {
+            return;
+        }
+
+        switch (_advertisementOption)
+        {
+            case AdvertisementOption.CreateNew:
+                // Przekieruj do strony tworzenia ogłoszenia z predefiniowanym kotem
+                NavigationManager.NavigateTo($"/user/advertisements/create?catId={_createdCatResponse.Id}");
+                break;
+
+            case AdvertisementOption.AddToExisting:
+                if (string.IsNullOrEmpty(_selectedAdvertisementId))
+                {
+                    // Brak wybranego ogłoszenia
+                    return;
+                }
+
+                // Przekieruj do strony edycji ogłoszenia
+                NavigationManager.NavigateTo($"/user/advertisements/update/{_selectedAdvertisementId}?addCatId={_createdCatResponse.Id}");
+                break;
+
+            case AdvertisementOption.Later:
+                // Zakończ proces i przekieruj do listy kotów
+                NavigationManager.NavigateTo("/user/cats");
+                break;
+        }
+    }
+
     public void Dispose()
     {
         if (_editContext != null)
@@ -264,7 +972,7 @@
             _editContext.OnValidationRequested -= HandleValidationRequested;
         }
     }
-    
+
     public sealed class CreateCatDto : IValidatableObject
     {
         [Required(ErrorMessage = "Imię kota jest wymagane")]

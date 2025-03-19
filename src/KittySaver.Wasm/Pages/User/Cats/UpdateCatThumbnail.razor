@@ -1,4 +1,4 @@
-﻿@page "/user/cats/manage-thumbnail/{CatId:guid}"
+﻿@page "/user/cats/thumbnail/{Id:guid}"
 @attribute [Authorize]
 @using System.ComponentModel.DataAnnotations
 @using System.Net.Http.Headers
@@ -21,7 +21,7 @@
         <header class="subpage_header">
             <h1>Aktualizacja miniaturki kota</h1>
             <div class="subpage_header_action">
-                <a href="/user/cats/@CatId" class="default_btn btn_red">Anuluj</a>
+                <a href="/user/cats/@Id" class="default_btn btn_red">Anuluj</a>
             </div>
         </header>
 
@@ -123,11 +123,11 @@
 
 @code {
     [Parameter]
-    public Guid CatId { get; set; }
+    public Guid Id { get; set; }
 
     private CatResponse? _cat;
     private bool _isLoading = true;
-    private bool _hasThumbnail = false;
+    private bool _hasThumbnail;
     private IBrowserFile? _thumbnailFile;
     private string? _thumbnailError;
     private string? _thumbnailPreviewUrl;
@@ -162,7 +162,7 @@
                 // Replace any template parameter with the actual ID
                 catUrl = catLink.Href
                     .Replace("{personId}", ApiNavigation.Response?.PersonId.ToString())
-                    .Replace("{id}", CatId.ToString());
+                    .Replace("{id}", Id.ToString());
             }
             else
             {

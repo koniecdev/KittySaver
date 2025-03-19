@@ -412,6 +412,10 @@
     <aside class="subpage_sidebar"></aside>
 </div>
 @code {
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public Guid? CatId { get; set; }
+    
     private int _currentStep = 1;
     private AdvertisementDto _advertisementDto = new();
     private List<CatResponse> _availableCats = [];
@@ -433,6 +437,15 @@
         await base.OnInitializedAsync();
         await LoadUserData();
         await LoadAvailableCats();
+        
+        if (CatId.HasValue)
+        {
+            var catToAdd = _availableCats.FirstOrDefault(c => c.Id == CatId.Value);
+            if (catToAdd != null)
+            {
+                ToggleSelectCat(catToAdd);
+            }
+        }
     }
 
     private async Task LoadUserData()

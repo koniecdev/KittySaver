@@ -71,10 +71,13 @@
             }
             @if (isUpdateCatThumbnailLinkEnabled)
             {
-                <a href="/user/cats/manage-thumbnail/@Cat.Id" class="default_btn">
+                <a href="/user/cats/thumbnail/@Cat.Id" class="default_btn">
                     Zmień główne zdjęcie
                 </a>
             }
+            <a href="/user/cats/gallery/@Cat.Id" class="default_btn">
+                Galeria kota
+            </a>
             @if (isUpdateCatLinkEnabled)
             {
                 <a href="/user/cats/update/@Cat.Id" class="default_btn">
