@@ -7,6 +7,8 @@ using KittySaver.Wasm.Shared.Components;
 using KittySaver.Wasm.Shared.HttpClients;
 using KittySaver.Wasm.Shared.Validation;
 using Microsoft.AspNetCore.Components.Authorization;
+using MudBlazor;
+using MudBlazor.Services;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -18,5 +20,8 @@ builder.Services.AddAuthorizationCore();
 builder.Services.AddApiClient();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddMudServices(config => {
+    config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomRight;
+});
 
 await builder.Build().RunAsync();
