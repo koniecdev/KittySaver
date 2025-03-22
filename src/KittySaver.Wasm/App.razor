@@ -1,4 +1,9 @@
-﻿<CascadingAuthenticationState>
+﻿@using MudBlazor
+<CascadingAuthenticationState>
+    <MudThemeProvider />
+    <MudDialogProvider />
+    <MudDialogProvider />
+    <MudSnackbarProvider />
     <Router AppAssembly="@typeof(App).Assembly">
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">

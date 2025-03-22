@@ -289,6 +289,7 @@ select{
     border-radius: 10px;
     overflow: hidden;
     display: flex;
+    justify-content: center;
 }
 .subpage_cat_image img{
     width: 100%;
@@ -1234,6 +1235,20 @@ button.disabled {
     min-height: 200px;
     font-size: 1.125rem;
 }
+.mud-carousel-item > div{
+    align-items: center;
+}
+.img_wrapper{
+    overflow: hidden;
+    border-radius: 5px;
+    display: grid;
+    cursor: grab;
+}
+.subpage_cat_image .img_wrapper > img{
+    max-height: 280px;
+    pointer-events: none;
+}
+
 @media screen and (max-width: 1600px){
     .subpage_grid{
         grid-template-columns: 200px 1fr 200px;

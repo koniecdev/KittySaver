@@ -1,18 +1,87 @@
 ﻿@using KittySaver.Shared.Hateoas
 @using KittySaver.Shared.Responses
+@using KittySaver.Wasm.Shared.HttpClients
+@using MudBlazor
+@inject IApiClient ApiClient
 
 <div class="advertisement_element subpage_cat_tile">
     <header class="subpage_cat_tile_header">
         <div class="subpage_cat_image_wrapper">
             <div class="subpage_cat_image">
-                @if (Cat.IsThumbnailUploaded)
+                @{
+                    bool hasMultipleImages = (Cat.IsThumbnailUploaded && _galleryImages.Count > 0) || _galleryImages.Count > 1;
+                }
+
+                @if (_isLoadingGallery)
                 {
-                    <img alt="@Cat.Name - uratujkota.pl"
-                         src="@Cat.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatThumbnailRel)?.Href">
+                    <div class="d-flex" style="height:280px">
+                        <MudProgressCircular Color="Color.Primary" Class="mx-auto my-auto" Indeterminate="true" />
+                    </div>
+                }
+                else if (hasMultipleImages)
+                {
+                    <MudCarousel Class="mud-width-full rounded-lg" Style="height:280px;"
+                                 ShowArrows="true"
+                                 ShowBullets="true"
+                                 EnableSwipeGesture="true"
+                                 AutoCycle="false"
+                                 Color="Color.Primary"
+                                 TData="object">
+                        @if (Cat.IsThumbnailUploaded)
+                        {
+                            <MudCarouselItem>
+                                <div class="d-flex justify-center" style="height:100%">
+                                    <div class="img_wrapper">
+                                        <img src="@Cat.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatThumbnailRel)?.Href"
+                                             alt="@Cat.Name - uratujkota.pl"
+                                             style="max-height: 100%; object-fit: contain;"/>
+                                    </div>
+                                </div>
+                            </MudCarouselItem>
+                        }
+
+                        @foreach (var image in _galleryImages)
+                        {
+                            <MudCarouselItem>
+                                <div class="d-flex justify-center" style="height:100%">
+                                    <div class="img_wrapper">
+                                        <img src="@GetGalleryImageUrl(image.FilenameWithExtension)"
+                                             alt="@Cat.Name - zdjęcie z galerii"
+                                             style="max-width: 100%; object-fit: contain;"/>
+                                    </div>
+                                </div>
+                            </MudCarouselItem>
+                        }
+                    </MudCarousel>
                 }
                 else
                 {
-                    <img alt="uratujkota.pl" src="/imgs/defaultCat.webp">
+                    <div class="d-flex justify-center" style="height:280px">
+                        @if (Cat.IsThumbnailUploaded)
+                        {
+                            <div class="img_wrapper">
+                                <img src="@Cat.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatThumbnailRel)?.Href"
+                                     alt="@Cat.Name - uratujkota.pl"
+                                     style="max-width: 100%; object-fit: contain;" />
+                            </div>
+                        }
+                        else if (_galleryImages.Count == 1)
+                        {
+                            <div class="img_wrapper">
+                                <img src="@GetGalleryImageUrl(_galleryImages[0].FilenameWithExtension)"
+                                     alt="@Cat.Name - zdjęcie z galerii"
+                                     style="max-width: 100%; object-fit: contain;" />
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="img_wrapper">
+                                <img src="/imgs/defaultCat.webp"
+                                     alt="uratujkota.pl"
+                                     style="max-width: 100%; object-fit: contain;" />
+                            </div>
+                        }
+                    </div>
                 }
             </div>
         </div>
@@ -96,26 +165,70 @@
 
 @code 
 {
-
-    /// <summary>
-    /// The cat data to display in the tile.
-    /// </summary>
     [Parameter]
     public CatResponse Cat { get; set; } = null!;
 
-    /// <summary>
-    /// Determines if this tile is being used in the cat management view.
-    /// When true, shows advertisement status and management buttons.
-    /// When false, hides these elements (for public advertisement view).
-    /// </summary>
     [Parameter]
     public bool IsManagementView { get; set; }
 
-    [Parameter] public bool IsOnlyEssentialsRequested { get; set; }
+    [Parameter] 
+    public bool IsOnlyEssentialsRequested { get; set; }
+    
+    private bool _isLoadingGallery = true;
+    private List<PictureResponse> _galleryImages = [];
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadGalleryImages();
+        await base.OnInitializedAsync();
+    }
+    
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadGalleryImages();
+        await base.OnParametersSetAsync();
+    }
+    
+    private async Task LoadGalleryImages()
+    {
+        try
+        {
+            _isLoadingGallery = true;
+            
+            Link? galleryLink = Cat.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatGalleryRel);
+            
+            if (galleryLink != null)
+            {
+                var response = await ApiClient.GetAsync<List<PictureResponse>>(galleryLink.Href);
+                _galleryImages = response ?? [];
+            }
+        }
+        catch (Exception)
+        {
+            // Silently handle errors - will show default image if needed
+            _galleryImages = [];
+        }
+        finally
+        {
+            _isLoadingGallery = false;
+            StateHasChanged();
+        }
+    }
+    
+    private string GetGalleryImageUrl(string filename)
+    {
+        Link? galleryImageLink = Cat.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatGalleryPictureRel);
+        if (galleryImageLink is null)
+        {
+            return "";
+        }
+        
+        return galleryImageLink.Href
+            .Replace("{personId}", Cat.PersonId.ToString())
+            .Replace("{id}", Cat.Id.ToString())
+            .Replace("{filename}", filename);
+    }
 
-    /// <summary>
-    /// Tłumaczy status zdrowia kota bez powtarzania słowa "kot"
-    /// </summary>
     private string TranslateHealthStatus(string status)
     {
         return status.ToLower() switch
@@ -129,9 +242,6 @@
         };
     }
 
-    /// <summary>
-    /// Tłumaczy kategorię wiekową kota bez powtarzania słowa "kot"
-    /// </summary>
     private string TranslateAgeCategory(string ageCategory)
     {
         return ageCategory.ToLower() switch
@@ -143,9 +253,6 @@
         };
     }
 
-    /// <summary>
-    /// Tłumaczy informację o potrzebie pomocy weterynaryjnej bez powtarzania słowa "kot"
-    /// </summary>
     private string TranslateMedicalUrgency(string urgency)
     {
         return urgency.ToLower() switch
