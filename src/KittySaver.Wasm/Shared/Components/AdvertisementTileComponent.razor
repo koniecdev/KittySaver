@@ -69,21 +69,8 @@
         <div class="subpage_cat_actions">
             @{
                 bool isUpdateAdvertisementLinkEnabled = Advertisement.Links.Any(x => x.Rel == EndpointRels.Advertisement.UpdateAdvertisementRel);
-                bool isUpdateAdvertisementThumbnailLinkEnabled = Advertisement.Links.Any(x => x.Rel == EndpointRels.Advertisement.UpdateAdvertisementThumbnailRel);
                 bool isDeleteAdvertisementLinkEnabled = Advertisement.Links.Any(x => x.Rel == EndpointRels.Advertisement.DeleteAdvertisementRel);
                 bool isCloseAdvertisementLinkEnabled = Advertisement.Links.Any(x => x.Rel == EndpointRels.Advertisement.CloseAdvertisementRel);
-            }
-            @if (isUpdateAdvertisementThumbnailLinkEnabled)
-            {
-                <a href="/user/advertisements/manage-thumbnail/@Advertisement.Id" class="default_btn @(Advertisement.Status is AdvertisementStatus.ThumbnailNotUploaded ? "btn_green" : "")">
-                    @(Advertisement.Status is AdvertisementStatus.ThumbnailNotUploaded ? "Dodaj główne zdjęcie" : "Zmień główne zdjęcie")
-                </a>
-            }
-            @if (isCloseAdvertisementLinkEnabled)
-            {
-                <a href="/user/advertisements/close/@Advertisement.Id" class="default_btn">
-                    Zakończ ogłoszenie
-                </a>
             }
             @if (isUpdateAdvertisementLinkEnabled)
             {
@@ -95,6 +82,12 @@
             {
                 <a href="/user/advertisements/delete/@Advertisement.Id" class="default_btn btn_red">
                     Usuń ogłoszenie
+                </a>
+            }
+            @if (isCloseAdvertisementLinkEnabled)
+            {
+                <a href="/user/advertisements/close/@Advertisement.Id" class="default_btn">
+                    Zakończ ogłoszenie
                 </a>
             }
         </div>

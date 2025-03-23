@@ -1,17 +1,20 @@
 ﻿@page "/user/advertisements/update/{Id:guid}"
 @attribute [Authorize]
 @using System.ComponentModel.DataAnnotations
+@using System.Net.Http.Headers
 @using KittySaver.Shared.Hateoas
 @using KittySaver.Shared.Pagination
 @using KittySaver.Shared.Requests
 @using KittySaver.Shared.Responses
 @using KittySaver.Wasm.Shared
 @using KittySaver.Wasm.Shared.HttpClients
+@using KittySaver.Wasm.Shared.Validation
 @using Microsoft.AspNetCore.Authorization
 @using KittySaver.Wasm.Shared.Components
 @inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
 @inject IApiClient MainApiClient
 @inject NavigationManager NavigationManager
+@inject IFileValidationService FileValidationService
 
 <PageTitle>Uratujkota.pl - Edytuj ogłoszenie</PageTitle>
 
@@ -36,11 +39,12 @@
                 </div>
             </header>
 
-            <!-- Step indicator - align step naming with create page -->
+            <!-- Wskaźnik postępu - dodajemy nowy etap dla miniaturki -->
             <div class="advertisement_wizard_steps">
-                <div class="step @(_currentStep == 1 ? "active" : "")">1. Wybór kotów</div>
-                <div class="step @(_currentStep == 2 ? "active" : "")">2. Informacje ogłoszenia</div>
-                <div class="step @(_currentStep == 3 ? "active" : "")">3. Podgląd i zapisanie</div>
+                <div class="step @(_currentStep == 1 ? "active" : "")" @onclick="() => GoToStep(1)">1. Wybór kotów</div>
+                <div class="step @(_currentStep == 2 ? "active" : "")" @onclick="() => GoToStep(2)">2. Informacje ogłoszenia</div>
+                <div class="step @(_currentStep == 3 ? "active" : "")" @onclick="() => GoToStep(3)">3. Miniaturka ogłoszenia</div>
+                <div class="step @(_currentStep == 4 ? "active" : "")" @onclick="() => GoToStep(4)">4. Podgląd i zapisanie</div>
             </div>
 
             @if (_currentStep == 1)
@@ -250,7 +254,7 @@
                                     Wróć
                                 </button>
                                 <button type="submit" class="default_btn btn_green">
-                                    Dalej: Podgląd
+                                    Dalej: Miniaturka ogłoszenia
                                 </button>
                             </div>
                         </EditForm>
@@ -259,7 +263,83 @@
             }
             else if (_currentStep == 3)
             {
-                <!-- Step 3: Preview & Submit -->
+                <!-- Step 3: Thumbnail Upload (nowy) -->
+                <section class="subpage_main_info">
+                    <div class="subpage_description advertisement_element">
+                        <h3>Miniaturka ogłoszenia</h3>
+                        <p>
+                            Dodaj lub zaktualizuj główne zdjęcie dla Twojego ogłoszenia. To zdjęcie będzie widoczne na liście ogłoszeń.
+                        </p>
+                    </div>
+
+                    <div class="subpage_description advertisement_element advertisement_element_warning">
+                        <p>
+                            <strong>Ważne:</strong> Miniaturka jest wymagana, aby ogłoszenie było widoczne publicznie.
+                            Bez niej ogłoszenie będzie miało status "Brak wymaganej miniaturki".
+                        </p>
+                    </div>
+
+                    <div class="subpage_form_container">
+                        <div class="subpage_form">
+                            @if (_hasThumbnail)
+                            {
+                                <div class="login_form_tile">
+                                    <label>Obecna miniaturka:</label>
+                                    <div class="thumbnail-preview">
+                                        <img src="@GetCurrentThumbnailUrl()" alt="Obecna miniaturka" style="max-width: 300px; max-height: 300px;" />
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="subpage_description advertisement_element advertisement_element_warning">
+                                    <p>
+                                        <strong>Uwaga:</strong> To ogłoszenie nie ma jeszcze miniaturki.
+                                    </p>
+                                </div>
+                            }
+
+                            <div class="login_form_tile">
+                                <label for="thumbnail">Wybierz nowe zdjęcie miniaturki:</label>
+                                <InputFile id="thumbnail" OnChange="OnThumbnailSelected" accept=".jpg,.jpeg,.png,.webp" />
+                                @if (!string.IsNullOrEmpty(_thumbnailError))
+                                {
+                                    <div class="validation-message">@_thumbnailError</div>
+                                }
+                            </div>
+
+                            @if (_thumbnailPreviewUrl != null)
+                            {
+                                <div class="login_form_tile">
+                                    <label>Podgląd nowej miniaturki:</label>
+                                    <div class="thumbnail-preview">
+                                        <img src="@_thumbnailPreviewUrl" alt="Podgląd miniaturki" style="max-width: 300px; max-height: 300px;" />
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="login_form_tile_buttons">
+                                <button type="button" class="default_btn" @onclick="() => GoToStep(2)">
+                                    Wróć
+                                </button>
+                                <button type="button" class="default_btn btn_green" @onclick="() => GoToStep(4)" disabled="@(_thumbnailFileData == null && !_hasThumbnail)">
+                                    @if (_thumbnailFileData != null)
+                                    {
+                                        <span>Dalej: Podgląd (zmiany zostaną zapisane po zatwierdzeniu)</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Dalej: Podgląd @(!_hasThumbnail ? "(wymagana miniaturka)" : "")</span>
+                                    }
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            }
+            else if (_currentStep == 4)
+            {
+                <!-- Step 4: Preview & Submit -->
                 <section class="subpage_main_info">
                     <div class="subpage_description advertisement_element">
                         <h3>Podgląd ogłoszenia</h3>
@@ -310,6 +390,16 @@
                                         @_advertisementDto.Description
                                     </p>
                                 </div>
+                                
+                                @if (_thumbnailPreviewUrl != null || _hasThumbnail)
+                                {
+                                    <div class="subpage_description advertisement_element">
+                                        <strong>Miniaturka ogłoszenia</strong>
+                                        <div class="thumbnail-preview">
+                                            <img src="@(_thumbnailPreviewUrl ?? GetCurrentThumbnailUrl())" alt="Miniaturka ogłoszenia" style="max-width: 300px; max-height: 300px;" />
+                                        </div>
+                                    </div>
+                                }
                             </section>
 
                             <!-- Display cats in a grid matching the actual page -->
@@ -339,11 +429,18 @@
                     </div>
 
                     <div class="login_form_tile_buttons">
-                        <button type="button" class="default_btn" @onclick="() => GoToStep(2)">
+                        <button type="button" class="default_btn" @onclick="() => GoToStep(3)">
                             Wróć
                         </button>
-                        <button type="button" class="default_btn btn_green" @onclick="HandleSubmit">
-                            Zapisz zmiany
+                        <button type="button" class="default_btn btn_green" @onclick="HandleSubmit" disabled="@_isProcessing">
+                            @if (_isProcessing)
+                            {
+                                <span>Zapisywanie zmian...</span>
+                            }
+                            else
+                            {
+                                <span>Zapisz wszystkie zmiany</span>
+                            }
                         </button>
                     </div>
                 </section>
@@ -353,6 +450,20 @@
     
     <aside class="subpage_sidebar"></aside>
 </div>
+
+<style>
+    .validation-message {
+        color: #721c24;
+        margin-top: 5px;
+    }
+
+    .thumbnail-preview {
+        margin-top: 10px;
+        padding: 5px;
+        border-radius: 4px;
+        display: inline-block;
+    }
+</style>
 
 @code {
     [Parameter]
@@ -371,6 +482,20 @@
     private List<CatResponse> _originalAdvertisementCats = [];
     private bool _showValidationErrors;
     private string _userName = "";
+    private bool _isProcessing;
+    
+    // Dane dla miniaturki ogłoszenia
+    private bool _hasThumbnail;
+    private IBrowserFile? _thumbnailFile;
+    private string? _thumbnailError;
+    private string? _thumbnailPreviewUrl;
+    private byte[]? _thumbnailFileData;
+    private string? _thumbnailFileName;
+    private string? _thumbnailContentType;
+    private string _thumbnailTimestamp = DateTime.Now.Ticks.ToString();
+    
+    // Maximum allowed file size in bytes (5MB)
+    private const long MaxAllowedSize = 5 * 1024 * 1024;
     
     protected override async Task OnInitializedAsync()
     {
@@ -401,6 +526,9 @@
             NavigationManager.NavigateTo("/");
             return;
         }
+        
+        // Sprawdź, czy ogłoszenie ma miniaturkę
+        _hasThumbnail = _advertisement.Status != AdvertisementStatus.ThumbnailNotUploaded;
         
         // Load user info for the preview
         Link? personLink = ApiNavigation.GetLink(EndpointRels.Person.GetPersonRel);
@@ -525,6 +653,9 @@
                        !string.IsNullOrWhiteSpace(_advertisementDto.PickupAddressCountry) &&
                        !string.IsNullOrWhiteSpace(_advertisementDto.PickupAddressZipCode) &&
                        !string.IsNullOrWhiteSpace(_advertisementDto.PickupAddressCity);
+            case 3:
+                // Validate thumbnail - można przejść dalej bez wybranej nowej miniaturki, jeśli już istnieje
+                return _hasThumbnail || _thumbnailFileData != null;
             default:
                 return true;
         }
@@ -557,9 +688,64 @@
         return "/imgs/defaultCat.webp";
     }
     
+    // Obsługa miniaturki ogłoszenia
+    private async Task OnThumbnailSelected(InputFileChangeEventArgs e)
+    {
+        _thumbnailFile = e.File;
+        _thumbnailError = null;
+
+        // Validate file
+        ValidationResult? validationResult = FileValidationService.ValidateImageFile(_thumbnailFile);
+        if (validationResult != null)
+        {
+            _thumbnailError = validationResult.ErrorMessage;
+            return;
+        }
+
+        // Cache the file data immediately
+        try
+        {
+            // Save file details
+            _thumbnailFileName = _thumbnailFile.Name;
+            _thumbnailContentType = _thumbnailFile.ContentType;
+            
+            // Read and cache file data
+            await using var stream = _thumbnailFile.OpenReadStream(MaxAllowedSize);
+            _thumbnailFileData = new byte[_thumbnailFile.Size];
+            await stream.ReadAsync(_thumbnailFileData);
+
+            // Create a preview URL
+            var imageFile = await e.File.RequestImageFileAsync("image/jpeg", 300, 300);
+            var buffer = new byte[imageFile.Size];
+            await imageFile.OpenReadStream().ReadAsync(buffer);
+            var imageDataUrl = $"data:image/jpeg;base64,{Convert.ToBase64String(buffer)}";
+            _thumbnailPreviewUrl = imageDataUrl;
+        }
+        catch (Exception ex)
+        {
+            _thumbnailError = $"Błąd podczas tworzenia podglądu: {ex.Message}";
+        }
+    }
+    
+    private string GetCurrentThumbnailUrl()
+    {
+        if (_advertisement == null || _advertisement.Status is AdvertisementStatus.ThumbnailNotUploaded)
+        {
+            return "/imgs/defaultAd.webp";
+        }
+        
+        var thumbnailLink = _advertisement.Links.FirstOrDefault(x => x.Rel == EndpointRels.Advertisement.GetAdvertisementThumbnailRel);
+        string url = thumbnailLink?.Href ?? "/imgs/defaultAd.webp";
+        
+        // Dodaj parametr zapytania z timestamp, aby wymusić odświeżenie obrazu
+        return url + (url.Contains("?") ? "&" : "?") + "t=" + _thumbnailTimestamp;
+    }
+    
     private async Task HandleSubmit()
     {
         if (_advertisement == null) return;
+        
+        _isProcessing = true;
         
         try
         {
@@ -585,7 +771,25 @@
                 
                 if (result != null)
                 {
-                    // Step 2: Update cat assignments if they've changed
+                    // Step 2: Update thumbnail if needed
+                    if (_thumbnailFileData != null && !string.IsNullOrEmpty(_thumbnailFileName))
+                    {
+                        Link? thumbnailLink = result.Links.FirstOrDefault(l => l.Rel == EndpointRels.Advertisement.UpdateAdvertisementThumbnailRel);
+                        if (thumbnailLink != null)
+                        {
+                            using MultipartFormDataContent content = new();
+                            using ByteArrayContent fileContent = new(_thumbnailFileData);
+                            fileContent.Headers.ContentType = new MediaTypeHeaderValue(_thumbnailContentType ?? "image/jpeg");
+                            content.Add(fileContent, "thumbnail", _thumbnailFileName);
+                            
+                            await MainApiClient.PutFileAsync<AdvertisementHateoasResponse>(thumbnailLink.Href, content);
+                            
+                            // Aktualizuj timestamp po pomyślnym zapisaniu miniaturki
+                            _thumbnailTimestamp = DateTime.Now.Ticks.ToString();
+                        }
+                    }
+                    
+                    // Step 3: Update cat assignments if they've changed
                     if (!_advertisementCats.Select(c => c.Id).SequenceEqual(_originalAdvertisementCats.Select(c => c.Id)))
                     {
                         Link? reassignCatsLink = result.Links.FirstOrDefault(l => l.Rel == EndpointRels.Advertisement.ReassignCatsToAdvertisementRel);
@@ -609,6 +813,10 @@
         {
             // Handle errors
             Console.Error.WriteLine($"Error updating advertisement: {ex.Message}");
+        }
+        finally
+        {
+            _isProcessing = false;
         }
     }
     

@@ -1248,6 +1248,9 @@ button.disabled {
     max-height: 280px;
     pointer-events: none;
 }
+.profile_form h4{
+    grid-column: 1/-1;
+}
 
 @media screen and (max-width: 1600px){
     .subpage_grid{
@@ -1374,6 +1377,9 @@ button.disabled {
     .login_container, .register_container{
         order: 1;
     }
+    .advertisement_wizard_steps{
+        display: grid;
+    }
 }
 @media screen and (max-width: 800px) {
     .filtering_tile{
@@ -1426,6 +1432,9 @@ button.disabled {
         grid-template-columns: 1fr;
     }
     .two_part_label{
+        grid-template-columns: 1fr;
+    }
+    .subpage_cat_actions{
         grid-template-columns: 1fr;
     }
 }

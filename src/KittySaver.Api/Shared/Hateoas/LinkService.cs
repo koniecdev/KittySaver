@@ -365,6 +365,10 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         }
 
         links.Add(Generate(
+            endpointInfo: EndpointNames.GetPerson,
+            routeValues: new { id = personId.Value }));
+        
+        links.Add(Generate(
             endpointInfo: EndpointNames.GetCats,
             routeValues: new { personId = personId.Value }));
         
