@@ -1,6 +1,17 @@
 ﻿@page "/user/profile"
 @attribute [Authorize]
+@using System.ComponentModel.DataAnnotations
+@using KittySaver.Shared.Hateoas
+@using KittySaver.Shared.Pagination
+@using KittySaver.Shared.Requests
+@using KittySaver.Shared.Responses
+@using KittySaver.Wasm.Shared.HttpClients
 @using Microsoft.AspNetCore.Authorization
+@inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
+@inject IApiClient ApiClient
+@inject NavigationManager NavigationManager
+@inject ILocalStorageService LocalStorage
+
 <PageTitle>
     Uratujkota.pl - Twój profil
 </PageTitle>
@@ -13,15 +24,639 @@
         <header class="subpage_header">
             <h1>Twój profil</h1>
         </header>
-        <section class="subpage_main_info">
+
+        @if (_isLoading)
+        {
+            <div class="loading-indicator">
+                <p>Ładowanie danych profilu...</p>
+            </div>
+        }
+        else if (_person == null)
+        {
             <div class="subpage_description advertisement_element advertisement_element_warning">
                 <p>
-                    W trosce o Twoje bezpieczeństwo nie musisz podawać ulicy i numeru domu - przekażesz je sam po kontakcie z ogłoszeniobiorcą.
+                    Nie udało się załadować danych profilu. Spróbuj odświeżyć stronę lub zalogować się ponownie.
                 </p>
             </div>
-        </section>
+        }
+        else
+        {
+            <!-- Sekcje profilu z zakładkami -->
+            <div class="profile-tabs">
+                <div class="tab @(_activeTab == ProfileTab.PersonalInfo ? "active" : "")" @onclick="() => SwitchTab(ProfileTab.PersonalInfo)">
+                    Dane osobowe i ustawienia
+                </div>
+                <div class="tab @(_activeTab == ProfileTab.ChangePassword ? "active" : "")" @onclick="() => SwitchTab(ProfileTab.ChangePassword)">
+                    Zmiana hasła
+                </div>
+                <div class="tab @(_activeTab == ProfileTab.Stats ? "active" : "")" @onclick="() => SwitchTab(ProfileTab.Stats)">
+                    Statystyki
+                </div>
+            </div>
+
+            <!-- Zakładka z danymi osobowymi -->
+            @if (_activeTab == ProfileTab.PersonalInfo)
+            {
+                <section class="subpage_main_info">
+                    <div class="subpage_description advertisement_element">
+                        <h3>Twoje dane osobowe</h3>
+                        <p>
+                            Te dane są używane do kontaktu z Tobą przez administratorów serwisu i do ustawień domyślnych ogłoszeń.
+                        </p>
+                    </div>
+                    <div class="subpage_description advertisement_element advertisement_element_warning">
+                        <p>
+                            W trosce o Twoje bezpieczeństwo nie musisz podawać ulicy i numeru domu - przekażesz je sam po kontakcie z ogłoszeniobiorcą.
+                        </p>
+                    </div>
+
+                    <div class="subpage_form_container">
+                        <EditForm Model="_profileDto" OnValidSubmit="HandleUpdateProfile" class="subpage_form profile_form">
+                            <DataAnnotationsValidator />
+
+                            @if (_showValidationErrors)
+                            {
+                                <div class="validation-summary">
+                                    <ValidationSummary />
+                                </div>
+                            }
+
+                            <h4>Dane osobowe</h4>
+
+                            <div class="login_form_tile">
+                                <label for="nickname">Nazwa (pseudonim):</label>
+                                <InputText id="nickname" @bind-Value="_profileDto.Nickname" />
+                                <ValidationMessage For="@(() => _profileDto.Nickname)" />
+                            </div>
+
+                            <div class="login_form_tile">
+                                <label for="email">Adres email:</label>
+                                <InputText id="email" type="email" @bind-Value="_profileDto.Email" />
+                                <ValidationMessage For="@(() => _profileDto.Email)" />
+                                <small>Ten email służy do logowania i kontaktu administracyjnego.</small>
+                            </div>
+
+                            <div class="login_form_tile">
+                                <label for="phoneNumber">Numer telefonu:</label>
+                                <InputText id="phoneNumber" @bind-Value="_profileDto.PhoneNumber" />
+                                <ValidationMessage For="@(() => _profileDto.PhoneNumber)" />
+                                <small>Ten numer telefonu służy tylko do kontaktu administracyjnego.</small>
+                            </div>
+
+                            <h4>Dane kontaktowe do ogłoszeń</h4>
+
+                            <div class="login_form_tile">
+                                <label for="contactEmail">Domyślny kontaktowy adres email:</label>
+                                <InputText id="contactEmail" type="email" @bind-Value="_profileDto.DefaultAdvertisementContactInfoEmail" />
+                                <ValidationMessage For="@(() => _profileDto.DefaultAdvertisementContactInfoEmail)" />
+                                <small>Ten email będzie widoczny w Twoich ogłoszeniach.</small>
+                            </div>
+
+                            <div class="login_form_tile">
+                                <label for="contactPhone">Domyślny kontaktowy numer telefonu:</label>
+                                <InputText id="contactPhone" @bind-Value="_profileDto.DefaultAdvertisementContactInfoPhoneNumber" />
+                                <ValidationMessage For="@(() => _profileDto.DefaultAdvertisementContactInfoPhoneNumber)" />
+                                <small>Ten numer telefonu będzie widoczny w Twoich ogłoszeniach.</small>
+                            </div>
+
+                            <h4>Domyślny adres odbioru kotów</h4>
+
+                            <div class="login_form_tile">
+                                <label for="country">Kraj:</label>
+                                <InputText id="country" @bind-Value="_profileDto.DefaultAdvertisementPickupAddressCountry" />
+                                <ValidationMessage For="@(() => _profileDto.DefaultAdvertisementPickupAddressCountry)" />
+                            </div>
+
+                            <div class="login_form_tile">
+                                <label for="state">Województwo:</label>
+                                <InputSelect id="state" @bind-Value="_profileDto.DefaultAdvertisementPickupAddressState">
+                                    <option value="">Wybierz województwo</option>
+                                    <option value="Dolnośląskie">Dolnośląskie</option>
+                                    <option value="Kujawsko-Pomorskie">Kujawsko-Pomorskie</option>
+                                    <option value="Lubelskie">Lubelskie</option>
+                                    <option value="Lubuskie">Lubuskie</option>
+                                    <option value="Łódzkie">Łódzkie</option>
+                                    <option value="Małopolskie">Małopolskie</option>
+                                    <option value="Mazowieckie">Mazowieckie</option>
+                                    <option value="Opolskie">Opolskie</option>
+                                    <option value="Podkarpackie">Podkarpackie</option>
+                                    <option value="Podlaskie">Podlaskie</option>
+                                    <option value="Pomorskie">Pomorskie</option>
+                                    <option value="Śląskie">Śląskie</option>
+                                    <option value="Świętokrzyskie">Świętokrzyskie</option>
+                                    <option value="Warmińsko-Mazurskie">Warmińsko-Mazurskie</option>
+                                    <option value="Wielkopolskie">Wielkopolskie</option>
+                                    <option value="Zachodniopomorskie">Zachodniopomorskie</option>
+                                </InputSelect>
+                                <ValidationMessage For="@(() => _profileDto.DefaultAdvertisementPickupAddressState)" />
+                            </div>
+
+                            <div class="login_form_tile">
+                                <label for="zipCode">Kod pocztowy:</label>
+                                <InputText id="zipCode" @bind-Value="_profileDto.DefaultAdvertisementPickupAddressZipCode" />
+                                <ValidationMessage For="@(() => _profileDto.DefaultAdvertisementPickupAddressZipCode)" />
+                            </div>
+
+                            <div class="login_form_tile">
+                                <label for="city">Miasto:</label>
+                                <InputText id="city" @bind-Value="_profileDto.DefaultAdvertisementPickupAddressCity" />
+                                <ValidationMessage For="@(() => _profileDto.DefaultAdvertisementPickupAddressCity)" />
+                            </div>
+
+                            <div class="login_form_tile">
+                                <label for="street">Ulica:</label>
+                                <InputText id="street" @bind-Value="_profileDto.DefaultAdvertisementPickupAddressStreet" />
+                                <ValidationMessage For="@(() => _profileDto.DefaultAdvertisementPickupAddressStreet)" />
+                                <small>Opcjonalne - podasz przy osobistym kontakcie z adoptującym</small>
+                            </div>
+
+                            <div class="login_form_tile">
+                                <label for="buildingNumber">Numer budynku:</label>
+                                <InputText id="buildingNumber" @bind-Value="_profileDto.DefaultAdvertisementPickupAddressBuildingNumber" />
+                                <ValidationMessage For="@(() => _profileDto.DefaultAdvertisementPickupAddressBuildingNumber)" />
+                                <small>Opcjonalne - podasz przy osobistym kontakcie z adoptującym</small>
+                            </div>
+
+                            <div class="login_form_tile_buttons">
+                                <button class="default_btn btn_green" type="submit" disabled="@_isProcessing">
+                                    @if (_isProcessing)
+                                    {
+                                        <span>Aktualizowanie danych...</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Zapisz zmiany</span>
+                                    }
+                                </button>
+                            </div>
+                        </EditForm>
+                    </div>
+                </section>
+            }
+            else if (_activeTab == ProfileTab.ChangePassword)
+            {
+                <section class="subpage_main_info">
+                    <div class="subpage_description advertisement_element">
+                        <h3>Zmiana hasła</h3>
+                        <p>
+                            Tutaj możesz zmienić swoje hasło. Dla bezpieczeństwa wymagamy podania aktualnego hasła.
+                        </p>
+                    </div>
+
+                    <div class="subpage_form_container">
+                        <EditForm Model="_changePasswordDto" OnValidSubmit="HandleChangePassword" class="subpage_form">
+                            <DataAnnotationsValidator />
+
+                            @if (_showValidationErrors)
+                            {
+                                <div class="validation-summary">
+                                    <ValidationSummary />
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(_passwordChangeMessage))
+                            {
+                                <div class="subpage_description advertisement_element @(_passwordChangeSuccess ? "" : "advertisement_element_warning")">
+                                    <p>
+                                        @_passwordChangeMessage
+                                    </p>
+                                </div>
+                            }
+
+                            <div class="login_form_tile">
+                                <label for="currentPassword">Aktualne hasło:</label>
+                                <InputText id="currentPassword" type="password" @bind-Value="_changePasswordDto.CurrentPassword" />
+                                <ValidationMessage For="@(() => _changePasswordDto.CurrentPassword)" />
+                            </div>
+
+                            <div class="login_form_tile">
+                                <label for="newPassword">Nowe hasło:</label>
+                                <InputText id="newPassword" type="password" @bind-Value="_changePasswordDto.NewPassword" />
+                                <ValidationMessage For="@(() => _changePasswordDto.NewPassword)" />
+                                <small>Hasło powinno zawierać co najmniej 8 znaków, w tym wielkie i małe litery, cyfry oraz znaki specjalne.</small>
+                            </div>
+
+                            <div class="login_form_tile">
+                                <label for="confirmPassword">Potwierdź nowe hasło:</label>
+                                <InputText id="confirmPassword" type="password" @bind-Value="_changePasswordDto.ConfirmPassword" />
+                                <ValidationMessage For="@(() => _changePasswordDto.ConfirmPassword)" />
+                            </div>
+
+                            <div class="login_form_tile_buttons">
+                                <button class="default_btn btn_green" type="submit" disabled="@_isProcessing">
+                                    @if (_isProcessing)
+                                    {
+                                        <span>Zmiana hasła...</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Zmień hasło</span>
+                                    }
+                                </button>
+                            </div>
+                        </EditForm>
+                    </div>
+                </section>
+            }
+            else if (_activeTab == ProfileTab.Stats)
+            {
+                <section class="subpage_main_info">
+                    <div class="subpage_description advertisement_element">
+                        <h3>Twoje statystyki</h3>
+                        <p>
+                            Tutaj znajdziesz podsumowanie Twojej aktywności w serwisie.
+                        </p>
+                    </div>
+
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <div class="stat-icon">🐱</div>
+                            <div class="stat-value">@_statsCats</div>
+                            <div class="stat-label">Dodanych kotów</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">📢</div>
+                            <div class="stat-value">@_statsActiveAds</div>
+                            <div class="stat-label">Aktywnych ogłoszeń</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">✅</div>
+                            <div class="stat-value">@_statsClosedAds</div>
+                            <div class="stat-label">Zakończonych ogłoszeń</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">📆</div>
+                            <div class="stat-value">@_joinedDate</div>
+                            <div class="stat-label">Data dołączenia</div>
+                        </div>
+                    </div>
+                    
+                    <div class="subpage_description advertisement_element">
+                        <p>
+                            Dziękujemy za Twoją aktywność i pomoc w znajdowaniu domów dla kotów!
+                        </p>
+                    </div>
+                </section>
+            }
+        }
     </article>
     <aside class="subpage_sidebar">
 
     </aside>
 </div>
+
+<style>
+    .profile-tabs {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 20px;
+    }
+    
+    .profile-tabs .tab {
+        padding: 10px 20px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+        background-color: #242424;
+    }
+    
+    .profile-tabs .tab.active {
+        background-color: var(--kitty-green);
+    }
+    
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+        margin: 20px 0;
+    }
+    
+    .stat-card {
+        background-color: #242424;
+        color: #fff;
+        border-radius: 5px;
+        padding: 20px;
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stat-icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .stat-label {
+        color: #fff;
+    }
+    
+    .validation-message {
+        color: #721c24;
+        margin-top: 5px;
+    }
+    
+    .loading-indicator {
+        text-align: center;
+        padding: 20px;
+    }
+</style>
+
+@code {
+    private enum ProfileTab
+    {
+        PersonalInfo,
+        ChangePassword,
+        Stats
+    }
+
+    private ProfileTab _activeTab = ProfileTab.PersonalInfo;
+    private bool _isLoading = true;
+    private bool _isProcessing;
+    private bool _showValidationErrors;
+    private PersonResponse? _person;
+    
+    // Dane dla formularzy
+    private ProfileDto _profileDto = new();
+    private ChangePasswordDto _changePasswordDto = new();
+    
+    // Dane dla statystyk
+    private int _statsCats;
+    private int _statsActiveAds;
+    private int _statsClosedAds;
+    private string _joinedDate = "N/A";
+    
+    // Wiadomość o zmianie hasła
+    private string? _passwordChangeMessage;
+    private bool _passwordChangeSuccess;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await ApiNavigation.RefreshAsync();
+        await LoadPersonData();
+    }
+    
+    private async Task LoadPersonData()
+    {
+        try
+        {
+            _isLoading = true;
+            
+            // Pobierz dane użytkownika
+            Link? personLink = ApiNavigation.GetLink(EndpointRels.Person.GetPersonRel);
+            if (personLink != null)
+            {
+                _person = await ApiClient.GetAsync<PersonResponse>(personLink.Href);
+                
+                if (_person != null)
+                {
+                    // Uzupełnij wszystkie dane formularza
+                    _profileDto = new ProfileDto
+                    {
+                        Nickname = _person.Nickname,
+                        Email = _person.Email,
+                        PhoneNumber = _person.PhoneNumber,
+                        DefaultAdvertisementContactInfoEmail = _person.DefaultAdvertisementsContactInfoEmail,
+                        DefaultAdvertisementContactInfoPhoneNumber = _person.DefaultAdvertisementsContactInfoPhoneNumber,
+                        DefaultAdvertisementPickupAddressCountry = _person.DefaultAdvertisementsPickupAddress.Country,
+                        DefaultAdvertisementPickupAddressState = _person.DefaultAdvertisementsPickupAddress.State,
+                        DefaultAdvertisementPickupAddressZipCode = _person.DefaultAdvertisementsPickupAddress.ZipCode,
+                        DefaultAdvertisementPickupAddressCity = _person.DefaultAdvertisementsPickupAddress.City,
+                        DefaultAdvertisementPickupAddressStreet = _person.DefaultAdvertisementsPickupAddress.Street,
+                        DefaultAdvertisementPickupAddressBuildingNumber = _person.DefaultAdvertisementsPickupAddress.BuildingNumber
+                    };
+                    
+                    // Pobierz statystyki
+                    await LoadStatistics();
+                    
+                    // Ustaw datę dołączenia
+                    _joinedDate = _person.CreatedOn.ToString("dd.MM.yyyy");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error loading person data: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+    
+    private async Task LoadStatistics()
+    {
+        try
+        {
+            // Pobierz liczbę kotów
+            Link? catsLink = ApiNavigation.GetLink(EndpointRels.Cat.GetCatsRel);
+            if (catsLink != null)
+            {
+                var catsResponse = await ApiClient.GetAsync<PagedList<CatResponse>>(catsLink.Href);
+                _statsCats = catsResponse?.Total ?? 0;
+            }
+            
+            // Pobierz liczbę ogłoszeń
+            Link? advertisementsLink = ApiNavigation.GetLink(EndpointRels.Advertisement.GetPersonAdvertisementsRel);
+            if (advertisementsLink != null)
+            {
+                var advertisementsResponse = await ApiClient.GetAsync<PagedList<AdvertisementResponse>>(advertisementsLink.Href);
+                if (advertisementsResponse?.Items != null)
+                {
+                    _statsActiveAds = advertisementsResponse.Items.Count(a => a.Status == AdvertisementStatus.Active);
+                    _statsClosedAds = advertisementsResponse.Items.Count(a => a.Status == AdvertisementStatus.Closed);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error loading statistics: {ex.Message}");
+        }
+    }
+    
+    private void SwitchTab(ProfileTab tab)
+    {
+        _activeTab = tab;
+        _showValidationErrors = false;
+        _passwordChangeMessage = null;
+    }
+    
+    private async Task HandleUpdateProfile()
+    {
+        if (_person == null) return;
+        
+        _isProcessing = true;
+        _showValidationErrors = false;
+        
+        try
+        {
+            // Endpoint do aktualizacji danych osobowych
+            Link? updatePersonLink = _person.Links.FirstOrDefault(x => x.Rel == EndpointRels.Person.UpdatePersonRel);
+            if (updatePersonLink != null)
+            {
+                // Tworzymy żądanie aktualizacji zgodnie z kontraktem
+                UpdatePersonRequest request = new(
+                    Nickname: _profileDto.Nickname,
+                    Email: _profileDto.Email,
+                    PhoneNumber: _profileDto.PhoneNumber,
+                    DefaultAdvertisementPickupAddressCountry: _profileDto.DefaultAdvertisementPickupAddressCountry,
+                    DefaultAdvertisementPickupAddressState: _profileDto.DefaultAdvertisementPickupAddressState,
+                    DefaultAdvertisementPickupAddressZipCode: _profileDto.DefaultAdvertisementPickupAddressZipCode,
+                    DefaultAdvertisementPickupAddressCity: _profileDto.DefaultAdvertisementPickupAddressCity,
+                    DefaultAdvertisementPickupAddressStreet: _profileDto.DefaultAdvertisementPickupAddressStreet,
+                    DefaultAdvertisementPickupAddressBuildingNumber: _profileDto.DefaultAdvertisementPickupAddressBuildingNumber,
+                    DefaultAdvertisementContactInfoEmail: _profileDto.DefaultAdvertisementContactInfoEmail,
+                    DefaultAdvertisementContactInfoPhoneNumber: _profileDto.DefaultAdvertisementContactInfoPhoneNumber
+                );
+                
+                // Wysyłamy żądanie
+                var response = await ApiClient.PutAsync<UpdatePersonRequest, PersonHateoasResponse>(
+                    updatePersonLink.Href, request);
+                
+                if (response != null)
+                {
+                    // Odświeżamy dane
+                    await LoadPersonData();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error updating profile: {ex.Message}");
+            _showValidationErrors = true;
+        }
+        finally
+        {
+            _isProcessing = false;
+            StateHasChanged();
+        }
+    }
+    
+    private async Task HandleChangePassword()
+    {
+        if (_person == null) return;
+        
+        _isProcessing = true;
+        _showValidationErrors = false;
+        _passwordChangeMessage = null;
+        
+        try
+        {
+            // Sprawdź, czy nowe hasło i potwierdzenie hasła są takie same
+            if (_changePasswordDto.NewPassword != _changePasswordDto.ConfirmPassword)
+            {
+                _passwordChangeMessage = "Nowe hasło i potwierdzenie hasła nie są takie same.";
+                _passwordChangeSuccess = false;
+                return;
+            }
+            
+            // Endpoint do zmiany hasła
+            // Link? changePasswordLink = _person.Links.FirstOrDefault(x => x.Rel == EndpointRels.Person.ChangePasswordRel);
+            // if (changePasswordLink != null)
+            // {
+            //     // Tworzymy żądanie zmiany hasła
+            //     ChangePasswordRequest request = new(
+            //         CurrentPassword: _changePasswordDto.CurrentPassword,
+            //         NewPassword: _changePasswordDto.NewPassword
+            //     );
+            //     
+            //     // Wysyłamy żądanie
+            //     var response = await ApiClient.PutAsync<ChangePasswordRequest, PersonHateoasResponse>(
+            //         changePasswordLink.Href, request);
+            //     
+            //     if (response != null)
+            //     {
+            //         // Wyświetl komunikat o sukcesie
+            //         _passwordChangeMessage = "Hasło zostało zmienione pomyślnie.";
+            //         _passwordChangeSuccess = true;
+            //         
+            //         // Wyczyść formularz
+            //         _changePasswordDto = new ChangePasswordDto();
+            //         
+            //         // Potencjalnie wyloguj użytkownika, aby zalogował się ponownie z nowym hasłem
+            //         // await LocalStorage.RemoveItemAsync("token");
+            //         // await LocalStorage.RemoveItemAsync("token_expires");
+            //         // NavigationManager.NavigateTo("/login");
+            //     }
+            // }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error changing password: {ex.Message}");
+            _passwordChangeMessage = "Wystąpił błąd podczas zmiany hasła. Upewnij się, że aktualne hasło jest poprawne.";
+            _passwordChangeSuccess = false;
+            _showValidationErrors = true;
+        }
+        finally
+        {
+            _isProcessing = false;
+            StateHasChanged();
+        }
+    }
+
+    // Klasa DTO dla formularza profilu - zgodna z kontraktem UpdatePersonRequest
+    private class ProfileDto
+    {
+        [Required(ErrorMessage = "Nazwa jest wymagana")]
+        [StringLength(100, ErrorMessage = "Nazwa nie może przekraczać {1} znaków")]
+        public string Nickname { get; set; } = "";
+
+        [Required(ErrorMessage = "Email jest wymagany")]
+        [EmailAddress(ErrorMessage = "Podaj poprawny adres email")]
+        public string Email { get; set; } = "";
+
+        [Required(ErrorMessage = "Numer telefonu jest wymagany")]
+        [Phone(ErrorMessage = "Podaj poprawny numer telefonu")]
+        public string PhoneNumber { get; set; } = "";
+        
+        [Required(ErrorMessage = "Email kontaktowy jest wymagany")]
+        [EmailAddress(ErrorMessage = "Podaj poprawny adres email")]
+        public string DefaultAdvertisementContactInfoEmail { get; set; } = "";
+
+        [Required(ErrorMessage = "Numer telefonu kontaktowego jest wymagany")]
+        [Phone(ErrorMessage = "Podaj poprawny numer telefonu")]
+        public string DefaultAdvertisementContactInfoPhoneNumber { get; set; } = "";
+
+        [Required(ErrorMessage = "Kraj jest wymagany")]
+        public string DefaultAdvertisementPickupAddressCountry { get; set; } = "";
+
+        public string? DefaultAdvertisementPickupAddressState { get; set; }
+
+        [Required(ErrorMessage = "Kod pocztowy jest wymagany")]
+        public string DefaultAdvertisementPickupAddressZipCode { get; set; } = "";
+
+        [Required(ErrorMessage = "Miasto jest wymagane")]
+        public string DefaultAdvertisementPickupAddressCity { get; set; } = "";
+
+        public string? DefaultAdvertisementPickupAddressStreet { get; set; }
+
+        public string? DefaultAdvertisementPickupAddressBuildingNumber { get; set; }
+    }
+
+    private class ChangePasswordDto
+    {
+        [Required(ErrorMessage = "Aktualne hasło jest wymagane")]
+        public string CurrentPassword { get; set; } = "";
+
+        [Required(ErrorMessage = "Nowe hasło jest wymagane")]
+        [StringLength(100, MinimumLength = 8, ErrorMessage = "Hasło musi mieć co najmniej {2} znaków")]
+        public string NewPassword { get; set; } = "";
+
+        [Required(ErrorMessage = "Potwierdzenie hasła jest wymagane")]
+        [Compare("NewPassword", ErrorMessage = "Hasła nie są takie same")]
+        public string ConfirmPassword { get; set; } = "";
+    }
+}

@@ -16,25 +16,25 @@
         <span></span>
     </div>
     <div class="nav_content @(_showNavMenu ? "active" : "")">
-        <a href="/">Ogłoszenia</a>
-        <a href="/mission">Misja</a>
+        <a href="/" @onclick="ToggleNavMenu">Ogłoszenia</a>
+        <a href="/mission" @onclick="ToggleNavMenu">Misja</a>
         <AuthorizeView>
             <Authorized>
-                <a href="/user/cats">Moje koty</a>
-                <a href="/user/advertisements">Moje ogłoszenia</a>
-                <a href="/user/profile">Twój profil</a>
+                <a href="/user/cats" @onclick="ToggleNavMenu">Moje koty</a>
+                <a href="/user/advertisements" @onclick="ToggleNavMenu">Moje ogłoszenia</a>
+                <a href="/user/profile" @onclick="ToggleNavMenu">Twój profil</a>
                 <a class="cp" @onclick="Logout">Wyloguj</a>
             </Authorized>
             <NotAuthorized>
-                <a href="/login">Zaloguj się</a>
-                <a href="/register">Zarejestruj się</a>
+                <a href="/login" @onclick="ToggleNavMenu">Zaloguj się</a>
+                <a href="/register" @onclick="ToggleNavMenu">Zarejestruj się</a>
             </NotAuthorized>
         </AuthorizeView>
     </div>
 </nav>
 
 @code {
-    private bool _showNavMenu = false;
+    private bool _showNavMenu;
 
     private void ToggleNavMenu()
     {
@@ -47,6 +47,7 @@
         await LocalStorage.RemoveItemAsync("token_expires");
         await AuthenticationStateProvider.GetAuthenticationStateAsync();
         await ApiNavigation.RefreshAsync();
+        ToggleNavMenu();
         NavigationManager.NavigateTo("/");
     }
 }

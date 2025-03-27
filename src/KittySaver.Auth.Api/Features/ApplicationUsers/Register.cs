@@ -3,12 +3,17 @@ using KittySaver.Auth.Api.Features.ApplicationUsers.SharedContracts;
 using KittySaver.Auth.Api.Shared.Abstractions;
 using KittySaver.Auth.Api.Shared.Domain.Entites;
 using KittySaver.Auth.Api.Shared.Endpoints;
+using KittySaver.Auth.Api.Shared.Exceptions;
+using KittySaver.Auth.Api.Shared.Infrastructure.Services.Email;
 using KittySaver.Auth.Api.Shared.Persistence;
 using KittySaver.Shared.Requests;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Riok.Mapperly.Abstractions;
+using System.Text;
 
 namespace KittySaver.Auth.Api.Features.ApplicationUsers;
 
@@ -52,13 +57,32 @@ public sealed class Register : IEndpoint
     }
     
     internal sealed class RegisterCommandHandler(
-        UserManager<ApplicationUser> userManager)
+        UserManager<ApplicationUser> userManager,
+        IEmailService emailService,
+        IOptions<EmailSettings> emailSettings)
         : IRequestHandler<RegisterCommand, Guid>
     {
         public async Task<Guid> Handle(RegisterCommand request, CancellationToken cancellationToken)
         {
             ApplicationUser user = request.ToEntity();
-            await userManager.CreateAsync(user, request.Password);
+            IdentityResult result = await userManager.CreateAsync(user, request.Password);
+            
+            if (!result.Succeeded)
+            {
+                string errorMessage = result.Errors.FirstOrDefault()?.Description ?? "User creation failed";
+                throw new BadRequestException("ApplicationUser.Registration.Failed", errorMessage);
+            }
+            
+            // Generuj token potwierdzenia email
+            string token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+            string encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+            
+            // Utwórz link potwierdzający
+            string confirmationLink = $"{emailSettings.Value.WebsiteBaseUrl}/confirm-email?userId={user.Id}&token={encodedToken}";
+            
+            // Wyślij email z potwierdzeniem
+            await emailService.SendEmailConfirmationAsync(user.Email!, confirmationLink);
+            
             return user.Id;
         }
     }

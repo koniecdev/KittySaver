@@ -14,6 +14,7 @@ public static class PersonMapper
             Nickname = entity.Nickname,
             Email = entity.Email,
             PhoneNumber = entity.PhoneNumber,
+            CreatedOn = entity.CreatedOn,
             DefaultAdvertisementsContactInfoEmail = entity.DefaultAdvertisementsContactInfoEmail,
             DefaultAdvertisementsContactInfoPhoneNumber = entity.DefaultAdvertisementsContactInfoPhoneNumber,
             DefaultAdvertisementsPickupAddress = new PersonResponse.AddressDto

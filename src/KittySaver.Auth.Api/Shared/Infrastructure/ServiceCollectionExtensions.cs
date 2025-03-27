@@ -4,6 +4,7 @@ using FluentValidation;
 using KittySaver.Auth.Api.Shared.Behaviours;
 using KittySaver.Auth.Api.Shared.Domain.Entites;
 using KittySaver.Auth.Api.Shared.Infrastructure.Services;
+using KittySaver.Auth.Api.Shared.Infrastructure.Services.Email;
 using KittySaver.Auth.Api.Shared.Persistence;
 using KittySaver.SharedForApi.Auth;
 using Microsoft.AspNetCore.Authentication;
@@ -32,7 +33,22 @@ public static class ServiceCollectionExtensions
             cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
         });
         AddAuth();
-        
+        services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
+        EmailSettings emailSettings = configuration.GetSection("EmailSettings").Get<EmailSettings>()
+            ?? throw new Exception("Missing email settings");
+        services
+            .AddFluentEmail(emailSettings.SenderEmail, emailSettings.SenderName)
+            .AddRazorRenderer()
+            .AddSmtpSender(new System.Net.Mail.SmtpClient
+            {
+                Host = emailSettings.Server,
+                Port = emailSettings.Port,
+                EnableSsl = emailSettings.UseSsl,
+                DeliveryMethod = System.Net.Mail.SmtpDeliveryMethod.Network,
+                UseDefaultCredentials = false,
+                Credentials = new System.Net.NetworkCredential(emailSettings.Username, emailSettings.Password)
+            });
+        services.AddScoped<IEmailService, FluentEmailService>();
         return services;
 
         void AddAuth()
@@ -87,17 +103,35 @@ public static class ServiceCollectionExtensions
             o => o.UseSqlServer(configuration.GetConnectionString("Database")
                                 ?? throw new Exceptions.Database.MissingConnectionStringException()));
         services
-            .AddIdentityCore<ApplicationUser>(x =>
+            .AddIdentityCore<ApplicationUser>(options =>
             {
-                x.Password.RequireNonAlphanumeric = false;
-                x.Password.RequireDigit = true;
-                x.Password.RequiredLength = 8;
-                x.Password.RequireLowercase = true;
-                x.Password.RequireUppercase = true;
-                x.Password.RequiredUniqueChars = 0;
-            }).AddRoles<IdentityRole<Guid>>()
+                // Opcje haseł
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireDigit = true;
+                options.Password.RequiredLength = 8;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequiredUniqueChars = 0;
+            
+                // Opcje blokady konta
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.AllowedForNewUsers = true;
+            
+                // Opcje potwierdzenia emaila
+                options.SignIn.RequireConfirmedEmail = true;
+                options.SignIn.RequireConfirmedPhoneNumber = false;
+                options.SignIn.RequireConfirmedAccount = true;
+            
+                // Opcje użytkownika
+                options.User.RequireUniqueEmail = true;
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+            })
+            .AddRoles<IdentityRole<Guid>>()
             .AddSignInManager()
+            .AddDefaultTokenProviders()
             .AddEntityFrameworkStores<ApplicationDbContext>();
+    
         return services;
     }
 

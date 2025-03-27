@@ -135,18 +135,8 @@
         <div class="subpage_cat_actions">
             @{
                 bool isUpdateCatLinkEnabled = Cat.Links.Any(x => x.Rel == EndpointRels.Cat.UpdateCatRel);
-                bool isUpdateCatThumbnailLinkEnabled = Cat.Links.Any(x => x.Rel == EndpointRels.Cat.UpdateCatThumbnailRel);
                 bool isDeleteCatLinkEnabled = Cat.Links.Any(x => x.Rel == EndpointRels.Cat.DeleteCatRel);
             }
-            @if (isUpdateCatThumbnailLinkEnabled)
-            {
-                <a href="/user/cats/thumbnail/@Cat.Id" class="default_btn">
-                    Zmień główne zdjęcie
-                </a>
-            }
-            <a href="/user/cats/gallery/@Cat.Id" class="default_btn">
-                Galeria kota
-            </a>
             @if (isUpdateCatLinkEnabled)
             {
                 <a href="/user/cats/update/@Cat.Id" class="default_btn">
