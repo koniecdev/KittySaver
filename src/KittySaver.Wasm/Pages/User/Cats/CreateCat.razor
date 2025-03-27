@@ -79,7 +79,7 @@
                         <div class="login_form_tile">
                             <label for="healthStatus">Stan zdrowia:</label>
                             <InputSelect id="healthStatus" @bind-Value="_createCatDto.HealthStatus">
-                                <option value="">Kliknij by wybrać stan zdrowia</option>
+                                <option value="">Kliknij by wybrać</option>
                                 @foreach (KeyValuePair<string, (string text, string className)> status in Dictionaries.HealthStatusDictionary)
                                 {
                                     <option value="@status.Key">@status.Value.text</option>
@@ -90,7 +90,7 @@
                         <div class="login_form_tile">
                             <label for="medicalHelp">Pilność pomocy weterynaryjnej:</label>
                             <InputSelect id="medicalHelp" @bind-Value="_createCatDto.MedicalHelpUrgency">
-                                <option value="">Kliknij by wybrać pilność wizyty u weterynarza</option>
+                                <option value="">Kliknij by wybrać</option>
                                 @foreach (KeyValuePair<string, (string text, string className)> urgency in Dictionaries.MedicalHelpUrgencyDictionary)
                                 {
                                     <option value="@urgency.Key">@urgency.Value.text</option>
@@ -101,7 +101,7 @@
                         <div class="login_form_tile">
                             <label for="ageCategory">Kategoria wiekowa:</label>
                             <InputSelect id="ageCategory" @bind-Value="_createCatDto.AgeCategory">
-                                <option value="">Kliknij by wybrać wiek</option>
+                                <option value="">Kliknij by wybrać</option>
                                 @foreach (KeyValuePair<string, (string text, string className)> age in Dictionaries.AgeCategoryDictionary)
                                 {
                                     <option value="@age.Key">@age.Value.text</option>
@@ -112,7 +112,7 @@
                         <div class="login_form_tile">
                             <label for="behaviour">Zachowanie względem ludzi:</label>
                             <InputSelect id="behaviour" @bind-Value="_createCatDto.Behavior">
-                                <option value="">Kliknij by wybrać zachowanie</option>
+                                <option value="">Kliknij by wybrać</option>
                                 @foreach (KeyValuePair<string, (string text, string className)> age in Dictionaries.BehaviourDictionary)
                                 {
                                     <option value="@age.Key">@age.Value.text</option>
@@ -393,98 +393,6 @@
     </article>
     <aside class="subpage_sidebar"></aside>
 </div>
-
-<style>
-    .validation-message {
-        color: #721c24;
-        margin-top: 5px;
-    }
-
-    .loading-indicator {
-        text-align: center;
-        padding: 20px;
-    }
-
-    .advertisement_wizard_steps {
-        display: flex;
-        border-radius: 5px;
-        overflow: hidden;
-        margin-bottom: 20px;
-    }
-
-    .advertisement_wizard_steps .step {
-        flex: 1;
-        padding: 12px 10px;
-        text-align: center;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-
-    .advertisement_wizard_steps .step:last-child {
-        border-right: none;
-    }
-
-    .advertisement_wizard_steps .step.active {
-        background-color: #28a745;
-        color: white;
-        font-weight: bold;
-    }
-
-    .advertisement_wizard_steps .step.disabled {
-        pointer-events: none;
-        opacity: 0.6;
-    }
-
-    .thumbnail-preview {
-        margin-top: 10px;
-        padding: 5px;
-        border-radius: 4px;
-        display: inline-block;
-    }
-
-    .cat_advertisement_options {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        margin-top: 10px;
-    }
-
-    .cat_advertisement_option {
-        display: flex;
-        padding: 15px;
-        border: 2px solid #ddd;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: all 0.3s;
-    }
-
-    .cat_advertisement_option:hover {
-        border-color: #28a745;
-    }
-
-    .cat_advertisement_option.active {
-        border-color: #28a745;
-    }
-
-    .cat_advertisement_option_icon {
-        margin-right: 15px;
-        font-size: 24px;
-        color: #28a745;
-        display: flex;
-        align-items: center;
-    }
-
-    .cat_advertisement_option_content h5 {
-        margin: 0 0 5px 0;
-        font-size: 16px;
-    }
-
-    .cat_advertisement_option_content p {
-        margin: 0;
-        color: #666;
-        font-size: 14px;
-    }
-</style>
 
 @code {
     // Etapy kreatora

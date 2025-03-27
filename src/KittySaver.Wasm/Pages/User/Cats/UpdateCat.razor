@@ -102,7 +102,7 @@
                             <div class="login_form_tile">
                                 <label for="healthStatus">Stan zdrowia:</label>
                                 <InputSelect id="healthStatus" @bind-Value="_updateCatDto.HealthStatus">
-                                    <option value="">Kliknij by wybrać stan zdrowia</option>
+                                    <option value="">Kliknij by wybrać</option>
                                     @foreach (KeyValuePair<string, (string text, string className)> status in Dictionaries.HealthStatusDictionary)
                                     {
                                         <option value="@status.Key">@status.Value.text</option>
@@ -113,7 +113,7 @@
                             <div class="login_form_tile">
                                 <label for="medicalHelp">Pilność pomocy weterynaryjnej:</label>
                                 <InputSelect id="medicalHelp" @bind-Value="_updateCatDto.MedicalHelpUrgency">
-                                    <option value="">Kliknij by wybrać pilność wizyty u weterynarza</option>
+                                    <option value="">Kliknij by wybrać</option>
                                     @foreach (KeyValuePair<string, (string text, string className)> urgency in Dictionaries.MedicalHelpUrgencyDictionary)
                                     {
                                         <option value="@urgency.Key">@urgency.Value.text</option>
@@ -124,7 +124,7 @@
                             <div class="login_form_tile">
                                 <label for="ageCategory">Kategoria wiekowa:</label>
                                 <InputSelect id="ageCategory" @bind-Value="_updateCatDto.AgeCategory">
-                                    <option value="">Kliknij by wybrać wiek</option>
+                                    <option value="">Kliknij by wybrać</option>
                                     @foreach (KeyValuePair<string, (string text, string className)> age in Dictionaries.AgeCategoryDictionary)
                                     {
                                         <option value="@age.Key">@age.Value.text</option>
@@ -135,7 +135,7 @@
                             <div class="login_form_tile">
                                 <label for="behaviour">Zachowanie względem ludzi:</label>
                                 <InputSelect id="behaviour" @bind-Value="_updateCatDto.Behavior">
-                                    <option value="">Kliknij by wybrać zachowanie</option>
+                                    <option value="">Kliknij by wybrać</option>
                                     @foreach (KeyValuePair<string, (string text, string className)> age in Dictionaries.BehaviourDictionary)
                                     {
                                         <option value="@age.Key">@age.Value.text</option>
@@ -325,80 +325,6 @@
     }
     <aside class="subpage_sidebar"></aside>
 </div>
-
-<style>
-    .validation-message {
-        color: #721c24;
-        margin-top: 5px;
-    }
-
-    .loading-indicator {
-        text-align: center;
-        padding: 20px;
-    }
-
-    .advertisement_wizard_steps {
-        display: flex;
-        border-radius: 5px;
-        overflow: hidden;
-        margin-bottom: 20px;
-    }
-
-    .advertisement_wizard_steps .step {
-        flex: 1;
-        padding: 12px 10px;
-        text-align: center;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
-
-    .advertisement_wizard_steps .step:last-child {
-        border-right: none;
-    }
-
-    .advertisement_wizard_steps .step.active {
-        background-color: #28a745;
-        color: white;
-        font-weight: bold;
-    }
-
-    .thumbnail-preview {
-        margin-top: 10px;
-        padding: 5px;
-        border-radius: 4px;
-        display: inline-block;
-    }
-    
-    .manage_gallery_grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 16px;
-        margin-top: 20px;
-    }
-    
-    .manage_gallery_grid_tile {
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        overflow: hidden;
-    }
-    
-    .manage_gallery_grid_tile_wrapper {
-        height: 150px;
-        overflow: hidden;
-    }
-    
-    .manage_gallery_grid_tile_image {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-    
-    .manage_gallery_grid_tile_buttons {
-        padding: 8px;
-        display: flex;
-        justify-content: center;
-    }
-</style>
 
 @code {
     // Etapy kreatora
