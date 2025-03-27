@@ -26,6 +26,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDateTimeProvider, DefaultDateTimeProvider>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
+        services.AddScoped<IRefreshTokenService, RefreshTokenService>();
         services.AddValidatorsFromAssembly(assembly);
         services.AddMediatR(cfg =>
         {
@@ -48,15 +49,15 @@ public static class ServiceCollectionExtensions
                 UseDefaultCredentials = false,
                 Credentials = new System.Net.NetworkCredential(emailSettings.Username, emailSettings.Password)
             });
-        services.AddScoped<IEmailService, FluentEmailService>();
+        services.AddScoped<IEmailService, EmailService>();
         return services;
 
         void AddAuth()
         {
             if (environment.IsDevelopment())
             {
-                AddDevSchemeAuth();
-                // AddJwtAuth();
+                // AddDevSchemeAuth();
+                AddJwtAuth();
             }
             else
             {

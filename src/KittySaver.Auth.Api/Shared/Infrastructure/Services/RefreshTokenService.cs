@@ -22,7 +22,7 @@ public sealed class RefreshTokenService(
     
     public async Task<RefreshToken> GenerateRefreshTokenAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        string token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+        string token = Guid.NewGuid().ToString();
         
         RefreshToken refreshToken = new RefreshToken
         {

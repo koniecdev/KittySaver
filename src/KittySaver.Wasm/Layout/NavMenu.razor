@@ -1,7 +1,11 @@
 ﻿@inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
+@using KittySaver.Shared.Requests
+@using KittySaver.Wasm.Shared.Auth
+@using KittySaver.Wasm.Shared.HttpClients
 @inject ILocalStorageService LocalStorage
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
+@inject IApiClient ApiClient
 
 <nav class="nav">
     <div class="logo">
@@ -35,6 +39,7 @@
 
 @code {
     private bool _showNavMenu;
+    private bool _isLoggingOut;
 
     private void ToggleNavMenu()
     {
@@ -43,11 +48,53 @@
 
     private async Task Logout()
     {
-        await LocalStorage.RemoveItemAsync("token");
-        await LocalStorage.RemoveItemAsync("token_expires");
-        await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        await ApiNavigation.RefreshAsync();
-        ToggleNavMenu();
-        NavigationManager.NavigateTo("/");
+        if (_isLoggingOut) return;
+
+        _isLoggingOut = true;
+
+        try
+        {
+            // Get refresh token to revoke it
+            string? refreshToken = await LocalStorage.GetItemAsStringAsync("refresh_token");
+
+            if (!string.IsNullOrEmpty(refreshToken))
+            {
+                refreshToken = refreshToken.Replace("\"", "");
+
+                // Call API to revoke the refresh token
+                try
+                {
+                    await ApiClient.PostAsync<LogoutRequest, object>(
+                        "https://localhost:44371/api/v1/application-users/logout",
+                        new LogoutRequest(refreshToken));
+                }
+                catch
+                {
+                    // If revoking fails, we still want to log out locally
+                }
+            }
+
+            // Clear tokens from local storage
+            if (AuthenticationStateProvider is CustomAuthStateProvider customProvider)
+            {
+                await customProvider.ClearAuthData();
+            }
+            else
+            {
+                await LocalStorage.RemoveItemAsync("token");
+                await LocalStorage.RemoveItemAsync("token_expires");
+                await LocalStorage.RemoveItemAsync("refresh_token");
+                await LocalStorage.RemoveItemAsync("refresh_token_expires");
+                await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            }
+
+            await ApiNavigation.RefreshAsync();
+            ToggleNavMenu();
+            NavigationManager.NavigateTo("/");
+        }
+        finally
+        {
+            _isLoggingOut = false;
+        }
     }
 }

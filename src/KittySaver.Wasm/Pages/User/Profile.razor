@@ -408,6 +408,7 @@
         await LoadPersonData();
     }
     
+    
     private async Task LoadPersonData()
     {
         try
@@ -546,66 +547,76 @@
     }
     
     private async Task HandleChangePassword()
+{
+    if (_person == null) return;
+    
+    _isProcessing = true;
+    _showValidationErrors = false;
+    _passwordChangeMessage = null;
+    
+    try
     {
-        if (_person == null) return;
-        
-        _isProcessing = true;
-        _showValidationErrors = false;
-        _passwordChangeMessage = null;
-        
-        try
+        // Sprawdź, czy nowe hasło i potwierdzenie hasła są takie same
+        if (_changePasswordDto.NewPassword != _changePasswordDto.ConfirmPassword)
         {
-            // Sprawdź, czy nowe hasło i potwierdzenie hasła są takie same
-            if (_changePasswordDto.NewPassword != _changePasswordDto.ConfirmPassword)
-            {
-                _passwordChangeMessage = "Nowe hasło i potwierdzenie hasła nie są takie same.";
-                _passwordChangeSuccess = false;
-                return;
-            }
-            
-            // Endpoint do zmiany hasła
-            // Link? changePasswordLink = _person.Links.FirstOrDefault(x => x.Rel == EndpointRels.Person.ChangePasswordRel);
-            // if (changePasswordLink != null)
-            // {
-            //     // Tworzymy żądanie zmiany hasła
-            //     ChangePasswordRequest request = new(
-            //         CurrentPassword: _changePasswordDto.CurrentPassword,
-            //         NewPassword: _changePasswordDto.NewPassword
-            //     );
-            //     
-            //     // Wysyłamy żądanie
-            //     var response = await ApiClient.PutAsync<ChangePasswordRequest, PersonHateoasResponse>(
-            //         changePasswordLink.Href, request);
-            //     
-            //     if (response != null)
-            //     {
-            //         // Wyświetl komunikat o sukcesie
-            //         _passwordChangeMessage = "Hasło zostało zmienione pomyślnie.";
-            //         _passwordChangeSuccess = true;
-            //         
-            //         // Wyczyść formularz
-            //         _changePasswordDto = new ChangePasswordDto();
-            //         
-            //         // Potencjalnie wyloguj użytkownika, aby zalogował się ponownie z nowym hasłem
-            //         // await LocalStorage.RemoveItemAsync("token");
-            //         // await LocalStorage.RemoveItemAsync("token_expires");
-            //         // NavigationManager.NavigateTo("/login");
-            //     }
-            // }
-        }
-        catch (Exception ex)
-        {
-            Console.Error.WriteLine($"Error changing password: {ex.Message}");
-            _passwordChangeMessage = "Wystąpił błąd podczas zmiany hasła. Upewnij się, że aktualne hasło jest poprawne.";
+            _passwordChangeMessage = "Nowe hasło i potwierdzenie hasła nie są takie same.";
             _passwordChangeSuccess = false;
-            _showValidationErrors = true;
+            return;
         }
-        finally
-        {
-            _isProcessing = false;
-            StateHasChanged();
-        }
+        
+        // Endpoint do zmiany hasła
+        await ApiClient.PostAsync<ChangePasswordRequest, object>(
+            "https://localhost:44371/api/v1/application-users/change-password",
+            new ChangePasswordRequest(_person.Email, _changePasswordDto.CurrentPassword, _changePasswordDto.NewPassword));
+        
+        // Wyświetl komunikat o sukcesie
+        _passwordChangeMessage = "Hasło zostało zmienione pomyślnie.";
+        _passwordChangeSuccess = true;
+        
+        // Wyczyść formularz
+        _changePasswordDto = new ChangePasswordDto();
+        
+        // Wyloguj użytkownika po zmianie hasła (opcjonalnie)
+        // await LocalStorage.RemoveItemAsync("token");
+        // await LocalStorage.RemoveItemAsync("token_expires");
+        // await LocalStorage.RemoveItemAsync("refresh_token");
+        // await LocalStorage.RemoveItemAsync("refresh_token_expires");
+        // NavigationManager.NavigateTo("/login");
     }
+    catch (HttpRequestException ex)
+    {
+        string message;
+        if (ex.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        {
+            message = "Aktualne hasło jest nieprawidłowe.";
+        }
+        else if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            message = "Brak uprawnień do zmiany hasła.";
+        }
+        else
+        {
+            message = "Wystąpił błąd podczas zmiany hasła. Spróbuj ponownie później.";
+        }
+        
+        Console.Error.WriteLine($"Error changing password: {ex.Message}");
+        _passwordChangeMessage = message;
+        _passwordChangeSuccess = false;
+        _showValidationErrors = true;
+    }
+    catch (Exception ex)
+    {
+        Console.Error.WriteLine($"Error changing password: {ex.Message}");
+        _passwordChangeMessage = "Wystąpił błąd podczas zmiany hasła. Upewnij się, że aktualne hasło jest poprawne.";
+        _passwordChangeSuccess = false;
+        _showValidationErrors = true;
+    }
+    finally
+    {
+        _isProcessing = false;
+        StateHasChanged();
+    }
+}
 
     // Klasa DTO dla formularza profilu - zgodna z kontraktem UpdatePersonRequest
     private class ProfileDto

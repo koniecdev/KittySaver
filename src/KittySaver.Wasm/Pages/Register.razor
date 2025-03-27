@@ -11,107 +11,176 @@
 </PageTitle>
 
 <div class="register_wrapper">
-    <section class="register_container">
-        <header>
-            <h2>Rejestracja konta</h2>
-            <p>Konto w naszym serwisie umożliwia dodawanie ogłoszeń adopcyjnych - nie potrzebujesz konta, jeżeli chcesz tylko adoptować kociaki!</p>
-        </header>
-        <EditForm Model="_registerDto" OnSubmit="HandleRegister" class="register_form">
+    @if (_registrationSuccess)
+    {
+        <section class="register_success">
+            <div class="success-container">
+                <div class="success-icon">✓</div>
+                <h2>Rejestracja przebiegła pomyślnie!</h2>
+                <p>Na Twój adres email <strong>@_registerDto.Email</strong> wysłaliśmy wiadomość z linkiem aktywacyjnym.</p>
+                <p>Proszę kliknij w link w wiadomości, aby potwierdzić swój adres email i aktywować konto.</p>
+                <p>Jeśli nie otrzymasz wiadomości w ciągu kilku minut, sprawdź folder spam lub kliknij poniższy link, aby wysłać link aktywacyjny ponownie.</p>
+                <div class="action-buttons">
+                    <a href="/login" class="default_btn">Przejdź do logowania</a>
+                    <a href="/resend-email-confirmation" class="default_btn">Wyślij link aktywacyjny ponownie</a>
+                </div>
+            </div>
+        </section>
+    }
+    else
+    {
+        <section class="register_container">
             <header>
-                <h3>
-                    Twoje dane
-                </h3>
-                <p>
-                    Nikomu nie udostępnimy twojego prywatnego adresu email oraz prywatnego numeru telefonu.
-                    <br>
-                    Twój kontaktowy adres email i kontaktowy numer telefonu będą widoczne dopiero po dodaniu ogłoszenia.
-                    <br>
-                    Zarówno konkaktowy adres email, kontaktowy numer telefonu, kontaktowy adres - Można modyfikować dowolnie przy późniejszym dodawaniu ogłoszeń.
-                </p>
+                <h2>Rejestracja konta</h2>
+                <p>Konto w naszym serwisie umożliwia dodawanie ogłoszeń adopcyjnych - nie potrzebujesz konta, jeżeli chcesz tylko adoptować kociaki!</p>
             </header>
-            <div class="login_form_tile">
-                <label for="email">Twój prywatny adres email:</label>
-                <InputText id="email" type="email" @bind-Value="_registerDto.Email"/>
-            </div>
-            <div class="login_form_tile">
-                <label for="phoneNumber">Twój prywatny numer telefonu:</label>
-                <InputText id="phoneNumber" type="text" @bind-Value="_registerDto.PhoneNumber"/>
-            </div>
-            <div class="login_form_tile">
-                <label for="password">Twoje hasło:</label>
-                <InputText id="password" type="password" @bind-Value="_registerDto.Password"/>
-            </div>
-            <div class="login_form_tile">
-                <label for="confirmPassword">Potwierdź hasło:</label>
-                <InputText id="confirmPassword" type="password" @bind-Value="_registerDto.ConfirmPassword"/>
-            </div>
-            <div class="login_form_tile">
-                <label for="contactEmail">Twój domyślny kontaktowy adres email, który ma być wyświetlany w Twoich ogłoszeniach:</label>
-                <InputText id="contactEmail" type="email" @bind-Value="_registerDto.DefaultAdvertisementContactInfoEmail"/>
-            </div>
-            <div class="login_form_tile">
-                <label for="contactPhone">Twój domyślnie kontaktowy numer telefonu, który ma być wyświetlany w twoich ogłoszeniach:</label>
-                <InputText id="contactPhone" type="text" @bind-Value="_registerDto.DefaultAdvertisementContactInfoPhoneNumber"/>
-            </div>
-            <div class="login_form_tile">
-                <label for="nickname">Twoja nazwa/imię jakie chcesz by się wyświetlało w Twoich ogłoszeniach:</label>
-                <InputText id="nickname" type="text" @bind-Value="_registerDto.Nickname"/>
-            </div>
-            <header>
-                <h3>Wypełnij domyślny adres odbioru kotów z twoich ogłoszeń</h3>
-                <p>
-                    Przy dodawaniu ogłoszenia, będziesz mógł wpisać inny adres.
-                    <br>
-                    W trosce o Twoje bezpieczeństwo nie musisz podawać ulicy i numeru domu - przekażesz je sam po kontakcie z ogłoszeniobiorcą.
-                </p>
-            </header>
-            <div class="login_form_tile">
-                <label for="DefaultAdvertisementPickupAddressCountry">Kraj:</label>
-                <InputText id="DefaultAdvertisementPickupAddressCountry" type="text" @bind-Value="_registerDto.DefaultAdvertisementPickupAddressCountry"/>
-            </div>
-            <div class="login_form_tile">
-                <label for="DefaultAdvertisementPickupAddressState">Województwo:</label>
-                <InputText id="DefaultAdvertisementPickupAddressState" type="text" @bind-Value="_registerDto.DefaultAdvertisementPickupAddressState"/>
-            </div>
-            <div class="login_form_tile">
-                <label for="DefaultAdvertisementPickupAddressZipCode">Kod pocztowy:</label>
-                <InputText id="DefaultAdvertisementPickupAddressZipCode" type="text" @bind-Value="_registerDto.DefaultAdvertisementPickupAddressZipCode"/>
-            </div>
-            <div class="login_form_tile">
-                <label for="DefaultAdvertisementPickupAddressCity">Miasto:</label>
-                <InputText id="DefaultAdvertisementPickupAddressCity" type="text" @bind-Value="_registerDto.DefaultAdvertisementPickupAddressCity"/>
-            </div>
-            <div class="login_form_tile">
-                <label for="DefaultAdvertisementPickupAddressStreet">Ulica:</label>
-                <InputText id="DefaultAdvertisementPickupAddressStreet" type="text" @bind-Value="_registerDto.DefaultAdvertisementPickupAddressStreet"/>
-            </div>
-            <div class="login_form_tile">
-                <label for="DefaultAdvertisementPickupAddressBuildingNumber">Numer budynku:</label>
-                <InputText id="DefaultAdvertisementPickupAddressBuildingNumber" type="text" @bind-Value="_registerDto.DefaultAdvertisementPickupAddressBuildingNumber"/>
-            </div>
-            <div class="login_form_tile_buttons">
-                <button class="default_btn btn_green" type="submit" disabled="@_isProcessing">
-                    @if (_isProcessing)
-                    {
-                        <span>Rejestracja...</span>
-                    }
-                    else
-                    {
-                        <span>Zatwierdź rejestrację konta</span>
-                    }
-                </button>
-                <a href="/register" class="default_btn">Zakładałeś juz konto? Zaloguj się</a>
-            </div>
-        </EditForm>
-    </section>
+
+            @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <div class="error-message">
+                    <p>@_errorMessage</p>
+                </div>
+            }
+
+            <EditForm Model="_registerDto" OnSubmit="HandleRegister" class="register_form">
+                <header>
+                    <h3>
+                        Twoje dane
+                    </h3>
+                    <p>
+                        Nikomu nie udostępnimy twojego prywatnego adresu email oraz prywatnego numeru telefonu.
+                        <br>
+                        Twój kontaktowy adres email i kontaktowy numer telefonu będą widoczne dopiero po dodaniu ogłoszenia.
+                        <br>
+                        Zarówno konkaktowy adres email, kontaktowy numer telefonu, kontaktowy adres - Można modyfikować dowolnie przy późniejszym dodawaniu ogłoszeń.
+                    </p>
+                </header>
+                <div class="login_form_tile">
+                    <label for="email">Twój prywatny adres email:</label>
+                    <InputText id="email" type="email" @bind-Value="_registerDto.Email"/>
+                </div>
+                <div class="login_form_tile">
+                    <label for="phoneNumber">Twój prywatny numer telefonu:</label>
+                    <InputText id="phoneNumber" type="text" @bind-Value="_registerDto.PhoneNumber"/>
+                </div>
+                <div class="login_form_tile">
+                    <label for="password">Twoje hasło:</label>
+                    <InputText id="password" type="password" @bind-Value="_registerDto.Password"/>
+                </div>
+                <div class="login_form_tile">
+                    <label for="confirmPassword">Potwierdź hasło:</label>
+                    <InputText id="confirmPassword" type="password" @bind-Value="_registerDto.ConfirmPassword"/>
+                </div>
+                <div class="login_form_tile">
+                    <label for="contactEmail">Twój domyślny kontaktowy adres email, który ma być wyświetlany w Twoich ogłoszeniach:</label>
+                    <InputText id="contactEmail" type="email" @bind-Value="_registerDto.DefaultAdvertisementContactInfoEmail"/>
+                </div>
+                <div class="login_form_tile">
+                    <label for="contactPhone">Twój domyślnie kontaktowy numer telefonu, który ma być wyświetlany w twoich ogłoszeniach:</label>
+                    <InputText id="contactPhone" type="text" @bind-Value="_registerDto.DefaultAdvertisementContactInfoPhoneNumber"/>
+                </div>
+                <div class="login_form_tile">
+                    <label for="nickname">Twoja nazwa/imię jakie chcesz by się wyświetlało w Twoich ogłoszeniach:</label>
+                    <InputText id="nickname" type="text" @bind-Value="_registerDto.Nickname"/>
+                </div>
+                <header>
+                    <h3>Wypełnij domyślny adres odbioru kotów z twoich ogłoszeń</h3>
+                    <p>
+                        Przy dodawaniu ogłoszenia, będziesz mógł wpisać inny adres.
+                        <br>
+                        W trosce o Twoje bezpieczeństwo nie musisz podawać ulicy i numeru domu - przekażesz je sam po kontakcie z ogłoszeniobiorcą.
+                    </p>
+                </header>
+                <div class="login_form_tile">
+                    <label for="DefaultAdvertisementPickupAddressCountry">Kraj:</label>
+                    <InputText id="DefaultAdvertisementPickupAddressCountry" type="text" @bind-Value="_registerDto.DefaultAdvertisementPickupAddressCountry"/>
+                </div>
+                <div class="login_form_tile">
+                    <label for="DefaultAdvertisementPickupAddressState">Województwo:</label>
+                    <InputText id="DefaultAdvertisementPickupAddressState" type="text" @bind-Value="_registerDto.DefaultAdvertisementPickupAddressState"/>
+                </div>
+                <div class="login_form_tile">
+                    <label for="DefaultAdvertisementPickupAddressZipCode">Kod pocztowy:</label>
+                    <InputText id="DefaultAdvertisementPickupAddressZipCode" type="text" @bind-Value="_registerDto.DefaultAdvertisementPickupAddressZipCode"/>
+                </div>
+                <div class="login_form_tile">
+                    <label for="DefaultAdvertisementPickupAddressCity">Miasto:</label>
+                    <InputText id="DefaultAdvertisementPickupAddressCity" type="text" @bind-Value="_registerDto.DefaultAdvertisementPickupAddressCity"/>
+                </div>
+                <div class="login_form_tile">
+                    <label for="DefaultAdvertisementPickupAddressStreet">Ulica:</label>
+                    <InputText id="DefaultAdvertisementPickupAddressStreet" type="text" @bind-Value="_registerDto.DefaultAdvertisementPickupAddressStreet"/>
+                </div>
+                <div class="login_form_tile">
+                    <label for="DefaultAdvertisementPickupAddressBuildingNumber">Numer budynku:</label>
+                    <InputText id="DefaultAdvertisementPickupAddressBuildingNumber" type="text" @bind-Value="_registerDto.DefaultAdvertisementPickupAddressBuildingNumber"/>
+                </div>
+                <div class="login_form_tile_buttons">
+                    <button class="default_btn btn_green" type="submit" disabled="@_isProcessing">
+                        @if (_isProcessing)
+                        {
+                            <span>Rejestracja...</span>
+                        }
+                        else
+                        {
+                            <span>Zatwierdź rejestrację konta</span>
+                        }
+                    </button>
+                    <a href="/login" class="default_btn">Zakładałeś już konto? Zaloguj się</a>
+                </div>
+            </EditForm>
+        </section>
+    }
 
     <aside class="register_photo">
     </aside>
 </div>
 
+<style>
+    .error-message {
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 4px;
+        background-color: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+    }
+
+    .register_success {
+        flex: 1;
+        padding: 40px;
+        background-color: #ffffff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        margin: 20px;
+    }
+
+    .success-container {
+        max-width: 600px;
+        margin: 0 auto;
+        text-align: center;
+        padding: 30px;
+    }
+
+    .success-icon {
+        font-size: 64px;
+        color: #28a745;
+        margin-bottom: 20px;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 30px;
+    }
+</style>
+
 @code{
     private readonly RegisterDto _registerDto = new();
     private bool _isProcessing;
+    private bool _registrationSuccess;
+    private string? _errorMessage;
     private Link _createPersonLink = null!;
 
     protected override void OnInitialized()
@@ -129,30 +198,63 @@
     private async Task HandleRegister()
     {
         _isProcessing = true;
-        
-        CreatePersonRequest registerRequest = new(
-            Nickname: _registerDto.Nickname,
-            Email: _registerDto.Email,
-            PhoneNumber: _registerDto.PhoneNumber,
-            Password: _registerDto.Password,
-            DefaultAdvertisementPickupAddressCountry: _registerDto.DefaultAdvertisementPickupAddressCountry,
-            DefaultAdvertisementPickupAddressState: _registerDto.DefaultAdvertisementPickupAddressState,
-            DefaultAdvertisementPickupAddressZipCode: _registerDto.DefaultAdvertisementPickupAddressZipCode,
-            DefaultAdvertisementPickupAddressCity: _registerDto.DefaultAdvertisementPickupAddressCity,
-            DefaultAdvertisementPickupAddressStreet: _registerDto.DefaultAdvertisementPickupAddressStreet,
-            DefaultAdvertisementPickupAddressBuildingNumber: _registerDto.DefaultAdvertisementPickupAddressBuildingNumber,
-            DefaultAdvertisementContactInfoEmail: _registerDto.DefaultAdvertisementContactInfoEmail,
-            DefaultAdvertisementContactInfoPhoneNumber: _registerDto.DefaultAdvertisementContactInfoPhoneNumber
-        );
+        _errorMessage = null;
 
-        PersonHateoasResponse? createPersonResponse = 
+        // Validate passwords match
+        if (_registerDto.Password != _registerDto.ConfirmPassword)
+        {
+            _errorMessage = "Hasła nie pasują do siebie";
+            _isProcessing = false;
+            return;
+        }
+
+        try
+        {
+            CreatePersonRequest registerRequest = new(
+                Nickname: _registerDto.Nickname,
+                Email: _registerDto.Email,
+                PhoneNumber: _registerDto.PhoneNumber,
+                Password: _registerDto.Password,
+                DefaultAdvertisementPickupAddressCountry: _registerDto.DefaultAdvertisementPickupAddressCountry,
+                DefaultAdvertisementPickupAddressState: _registerDto.DefaultAdvertisementPickupAddressState,
+                DefaultAdvertisementPickupAddressZipCode: _registerDto.DefaultAdvertisementPickupAddressZipCode,
+                DefaultAdvertisementPickupAddressCity: _registerDto.DefaultAdvertisementPickupAddressCity,
+                DefaultAdvertisementPickupAddressStreet: _registerDto.DefaultAdvertisementPickupAddressStreet,
+                DefaultAdvertisementPickupAddressBuildingNumber: _registerDto.DefaultAdvertisementPickupAddressBuildingNumber,
+                DefaultAdvertisementContactInfoEmail: _registerDto.DefaultAdvertisementContactInfoEmail,
+                DefaultAdvertisementContactInfoPhoneNumber: _registerDto.DefaultAdvertisementContactInfoPhoneNumber
+            );
+
             await ApiClient.PostAsync<CreatePersonRequest, PersonHateoasResponse>(_createPersonLink.Href, registerRequest);
 
-        if (createPersonResponse is not null)
-        {
-            NavigationManager.NavigateTo("/");
+            // Registration successful, show success message
+            _registrationSuccess = true;
         }
-        _isProcessing = false;
+        catch (HttpRequestException ex)
+        {
+            // Handle specific error cases
+            if (ex.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                _errorMessage = "Podane dane są nieprawidłowe. Sprawdź wszystkie pola i spróbuj ponownie.";
+            }
+            else if (ex.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                _errorMessage = "Użytkownik o podanym adresie email już istnieje. Spróbuj zalogować się lub skorzystaj z opcji resetowania hasła.";
+            }
+            else
+            {
+                _errorMessage = "Wystąpił błąd podczas rejestracji. Spróbuj ponownie później.";
+            }
+        }
+        catch (Exception)
+        {
+            _errorMessage = "Wystąpił nieoczekiwany błąd. Spróbuj ponownie później.";
+        }
+        finally
+        {
+            _isProcessing = false;
+            StateHasChanged();
+        }
     }
 
     private class RegisterDto

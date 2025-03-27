@@ -1,6 +1,7 @@
 ﻿@page "/login"
 @using KittySaver.Shared.Requests
 @using KittySaver.Shared.Responses
+@using KittySaver.Wasm.Shared.Auth
 @using KittySaver.Wasm.Shared.HttpClients
 @inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
 @inject IApiClient ApiClient
@@ -15,6 +16,14 @@
         <header>
             <h2>Logowanie do konta</h2>
         </header>
+
+        @if (!string.IsNullOrEmpty(_statusMessage))
+        {
+            <div class="status-message @(_statusSuccess ? "status-success" : "status-error")">
+                <p>@_statusMessage</p>
+            </div>
+        }
+
         <EditForm Model="_loginDto" OnSubmit="HandleLogin" class="login_form">
             <div class="login_form_tile">
                 <label for="email">Twój adres email:</label>
@@ -45,32 +54,138 @@
                 <a href="/register" class="default_btn">Nie masz konta? Zarejestruj się</a>
             </div>
         </EditForm>
+
+        <div class="additional-links">
+            <a href="/resend-email-confirmation">Wyślij ponownie link potwierdzający email</a>
+        </div>
     </section>
-    
+
     <aside class="login_photo">
     </aside>
 </div>
+
+<style>
+    .status-message {
+        margin-bottom: 20px;
+        padding: 15px;
+        border-radius: 4px;
+    }
+
+    .status-success {
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+    }
+
+    .status-error {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+    }
+
+    .additional-links {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .additional-links a {
+        color: #4A6FA5;
+        text-decoration: underline;
+    }
+</style>
+
 @code{
     private readonly LoginDto _loginDto = new();
     private bool _isProcessing;
+    private string? _statusMessage;
+    private bool _statusSuccess;
+
+    protected override void OnInitialized()
+    {
+        // Sprawdzamy parametry, które wskazują na przekierowania z innych przepływów
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        var queryString = System.Web.HttpUtility.ParseQueryString(uri.Query);
     
+        var emailConfirmed = queryString["emailConfirmed"];
+        if (emailConfirmed == "true")
+        {
+            _statusMessage = "Email został potwierdzony. Możesz się teraz zalogować.";
+            _statusSuccess = true;
+        }
+    
+        var passwordReset = queryString["passwordReset"];
+        if (passwordReset == "true")
+        {
+            _statusMessage = "Hasło zostało pomyślnie zresetowane. Możesz się teraz zalogować.";
+            _statusSuccess = true;
+        }
+    
+        var error = queryString["error"];
+        if (!string.IsNullOrEmpty(error))
+        {
+            _statusMessage = $"Wystąpił błąd: {error}";
+            _statusSuccess = false;
+        }
+
+        base.OnInitialized();
+    }
+
     private async Task HandleLogin()
     {
         _isProcessing = true;
-        LoginRequest loginRequest = new(Email: _loginDto.Email, Password: _loginDto.Password);
-        LoginResponse? response = 
-            await ApiClient.PostAsync<LoginRequest, LoginResponse>("https://localhost:44371/api/v1/application-users/login", loginRequest);
-        
-        if (response is not null)
+        _statusMessage = null;
+
+        try
         {
-            string parsedToken = response.AccessToken.Replace("\"", string.Empty);
-            await LocalStorage.SetItemAsync("token", parsedToken);
-            await LocalStorage.SetItemAsync("token_expires", response.AccessTokenExpiresAt);
-            await AuthStateProvider.GetAuthenticationStateAsync();
-            NavigationManager.NavigateTo("/");
+            LoginRequest loginRequest = new(Email: _loginDto.Email, Password: _loginDto.Password);
+            LoginResponse? response =
+                await ApiClient.PostAsync<LoginRequest, LoginResponse>("https://localhost:44371/api/v1/application-users/login", loginRequest);
+
+            if (response is not null)
+            {
+                string parsedToken = response.AccessToken.Replace("\"", string.Empty);
+                await LocalStorage.SetItemAsync("token", parsedToken);
+                await LocalStorage.SetItemAsync("token_expires", response.AccessTokenExpiresAt);
+
+                // Store refresh token if it's provided
+                if (!string.IsNullOrEmpty(response.RefreshToken))
+                {
+                    await LocalStorage.SetItemAsync("refresh_token", response.RefreshToken);
+                    await LocalStorage.SetItemAsync("refresh_token_expires", response.RefreshTokenExpiresAt);
+                }
+
+                await AuthStateProvider.GetAuthenticationStateAsync();
+                NavigationManager.NavigateTo("/");
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                _statusMessage = "Nieprawidłowy email lub hasło";
+            }
+            else if (ex.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                _statusMessage = "Twój email nie został jeszcze potwierdzony. Sprawdź swoją skrzynkę mailową.";
+            }
+            else
+            {
+                _statusMessage = "Wystąpił błąd podczas logowania. Spróbuj ponownie.";
+            }
+            _statusSuccess = false;
+        }
+        catch (Exception)
+        {
+            _statusMessage = "Wystąpił nieoczekiwany błąd. Spróbuj ponownie później.";
+            _statusSuccess = false;
+        }
+        finally
+        {
+            _isProcessing = false;
+            StateHasChanged();
         }
     }
-    
+
     private class LoginDto
     {
         public string Email { get; set; } = "";

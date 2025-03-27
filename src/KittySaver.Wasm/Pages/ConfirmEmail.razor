@@ -1,0 +1,181 @@
+﻿@page "/confirm-email"
+@using KittySaver.Shared.Requests
+@using KittySaver.Wasm.Shared.HttpClients
+@inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
+@inject IApiClient ApiClient
+@inject NavigationManager NavigationManager
+
+<PageTitle>Uratujkota.pl - Potwierdzenie adresu email</PageTitle>
+
+<div class="subpage_grid">
+    <aside class="subpage_sidebar"></aside>
+    <article class="subpage_content">
+        <header class="subpage_header">
+            <h1>Potwierdzenie adresu email</h1>
+        </header>
+        
+        <section class="subpage_main_info">
+            <div class="confirmation-container">
+                @if (_isProcessing)
+                {
+                    <div class="confirmation-status processing">
+                        <div class="spinner"></div>
+                        <h2>Weryfikacja adresu email...</h2>
+                        <p>Trwa weryfikacja Twojego adresu email. Prosimy o chwilę cierpliwości.</p>
+                    </div>
+                }
+                else if (_isConfirmed)
+                {
+                    <div class="confirmation-status success">
+                        <div class="status-icon success">✓</div>
+                        <h2>Email potwierdzony!</h2>
+                        <p>Twój adres email został pomyślnie potwierdzony. Możesz teraz korzystać ze wszystkich funkcji serwisu.</p>
+                        <div class="action-buttons">
+                            <a href="/login?emailConfirmed=true" class="default_btn btn_green">Zaloguj się</a>
+                        </div>
+                    </div>
+                }
+                else if (_error != null)
+                {
+                    <div class="confirmation-status error">
+                        <div class="status-icon error">✗</div>
+                        <h2>Wystąpił błąd</h2>
+                        <p>@_error</p>
+                        <div class="action-buttons">
+                            <a href="/resend-email-confirmation" class="default_btn">Wyślij ponownie link aktywacyjny</a>
+                            <a href="/login" class="default_btn">Przejdź do logowania</a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+    </article>
+    <aside class="subpage_sidebar"></aside>
+</div>
+
+<style>
+    .confirmation-container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 30px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .confirmation-status {
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .confirmation-status.success {
+        color: #155724;
+    }
+    
+    .confirmation-status.error {
+        color: #721c24;
+    }
+    
+    .confirmation-status.processing {
+        color: #0c5460;
+    }
+    
+    .status-icon {
+        font-size: 48px;
+        margin-bottom: 20px;
+    }
+    
+    .status-icon.success {
+        color: #28a745;
+    }
+    
+    .status-icon.error {
+        color: #dc3545;
+    }
+    
+    .spinner {
+        border: 6px solid #f3f3f3;
+        border-top: 6px solid #4A6FA5;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 2s linear infinite;
+        margin: 0 auto 20px;
+    }
+    
+    .action-buttons {
+        margin-top: 30px;
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+</style>
+
+@code {
+    private bool _isProcessing = true;
+    private bool _isConfirmed;
+    private string? _error;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+    
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+    
+        // Opcja 1: Użyj System.Web.HttpUtility
+        var queryString = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        var userId = queryString["userId"];
+        var token = queryString["token"];
+    
+        // Opcja 2: Własna implementacja
+        // var queryParams = ParseQueryString(uri.Query);
+        // var userId = queryParams.GetValueOrDefault("userId");
+        // var token = queryParams.GetValueOrDefault("token");
+    
+        if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+        {
+            _error = "Nieprawidłowy link potwierdzający. Upewnij się, że kliknąłeś właściwy link z wiadomości email.";
+            _isProcessing = false;
+            return;
+        }
+    
+        await ConfirmTheEmail(userId, token);
+    }
+    
+    private async Task ConfirmTheEmail(string userId, string token)
+    {
+        try
+        {
+            // Call API to confirm email
+            await ApiClient.PostAsync(
+                $"https://localhost:44371/api/v1/application-users/confirm-email?userId={Uri.EscapeDataString(userId)}&token={Uri.EscapeDataString(token)}");
+            
+            // If we got here, confirmation was successful
+            _isConfirmed = true;
+        }
+        catch (HttpRequestException ex)
+        {
+            if (ex.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                _error = "Link aktywacyjny jest nieprawidłowy lub wygasł. Spróbuj wygenerować nowy link.";
+            }
+            else if (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                _error = "Nie znaleziono użytkownika. Upewnij się, że korzystasz z aktualnego linku aktywacyjnego.";
+            }
+            else
+            {
+                _error = "Wystąpił błąd podczas potwierdzania adresu email. Spróbuj ponownie później.";
+            }
+        }
+        catch (Exception)
+        {
+            _error = "Wystąpił nieoczekiwany błąd. Spróbuj ponownie później.";
+        }
+        finally
+        {
+            _isProcessing = false;
+            StateHasChanged();
+        }
+    }
+}

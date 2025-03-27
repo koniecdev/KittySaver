@@ -7,6 +7,7 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
+using Microsoft.AspNetCore.Mvc;
 using Riok.Mapperly.Abstractions;
 
 namespace KittySaver.Auth.Api.Features.ApplicationUsers;
@@ -55,12 +56,13 @@ public sealed class ConfirmEmail : IEndpoint
 
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        endpointRouteBuilder.MapGet("application-users/confirm-email", async (
-            ConfirmEmailRequest request,
+        endpointRouteBuilder.MapPost("application-users/confirm-email", async (
+            [FromQuery] string userId,
+            [FromQuery] string token,
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            ConfirmEmailCommand command = request.ToConfirmEmailCommand();
+            ConfirmEmailCommand command = new(userId, token);
             await sender.Send(command, cancellationToken);
             return Results.Ok();
         });
