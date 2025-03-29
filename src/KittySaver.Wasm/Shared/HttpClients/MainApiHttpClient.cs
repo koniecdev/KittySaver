@@ -13,6 +13,7 @@ public interface IApiClient
     Task<TResponse?> GetAsync<TResponse>(string endpoint, CancellationToken cancellationToken = default);
     Task PostAsync(string endpointUrl, CancellationToken cancellationToken = default);
     Task<TResponse?> PostAsync<TResponse>(string endpointUrl, CancellationToken cancellationToken = default);
+    Task PostAsync<TRequest>(string endpointUrl, TRequest request, CancellationToken cancellationToken = default);
     Task<TResponse?> PostAsync<TRequest, TResponse>(string endpointUrl, TRequest request, CancellationToken cancellationToken = default);
     Task<TResponse?> PutAsync<TRequest, TResponse>(string endpoint, TRequest request, CancellationToken cancellationToken = default);
     Task<TResponse?> PostFileAsync<TResponse>(string endpoint, MultipartFormDataContent content, CancellationToken cancellationToken = default);
@@ -87,7 +88,25 @@ public class ApiClient(
             throw;
         }
     }
-    
+
+    public async Task PostAsync<TRequest>(string endpointUrl, TRequest request, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await SetAuthorizationHeadersIfPresent();
+            logger.LogInformation("Making POST request to {Endpoint}", endpointUrl);
+            
+            HttpResponseMessage response = await httpClient.PostAsJsonAsync(endpointUrl, request, _jsonOptions, cancellationToken);
+            await EnsureSuccessStatusCodeWithLoggingAsync(response);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            //Well, we do need the Result pattern for Response<TResponse || ProblemDetails>
+            logger.LogError(ex, "Error making POST request to {Endpoint}", endpointUrl);
+            throw;
+        }
+    }
+
     public async Task<TResponse?> PostAsync<TRequest, TResponse>(string endpointUrl, TRequest request, CancellationToken cancellationToken = default)
     {
         try

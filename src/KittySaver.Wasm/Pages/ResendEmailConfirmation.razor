@@ -8,70 +8,67 @@
 
 <PageTitle>Uratujkota.pl - Ponowne wysłanie linku potwierdzającego</PageTitle>
 
-<div class="subpage_grid">
-    <aside class="subpage_sidebar"></aside>
-    <article class="subpage_content">
-        <header class="subpage_header">
-            <h1>Ponowne wysłanie linku potwierdzającego</h1>
+<div class="login_wrapper">
+    <section class="login_container">
+        <header>
+            <h2>Ponowne wysłanie linku potwierdzającego</h2>
+            @if (!_isSuccess)
+            {
+                <p>
+                    Wpisz adres email, którego używasz do logowania w serwisie. Wyślemy na niego link potwierdzający.
+                </p>
+            }
         </header>
         
-        <section class="subpage_main_info">
-            <div class="form-container">
-                @if (_isSuccess)
-                {
-                    <div class="confirmation-status success">
-                        <div class="status-icon success">✓</div>
-                        <h2>Link aktywacyjny wysłany!</h2>
-                        <p>Jeśli podany adres email istnieje w naszej bazie i nie został jeszcze potwierdzony, wyślemy na niego nowy link aktywacyjny.</p>
-                        <p>Sprawdź swoją skrzynkę pocztową i kliknij link w wiadomości, aby potwierdzić adres email.</p>
-                        <div class="action-buttons">
-                            <a href="/login" class="default_btn btn_green">Przejdź do logowania</a>
-                        </div>
-                    </div>
-                }
-                else
-                {
-                    <div class="form-content">
-                        <p>
-                            Wpisz adres email, którego używasz do logowania w serwisie. Wyślemy na niego link potwierdzający.
-                        </p>
-                        
-                        @if (_error != null)
-                        {
-                            <div class="error-message">
-                                <p>@_error</p>
-                            </div>
-                        }
-                        
-                        <EditForm Model="_model" OnValidSubmit="HandleSubmit" class="resend-form">
-                            <DataAnnotationsValidator />
-                            
-                            <div class="form-group">
-                                <label for="email">Adres email:</label>
-                                <InputText id="email" @bind-Value="_model.Email" class="form-control" />
-                                <ValidationMessage For="@(() => _model.Email)" />
-                            </div>
-                            
-                            <div class="form-actions">
-                                <button type="submit" class="default_btn btn_green" disabled="@_isProcessing">
-                                    @if (_isProcessing)
-                                    {
-                                        <span>Wysyłanie...</span>
-                                    }
-                                    else
-                                    {
-                                        <span>Wyślij link potwierdzający</span>
-                                    }
-                                </button>
-                                <a href="/login" class="default_btn">Wróć do logowania</a>
-                            </div>
-                        </EditForm>
-                    </div>
-                }
+        @if (_isSuccess)
+        {
+            <div class="status-message status-success">
+                <div class="status-icon">✓</div>
+                <h3>Link aktywacyjny wysłany!</h3>
+                <p>Jeśli podany adres email istnieje w naszej bazie i nie został jeszcze potwierdzony, wyślemy na niego nowy link aktywacyjny.</p>
+                <p>Sprawdź swoją skrzynkę pocztową i kliknij link w wiadomości, aby potwierdzić adres email.</p>
+                <div class="login_form_tile_buttons">
+                    <a href="/login" class="default_btn btn_green">Przejdź do logowania</a>
+                </div>
             </div>
-        </section>
-    </article>
-    <aside class="subpage_sidebar"></aside>
+        }
+        else
+        {
+            @if (_error != null)
+            {
+                <div class="status-message status-error">
+                    <p>@_error</p>
+                </div>
+            }
+            
+            <EditForm Model="_model" OnValidSubmit="HandleSubmit" class="login_form">
+                <DataAnnotationsValidator />
+                
+                <div class="login_form_tile">
+                    <label for="email">Adres email:</label>
+                    <InputText id="email" @bind-Value="_model.Email" />
+                    <ValidationMessage For="@(() => _model.Email)" />
+                </div>
+                
+                <div class="login_form_tile_buttons">
+                    <button type="submit" class="default_btn btn_green" disabled="@_isProcessing">
+                        @if (_isProcessing)
+                        {
+                            <span>Wysyłanie...</span>
+                        }
+                        else
+                        {
+                            <span>Wyślij link potwierdzający</span>
+                        }
+                    </button>
+                    <a href="/login" class="default_btn">Wróć do logowania</a>
+                </div>
+            </EditForm>
+        }
+    </section>
+
+    <aside class="login_photo">
+    </aside>
 </div>
 
 @code {
@@ -95,7 +92,7 @@
         try
         {
             // Call API to resend confirmation email
-            await ApiClient.PostAsync<ResendEmailConfirmationRequest, object>(
+            await ApiClient.PostAsync(
                 "https://localhost:44371/api/v1/application-users/resend-email-confirmation",
                 new ResendEmailConfirmationRequest(_model.Email));
             

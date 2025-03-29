@@ -7,50 +7,47 @@
 
 <PageTitle>Uratujkota.pl - Potwierdzenie adresu email</PageTitle>
 
-<div class="subpage_grid">
-    <aside class="subpage_sidebar"></aside>
-    <article class="subpage_content">
-        <header class="subpage_header">
-            <h1>Potwierdzenie adresu email</h1>
+<div class="login_wrapper">
+    <section class="login_container">
+        <header>
+            <h2>Potwierdzenie adresu email</h2>
         </header>
         
-        <section class="subpage_main_info">
-            <div class="confirmation-container">
-                @if (_isProcessing)
-                {
-                    <div class="confirmation-status processing">
-                        <div class="spinner"></div>
-                        <h2>Weryfikacja adresu email...</h2>
-                        <p>Trwa weryfikacja Twojego adresu email. Prosimy o chwilę cierpliwości.</p>
-                    </div>
-                }
-                else if (_isConfirmed)
-                {
-                    <div class="confirmation-status success">
-                        <div class="status-icon success">✓</div>
-                        <h2>Email potwierdzony!</h2>
-                        <p>Twój adres email został pomyślnie potwierdzony. Możesz teraz korzystać ze wszystkich funkcji serwisu.</p>
-                        <div class="action-buttons">
-                            <a href="/login?emailConfirmed=true" class="default_btn btn_green">Zaloguj się</a>
-                        </div>
-                    </div>
-                }
-                else if (_error != null)
-                {
-                    <div class="confirmation-status error">
-                        <div class="status-icon error">✗</div>
-                        <h2>Wystąpił błąd</h2>
-                        <p>@_error</p>
-                        <div class="action-buttons">
-                            <a href="/resend-email-confirmation" class="default_btn">Wyślij ponownie link aktywacyjny</a>
-                            <a href="/login" class="default_btn">Przejdź do logowania</a>
-                        </div>
-                    </div>
-                }
+        @if (_isProcessing)
+        {
+            <div class="status-message">
+                <div class="spinner"></div>
+                <h3>Weryfikacja adresu email...</h3>
+                <p>Trwa weryfikacja Twojego adresu email. Prosimy o chwilę cierpliwości.</p>
             </div>
-        </section>
-    </article>
-    <aside class="subpage_sidebar"></aside>
+        }
+        else if (_isConfirmed)
+        {
+            <div class="status-message status-success">
+                <div class="status-icon">✓</div>
+                <h3>Email potwierdzony!</h3>
+                <p>Twój adres email został pomyślnie potwierdzony. Możesz teraz korzystać ze wszystkich funkcji serwisu.</p>
+                <div class="login_form_tile_buttons">
+                    <a href="/login?emailConfirmed=true" class="default_btn btn_green">Zaloguj się</a>
+                </div>
+            </div>
+        }
+        else if (_error != null)
+        {
+            <div class="status-message status-error">
+                <div class="status-icon">✗</div>
+                <h3>Wystąpił błąd</h3>
+                <p>@_error</p>
+                <div class="login_form_tile_buttons">
+                    <a href="/resend-email-confirmation" class="default_btn">Wyślij ponownie link aktywacyjny</a>
+                    <a href="/login" class="default_btn">Przejdź do logowania</a>
+                </div>
+            </div>
+        }
+    </section>
+
+    <aside class="login_photo">
+    </aside>
 </div>
 
 @code {
@@ -97,18 +94,12 @@
         }
         catch (HttpRequestException ex)
         {
-            if (ex.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            _error = ex.StatusCode switch
             {
-                _error = "Link aktywacyjny jest nieprawidłowy lub wygasł. Spróbuj wygenerować nowy link.";
-            }
-            else if (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
-            {
-                _error = "Nie znaleziono użytkownika. Upewnij się, że korzystasz z aktualnego linku aktywacyjnego.";
-            }
-            else
-            {
-                _error = "Wystąpił błąd podczas potwierdzania adresu email. Spróbuj ponownie później.";
-            }
+                System.Net.HttpStatusCode.BadRequest => "Link aktywacyjny jest nieprawidłowy lub wygasł. Spróbuj wygenerować nowy link.",
+                System.Net.HttpStatusCode.NotFound => "Nie znaleziono użytkownika. Upewnij się, że korzystasz z aktualnego linku aktywacyjnego.",
+                _ => "Wystąpił błąd podczas potwierdzania adresu email. Spróbuj ponownie później."
+            };
         }
         catch (Exception)
         {
