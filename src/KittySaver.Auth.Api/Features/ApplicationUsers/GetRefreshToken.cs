@@ -39,7 +39,7 @@ public sealed class GetRefreshToken : IEndpoint
         public async Task<LoginResponse> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
         {
             RefreshToken refreshToken = await refreshTokenService
-                .ValidateRefreshTokenAsync(request.RefreshToken, cancellationToken);
+                .ValidateRefreshTokenAsync(request.RefreshToken.Replace("\\u002B", "+"), cancellationToken);
 
             ApplicationUser user = refreshToken.ApplicationUser ?? 
                 await userManager.Users
@@ -48,7 +48,7 @@ public sealed class GetRefreshToken : IEndpoint
 
             (string token, DateTimeOffset expiresAt) = await jwtTokenService.GenerateTokenAsync(user);
             
-            await refreshTokenService.RevokeRefreshTokenAsync(request.RefreshToken, cancellationToken);
+            await refreshTokenService.RevokeRefreshTokenAsync(request.RefreshToken.Replace("\\u002B", "+"), cancellationToken);
             
             RefreshToken newRefreshToken = await refreshTokenService
                 .GenerateRefreshTokenAsync(user.Id, cancellationToken);

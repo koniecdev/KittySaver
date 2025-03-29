@@ -16,6 +16,6 @@ public sealed record ConfirmEmailRequest(string UserId, string Token);
 
 public sealed record ForgotPasswordRequest(string Email);
 public sealed record ResetPasswordRequest(string Email, string Token, string Password);
-public sealed record ChangePasswordRequest(string CurrentPassword, string NewPassword);
+public sealed record ChangePasswordRequest(string Email, string CurrentPassword, string NewPassword);
 public sealed record LogoutRequest(string RefreshToken);
 public sealed record ResendEmailConfirmationRequest(string Email);

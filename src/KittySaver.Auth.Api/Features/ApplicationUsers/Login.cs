@@ -36,7 +36,8 @@ public sealed class Login : IEndpoint
 
     internal sealed class LoginCommandHandler(
         UserManager<ApplicationUser> userManager,
-        IJwtTokenService jwtTokenService)
+        IJwtTokenService jwtTokenService,
+        IRefreshTokenService refreshTokenService)
         : IRequestHandler<LoginCommand, LoginResponse>
     {
         public async Task<LoginResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -53,12 +54,22 @@ public sealed class Login : IEndpoint
                 throw new AuthenticationException();
             }
             
+            bool isEmailConfirmed = await userManager.IsEmailConfirmedAsync(user);
+
+            if (!isEmailConfirmed)
+            {
+                throw new AuthenticationException();
+            }
+            
             (string token, DateTimeOffset expiresAt) = await jwtTokenService.GenerateTokenAsync(user);
+            RefreshToken refreshToken = await refreshTokenService.GenerateRefreshTokenAsync(user.Id, cancellationToken);
             
             return new LoginResponse
             {
                 AccessToken = token,
-                AccessTokenExpiresAt = expiresAt
+                AccessTokenExpiresAt = expiresAt,
+                RefreshToken = refreshToken.Token,
+                RefreshTokenExpiresAt = refreshToken.ExpiresAt
             };
         }
     }

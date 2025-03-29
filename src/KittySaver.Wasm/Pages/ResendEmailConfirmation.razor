@@ -1,0 +1,123 @@
+﻿@page "/resend-email-confirmation"
+@using System.ComponentModel.DataAnnotations
+@using KittySaver.Shared.Requests
+@using KittySaver.Wasm.Shared.HttpClients
+@inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
+@inject IApiClient ApiClient
+@inject NavigationManager NavigationManager
+
+<PageTitle>Uratujkota.pl - Ponowne wysłanie linku potwierdzającego</PageTitle>
+
+<div class="login_wrapper">
+    <section class="login_container">
+        <header>
+            <h2>Ponowne wysłanie linku potwierdzającego</h2>
+            @if (!_isSuccess)
+            {
+                <p>
+                    Wpisz adres email, którego używasz do logowania w serwisie. Wyślemy na niego link potwierdzający.
+                </p>
+            }
+        </header>
+        
+        @if (_isSuccess)
+        {
+            <div class="status-message status-success">
+                <div class="status-icon">✓</div>
+                <h3>Link aktywacyjny wysłany!</h3>
+                <p>Jeśli podany adres email istnieje w naszej bazie i nie został jeszcze potwierdzony, wyślemy na niego nowy link aktywacyjny.</p>
+                <p>Sprawdź swoją skrzynkę pocztową i kliknij link w wiadomości, aby potwierdzić adres email.</p>
+                <div class="login_form_tile_buttons">
+                    <a href="/login" class="default_btn btn_green">Przejdź do logowania</a>
+                </div>
+            </div>
+        }
+        else
+        {
+            @if (_error != null)
+            {
+                <div class="status-message status-error">
+                    <p>@_error</p>
+                </div>
+            }
+            
+            <EditForm Model="_model" OnValidSubmit="HandleSubmit" class="login_form">
+                <DataAnnotationsValidator />
+                
+                <div class="login_form_tile">
+                    <label for="email">Adres email:</label>
+                    <InputText id="email" @bind-Value="_model.Email" />
+                    <ValidationMessage For="@(() => _model.Email)" />
+                </div>
+                
+                <div class="login_form_tile_buttons">
+                    <button type="submit" class="default_btn btn_green" disabled="@_isProcessing">
+                        @if (_isProcessing)
+                        {
+                            <span>Wysyłanie...</span>
+                        }
+                        else
+                        {
+                            <span>Wyślij link potwierdzający</span>
+                        }
+                    </button>
+                    <a href="/login" class="default_btn">Wróć do logowania</a>
+                </div>
+            </EditForm>
+        }
+    </section>
+
+    <aside class="login_photo">
+    </aside>
+</div>
+
+@code {
+    private class ResendModel
+    {
+        [Required(ErrorMessage = "Adres email jest wymagany")]
+        [EmailAddress(ErrorMessage = "Podaj prawidłowy adres email")]
+        public string Email { get; set; } = "";
+    }
+    
+    private readonly ResendModel _model = new();
+    private bool _isProcessing;
+    private bool _isSuccess;
+    private string? _error;
+    
+    private async Task HandleSubmit()
+    {
+        _isProcessing = true;
+        _error = null;
+        
+        try
+        {
+            // Call API to resend confirmation email
+            await ApiClient.PostAsync(
+                "https://localhost:44371/api/v1/application-users/resend-email-confirmation",
+                new ResendEmailConfirmationRequest(_model.Email));
+            
+            // If we got here, the request was successful
+            _isSuccess = true;
+        }
+        catch (HttpRequestException ex)
+        {
+            if (ex.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                _error = "Nieprawidłowy adres email.";
+            }
+            else
+            {
+                _error = "Wystąpił błąd podczas wysyłania linku aktywacyjnego. Spróbuj ponownie później.";
+            }
+        }
+        catch (Exception)
+        {
+            _error = "Wystąpił nieoczekiwany błąd. Spróbuj ponownie później.";
+        }
+        finally
+        {
+            _isProcessing = false;
+            StateHasChanged();
+        }
+    }
+}

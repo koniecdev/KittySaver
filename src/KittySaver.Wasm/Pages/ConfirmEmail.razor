@@ -1,0 +1,114 @@
+﻿@page "/confirm-email"
+@using KittySaver.Shared.Requests
+@using KittySaver.Wasm.Shared.HttpClients
+@inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
+@inject IApiClient ApiClient
+@inject NavigationManager NavigationManager
+
+<PageTitle>Uratujkota.pl - Potwierdzenie adresu email</PageTitle>
+
+<div class="login_wrapper">
+    <section class="login_container">
+        <header>
+            <h2>Potwierdzenie adresu email</h2>
+        </header>
+        
+        @if (_isProcessing)
+        {
+            <div class="status-message">
+                <div class="spinner"></div>
+                <h3>Weryfikacja adresu email...</h3>
+                <p>Trwa weryfikacja Twojego adresu email. Prosimy o chwilę cierpliwości.</p>
+            </div>
+        }
+        else if (_isConfirmed)
+        {
+            <div class="status-message status-success">
+                <div class="status-icon">✓</div>
+                <h3>Email potwierdzony!</h3>
+                <p>Twój adres email został pomyślnie potwierdzony. Możesz teraz korzystać ze wszystkich funkcji serwisu.</p>
+                <div class="login_form_tile_buttons">
+                    <a href="/login?emailConfirmed=true" class="default_btn btn_green">Zaloguj się</a>
+                </div>
+            </div>
+        }
+        else if (_error != null)
+        {
+            <div class="status-message status-error">
+                <div class="status-icon">✗</div>
+                <h3>Wystąpił błąd</h3>
+                <p>@_error</p>
+                <div class="login_form_tile_buttons">
+                    <a href="/resend-email-confirmation" class="default_btn">Wyślij ponownie link aktywacyjny</a>
+                    <a href="/login" class="default_btn">Przejdź do logowania</a>
+                </div>
+            </div>
+        }
+    </section>
+
+    <aside class="login_photo">
+    </aside>
+</div>
+
+@code {
+    private bool _isProcessing = true;
+    private bool _isConfirmed;
+    private string? _error;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+    
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+    
+        // Opcja 1: Użyj System.Web.HttpUtility
+        var queryString = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        var userId = queryString["userId"];
+        var token = queryString["token"];
+    
+        // Opcja 2: Własna implementacja
+        // var queryParams = ParseQueryString(uri.Query);
+        // var userId = queryParams.GetValueOrDefault("userId");
+        // var token = queryParams.GetValueOrDefault("token");
+    
+        if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+        {
+            _error = "Nieprawidłowy link potwierdzający. Upewnij się, że kliknąłeś właściwy link z wiadomości email.";
+            _isProcessing = false;
+            return;
+        }
+    
+        await ConfirmTheEmail(userId, token);
+    }
+    
+    private async Task ConfirmTheEmail(string userId, string token)
+    {
+        try
+        {
+            // Call API to confirm email
+            await ApiClient.PostAsync(
+                $"https://localhost:44371/api/v1/application-users/confirm-email?userId={Uri.EscapeDataString(userId)}&token={Uri.EscapeDataString(token)}");
+            
+            // If we got here, confirmation was successful
+            _isConfirmed = true;
+        }
+        catch (HttpRequestException ex)
+        {
+            _error = ex.StatusCode switch
+            {
+                System.Net.HttpStatusCode.BadRequest => "Link aktywacyjny jest nieprawidłowy lub wygasł. Spróbuj wygenerować nowy link.",
+                System.Net.HttpStatusCode.NotFound => "Nie znaleziono użytkownika. Upewnij się, że korzystasz z aktualnego linku aktywacyjnego.",
+                _ => "Wystąpił błąd podczas potwierdzania adresu email. Spróbuj ponownie później."
+            };
+        }
+        catch (Exception)
+        {
+            _error = "Wystąpił nieoczekiwany błąd. Spróbuj ponownie później.";
+        }
+        finally
+        {
+            _isProcessing = false;
+            StateHasChanged();
+        }
+    }
+}

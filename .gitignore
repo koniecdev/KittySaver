@@ -486,3 +486,5 @@ $RECYCLE.BIN/
 logs
 
 src/KittySaver.Api/PrivateFiles/**/*
+src/KittySaver.Auth.Api/appsettings.Local.json
+src/KittySaver.Auth.Api/appsettings.Production.json
