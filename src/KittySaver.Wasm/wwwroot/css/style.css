@@ -88,7 +88,7 @@ main{
 p{
     margin: 0;
 }
-.advertisement_grid, .subpage_advertisements_grid{
+.listing_grid, .subpage_advertisements_grid{
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     grid-gap: 2.75rem;
@@ -100,10 +100,10 @@ p{
     grid-template-columns: repeat(4, 1fr);
     padding: 0;
 }
-.advertisement_grid header{
+.listing_grid header{
     grid-column: 1/-1;
 }
-.advertisement_tile {
+.listing_tile {
     border-left: 10px solid var(--kitty-green);
     border-radius: 10px;
     overflow: hidden;
@@ -116,7 +116,7 @@ p{
     grid-gap: 1rem;
     height: max-content;
 }
-.advertisement_tile_content strong{
+.listing_tile_content strong{
     font-size: 1.125rem;
     display: block;
 }
@@ -127,7 +127,7 @@ img{
     display: grid;
     grid-template-columns: 350px 1fr;
 }
-.advertisement_tile_img_wrapper {
+.listing_tile_img_wrapper {
     width: 100%;
     display: grid;
     border-radius: 10px;
@@ -135,7 +135,7 @@ img{
     position: relative;
     padding-top: 100%;
 }
-.advertisement_tile_img_wrapper img{
+.listing_tile_img_wrapper img{
     display: block;
     width: 100%;
     height: 100%;
@@ -218,14 +218,14 @@ select{
     grid-gap: 2rem;
     grid-template-columns: 1fr max-content;
 }
-.subpage_header:not(.advertisement_header){
+.subpage_header:not(.listing_header){
     align-items: center;
 }
 .subpage_header h1{
     font-size: 3rem;
     margin: 0;
 }
-.advertisement_header h1{
+.listing_header h1{
     grid-column: 1/-1;
 }
 .subpage_header p{
@@ -252,7 +252,7 @@ select{
     margin: 0;
     font-size: 1.25rem;
 }
-.advertisement_element{
+.listing_element{
     background-color: #242424;
     border-left: 10px solid #fff;
     border-radius: 10px;
@@ -261,12 +261,12 @@ select{
     align-content: center;
     grid-auto-rows: max-content;
 }
-.advertisement_element_warning {
+.listing_element_warning {
     border-left-color: var(--kitty-yellow);
     background-color: #3D3A2B;
     color: #fff;
 }
-.advertisement_element > strong{
+.listing_element > strong{
     margin-bottom: .25rem;
 }
 .subpage_cat_tile{
@@ -342,12 +342,12 @@ select{
     width: auto;
     fill: #fff;
 }
-.btn_advertisement_contact_inner{
+.btn_listing_contact_inner{
     display: flex;
     gap: 1rem;
     align-items: center;
 }
-.btn_advertisement_contact_clickable_link{
+.btn_listing_contact_clickable_link{
     background-color: var(--kitty-green);
     padding: 0 .5rem;
     border-radius: 10px;
@@ -519,20 +519,20 @@ select{
 /*/register*/
 
 /* Advertisement creation wizard styles */
-.advertisement_wizard_steps {
+.listing_wizard_steps {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
 }
 
-.advertisement_wizard_steps .step {
+.listing_wizard_steps .step {
     padding: 0.75rem;
     text-align: center;
     background-color: #242424;
     border-radius: 10px;
 }
 
-.advertisement_wizard_steps .step.active {
+.listing_wizard_steps .step.active {
     background-color: var(--kitty-green);
     font-weight: bold;
 }
@@ -677,12 +677,12 @@ select{
     padding-left: 2rem;
 }
 
-.advertisement_preview {
+.listing_preview {
     padding-top: 1rem;
     margin-top: 1rem;
 }
 
-.advertisement_warning {
+.listing_warning {
     background-color: #3D3A2B;
     border-left: 10px solid var(--kitty-yellow);
     padding: 1rem;
@@ -731,13 +731,13 @@ button.disabled {
 }
 
 /* Advertisement wizard shared styles */
-.advertisement_wizard_steps {
+.listing_wizard_steps {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
 }
 
-.advertisement_wizard_steps .step {
+.listing_wizard_steps .step {
     padding: 0.75rem;
     text-align: center;
     background-color: #242424;
@@ -745,7 +745,7 @@ button.disabled {
     transition: background-color 0.2s ease;
 }
 
-.advertisement_wizard_steps .step.active {
+.listing_wizard_steps .step.active {
     background-color: var(--kitty-green);
     font-weight: bold;
 }
@@ -945,7 +945,7 @@ button.disabled {
 
 /* Preview styles */
 
-.advertisement_warning {
+.listing_warning {
     background-color: #3D3A2B;
     border-left: 10px solid var(--kitty-yellow);
     padding: 1rem;
@@ -953,7 +953,7 @@ button.disabled {
     margin: 1rem 0;
 }
 
-.advertisement_details {
+.listing_details {
     margin: 1rem 0;
     padding: 0.75rem;
     background-color: #303030;
@@ -1038,51 +1038,51 @@ button.disabled {
     grid-gap: 1.5rem;
 }
 
-.user_advertisement_tile {
+.user_listing_tile {
     display: grid;
     grid-gap: 1rem;
     padding: 1.5rem;
 }
 
-.user_advertisement_header {
+.user_listing_header {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.user_advertisement_header h3 {
+.user_listing_header h3 {
     margin: 0;
     font-size: 1.25rem;
 }
 
-.user_advertisement_content {
+.user_listing_content {
     display: grid;
     gap: 1rem;
 }
 
-.advertisement_details {
+.listing_details {
     display: grid;
     gap: 0.25rem;
 }
 
-.advertisement_details p {
+.listing_details p {
     margin: 0;
 }
 
-.advertisement_description {
+.listing_description {
     border-left: 4px solid #303030;
     padding-left: 1rem;
     margin: 0.5rem 0;
 }
 
-.advertisement_cats {
+.listing_cats {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
     margin-top: 0.5rem;
 }
 
-.advertisement_cat_chip {
+.listing_cat_chip {
     background-color: #303030;
     color: white;
     padding: 0.3rem 0.7rem;
@@ -1090,27 +1090,27 @@ button.disabled {
     font-size: 0.875rem;
 }
 
-.user_advertisement_actions {
+.user_listing_actions {
     display: flex;
     gap: 0.75rem;
     justify-content: flex-end;
     margin-top: 0.5rem;
 }
 
-.user_advertisement_actions .default_btn {
+.user_listing_actions .default_btn {
     display: flex;
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
 }
 
-.user_advertisement_actions svg {
+.user_listing_actions svg {
     width: 18px;
     height: 18px;
 }
 
 /* Advertisement status styles */
-.advertisement_status {
+.listing_status {
     display: flex;
     align-items: center;
 }
@@ -1197,7 +1197,7 @@ button.disabled {
     text-align: center;
 }
 
-.empty-state-container .advertisement_element {
+.empty-state-container .listing_element {
     padding: 3rem;
     display: flex;
     flex-direction: column;
@@ -1209,14 +1209,14 @@ button.disabled {
     margin-top: 1rem;
 }
 /* Delete advertisement page styles */
-.advertisement_details {
+.listing_details {
     background-color: #303030;
     padding: 1rem;
     border-radius: 8px;
     margin: 1rem 0;
 }
 
-.advertisement_description {
+.listing_description {
     margin: 1.5rem 0;
 }
 
@@ -1270,13 +1270,13 @@ button.disabled {
     padding: 20px;
 }
 
-.advertisement_wizard_steps {
+.listing_wizard_steps {
     display: flex;
     border-radius: 5px;
     overflow: hidden;
 }
 
-.advertisement_wizard_steps .step {
+.listing_wizard_steps .step {
     flex: 1;
     padding: 12px 10px;
     text-align: center;
@@ -1284,17 +1284,17 @@ button.disabled {
     transition: background-color 0.3s;
 }
 
-.advertisement_wizard_steps .step:last-child {
+.listing_wizard_steps .step:last-child {
     border-right: none;
 }
 
-.advertisement_wizard_steps .step.active {
+.listing_wizard_steps .step.active {
     background-color: #28a745;
     color: white;
     font-weight: bold;
 }
 
-.advertisement_wizard_steps .step.disabled {
+.listing_wizard_steps .step.disabled {
     pointer-events: none;
     opacity: 0.6;
 }
@@ -1306,14 +1306,14 @@ button.disabled {
     display: inline-block;
 }
 
-.cat_advertisement_options {
+.cat_listing_options {
     display: flex;
     flex-direction: column;
     gap: 15px;
     margin-top: 10px;
 }
 
-.cat_advertisement_option {
+.cat_listing_option {
     display: flex;
     padding: 15px;
     border: 2px solid #ddd;
@@ -1322,15 +1322,15 @@ button.disabled {
     transition: all 0.3s;
 }
 
-.cat_advertisement_option:hover {
+.cat_listing_option:hover {
     border-color: #28a745;
 }
 
-.cat_advertisement_option.active {
+.cat_listing_option.active {
     border-color: #28a745;
 }
 
-.cat_advertisement_option_icon {
+.cat_listing_option_icon {
     margin-right: 15px;
     font-size: 24px;
     color: #28a745;
@@ -1338,12 +1338,12 @@ button.disabled {
     align-items: center;
 }
 
-.cat_advertisement_option_content h5 {
+.cat_listing_option_content h5 {
     margin: 0 0 5px 0;
     font-size: 16px;
 }
 
-.cat_advertisement_option_content p {
+.cat_listing_option_content p {
     margin: 0;
     color: #666;
     font-size: 14px;
@@ -1360,13 +1360,13 @@ button.disabled {
     padding: 20px;
 }
 
-.advertisement_wizard_steps {
+.listing_wizard_steps {
     display: flex;
     border-radius: 5px;
     overflow: hidden;
 }
 
-.advertisement_wizard_steps .step {
+.listing_wizard_steps .step {
     flex: 1;
     padding: 12px 10px;
     text-align: center;
@@ -1374,11 +1374,11 @@ button.disabled {
     transition: background-color 0.3s;
 }
 
-.advertisement_wizard_steps .step:last-child {
+.listing_wizard_steps .step:last-child {
     border-right: none;
 }
 
-.advertisement_wizard_steps .step.active {
+.listing_wizard_steps .step.active {
     background-color: #28a745;
     color: white;
     font-weight: bold;
@@ -1733,7 +1733,7 @@ button.disabled {
     }
 }
 @media screen and (max-width: 1150px){
-    .advertisement_grid,
+    .listing_grid,
     .subpage_advertisements_grid{
         padding: 1.5rem;
         grid-gap: 1.5rem;
@@ -1843,7 +1843,7 @@ button.disabled {
     .login_container, .register_container{
         order: 1;
     }
-    .advertisement_wizard_steps{
+    .listing_wizard_steps{
         display: grid;
         grid-template-columns: repeat(2, 1fr);
     }
@@ -1862,7 +1862,7 @@ button.disabled {
         grid-template-columns: repeat(2, 1fr);
         grid-gap: 1rem;
     }
-    .advertisement_grid, .subpage_advertisements_grid{
+    .listing_grid, .subpage_advertisements_grid{
         grid-template-columns: repeat(2, 1fr);
     }
     .subpage_cats_grid{
@@ -1892,13 +1892,13 @@ button.disabled {
     }
 }
 @media screen and (max-width: 500px) {
-    .advertisement_grid, .subpage_advertisements_grid{
+    .listing_grid, .subpage_advertisements_grid{
         grid-template-columns: 1fr;
     }
-    .advertisement_tile_content{
+    .listing_tile_content{
         font-size: 1.25rem;
     }
-    .advertisement_tile_content strong{
+    .listing_tile_content strong{
         font-size: 1.5rem;
     }
     .index_aside{
@@ -1910,7 +1910,7 @@ button.disabled {
     .logo span{
         display: none;
     }
-    .advertisement_header h1{
+    .listing_header h1{
         font-size: 2rem;
     }
     .subpage_header p{
@@ -1928,7 +1928,7 @@ button.disabled {
     .subpage_header h1{
         font-size: 2rem;
     }
-    .advertisement_wizard_steps{
+    .listing_wizard_steps{
         display: grid;
         grid-template-columns: 1fr;
     }

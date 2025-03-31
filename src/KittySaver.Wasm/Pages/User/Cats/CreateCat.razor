@@ -26,7 +26,7 @@
         </header>
 
         <!-- Wskaźnik postępu -->
-        <div class="advertisement_wizard_steps">
+        <div class="listing_wizard_steps">
             <div class="step @(_currentStep == WizardStep.CatInfo ? "active" : "")"
                  @onclick="async () => await NavigateToStepAsync(WizardStep.CatInfo)">
                 1. Dane kota
@@ -50,7 +50,7 @@
         {
             case WizardStep.CatInfo:
                 <section class="subpage_main_info">
-                    <div class="subpage_description advertisement_element advertisement_element_warning">
+                    <div class="subpage_description listing_element listing_element_warning">
                         <p>
                             W tym kroku dodajesz podstawowe informacje o kocie. Po zapisaniu, będziesz mógł dodać zdjęcia i utworzyć ogłoszenie.
                         </p>
@@ -143,14 +143,14 @@
 
             case WizardStep.MainPhoto:
                 <section class="subpage_main_info">
-                    <div class="subpage_description advertisement_element">
+                    <div class="subpage_description listing_element">
                         <h3>Główne zdjęcie kota</h3>
                         <p>
                             Dodaj lub zaktualizuj główne zdjęcie dla Twojego kota. To zdjęcie będzie widoczne jako główne zdjęcie kota w ogłoszeniu.
                         </p>
                     </div>
 
-                    <div class="subpage_description advertisement_element advertisement_element_warning">
+                    <div class="subpage_description listing_element listing_element_warning">
                         <p>
                             <strong>Ważne:</strong> Miniaturka jest wymagana, aby kot był widoczny poprawnie.
                             Bez niej kot będzie miał domyślne zdjęcie zastępcze.
@@ -222,7 +222,7 @@
 
             case WizardStep.Gallery:
                 <section class="subpage_main_info">
-                    <div class="subpage_description advertisement_element">
+                    <div class="subpage_description listing_element">
                         <h3>Galeria zdjęć kota</h3>
                         <p>
                             Zdjęcia w galerii pomogą potencjalnym opiekunom lepiej poznać kota.
@@ -264,7 +264,7 @@
                         </div>
                     </div>
 
-                    <div class="subpage_description advertisement_element manage_gallery_container">
+                    <div class="subpage_description listing_element manage_gallery_container">
                         <h3>Aktualne zdjęcia w galerii</h3>
                         @if (!_galleryImages.Any())
                         {
@@ -301,7 +301,7 @@
 
             case WizardStep.Advertisement:
                 <section class="subpage_main_info">
-                    <div class="subpage_description advertisement_element">
+                    <div class="subpage_description listing_element">
                         <h3>Ogłoszenie dla kota</h3>
                         <p>
                             Możesz utworzyć nowe ogłoszenie dla tego kota lub dodać go do istniejącego ogłoszenia.
@@ -312,35 +312,35 @@
                         <div class="subpage_form">
                             <div class="login_form_tile span2">
                                 <h4>Wybierz opcję:</h4>
-                                <div class="cat_advertisement_options">
-                                    <div class="cat_advertisement_option @(_advertisementOption == AdvertisementOption.CreateNew ? "active" : "")"
+                                <div class="cat_listing_options">
+                                    <div class="cat_listing_option @(_advertisementOption == AdvertisementOption.CreateNew ? "active" : "")"
                                          @onclick="() => _advertisementOption = AdvertisementOption.CreateNew">
-                                        <div class="cat_advertisement_option_icon">
+                                        <div class="cat_listing_option_icon">
                                             <i class="fas fa-plus-circle"></i>
                                         </div>
-                                        <div class="cat_advertisement_option_content">
+                                        <div class="cat_listing_option_content">
                                             <h5>Utwórz nowe ogłoszenie</h5>
                                             <p>Utworzenie nowego ogłoszenia z tym kotem</p>
                                         </div>
                                     </div>
 
-                                    <div class="cat_advertisement_option @(_advertisementOption == AdvertisementOption.AddToExisting ? "active" : "")"
+                                    <div class="cat_listing_option @(_advertisementOption == AdvertisementOption.AddToExisting ? "active" : "")"
                                          @onclick="() => _advertisementOption = AdvertisementOption.AddToExisting">
-                                        <div class="cat_advertisement_option_icon">
+                                        <div class="cat_listing_option_icon">
                                             <i class="fas fa-clipboard-list"></i>
                                         </div>
-                                        <div class="cat_advertisement_option_content">
+                                        <div class="cat_listing_option_content">
                                             <h5>Dodaj do istniejącego ogłoszenia</h5>
                                             <p>Dodaj kota do istniejącego ogłoszenia z listy</p>
                                         </div>
                                     </div>
 
-                                    <div class="cat_advertisement_option @(_advertisementOption == AdvertisementOption.Later ? "active" : "")"
+                                    <div class="cat_listing_option @(_advertisementOption == AdvertisementOption.Later ? "active" : "")"
                                          @onclick="() => _advertisementOption = AdvertisementOption.Later">
-                                        <div class="cat_advertisement_option_icon">
+                                        <div class="cat_listing_option_icon">
                                             <i class="fas fa-clock"></i>
                                         </div>
-                                        <div class="cat_advertisement_option_content">
+                                        <div class="cat_listing_option_content">
                                             <h5>Utworzę ogłoszenie później</h5>
                                             <p>Kot będzie dostępny na liście twoich kotów, ale nie w ogłoszeniu</p>
                                         </div>

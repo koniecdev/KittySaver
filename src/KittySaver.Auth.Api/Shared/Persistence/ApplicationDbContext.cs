@@ -21,26 +21,62 @@ public sealed class ApplicationDbContext(
         builder.ApplyConfigurationsFromAssembly(typeof(Program).Assembly);
     }
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+{
+    foreach (EntityEntry<AuditableEntity> entity in ChangeTracker.Entries<AuditableEntity>())
     {
-        foreach (EntityEntry<AuditableEntity> entity in ChangeTracker.Entries<AuditableEntity>())
+        // Sprawdź, czy to jest przypadek tworzenia nowego RefreshToken
+        bool isRefreshTokenCreation = entity.Entity is RefreshToken refreshToken && 
+                                     entity.State == EntityState.Added;
+
+        switch (entity.State)
         {
-            switch (entity.State)
-            {
-                case EntityState.Added:
-                    entity.Entity.CreatedOn = dateTimeProvider.Now;
-                    entity.Entity.CreatedBy = currentUserService.UserId;
-                    break;
-                case EntityState.Modified:
-                    entity.Entity.LastModificationOn = dateTimeProvider.Now;
+            case EntityState.Added:
+                entity.Entity.CreatedOn = dateTimeProvider.Now;
+                
+                // Obsługa przypadku tworzenia tokenu podczas logowania
+                if (isRefreshTokenCreation)
+                {
+                    // Bezpośrednio używamy ID użytkownika z RefreshToken zamiast pobierać z kontekstu
+                    RefreshToken token = (RefreshToken)entity.Entity;
+                    entity.Entity.CreatedBy = token.ApplicationUserId.ToString();
+                }
+                else
+                {
+                    try
+                    {
+                        // Standardowa obsługa dla innych encji
+                        entity.Entity.CreatedBy = currentUserService.UserId;
+                    }
+                    catch (System.Security.Authentication.AuthenticationException)
+                    {
+                        // Awaryjnie, jeśli nie ma zalogowanego użytkownika
+                        entity.Entity.CreatedBy = "System";
+                    }
+                }
+                break;
+                
+            case EntityState.Modified:
+                entity.Entity.LastModificationOn = dateTimeProvider.Now;
+                
+                try
+                {
                     entity.Entity.LastModificationBy = currentUserService.UserId;
-                    break;
-                case EntityState.Detached:
-                case EntityState.Unchanged:
-                case EntityState.Deleted:
-                default:
-                    break;
-            }
+                }
+                catch (System.Security.Authentication.AuthenticationException)
+                {
+                    // Awaryjnie, jeśli nie ma zalogowanego użytkownika
+                    entity.Entity.LastModificationBy = "System";
+                }
+                break;
+                
+            case EntityState.Detached:
+            case EntityState.Unchanged:
+            case EntityState.Deleted:
+            default:
+                break;
         }
-        return base.SaveChangesAsync(cancellationToken);
     }
+    
+    return base.SaveChangesAsync(cancellationToken);
+}
 }

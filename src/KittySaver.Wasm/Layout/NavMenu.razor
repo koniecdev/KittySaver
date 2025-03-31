@@ -64,8 +64,8 @@
                 // Call API to revoke the refresh token
                 try
                 {
-                    await ApiClient.PostAsync<LogoutRequest, object>(
-                        "https://localhost:44371/api/v1/application-users/logout",
+                    await ApiClient.PostAsync(
+                        $"{StaticDetails.AuthUrl}application-users/logout",
                         new LogoutRequest(refreshToken));
                 }
                 catch

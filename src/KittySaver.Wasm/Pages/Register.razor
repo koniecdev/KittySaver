@@ -93,11 +93,32 @@
                 </header>
                 <div class="login_form_tile">
                     <label for="DefaultAdvertisementPickupAddressCountry">Kraj:</label>
-                    <InputText id="DefaultAdvertisementPickupAddressCountry" type="text" @bind-Value="_registerDto.DefaultAdvertisementPickupAddressCountry"/>
+                    <InputSelect id="DefaultAdvertisementPickupAddressCountry" @bind-Value="_registerDto.DefaultAdvertisementPickupAddressCountry">
+                        <option value="">-- Wybierz kraj --</option>
+                        <option value="PL">Polska</option>
+                    </InputSelect>
                 </div>
                 <div class="login_form_tile">
                     <label for="DefaultAdvertisementPickupAddressState">Województwo:</label>
-                    <InputText id="DefaultAdvertisementPickupAddressState" type="text" @bind-Value="_registerDto.DefaultAdvertisementPickupAddressState"/>
+                    <InputSelect id="DefaultAdvertisementPickupAddressState" @bind-Value="_registerDto.DefaultAdvertisementPickupAddressState">
+                        <option value="">-- Wybierz województwo --</option>
+                        <option value="Dolnośląskie">Dolnośląskie</option>
+                        <option value="Kujawsko-pomorskie">Kujawsko-pomorskie</option>
+                        <option value="Lubelskie">Lubelskie</option>
+                        <option value="Lubuskie">Lubuskie</option>
+                        <option value="Łódzkie">Łódzkie</option>
+                        <option value="Małopolskie">Małopolskie</option>
+                        <option value="Mazowieckie">Mazowieckie</option>
+                        <option value="Opolskie">Opolskie</option>
+                        <option value="Podkarpackie">Podkarpackie</option>
+                        <option value="Podlaskie">Podlaskie</option>
+                        <option value="Pomorskie">Pomorskie</option>
+                        <option value="Śląskie">Śląskie</option>
+                        <option value="Świętokrzyskie">Świętokrzyskie</option>
+                        <option value="Warmińsko-mazurskie">Warmińsko-mazurskie</option>
+                        <option value="Wielkopolskie">Wielkopolskie</option>
+                        <option value="Zachodniopomorskie">Zachodniopomorskie</option>
+                    </InputSelect>
                 </div>
                 <div class="login_form_tile">
                     <label for="DefaultAdvertisementPickupAddressZipCode">Kod pocztowy:</label>

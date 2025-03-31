@@ -14,7 +14,8 @@ internal sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> log
         ProblemDetails problemDetails = new()
         {
             Status = StatusCodes.Status500InternalServerError,
-            Title = "Sorry, an internal server error has occurred, there is nothing You can do."
+            Title = "Sorry, an internal server error has occurred, there is nothing You can do.",
+            Detail = exception.Message
         };
 
         logger.LogError(

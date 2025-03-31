@@ -24,11 +24,6 @@ public sealed class CurrentUserService(IHttpContextAccessor httpContextAccessor,
                 return userId;
             }
             
-            if (!currentEnvironmentService.IsDevelopmentTheCurrentEnvironment())
-            {
-                throw new AuthenticationException();
-            }
-            
             userId = NotLoggedInValueForDevelopment;
             return userId;
         }

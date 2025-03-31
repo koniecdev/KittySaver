@@ -13,16 +13,17 @@ public interface IApiNavigationService
 
 public class ApiNavigationService(IApiClient apiClient) : IApiNavigationService
 {
+    
     public GetApiDiscoveryV1Response? Response { get; private set; }
 
     public async Task InitializeAsync()
     {
-        Response ??= await apiClient.GetAsync<GetApiDiscoveryV1Response>("https://localhost:7127/api/v1/");
+        Response ??= await apiClient.GetAsync<GetApiDiscoveryV1Response>(StaticDetails.ApiUrl);
     }
     
     public async Task RefreshAsync()
     {
-        Response = await apiClient.GetAsync<GetApiDiscoveryV1Response>("https://localhost:7127/api/v1/");
+        Response = await apiClient.GetAsync<GetApiDiscoveryV1Response>(StaticDetails.ApiUrl);
     }
 
     public Link? GetLink(string rel) => Response?.Links.FirstOrDefault(x => x.Rel == rel);

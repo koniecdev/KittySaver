@@ -53,6 +53,18 @@ public sealed class CurrentUserService(
 
     public Guid GetCurrentUserIdentityId()
     {
+        // Sprawdź, czy to endpoint rejestracji
+        bool isRegistrationEndpoint = httpContextAccessor.HttpContext?.Request.Path
+                                          .ToString().EndsWith("/api/v1/persons", StringComparison.OrdinalIgnoreCase) == true
+                                      && httpContextAccessor.HttpContext?.Request.Method == "POST";
+    
+        // Jeśli to rejestracja, pozwól na pusty identyfikator
+        if (isRegistrationEndpoint)
+        {
+            return Guid.Empty;
+        }
+    
+        // Dla innych przypadków zachowaj obecną logikę
         return Guid.TryParse(httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier),
             out Guid userId)
             ? userId

@@ -93,7 +93,7 @@
         {
             // Call API to resend confirmation email
             await ApiClient.PostAsync(
-                "https://localhost:44371/api/v1/application-users/resend-email-confirmation",
+                $"{StaticDetails.AuthUrl}application-users/resend-email-confirmation",
                 new ResendEmailConfirmationRequest(_model.Email));
             
             // If we got here, the request was successful
