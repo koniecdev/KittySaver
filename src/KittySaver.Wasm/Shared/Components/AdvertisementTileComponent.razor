@@ -1,7 +1,7 @@
 ﻿@using KittySaver.Shared.Hateoas
 @using KittySaver.Shared.Responses
 
-<div class="advertisement_element subpage_cat_tile">
+<div class="listing_element subpage_cat_tile">
     <header class="subpage_cat_tile_header">
         <div class="subpage_cat_image_wrapper">
             <div class="subpage_cat_image">
@@ -10,7 +10,7 @@
                         .FirstOrDefault(x => x.Rel == EndpointRels.Advertisement.GetAdvertisementThumbnailRel);
                     if (getAdThumbnailLink is not null)
                     {
-                        <img alt="@Advertisement.Title - uratujkota.pl" src="@getAdThumbnailLink.Href">
+                        <img alt="@Advertisement.Title - uratujkota.pl" src="@getAdThumbnailLink.Href?cachebuster=@DateTimeOffset.Now">
                     }
                     else
                     {

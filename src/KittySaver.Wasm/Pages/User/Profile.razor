@@ -33,7 +33,7 @@
         }
         else if (_person == null)
         {
-            <div class="subpage_description advertisement_element advertisement_element_warning">
+            <div class="subpage_description listing_element listing_element_warning">
                 <p>
                     Nie udało się załadować danych profilu. Spróbuj odświeżyć stronę lub zalogować się ponownie.
                 </p>
@@ -58,13 +58,13 @@
             @if (_activeTab == ProfileTab.PersonalInfo)
             {
                 <section class="subpage_main_info">
-                    <div class="subpage_description advertisement_element">
+                    <div class="subpage_description listing_element">
                         <h3>Twoje dane osobowe</h3>
                         <p>
                             Te dane są używane do kontaktu z Tobą przez administratorów serwisu i do ustawień domyślnych ogłoszeń.
                         </p>
                     </div>
-                    <div class="subpage_description advertisement_element advertisement_element_warning">
+                    <div class="subpage_description listing_element listing_element_warning">
                         <p>
                             W trosce o Twoje bezpieczeństwo nie musisz podawać ulicy i numeru domu - przekażesz je sam po kontakcie z ogłoszeniobiorcą.
                         </p>
@@ -196,7 +196,7 @@
             else if (_activeTab == ProfileTab.ChangePassword)
             {
                 <section class="subpage_main_info">
-                    <div class="subpage_description advertisement_element">
+                    <div class="subpage_description listing_element">
                         <h3>Zmiana hasła</h3>
                         <p>
                             Tutaj możesz zmienić swoje hasło. Dla bezpieczeństwa wymagamy podania aktualnego hasła.
@@ -216,7 +216,7 @@
 
                             @if (!string.IsNullOrEmpty(_passwordChangeMessage))
                             {
-                                <div class="subpage_description advertisement_element @(_passwordChangeSuccess ? "" : "advertisement_element_warning")">
+                                <div class="subpage_description listing_element @(_passwordChangeSuccess ? "" : "listing_element_warning")">
                                     <p>
                                         @_passwordChangeMessage
                                     </p>
@@ -261,7 +261,7 @@
             else if (_activeTab == ProfileTab.Stats)
             {
                 <section class="subpage_main_info">
-                    <div class="subpage_description advertisement_element">
+                    <div class="subpage_description listing_element">
                         <h3>Twoje statystyki</h3>
                         <p>
                             Tutaj znajdziesz podsumowanie Twojej aktywności w serwisie.
@@ -294,7 +294,7 @@
                         </div>
                     </div>
                     
-                    <div class="subpage_description advertisement_element">
+                    <div class="subpage_description listing_element">
                         <p>
                             Dziękujemy za Twoją aktywność i pomoc w znajdowaniu domów dla kotów!
                         </p>
@@ -501,7 +501,7 @@
         
         // Endpoint do zmiany hasła
         await ApiClient.PostAsync<ChangePasswordRequest, object>(
-            "https://localhost:44371/api/v1/application-users/change-password",
+            $"{StaticDetails.AuthUrl}application-users/change-password",
             new ChangePasswordRequest(_person.Email, _changePasswordDto.CurrentPassword, _changePasswordDto.NewPassword));
         
         // Wyświetl komunikat o sukcesie

@@ -11,6 +11,7 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Riok.Mapperly.Abstractions;
+using UnauthorizedAccessException = System.UnauthorizedAccessException;
 
 namespace KittySaver.Auth.Api.Features.ApplicationUsers;
 
@@ -58,7 +59,7 @@ public sealed class Login : IEndpoint
 
             if (!isEmailConfirmed)
             {
-                throw new AuthenticationException();
+                throw new Exception("Nie znaleziono potwierdzenia maila");
             }
             
             (string token, DateTimeOffset expiresAt) = await jwtTokenService.GenerateTokenAsync(user);

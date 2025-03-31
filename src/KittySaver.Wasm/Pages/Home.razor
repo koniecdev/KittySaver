@@ -52,7 +52,7 @@
     }
     else
     {
-        <div class="advertisement_grid">
+        <div class="listing_grid">
             <header>
                 <h1>
                     Uratuj kota - ogłoszenia adopcyjne
@@ -61,11 +61,11 @@
             </header>
             @foreach (AdvertisementResponse ad in _advertisements.Items)
             {
-                <a @onclick="@(() => NavigateToAdvertisement(ad))" @onclick:preventDefault href="/advertisement/@ad.Id" class="advertisement_tile">
-                    <div class="advertisement_tile_img_wrapper">
-                        <img src="@ad.Links.FirstOrDefault(x => x.Rel == EndpointRels.Advertisement.GetAdvertisementThumbnailRel)?.Href" class="advertisement_tile_img" alt="uratujkota.pl - @ad.Title">
+                <a @onclick="@(() => NavigateToAdvertisement(ad))" @onclick:preventDefault href="/advertisement/@ad.Id" class="listing_tile">
+                    <div class="listing_tile_img_wrapper">
+                        <img src="@ad.Links.FirstOrDefault(x => x.Rel == EndpointRels.Advertisement.GetAdvertisementThumbnailRel)?.Href" class="listing_tile_img" alt="uratujkota.pl - @ad.Title">
                     </div>
-                    <div class="advertisement_tile_content">
+                    <div class="listing_tile_content">
                         <strong>@ad.Title</strong>
                         <p>@ad.PickupAddress.City<br>@ad.PickupAddress.State<br>@ad.PickupAddress.ZipCode</p>
                     </div>

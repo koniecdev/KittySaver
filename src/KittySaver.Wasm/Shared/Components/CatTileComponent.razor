@@ -4,7 +4,7 @@
 @using MudBlazor
 @inject IApiClient ApiClient
 
-<div class="advertisement_element subpage_cat_tile">
+<div class="listing_element subpage_cat_tile">
     <header class="subpage_cat_tile_header">
         <div class="subpage_cat_image_wrapper">
             <div class="subpage_cat_image">
@@ -32,7 +32,7 @@
                             <MudCarouselItem>
                                 <div class="d-flex justify-center" style="height:100%">
                                     <div class="img_wrapper">
-                                        <img src="@Cat.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatThumbnailRel)?.Href"
+                                        <img src="@Cat.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatThumbnailRel)?.Href?cachebuster=@DateTimeOffset.Now"
                                              alt="@Cat.Name - uratujkota.pl"
                                              style="max-height: 100%; object-fit: contain;"/>
                                     </div>
@@ -45,7 +45,7 @@
                             <MudCarouselItem>
                                 <div class="d-flex justify-center" style="height:100%">
                                     <div class="img_wrapper">
-                                        <img src="@GetGalleryImageUrl(image.FilenameWithExtension)"
+                                        <img src="@GetGalleryImageUrl(image.FilenameWithExtension)?cachebuster=@DateTimeOffset.Now"
                                              alt="@Cat.Name - zdjęcie z galerii"
                                              style="max-width: 100%; object-fit: contain;"/>
                                     </div>
@@ -60,7 +60,7 @@
                         @if (Cat.IsThumbnailUploaded)
                         {
                             <div class="img_wrapper">
-                                <img src="@Cat.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatThumbnailRel)?.Href"
+                                <img src="@Cat.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatThumbnailRel)?.Href?cachebuster=@DateTimeOffset.Now"
                                      alt="@Cat.Name - uratujkota.pl"
                                      style="max-width: 100%; object-fit: contain;" />
                             </div>
@@ -68,7 +68,7 @@
                         else if (_galleryImages.Count == 1)
                         {
                             <div class="img_wrapper">
-                                <img src="@GetGalleryImageUrl(_galleryImages[0].FilenameWithExtension)"
+                                <img src="@GetGalleryImageUrl(_galleryImages[0].FilenameWithExtension)?cachebuster=@DateTimeOffset.Now"
                                      alt="@Cat.Name - zdjęcie z galerii"
                                      style="max-width: 100%; object-fit: contain;" />
                             </div>

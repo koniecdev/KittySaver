@@ -36,7 +36,7 @@
             </header>
 
             <!-- Wskaźnik postępu -->
-            <div class="advertisement_wizard_steps">
+            <div class="listing_wizard_steps">
                 <div class="step @(_currentStep == WizardStep.CatInfo ? "active" : "")" 
                      @onclick="() => NavigateToStep(WizardStep.CatInfo)">
                     1. Dane kota
@@ -56,7 +56,7 @@
             {
                 case WizardStep.CatInfo:
                     <section class="subpage_main_info">
-                        <div class="subpage_description advertisement_element advertisement_element_warning">
+                        <div class="subpage_description listing_element listing_element_warning">
                             @if (_cat.IsAssignedToAdvertisement)
                             {
                                 <p>
@@ -167,14 +167,14 @@
 
                 case WizardStep.MainPhoto:
                     <section class="subpage_main_info">
-                        <div class="subpage_description advertisement_element">
+                        <div class="subpage_description listing_element">
                             <h3>Główne zdjęcie kota</h3>
                             <p>
                                 Dodaj lub zaktualizuj główne zdjęcie dla Twojego kota. To zdjęcie będzie widoczne jako główne zdjęcie kota w ogłoszeniu.
                             </p>
                         </div>
 
-                        <div class="subpage_description advertisement_element advertisement_element_warning">
+                        <div class="subpage_description listing_element listing_element_warning">
                             <p>
                                 <strong>Ważne:</strong> Miniaturka jest wymagana, aby kot był widoczny poprawnie.
                                 Bez niej kot będzie miał domyślne zdjęcie zastępcze.
@@ -246,7 +246,7 @@
 
                 case WizardStep.Gallery:
                     <section class="subpage_main_info">
-                        <div class="subpage_description advertisement_element">
+                        <div class="subpage_description listing_element">
                             <h3>Galeria zdjęć kota</h3>
                             <p>
                                 Zdjęcia w galerii pomogą potencjalnym opiekunom lepiej poznać kota.
@@ -286,7 +286,7 @@
                             </div>
                         </div>
 
-                        <div class="subpage_description advertisement_element manage_gallery_container">
+                        <div class="subpage_description listing_element manage_gallery_container">
                             <h3>Aktualne zdjęcia w galerii</h3>
                             @if (!_galleryImages.Any())
                             {
