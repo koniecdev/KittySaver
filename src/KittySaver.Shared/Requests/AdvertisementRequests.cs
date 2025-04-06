@@ -1,7 +1,9 @@
-﻿namespace KittySaver.Shared.Requests;
+﻿using KittySaver.Shared.TypedIds;
+
+namespace KittySaver.Shared.Requests;
 
 public sealed record CreateAdvertisementRequest(
-    IEnumerable<Guid> CatsIdsToAssign,
+    IEnumerable<CatId> CatsIdsToAssign,
     string? Description,
     string PickupAddressCountry,
     string? PickupAddressState,
@@ -24,4 +26,4 @@ public sealed record UpdateAdvertisementRequest(
     string ContactInfoEmail,
     string ContactInfoPhoneNumber);
 
-public sealed record ReassignCatsToAdvertisementRequest(IEnumerable<Guid> CatIds);
+public sealed record ReassignCatsToAdvertisementRequest(IEnumerable<CatId> CatIds);

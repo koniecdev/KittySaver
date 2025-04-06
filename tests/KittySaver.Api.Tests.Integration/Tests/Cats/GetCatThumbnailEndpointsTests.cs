@@ -3,7 +3,9 @@ using System.Net.Http.Json;
 using Bogus;
 using FluentAssertions;
 using KittySaver.Api.Tests.Integration.Helpers;
-using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Shared.Common.Enums;
+using KittySaver.Shared.Responses;
+using KittySaver.Shared.TypedIds;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using KittySaver.Tests.Shared;
@@ -57,7 +59,7 @@ public class GetAdvertisementThumbnailEndpointsTests : IAsyncLifetime
     public async Task GetThumbnail_ShouldReturnSuccess_WhenValidImageIsProvided()
     {
         // Arrange
-        (Guid personId, Guid catId) = await CreateTestCat();
+        (PersonId personId, CatId catId) = await CreateTestCat();
         
         await using Stream imageStream = CreateTestImage();
         using MultipartFormDataContent content = new();
@@ -79,7 +81,7 @@ public class GetAdvertisementThumbnailEndpointsTests : IAsyncLifetime
     [Fact]
     public async Task GetThumbnail_ShouldReturnNotFound_WhenCatDoesNotExist()
     {
-        (Guid personId, _) = await CreateTestCat();
+        (PersonId personId, _) = await CreateTestCat();
 
         // Act
         HttpResponseMessage response = await _httpClient.GetAsync($"/api/v1/persons/{personId}/cats/{Guid.NewGuid()}/thumbnail");
@@ -95,7 +97,7 @@ public class GetAdvertisementThumbnailEndpointsTests : IAsyncLifetime
     public async Task UpdateThumbnail_ShouldReturnBadRequest_WhenTheSameValueIsProvidedForPersonIdAndId()
     {
         // Arrange
-        (Guid personId, Guid catId) = await CreateTestCat();
+        (PersonId personId, CatId catId) = await CreateTestCat();
         
         // Act
         HttpResponseMessage response = await _httpClient.GetAsync($"/api/v1/persons/{personId}/cats/{catId}/thumbnail");
@@ -108,19 +110,19 @@ public class GetAdvertisementThumbnailEndpointsTests : IAsyncLifetime
         problemDetails.Detail.Should().Be("Thumbnail is not uploaded");
     }
 
-    private async Task<(Guid PersonId, Guid CatId)> CreateTestCat()
+    private async Task<(PersonId PersonId, CatId CatId)> CreateTestCat()
     {
         CreatePersonRequest? createPersonRequest = _createPersonRequestGenerator.Generate();
         HttpResponseMessage personResponse = await _httpClient.PostAsJsonAsync("/api/v1/persons", createPersonRequest);
-        ApiResponses.CreatedWithIdResponse personResult = await personResponse.GetIdResponseFromResponseMessageAsync();
+        IdResponse<PersonId> personResult = await personResponse.GetIdResponseFromResponseMessageAsync<IdResponse<PersonId>>();
         
         CreateCatRequest? createCatRequest = _createCatRequestGenerator.Generate();
         HttpResponseMessage catResponse = await _httpClient.PostAsJsonAsync(
-            $"/api/v1/persons/{personResult.Id}/cats", 
+            $"/api/v1/persons/{personResult}/cats", 
             createCatRequest);
-        ApiResponses.CreatedWithIdResponse catResult = await catResponse.GetIdResponseFromResponseMessageAsync();
+        IdResponse<CatId> catResult = await catResponse.GetIdResponseFromResponseMessageAsync<IdResponse<CatId>>();
         
-        return (personResult.Id, catResult.Id);
+        return (personResult, catResult);
     }
 
     private static MemoryStream CreateTestImage(int width = 100, int height = 100)

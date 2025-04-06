@@ -2,6 +2,7 @@
 @using KittySaver.Shared.Hateoas
 @using KittySaver.Shared.Pagination
 @using KittySaver.Shared.Responses
+@using KittySaver.Shared.TypedIds
 @using KittySaver.Wasm.Shared
 @using KittySaver.Wasm.Shared.Components
 @using KittySaver.Wasm.Shared.HttpClients
@@ -150,12 +151,12 @@ else
 
     private async Task LoadAdvertisement()
     {
-        Link? link = AdvertisementState.GetSelectedAdvertisementLink(Id);
+        Link? link = AdvertisementState.GetSelectedAdvertisementLink(new AdvertisementId(Id));
 
         if (link is not null)
         {
             _advertisement = await MainApiClient.GetAsync<AdvertisementResponse>(link.Href);
-            AdvertisementState.ClearSelectedAdvertisementLink(Id);
+            AdvertisementState.ClearSelectedAdvertisementLink(new AdvertisementId(Id));
         }
         else
         {

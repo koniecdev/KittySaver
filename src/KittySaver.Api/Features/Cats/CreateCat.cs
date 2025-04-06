@@ -2,11 +2,16 @@
 using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Persistence;
-using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.DomainRepositories;
+using KittySaver.Domain.Persons.DomainServices;
+using KittySaver.Domain.Persons.Entities;
+using KittySaver.Domain.Persons.ValueObjects;
 using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.Common.Enums;
 using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.Requests;
+using KittySaver.Shared.TypedIds;
 using MediatR;
 using Riok.Mapperly.Abstractions;
 
@@ -15,7 +20,7 @@ namespace KittySaver.Api.Features.Cats;
 public sealed class CreateCat : IEndpoint
 {
     public sealed record CreateCatCommand(
-        Guid PersonId,
+        PersonId PersonId,
         string Name,
         bool IsCastrated,
         string MedicalHelpUrgency,

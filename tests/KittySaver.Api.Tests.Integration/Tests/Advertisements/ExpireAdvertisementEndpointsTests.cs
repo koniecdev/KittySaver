@@ -6,9 +6,10 @@ using FluentAssertions;
 using KittySaver.Api.Features.Advertisements;
 using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Tests.Integration.Helpers;
-using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Shared.Common.Enums;
 using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.Responses;
+using KittySaver.Shared.TypedIds;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using KittySaver.Tests.Shared;
@@ -65,20 +66,18 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
         CreatePersonRequest personRegisterRequest = _createPersonRequestGenerator.Generate();
         HttpResponseMessage personRegisterResponseMessage =
             await _httpClient.PostAsJsonAsync("api/v1/persons", personRegisterRequest);
-        ApiResponses.CreatedWithIdResponse personRegisterResponse =
-            await personRegisterResponseMessage.GetIdResponseFromResponseMessageAsync();
+        IdResponse<PersonId> personId = await personRegisterResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<PersonId>>();
         
         CreateCatRequest catCreateRequest = _createCatRequestGenerator.Generate();
         HttpResponseMessage catCreateResponseMessage =
-            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", catCreateRequest);
-        ApiResponses.CreatedWithIdResponse catCreateResponse =
-            await catCreateResponseMessage.GetIdResponseFromResponseMessageAsync();
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personId}/cats", catCreateRequest);
+        IdResponse<CatId> catId = await catCreateResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<CatId>>();
 
         CreateAdvertisementRequest request =
             new Faker<CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
                     new CreateAdvertisementRequest(
-                        CatsIdsToAssign: [catCreateResponse.Id],
+                        CatsIdsToAssign: [catId],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.CountryCode(),
                         PickupAddressState: faker.Address.State(),
@@ -91,9 +90,8 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
                     ));
 
         HttpResponseMessage advertisementResponseMessage =
-            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
-        ApiResponses.CreatedWithIdResponse advertisementResponse =
-            await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personId}/advertisements", request);
+        IdResponse<AdvertisementId> advertisementId = await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<AdvertisementId>>();
         
         await using Stream imageStream = CreateTestImageHelper.Create();
         using MultipartFormDataContent content = new();
@@ -101,19 +99,19 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
         imageContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg");
         content.Add(imageContent, "thumbnail", "test.jpg");
         await _httpClient.PutAsync(
-            $"/api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}/thumbnail", 
+            $"/api/v1/persons/{personId}/advertisements/{advertisementId}/thumbnail", 
             content);
         
         //Act
         HttpResponseMessage expireResponseMessage =
-            await _httpClient.PostAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}/expire", null);
+            await _httpClient.PostAsync($"api/v1/persons/{personId}/advertisements/{advertisementId}/expire", null);
 
         //Assert
         expireResponseMessage.StatusCode.Should().Be(HttpStatusCode.OK);
         AdvertisementHateoasResponse? hateoasResponse = await expireResponseMessage.Content.ReadFromJsonAsync<AdvertisementHateoasResponse>();
         hateoasResponse.Should().NotBeNull();
-        hateoasResponse!.Id.Should().Be(advertisementResponse.Id);
-        hateoasResponse.PersonId.Should().Be(personRegisterResponse.Id);
+        hateoasResponse!.Id.Should().Be(advertisementId);
+        hateoasResponse.PersonId.Should().Be(personId.Id);
         hateoasResponse.Status.Should().Be(AdvertisementStatus.Expired);
         List<string> expectedRels =
         [
@@ -127,7 +125,7 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Links.All(x => !string.IsNullOrWhiteSpace(x.Href)).Should().BeTrue();
         AdvertisementResponse advertisement =
             await _httpClient.GetFromJsonAsync<AdvertisementResponse>
-                ($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}")
+                ($"api/v1/persons/{personId}/advertisements/{advertisementId}")
             ?? throw new JsonException();
         advertisement.Status.Should().Be(AdvertisementStatus.Expired);
     }
@@ -139,19 +137,18 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
         CreatePersonRequest personRegisterRequest = _createPersonRequestGenerator.Generate();
         HttpResponseMessage personRegisterResponseMessage =
             await _httpClient.PostAsJsonAsync("api/v1/persons", personRegisterRequest);
-        ApiResponses.CreatedWithIdResponse personRegisterResponse =
-            await personRegisterResponseMessage.GetIdResponseFromResponseMessageAsync();
+        IdResponse<PersonId> personId = await personRegisterResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<PersonId>>();
+        
         CreateCatRequest catCreateRequest = _createCatRequestGenerator.Generate();
         HttpResponseMessage catCreateResponseMessage =
-            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", catCreateRequest);
-        ApiResponses.CreatedWithIdResponse catCreateResponse =
-            await catCreateResponseMessage.GetIdResponseFromResponseMessageAsync();
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personId}/cats", catCreateRequest);
+        IdResponse<CatId> catId = await catCreateResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<CatId>>();
 
         CreateAdvertisementRequest request =
             new Faker<CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
                     new CreateAdvertisementRequest(
-                        CatsIdsToAssign: [catCreateResponse.Id],
+                        CatsIdsToAssign: [catId],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.CountryCode(),
                         PickupAddressState: faker.Address.State(),
@@ -164,14 +161,13 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
                     ));
 
         HttpResponseMessage advertisementResponseMessage =
-            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
-        ApiResponses.CreatedWithIdResponse advertisementResponse =
-            await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
-        await _httpClient.PostAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}/expire", null);
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personId}/advertisements", request);
+        IdResponse<AdvertisementId> advertisementId = await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<AdvertisementId>>();
+        await _httpClient.PostAsync($"api/v1/persons/{personId}/advertisements/{advertisementId}/expire", null);
 
         //Act
         HttpResponseMessage duplicatedExpireResponseMessage =
-            await _httpClient.PostAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}/expire", null);
+            await _httpClient.PostAsync($"api/v1/persons/{personId}/advertisements/{advertisementId}/expire", null);
 
         //Assert
         duplicatedExpireResponseMessage.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -185,8 +181,8 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
     public async Task ExpireAdvertisement_ShouldReturnNotFound_WhenInvalidPersonIdIsProvided()
     {
         //Arrange
-        Guid randomPersonId = Guid.NewGuid();
-        Guid randomAdvertisementId = Guid.NewGuid();
+        PersonId randomPersonId = PersonId.New();
+        AdvertisementId randomAdvertisementId = AdvertisementId.New();
 
         //Act
         HttpResponseMessage expireResponseMessage =
@@ -195,7 +191,7 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
         //Assert
         expireResponseMessage.StatusCode.Should().Be(HttpStatusCode.NotFound);
         ProblemDetails notFoundProblemDetails = await expireResponseMessage.Content.ReadFromJsonAsync<ProblemDetails>()
-                                                ?? throw new JsonException();
+                                            ?? throw new JsonException();
         notFoundProblemDetails.Status.Should().Be(StatusCodes.Status404NotFound);
     }
     
@@ -206,19 +202,17 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
         CreatePersonRequest personRegisterRequest = _createPersonRequestGenerator.Generate();
         HttpResponseMessage personRegisterResponseMessage =
             await _httpClient.PostAsJsonAsync("api/v1/persons", personRegisterRequest);
-        ApiResponses.CreatedWithIdResponse personRegisterResponse =
-            await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
-        Guid randomAdvertisementId = Guid.NewGuid();
+        IdResponse<PersonId> personId = await personRegisterResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<PersonId>>();
+        AdvertisementId randomAdvertisementId = AdvertisementId.New();
 
         //Act
         HttpResponseMessage expireResponseMessage =
-            await _httpClient.PostAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{randomAdvertisementId}/expire", null);
+            await _httpClient.PostAsync($"api/v1/persons/{personId}/advertisements/{randomAdvertisementId}/expire", null);
 
         //Assert
         expireResponseMessage.StatusCode.Should().Be(HttpStatusCode.NotFound);
         ProblemDetails notFoundProblemDetails = await expireResponseMessage.Content.ReadFromJsonAsync<ProblemDetails>()
-                                                ?? throw new JsonException();
+                                            ?? throw new JsonException();
         notFoundProblemDetails.Status.Should().Be(StatusCodes.Status404NotFound);
     }
 
@@ -226,8 +220,8 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
     public async Task ExpireAdvertisement_ShouldReturnBadRequest_WhenEmptyDataAreProvided()
     {
         //Arrange
-        Guid emptyAdvertisementId = Guid.Empty;
-        Guid randomPersonId = Guid.NewGuid();
+        AdvertisementId emptyAdvertisementId = default;
+        PersonId randomPersonId = PersonId.New();
 
         //Act
         HttpResponseMessage expireResponse =

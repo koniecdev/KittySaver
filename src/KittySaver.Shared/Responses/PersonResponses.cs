@@ -1,12 +1,13 @@
 ﻿using KittySaver.Shared.Hateoas;
+using KittySaver.Shared.TypedIds;
 
 namespace KittySaver.Shared.Responses;
 
 public sealed class PersonResponse : IHateoasPersonResponse
 {
-    public required Guid Id { get; init; }
+    public required PersonId Id { get; init; }
     public required Guid UserIdentityId { get; init; }
-    public required DateTimeOffset CreatedOn { get; init; }
+    public required DateTimeOffset CreatedAt { get; init; }
     public required string Nickname { get; init; }
     public required string Email { get; init; }
     public required string PhoneNumber { get; init; }

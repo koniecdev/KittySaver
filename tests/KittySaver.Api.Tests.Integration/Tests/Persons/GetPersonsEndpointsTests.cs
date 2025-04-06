@@ -6,6 +6,7 @@ using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.Pagination;
 using KittySaver.Shared.Responses;
+using KittySaver.Shared.TypedIds;
 
 namespace KittySaver.Api.Tests.Integration.Tests.Persons;
 
@@ -44,9 +45,12 @@ public class GetPersonsEndpointsTests : IAsyncLifetime
     {
         //Arrange
         CreatePersonRequest createRequest = _createPersonRequestGenerator.Generate();
-        await _httpClient.PostAsJsonAsync("api/v1/persons", createRequest);
+        HttpResponseMessage createResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/persons", createRequest);
+        IdResponse<PersonId> personId = await createResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<PersonId>>();
+        
         //Act
         HttpResponseMessage response = await _httpClient.GetAsync("/api/v1/persons");
+        
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         PagedList<PersonResponse>? persons = await response.Content.ReadFromJsonAsync<PagedList<PersonResponse>>();
@@ -57,7 +61,7 @@ public class GetPersonsEndpointsTests : IAsyncLifetime
         persons.Links.First(x => x.Rel == EndpointRels.SelfRel).Href.Should().Contain("://");
         persons.Links.First(x => x.Rel == "by-page").Href.Should().Contain("://");
         PersonResponse registeredPerson = persons.Items.First();
-        registeredPerson.Id.Should().NotBeEmpty();
+        registeredPerson.Id.Should().Be(personId.Id);
         registeredPerson.Nickname.Should().Be(createRequest.Nickname);
         registeredPerson.Email.Should().Be(createRequest.Email);
         registeredPerson.PhoneNumber.Should().Be(createRequest.PhoneNumber);

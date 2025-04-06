@@ -6,6 +6,7 @@ using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Pagination;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Api.Shared.Persistence.ReadModels;
+using KittySaver.Shared.Common.Enums;
 using KittySaver.Shared.Pagination;
 using KittySaver.Shared.Responses;
 using MediatR;
@@ -97,7 +98,7 @@ public sealed class GetPublicAdvertisements : IEndpoint
                 
             new NumericPropertyFilter<AdvertisementReadModel, double>(p => p.PriorityScore),
             
-            new GuidPropertyFilter<AdvertisementReadModel>(p => p.PersonId)
+            new PersonIdPropertyFilter<AdvertisementReadModel>(p => p.PersonId)
         ];
         
         private static Expression<Func<AdvertisementReadModel, object>> GetSortProperty(GetPublicAdvertisementsQuery request)

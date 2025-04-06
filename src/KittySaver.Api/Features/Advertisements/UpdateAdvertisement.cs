@@ -3,9 +3,13 @@ using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.DomainRepositories;
+using KittySaver.Domain.Persons.Entities;
 using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.Common.Enums;
 using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.Requests;
+using KittySaver.Shared.TypedIds;
 using MediatR;
 using Riok.Mapperly.Abstractions;
 
@@ -14,8 +18,8 @@ namespace KittySaver.Api.Features.Advertisements;
 public sealed class UpdateAdvertisement : IEndpoint
 {
     public sealed record UpdateAdvertisementCommand(
-        Guid Id,
-        Guid PersonId,
+        AdvertisementId Id,
+        PersonId PersonId,
         string? Description,
         string PickupAddressCountry,
         string? PickupAddressState,
@@ -32,12 +36,10 @@ public sealed class UpdateAdvertisement : IEndpoint
         public UpdateAdvertisementCommandValidator()
         {
             RuleFor(x => x.PersonId)
-                .NotEmpty()
-                .NotEqual(x => x.Id);
-            
+                .NotEmpty();
+
             RuleFor(x => x.Id)
-                .NotEmpty()
-                .NotEqual(x => x.PersonId);
+                .NotEmpty();
             
             RuleFor(x => x.Description).MaximumLength(Description.MaxLength);
             

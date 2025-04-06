@@ -3,13 +3,16 @@ using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.DomainRepositories;
+using KittySaver.Domain.Persons.Entities;
+using KittySaver.Shared.TypedIds;
 using MediatR;
 
 namespace KittySaver.Api.Features.Persons;
 
 public sealed class DeletePerson : IEndpoint
 {
-    public sealed record DeletePersonCommand(Guid Id, string AuthHeader) : ICommand, IAuthorizedRequest, IPersonRequest;
+    public sealed record DeletePersonCommand(PersonId Id, string AuthHeader) : ICommand, IAuthorizedRequest, IPersonRequest;
 
     public sealed class DeletePersonCommandValidator : AbstractValidator<DeletePersonCommand>
     {
@@ -43,7 +46,7 @@ public sealed class DeletePerson : IEndpoint
             CancellationToken cancellationToken) =>
         {
             string authHeader = httpContext.Request.Headers.Authorization.ToString();
-            DeletePersonCommand command = new(id, authHeader);
+            DeletePersonCommand command = new(new PersonId(id), authHeader);
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
         }).RequireAuthorization()

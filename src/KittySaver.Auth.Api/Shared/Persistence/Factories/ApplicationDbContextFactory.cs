@@ -7,7 +7,7 @@ internal sealed class ApplicationDbContextFactoryFactory : DesignTimeDbContextFa
 {
     protected override ApplicationDbContext CreateNewInstance(DbContextOptions<ApplicationDbContext> options)
     {
-        ApplicationDbContext db = new ApplicationDbContext(options, new DefaultDateTimeProvider(), new DesignTimeMigrationsCurrentUserService());
+        ApplicationDbContext db = new ApplicationDbContext(options, new DefaultDateTimeProvider());
         return db;
     }
 }

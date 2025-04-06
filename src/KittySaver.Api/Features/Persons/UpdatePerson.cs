@@ -4,9 +4,13 @@ using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.DomainRepositories;
+using KittySaver.Domain.Persons.Entities;
+using KittySaver.Domain.Persons.ValueObjects;
 using KittySaver.Domain.ValueObjects;
 using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.Requests;
+using KittySaver.Shared.TypedIds;
 using MediatR;
 using Riok.Mapperly.Abstractions;
 
@@ -15,7 +19,7 @@ namespace KittySaver.Api.Features.Persons;
 public sealed class UpdatePerson : IEndpoint
 {
     public sealed record UpdatePersonCommand(
-        Guid Id,
+        PersonId Id,
         string Nickname,
         string Email,
         string PhoneNumber,

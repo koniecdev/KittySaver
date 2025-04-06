@@ -7,9 +7,11 @@ using FluentAssertions;
 using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.ValueObjects;
 using KittySaver.Domain.ValueObjects;
 using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.Responses;
+using KittySaver.Shared.TypedIds;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using KittySaver.Tests.Shared;
@@ -69,12 +71,10 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
                 EndpointNames.CreateCat.Rel,
                 EndpointNames.CreateAdvertisement.Rel);
         hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
-        hateoasResponse.Id.Should().NotBeEmpty();
         response.Headers.Location!.ToString().Should().Contain($"/api/v1/persons/{hateoasResponse.Id}");
         PersonResponse person =
             await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{hateoasResponse.Id}")
             ?? throw new JsonException();
-        person.Id.Should().NotBeEmpty();
     }
 
     [Theory]
@@ -119,7 +119,6 @@ public class CreatePersonEndpointsTests : IAsyncLifetime
                 EndpointNames.CreateAdvertisement.Rel);
         hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         hateoasResponse.Should().NotBeNull();
-        hateoasResponse.Id.Should().NotBeEmpty();
         response.Headers.Location!.ToString().Should().Contain($"/api/v1/persons/{hateoasResponse.Id}");
     }
 

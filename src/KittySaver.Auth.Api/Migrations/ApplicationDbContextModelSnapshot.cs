@@ -129,20 +129,10 @@ namespace KittySaver.Auth.Api.Migrations
                     b.Property<Guid>("ApplicationUserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset>("CreatedOn")
+                    b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<DateTimeOffset>("ExpiresAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("LastModificationBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset?>("LastModificationOn")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<DateTimeOffset?>("RevokedAt")

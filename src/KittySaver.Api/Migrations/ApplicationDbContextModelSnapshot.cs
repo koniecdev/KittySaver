@@ -23,7 +23,7 @@ namespace KittySaver.Api.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("KittySaver.Domain.Persons.Advertisement", b =>
+            modelBuilder.Entity("KittySaver.Domain.Persons.Entities.Advertisement", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
@@ -31,20 +31,10 @@ namespace KittySaver.Api.Migrations
                     b.Property<DateTimeOffset?>("ClosedOn")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset>("CreatedOn")
+                    b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<DateTimeOffset>("ExpiresOn")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<string>("LastModificationBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset?>("LastModificationOn")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<Guid>("PersonId")
@@ -56,7 +46,7 @@ namespace KittySaver.Api.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.ComplexProperty<Dictionary<string, object>>("ContactInfoEmail", "KittySaver.Domain.Persons.Advertisement.ContactInfoEmail#Email", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("ContactInfoEmail", "KittySaver.Domain.Persons.Entities.Advertisement.ContactInfoEmail#Email", b1 =>
                         {
                             b1.IsRequired();
 
@@ -67,7 +57,7 @@ namespace KittySaver.Api.Migrations
                                 .HasColumnName("ContactInfoEmail");
                         });
 
-                    b.ComplexProperty<Dictionary<string, object>>("ContactInfoPhoneNumber", "KittySaver.Domain.Persons.Advertisement.ContactInfoPhoneNumber#PhoneNumber", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("ContactInfoPhoneNumber", "KittySaver.Domain.Persons.Entities.Advertisement.ContactInfoPhoneNumber#PhoneNumber", b1 =>
                         {
                             b1.IsRequired();
 
@@ -78,7 +68,7 @@ namespace KittySaver.Api.Migrations
                                 .HasColumnName("ContactInfoPhoneNumber");
                         });
 
-                    b.ComplexProperty<Dictionary<string, object>>("Description", "KittySaver.Domain.Persons.Advertisement.Description#Description", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("Description", "KittySaver.Domain.Persons.Entities.Advertisement.Description#Description", b1 =>
                         {
                             b1.IsRequired();
 
@@ -89,7 +79,7 @@ namespace KittySaver.Api.Migrations
                                 .HasColumnName("Description");
                         });
 
-                    b.ComplexProperty<Dictionary<string, object>>("PickupAddress", "KittySaver.Domain.Persons.Advertisement.PickupAddress#Address", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("PickupAddress", "KittySaver.Domain.Persons.Entities.Advertisement.PickupAddress#Address", b1 =>
                         {
                             b1.IsRequired();
 
@@ -134,7 +124,7 @@ namespace KittySaver.Api.Migrations
                     b.ToTable("Advertisements", (string)null);
                 });
 
-            modelBuilder.Entity("KittySaver.Domain.Persons.Cat", b =>
+            modelBuilder.Entity("KittySaver.Domain.Persons.Entities.Cat", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
@@ -152,11 +142,7 @@ namespace KittySaver.Api.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset>("CreatedOn")
+                    b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("HealthStatus")
@@ -173,12 +159,6 @@ namespace KittySaver.Api.Migrations
                     b.Property<bool>("IsThumbnailUploaded")
                         .HasColumnType("bit");
 
-                    b.Property<string>("LastModificationBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset?>("LastModificationOn")
-                        .HasColumnType("datetimeoffset");
-
                     b.Property<string>("MedicalHelpUrgency")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -190,7 +170,7 @@ namespace KittySaver.Api.Migrations
                     b.Property<double>("PriorityScore")
                         .HasColumnType("float");
 
-                    b.ComplexProperty<Dictionary<string, object>>("AdditionalRequirements", "KittySaver.Domain.Persons.Cat.AdditionalRequirements#Description", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("AdditionalRequirements", "KittySaver.Domain.Persons.Entities.Cat.AdditionalRequirements#Description", b1 =>
                         {
                             b1.IsRequired();
 
@@ -201,7 +181,7 @@ namespace KittySaver.Api.Migrations
                                 .HasColumnName("AdditionalRequirements");
                         });
 
-                    b.ComplexProperty<Dictionary<string, object>>("Name", "KittySaver.Domain.Persons.Cat.Name#CatName", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("Name", "KittySaver.Domain.Persons.Entities.Cat.Name#CatName", b1 =>
                         {
                             b1.IsRequired();
 
@@ -221,31 +201,21 @@ namespace KittySaver.Api.Migrations
                     b.ToTable("Cats", (string)null);
                 });
 
-            modelBuilder.Entity("KittySaver.Domain.Persons.Person", b =>
+            modelBuilder.Entity("KittySaver.Domain.Persons.Entities.Person", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset>("CreatedOn")
+                    b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<int>("CurrentRole")
                         .HasColumnType("int");
 
-                    b.Property<string>("LastModificationBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset?>("LastModificationOn")
-                        .HasColumnType("datetimeoffset");
-
                     b.Property<Guid>("UserIdentityId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.ComplexProperty<Dictionary<string, object>>("DefaultAdvertisementsContactInfoEmail", "KittySaver.Domain.Persons.Person.DefaultAdvertisementsContactInfoEmail#Email", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("DefaultAdvertisementsContactInfoEmail", "KittySaver.Domain.Persons.Entities.Person.DefaultAdvertisementsContactInfoEmail#Email", b1 =>
                         {
                             b1.IsRequired();
 
@@ -256,7 +226,7 @@ namespace KittySaver.Api.Migrations
                                 .HasColumnName("DefaultAdvertisementsContactInfoEmail");
                         });
 
-                    b.ComplexProperty<Dictionary<string, object>>("DefaultAdvertisementsContactInfoPhoneNumber", "KittySaver.Domain.Persons.Person.DefaultAdvertisementsContactInfoPhoneNumber#PhoneNumber", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("DefaultAdvertisementsContactInfoPhoneNumber", "KittySaver.Domain.Persons.Entities.Person.DefaultAdvertisementsContactInfoPhoneNumber#PhoneNumber", b1 =>
                         {
                             b1.IsRequired();
 
@@ -267,7 +237,7 @@ namespace KittySaver.Api.Migrations
                                 .HasColumnName("DefaultAdvertisementsContactInfoPhoneNumber");
                         });
 
-                    b.ComplexProperty<Dictionary<string, object>>("DefaultAdvertisementsPickupAddress", "KittySaver.Domain.Persons.Person.DefaultAdvertisementsPickupAddress#Address", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("DefaultAdvertisementsPickupAddress", "KittySaver.Domain.Persons.Entities.Person.DefaultAdvertisementsPickupAddress#Address", b1 =>
                         {
                             b1.IsRequired();
 
@@ -305,7 +275,7 @@ namespace KittySaver.Api.Migrations
                                 .HasColumnName("DefaultAdvertisementsPickupAddressZipCode");
                         });
 
-                    b.ComplexProperty<Dictionary<string, object>>("Email", "KittySaver.Domain.Persons.Person.Email#Email", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("Email", "KittySaver.Domain.Persons.Entities.Person.Email#Email", b1 =>
                         {
                             b1.IsRequired();
 
@@ -316,7 +286,7 @@ namespace KittySaver.Api.Migrations
                                 .HasColumnName("Email");
                         });
 
-                    b.ComplexProperty<Dictionary<string, object>>("Nickname", "KittySaver.Domain.Persons.Person.Nickname#Nickname", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("Nickname", "KittySaver.Domain.Persons.Entities.Person.Nickname#Nickname", b1 =>
                         {
                             b1.IsRequired();
 
@@ -327,7 +297,7 @@ namespace KittySaver.Api.Migrations
                                 .HasColumnName("Nickname");
                         });
 
-                    b.ComplexProperty<Dictionary<string, object>>("PhoneNumber", "KittySaver.Domain.Persons.Person.PhoneNumber#PhoneNumber", b1 =>
+                    b.ComplexProperty<Dictionary<string, object>>("PhoneNumber", "KittySaver.Domain.Persons.Entities.Person.PhoneNumber#PhoneNumber", b1 =>
                         {
                             b1.IsRequired();
 
@@ -343,30 +313,30 @@ namespace KittySaver.Api.Migrations
                     b.ToTable("Persons", (string)null);
                 });
 
-            modelBuilder.Entity("KittySaver.Domain.Persons.Advertisement", b =>
+            modelBuilder.Entity("KittySaver.Domain.Persons.Entities.Advertisement", b =>
                 {
-                    b.HasOne("KittySaver.Domain.Persons.Person", null)
+                    b.HasOne("KittySaver.Domain.Persons.Entities.Person", null)
                         .WithMany("Advertisements")
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("KittySaver.Domain.Persons.Cat", b =>
+            modelBuilder.Entity("KittySaver.Domain.Persons.Entities.Cat", b =>
                 {
-                    b.HasOne("KittySaver.Domain.Persons.Advertisement", null)
+                    b.HasOne("KittySaver.Domain.Persons.Entities.Advertisement", null)
                         .WithMany()
                         .HasForeignKey("AdvertisementId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("KittySaver.Domain.Persons.Person", null)
+                    b.HasOne("KittySaver.Domain.Persons.Entities.Person", null)
                         .WithMany("Cats")
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("KittySaver.Domain.Persons.Person", b =>
+            modelBuilder.Entity("KittySaver.Domain.Persons.Entities.Person", b =>
                 {
                     b.Navigation("Advertisements");
 

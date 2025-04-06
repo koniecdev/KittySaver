@@ -1,10 +1,14 @@
 ﻿using Bogus;
 using FluentAssertions;
-using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.DomainServices;
+using KittySaver.Domain.Persons.Entities;
+using KittySaver.Domain.Persons.ValueObjects;
 using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.Common.Enums;
+using KittySaver.Shared.TypedIds;
 using Address = KittySaver.Domain.ValueObjects.Address;
-using Person = KittySaver.Domain.Persons.Person;
+using Person = KittySaver.Domain.Persons.Entities.Person;
 
 namespace KittySaver.Domain.Tests.Unit.Tests.Advertisements;
 
@@ -87,7 +91,6 @@ public class AdvertisementTests
         
         //Assert
         advertisement.Should().NotBeNull();
-        advertisement.Id.Should().NotBeEmpty();
         advertisement.PickupAddress.Should().BeEquivalentTo(pickupAddress);
         advertisement.ContactInfoEmail.Should().BeEquivalentTo(contactInfoEmail);
         advertisement.ContactInfoPhoneNumber.Should().BeEquivalentTo(contactInfoPhoneNumber);
@@ -264,53 +267,6 @@ public class AdvertisementTests
 
         //Assert
         action.Should().ThrowExactly<InvalidOperationException>();
-    }
-    
-    [Fact]
-    public void PersonIdSet_ShouldThrowArgumentException_WhenProvidedEmptyValue()
-    {
-        Person person = new Faker<Person>()
-        .CustomInstantiator(faker =>
-            Person.Create(
-                nickname: Nickname.Create(faker.Person.FirstName),
-                email: Email.Create(faker.Person.Email),
-                phoneNumber: PhoneNumber.Create(faker.Person.Phone),
-                defaultAdvertisementPickupAddress: Address,
-                defaultAdvertisementContactInfoEmail: Email.Create(faker.Person.Email),
-                defaultAdvertisementContactInfoPhoneNumber: PhoneNumber.Create(faker.Person.Phone)
-            )).Generate();
-
-        Cat cat = new Faker<Cat>()
-            .CustomInstantiator(faker =>
-                person.AddCat(
-                    priorityScoreCalculator: new DefaultCatPriorityCalculatorService(),
-                    name: CatName.Create(faker.Person.FirstName),
-                    medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed,
-                        MedicalHelpUrgency.ShouldSeeVet,
-                        MedicalHelpUrgency.HaveToSeeVet),
-                    ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
-                    behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
-                    healthStatus: faker.PickRandomParam(HealthStatus.ChronicSerious, HealthStatus.ChronicMinor, HealthStatus.Good),
-                    isCastrated: faker.PickRandomParam(true, false),
-                    additionalRequirements: Description.Create(faker.Lorem.Lines(2))
-                )).Generate();
-        
-        SharedHelper.SetBackingField(person, nameof(Person.Id), Guid.Empty);
-        
-        //Act
-        Action createAdvertisement = () =>
-        {
-            person.AddAdvertisement(
-                dateOfCreation: new DateTimeOffset(2024, 1, 1, 1, 1, 1, TimeSpan.Zero),
-                catsIdsToAssign: [cat.Id],
-                pickupAddress: person.DefaultAdvertisementsPickupAddress,
-                contactInfoEmail: person.DefaultAdvertisementsContactInfoEmail,
-                contactInfoPhoneNumber: person.DefaultAdvertisementsContactInfoPhoneNumber,
-                description: Description.Create("Lorem ipsum"));
-        };
-        
-        //Assert
-        createAdvertisement.Should().Throw<ArgumentException>().WithMessage("Provided person id is empty. (Parameter 'PersonId')");
     }
     
     [Fact]

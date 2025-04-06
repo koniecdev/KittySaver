@@ -4,6 +4,9 @@ using KittySaver.Api.Shared.Infrastructure.Services.FileServices;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.Entities;
+using KittySaver.Shared.Common.Enums;
+using KittySaver.Shared.TypedIds;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
@@ -63,7 +66,7 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
             IAdvertisementFileStorageService advertisementFileStorageService = Substitute.For<IAdvertisementFileStorageService>();
             TestableFileStream testStream = new("test/path/image.jpg");
             advertisementFileStorageService
-                .GetThumbnail(Arg.Any<Guid>())
+                .GetThumbnail(Arg.Any<AdvertisementId>())
                 .Returns(testStream);
 
             advertisementFileStorageService
@@ -75,7 +78,7 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
             ICatThumbnailService catFileStorageService = Substitute.For<ICatThumbnailService>();
             TestableFileStream testStream1 = new("test/path/image.jpg");
             catFileStorageService
-                .GetThumbnail(Arg.Any<Guid>())
+                .GetThumbnail(Arg.Any<CatId>())
                 .Returns(testStream1);
 
             catFileStorageService
@@ -86,11 +89,11 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
             services.RemoveAll<ICurrentUserService>();
             ICurrentUserService currentUserService = Substitute.For<ICurrentUserService>();
             currentUserService.EnsureUserIsAdminAsync(Arg.Any<CancellationToken>()).Returns(Task.FromResult(true));
-            currentUserService.EnsureUserIsAuthorizedAsync(Arg.Any<Guid>(), Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
+            currentUserService.EnsureUserIsAuthorizedAsync(Arg.Any<PersonId>(), Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
             currentUserService.GetCurrentUserIdentityId().Returns(Guid.NewGuid());
             currentUserService.GetCurrentlyLoggedInPersonAsync(Arg.Any<CancellationToken>()).Returns(
                 Task.FromResult<CurrentlyLoggedInPerson?>
-                    (new CurrentlyLoggedInPerson { PersonId = Guid.NewGuid(), Role = Person.Role.Admin}));
+                    (new CurrentlyLoggedInPerson { PersonId = PersonId.New(), Role = PersonRole.Admin}));
             services.AddSingleton<ICurrentUserService>(_ => currentUserService);
             
             services.RemoveAll<IAuthenticationService>();

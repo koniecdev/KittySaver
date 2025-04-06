@@ -3,7 +3,9 @@ using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
+using KittySaver.Shared.Common.Enums;
 using KittySaver.Shared.Responses;
+using KittySaver.Shared.TypedIds;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,7 +13,7 @@ namespace KittySaver.Api.Features.Advertisements;
 
 public class GetPublicAdvertisement : IEndpoint
 {
-    public sealed record GetPublicAdvertisementQuery(Guid Id) : IQuery<AdvertisementResponse>;
+    public sealed record GetPublicAdvertisementQuery(AdvertisementId Id) : IQuery<AdvertisementResponse>;
 
     internal sealed class GetPublicAdvertisementQueryHandler(
         ApplicationReadDbContext db)
@@ -38,7 +40,7 @@ public class GetPublicAdvertisement : IEndpoint
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            GetPublicAdvertisementQuery query = new(id);
+            GetPublicAdvertisementQuery query = new(new AdvertisementId(id));
             AdvertisementResponse advertisement = await sender.Send(query, cancellationToken);
             return Results.Ok(advertisement);
         }).AllowAnonymous()

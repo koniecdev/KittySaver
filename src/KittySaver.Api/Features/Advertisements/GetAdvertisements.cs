@@ -8,6 +8,7 @@ using KittySaver.Api.Shared.Persistence;
 using KittySaver.Api.Shared.Persistence.ReadModels;
 using KittySaver.Shared.Pagination;
 using KittySaver.Shared.Responses;
+using KittySaver.Shared.TypedIds;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,7 +17,7 @@ namespace KittySaver.Api.Features.Advertisements;
 public sealed class GetAdvertisements : IEndpoint
 {
     public sealed record GetAdvertisementsQuery(
-        Guid PersonId,
+        PersonId PersonId,
         int? Offset,
         int? Limit,
         string? SearchTerm,
@@ -118,7 +119,7 @@ public sealed class GetAdvertisements : IEndpoint
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            GetAdvertisementsQuery query = new(personId, offset, limit, searchTerm, sortColumn, sortOrder);
+            GetAdvertisementsQuery query = new(new PersonId(personId), offset, limit, searchTerm, sortColumn, sortOrder);
             IPagedList<AdvertisementResponse> advertisements = await sender.Send(query, cancellationToken);
             return Results.Ok(advertisements);
         }).RequireAuthorization()

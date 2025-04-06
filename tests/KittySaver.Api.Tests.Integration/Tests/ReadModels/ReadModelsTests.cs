@@ -3,8 +3,9 @@ using System.Net.Http.Json;
 using Bogus;
 using FluentAssertions;
 using KittySaver.Api.Tests.Integration.Helpers;
-using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Shared.Common.Enums;
 using KittySaver.Shared.Responses;
+using KittySaver.Shared.TypedIds;
 using KittySaver.Tests.Shared;
 
 namespace KittySaver.Api.Tests.Integration.Tests.ReadModels;
@@ -60,16 +61,16 @@ public class ReadModelsIntegrationTests : IAsyncLifetime
 
         // Act
         HttpResponseMessage createResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/persons", createRequest);
-        ApiResponses.CreatedWithIdResponse createResponse = await createResponseMessage.GetIdResponseFromResponseMessageAsync();
+        IdResponse<PersonId> personId = await createResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<PersonId>>();
 
         // Assert
-        HttpResponseMessage getResponse = await _httpClient.GetAsync($"api/v1/persons/{createResponse.Id}");
+        HttpResponseMessage getResponse = await _httpClient.GetAsync($"api/v1/persons/{personId}");
         getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         
         PersonResponse person = await getResponse.GetResponseFromResponseMessageAsync<PersonResponse>();
         
         // Verify all PersonReadModel properties are correctly mapped
-        person.Id.Should().NotBeEmpty();
+        person.Id.Should().Be(personId.Id);
         person.Nickname.Should().Be(createRequest.Nickname);
         person.Email.Should().Be(createRequest.Email);
         person.PhoneNumber.Should().Be(createRequest.PhoneNumber);
@@ -90,22 +91,22 @@ public class ReadModelsIntegrationTests : IAsyncLifetime
         // Arrange
         CreatePersonRequest createPersonRequest = _createPersonRequestGenerator.Generate();
         HttpResponseMessage createPersonResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/persons", createPersonRequest);
-        ApiResponses.CreatedWithIdResponse createPersonResponse = await createPersonResponseMessage.GetIdResponseFromResponseMessageAsync();
+        IdResponse<PersonId> personId = await createPersonResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<PersonId>>();
 
         CreateCatRequest createCatRequest = _createCatRequestGenerator.Generate();
 
         // Act
-        HttpResponseMessage createCatResponseMessage = await _httpClient.PostAsJsonAsync($"api/v1/persons/{createPersonResponse.Id}/cats", createCatRequest);
-        ApiResponses.CreatedWithIdResponse createCatResponse = await createCatResponseMessage.GetIdResponseFromResponseMessageAsync();
+        HttpResponseMessage createCatResponseMessage = await _httpClient.PostAsJsonAsync($"api/v1/persons/{personId}/cats", createCatRequest);
+        IdResponse<CatId> catId = await createCatResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<CatId>>();
 
         // Assert
-        HttpResponseMessage getResponse = await _httpClient.GetAsync($"api/v1/persons/{createPersonResponse.Id}/cats/{createCatResponse.Id}");
+        HttpResponseMessage getResponse = await _httpClient.GetAsync($"api/v1/persons/{personId}/cats/{catId}");
         getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         
         CatResponse cat = await getResponse.GetResponseFromResponseMessageAsync<CatResponse>();
         
         // Verify all CatReadModel properties are correctly mapped
-        cat.Id.Should().NotBeEmpty();
+        cat.Id.Should().Be(catId.Id);
         cat.Name.Should().Be(createCatRequest.Name);
         cat.AdditionalRequirements.Should().Be(createCatRequest.AdditionalRequirements);
         cat.IsCastrated.Should().Be(createCatRequest.IsCastrated);
@@ -124,18 +125,18 @@ public class ReadModelsIntegrationTests : IAsyncLifetime
         // Arrange
         CreatePersonRequest createPersonRequest = _createPersonRequestGenerator.Generate();
         HttpResponseMessage createPersonResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/persons", createPersonRequest);
-        ApiResponses.CreatedWithIdResponse createPersonResponse = await createPersonResponseMessage.GetIdResponseFromResponseMessageAsync();
+        IdResponse<PersonId> personId = await createPersonResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<PersonId>>();
 
         CreateCatRequest createCatRequest = _createCatRequestGenerator.Generate();
-        HttpResponseMessage createCatResponseMessage = await _httpClient.PostAsJsonAsync($"api/v1/persons/{createPersonResponse.Id}/cats", createCatRequest);
-        ApiResponses.CreatedWithIdResponse createCatResponse = await createCatResponseMessage.GetIdResponseFromResponseMessageAsync();
+        HttpResponseMessage createCatResponseMessage = await _httpClient.PostAsJsonAsync($"api/v1/persons/{personId}/cats", createCatRequest);
+        IdResponse<CatId> catId = await createCatResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<CatId>>();
 
         // Act
         CreateAdvertisementRequest createAdvertisementRequest = 
             new Faker<CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
                     new CreateAdvertisementRequest(
-                        CatsIdsToAssign: [createCatResponse.Id],
+                        CatsIdsToAssign: [catId.Id],
                         Description: faker.Lorem.Paragraph(),
                         PickupAddressCountry: faker.Address.CountryCode(),
                         PickupAddressState: faker.Address.State(),
@@ -148,21 +149,20 @@ public class ReadModelsIntegrationTests : IAsyncLifetime
                     )).Generate();
         HttpResponseMessage createAdvertisementResponseMessage =
             await _httpClient.PostAsJsonAsync(
-                $"api/v1/persons/{createPersonResponse.Id}/advertisements",
+                $"api/v1/persons/{personId}/advertisements",
                 createAdvertisementRequest);
-        ApiResponses.CreatedWithIdResponse createAdvertisementResponse = 
-            await createAdvertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
+        IdResponse<AdvertisementId> advertisementId = await createAdvertisementResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<AdvertisementId>>();
 
         // Assert
         HttpResponseMessage getResponse = await _httpClient.GetAsync(
-            $"api/v1/persons/{createPersonResponse.Id}/advertisements/{createAdvertisementResponse.Id}");
+            $"api/v1/persons/{personId}/advertisements/{advertisementId}");
         getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         
         AdvertisementResponse advertisement = await getResponse.GetResponseFromResponseMessageAsync<AdvertisementResponse>();
         
         // Verify all AdvertisementReadModel properties are correctly mapped
-        advertisement.Id.Should().NotBeEmpty();
-        advertisement.PersonId.Should().Be(createPersonResponse.Id);
+        advertisement.Id.Should().Be(advertisementId.Id);
+        advertisement.PersonId.Should().Be(personId.Id);
         advertisement.PersonName.Should().Be(createPersonRequest.Nickname);
         advertisement.Description.Should().Be(createAdvertisementRequest.Description);
         advertisement.ContactInfoEmail.Should().Be(createAdvertisementRequest.ContactInfoEmail);
@@ -180,7 +180,7 @@ public class ReadModelsIntegrationTests : IAsyncLifetime
         
         advertisement.Cats.Should().ContainSingle();
         AdvertisementResponse.CatDto cat = advertisement.Cats.Single();
-        cat.Id.Should().Be(createCatResponse.Id);
+        cat.Id.Should().Be(catId.Id);
         cat.Name.Should().Be(createCatRequest.Name);
     }
     

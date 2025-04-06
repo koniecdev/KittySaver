@@ -5,7 +5,9 @@ using Bogus;
 using FluentAssertions;
 using KittySaver.Api.Features.Cats;
 using KittySaver.Api.Tests.Integration.Helpers;
-using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Shared.Common.Enums;
+using KittySaver.Shared.Responses;
+using KittySaver.Shared.TypedIds;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using KittySaver.Tests.Shared;
@@ -61,31 +63,28 @@ public class DeleteCatEndpointsTests : IAsyncLifetime
         //Arrange
         HttpResponseMessage personRegisterResponseMessage =
             await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
-        ApiResponses.CreatedWithIdResponse personRegisterResponse =
-            await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
+        IdResponse<PersonId> personId = await personRegisterResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<PersonId>>();
+        
         HttpResponseMessage catCreateResponseMessage =
-            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", _createCatRequest);
-        ApiResponses.CreatedWithIdResponse catCreateResponse =
-            await catCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personId}/cats", _createCatRequest);
+        IdResponse<CatId> catId = await catCreateResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<CatId>>();
 
         //Act
         HttpResponseMessage deleteResponse =
-            await _httpClient.DeleteAsync($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}");
+            await _httpClient.DeleteAsync($"api/v1/persons/{personId}/cats/{catId}");
 
         //Assert
         deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         HttpResponseMessage catNotFoundProblemDetailsMessage =
-            await _httpClient.GetAsync($"api/v1/persons/{personRegisterResponse.Id}/cats/{catCreateResponse.Id}");
+            await _httpClient.GetAsync($"api/v1/persons/{personId}/cats/{catId}");
         catNotFoundProblemDetailsMessage.StatusCode.Should().Be(HttpStatusCode.NotFound);
         ProblemDetails? notFoundProblemDetails =
             await catNotFoundProblemDetailsMessage.Content.ReadFromJsonAsync<ProblemDetails>();
         notFoundProblemDetails.Should().NotBeNull();
         notFoundProblemDetails!.Status.Should().Be(StatusCodes.Status404NotFound);
         HttpResponseMessage userResponseMessage =
-            await _httpClient.GetAsync($"api/v1/persons/{personRegisterResponse.Id}");
+            await _httpClient.GetAsync($"api/v1/persons/{personId}");
         userResponseMessage.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
@@ -95,13 +94,12 @@ public class DeleteCatEndpointsTests : IAsyncLifetime
         //Arrange
         HttpResponseMessage personRegisterResponseMessage =
             await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
-        ApiResponses.CreatedWithIdResponse personRegisterResponse =
-            await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
+        IdResponse<PersonId> personId = await personRegisterResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<PersonId>>();
+        CatId randomCatId = CatId.New();
 
         //Act
         HttpResponseMessage deleteResponse =
-            await _httpClient.DeleteAsync($"api/v1/persons/{personRegisterResponse.Id}/cats/{Guid.NewGuid()}");
+            await _httpClient.DeleteAsync($"api/v1/persons/{personId}/cats/{randomCatId}");
 
         //Assert
         deleteResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -116,18 +114,16 @@ public class DeleteCatEndpointsTests : IAsyncLifetime
         //Arrange
         HttpResponseMessage personRegisterResponseMessage =
             await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
-        ApiResponses.CreatedWithIdResponse personRegisterResponse =
-            await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
+        IdResponse<PersonId> personId = await personRegisterResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<PersonId>>();
+        
         HttpResponseMessage catCreateResponseMessage =
-            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", _createCatRequest);
-        ApiResponses.CreatedWithIdResponse catCreateResponse =
-            await catCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personId}/cats", _createCatRequest);
+        IdResponse<CatId> catId = await catCreateResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<CatId>>();
+        PersonId randomPersonId = PersonId.New();
 
         //Act
         HttpResponseMessage deleteResponse =
-            await _httpClient.DeleteAsync($"api/v1/persons/{Guid.NewGuid()}/cats/{catCreateResponse.Id}");
+            await _httpClient.DeleteAsync($"api/v1/persons/{randomPersonId}/cats/{catId}");
 
         //Assert
         deleteResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -140,12 +136,12 @@ public class DeleteCatEndpointsTests : IAsyncLifetime
     public async Task DeleteCat_ShouldReturnBadRequest_WhenEmptyDataAreProvided()
     {
         //Arrange
-        Guid randomPersonId = Guid.Empty;
-        Guid randomCatId = Guid.Empty;
+        PersonId emptyPersonId = default;
+        CatId emptyCatId = default;
 
         //Act
         HttpResponseMessage deleteResponse =
-            await _httpClient.DeleteAsync($"api/v1/persons/{randomPersonId}/cats/{randomCatId}");
+            await _httpClient.DeleteAsync($"api/v1/persons/{emptyPersonId}/cats/{emptyCatId}");
 
         //Assert
         deleteResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);

@@ -2,10 +2,12 @@
 @attribute [Authorize]
 @using System.ComponentModel.DataAnnotations
 @using System.Net.Http.Headers
+@using KittySaver.Shared.Common.Enums
 @using KittySaver.Shared.Hateoas
 @using KittySaver.Shared.Pagination
 @using KittySaver.Shared.Requests
 @using KittySaver.Shared.Responses
+@using KittySaver.Shared.TypedIds
 @using KittySaver.Wasm.Shared
 @using KittySaver.Wasm.Shared.HttpClients
 @using KittySaver.Wasm.Shared.Validation
@@ -561,7 +563,7 @@
         Link? ownerCatsLink = ApiNavigation.GetLink(EndpointRels.Cat.GetCatsRel);
         if (ownerCatsLink != null)
         {
-            var allCatsResult = await MainApiClient.GetAsync<PagedList<CatResponse>>(ownerCatsLink.Href);
+            PagedList<CatResponse>? allCatsResult = await MainApiClient.GetAsync<PagedList<CatResponse>>(ownerCatsLink.Href);
             if (allCatsResult?.Items != null)
             {
                 // Exclude cats that are already in this advertisement and cats that are in other advertisements
@@ -576,7 +578,7 @@
         if (AddCatId.HasValue)
         {
             // Najpierw sprawdź w dostępnych kotach
-            var catToAdd = _availableCats.FirstOrDefault(c => c.Id == AddCatId.Value);
+            CatResponse? catToAdd = _availableCats.FirstOrDefault(c => c.Id == new CatId(AddCatId.Value));
             if (catToAdd != null)
             {
                 AddCatToAdvertisement(catToAdd);
@@ -593,7 +595,7 @@
                             .Replace("{personId}", ApiNavigation.Response.PersonId.ToString())
                             .Replace("{id}", AddCatId.Value.ToString());
                     
-                        var cat = await MainApiClient.GetAsync<CatResponse>(catUrl);
+                        CatResponse? cat = await MainApiClient.GetAsync<CatResponse>(catUrl);
                         if (cat != null)
                         {
                             _advertisementCats.Add(cat);

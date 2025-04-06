@@ -1,10 +1,15 @@
 ﻿namespace KittySaver.Domain.Common.Primitives;
 
-public abstract class AuditableEntity
+public interface IAuditableEntity
 {
-    public Guid Id { get; } = Guid.NewGuid();
-    public string CreatedBy { get; set; } = "";
-    public DateTimeOffset CreatedOn { get; set; }
-    public string? LastModificationBy { get; set; }
-    public DateTimeOffset? LastModificationOn { get; set; }
+    DateTimeOffset CreatedAt { get; set; }
+}
+
+public abstract class AuditableEntity<TId>(TId id) : IAuditableEntity where TId : struct
+{
+    protected AuditableEntity() : this(default)
+    {
+    }
+    public TId Id { get; } = id;
+    public DateTimeOffset CreatedAt { get; set; }
 }

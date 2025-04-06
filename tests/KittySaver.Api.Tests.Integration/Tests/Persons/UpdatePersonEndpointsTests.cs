@@ -6,9 +6,11 @@ using FluentAssertions;
 using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.ValueObjects;
 using KittySaver.Domain.ValueObjects;
 using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.Responses;
+using KittySaver.Shared.TypedIds;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using KittySaver.Tests.Shared;
@@ -51,11 +53,10 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
     {
         //Arrange
         HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
-        ApiResponses.CreatedWithIdResponse registeredPersonResponse =
-            await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
+        IdResponse<PersonId> personId = await response.GetIdResponseFromResponseMessageAsync<IdResponse<PersonId>>();
+
         PersonResponse person =
-            await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{registeredPersonResponse.Id}")
+            await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{personId}")
             ?? throw new JsonException();
         
         //Act
@@ -75,7 +76,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
                     DefaultAdvertisementContactInfoPhoneNumber: faker.Person.Phone
                 ));
 
-        HttpResponseMessage updateResponse = await _httpClient.PutAsJsonAsync($"api/v1/persons/{registeredPersonResponse.Id}", request);
+        HttpResponseMessage updateResponse = await _httpClient.PutAsJsonAsync($"api/v1/persons/{personId}", request);
         
         //Assert
         updateResponse.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -94,7 +95,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         hateoasResponse.Id.Should().Be(person.Id);
 
         PersonResponse personAfterUpdate =
-            await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{registeredPersonResponse.Id}")
+            await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{personId}")
             ?? throw new JsonException();
         personAfterUpdate.Should().NotBeEquivalentTo(person);
         personAfterUpdate.Nickname.Should().Be(request.Nickname);
@@ -106,7 +107,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
     public async Task UpdatePerson_ShouldReturnNotFound_WhenNonRegisteredUserIdProvided()
     {
         //Arrange
-        Guid randomId = Guid.NewGuid();
+        PersonId randomId = PersonId.New();
 
         //Act
         UpdatePersonRequest request = new Faker<UpdatePersonRequest>()
@@ -139,9 +140,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
     {
         //Arrange
         HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
-        ApiResponses.CreatedWithIdResponse firstUserIdResponse =
-            await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
+        IdResponse<PersonId> personId = await response.GetIdResponseFromResponseMessageAsync<IdResponse<PersonId>>();
 
         //Act
         UpdatePersonRequest request = new(
@@ -158,7 +157,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
             DefaultAdvertisementContactInfoPhoneNumber: ""
         );
         HttpResponseMessage updateResponse =
-            await _httpClient.PutAsJsonAsync($"api/v1/persons/{firstUserIdResponse.Id}", request);
+            await _httpClient.PutAsJsonAsync($"api/v1/persons/{personId}", request);
 
         //Assert
         updateResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -224,9 +223,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         //Arrange
         HttpResponseMessage registerResponseMessage =
             await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
-        ApiResponses.CreatedWithIdResponse registerResponse =
-            await registerResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
+        IdResponse<PersonId> personId = await registerResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<PersonId>>();
 
         UpdatePersonRequest request = new Faker<UpdatePersonRequest>()
             .CustomInstantiator(faker =>
@@ -253,7 +250,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
 
         //Act
         HttpResponseMessage response =
-            await _httpClient.PutAsJsonAsync($"api/v1/persons/{registerResponse.Id}", request);
+            await _httpClient.PutAsJsonAsync($"api/v1/persons/{personId}", request);
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
@@ -346,11 +343,10 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         //Arrange
         HttpResponseMessage createPersonResponse =
             await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
-        ApiResponses.CreatedWithIdResponse idOfCreatedPersonResponse =
-            await createPersonResponse.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
+        IdResponse<PersonId> personId = await createPersonResponse.GetIdResponseFromResponseMessageAsync<IdResponse<PersonId>>();
+        
         PersonResponse person =
-            await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{idOfCreatedPersonResponse.Id}")
+            await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{personId}")
             ?? throw new JsonException();
 
         UpdatePersonRequest request = new(
@@ -390,9 +386,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
     {
         //Arrange
         HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
-        ApiResponses.CreatedWithIdResponse firstUserIdResponse =
-            await response.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
+        IdResponse<PersonId> personId = await response.GetIdResponseFromResponseMessageAsync<IdResponse<PersonId>>();
 
         CreatePersonRequest secondPersonCreateRequest = _createPersonRequest with
         {
@@ -403,7 +397,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
 
 
         PersonResponse firstUser =
-            await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{firstUserIdResponse.Id}")
+            await _httpClient.GetFromJsonAsync<PersonResponse>($"api/v1/persons/{personId}")
             ?? throw new JsonException();
 
         //Act
@@ -423,7 +417,7 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
         );
 
         HttpResponseMessage updateResponse =
-            await _httpClient.PutAsJsonAsync($"api/v1/persons/{firstUserIdResponse.Id}", firstUserUpdateRequest);
+            await _httpClient.PutAsJsonAsync($"api/v1/persons/{personId}", firstUserUpdateRequest);
 
         //Assert
         updateResponse.StatusCode.Should().Be(HttpStatusCode.BadRequest);

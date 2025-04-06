@@ -1,14 +1,14 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json;
 using Bogus;
 using FluentAssertions;
 using KittySaver.Api.Features.Advertisements;
 using KittySaver.Api.Tests.Integration.Helpers;
-using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Shared.Common.Enums;
+using KittySaver.Shared.Responses;
+using KittySaver.Shared.TypedIds;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using KittySaver.Tests.Shared;
 
 namespace KittySaver.Api.Tests.Integration.Tests.Advertisements;
 
@@ -61,21 +61,18 @@ public class DeleteAdvertisementEndpointsTests : IAsyncLifetime
         CreatePersonRequest personRegisterRequest = _createPersonRequestGenerator.Generate();
         HttpResponseMessage personRegisterResponseMessage =
             await _httpClient.PostAsJsonAsync("api/v1/persons", personRegisterRequest);
-        ApiResponses.CreatedWithIdResponse personRegisterResponse =
-            await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
+        IdResponse<PersonId> personId = await personRegisterResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<PersonId>>();
+        
         CreateCatRequest catCreateRequest = _createCatRequestGenerator.Generate();
         HttpResponseMessage catCreateResponseMessage =
-            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", catCreateRequest);
-        ApiResponses.CreatedWithIdResponse catCreateResponse =
-            await catCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personId}/cats", catCreateRequest);
+        IdResponse<CatId> catId = await catCreateResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<CatId>>();
         
         CreateAdvertisementRequest request =
             new Faker<CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
                     new CreateAdvertisementRequest(
-                        CatsIdsToAssign: [catCreateResponse.Id],
+                        CatsIdsToAssign: [catId],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.CountryCode(),
                         PickupAddressState: faker.Address.State(),
@@ -88,12 +85,12 @@ public class DeleteAdvertisementEndpointsTests : IAsyncLifetime
                     ));
 
         HttpResponseMessage advertisementResponseMessage = 
-            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
-        ApiResponses.CreatedWithIdResponse advertisementResponse = await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync();
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personId}/advertisements", request);
+        IdResponse<AdvertisementId> advertisementId = await advertisementResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<AdvertisementId>>();
         
         //Act
         HttpResponseMessage deleteResponseMessage = 
-            await _httpClient.DeleteAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}");
+            await _httpClient.DeleteAsync($"api/v1/persons/{personId}/advertisements/{advertisementId}");
         
         //Assert
         deleteResponseMessage.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -106,29 +103,24 @@ public class DeleteAdvertisementEndpointsTests : IAsyncLifetime
         CreatePersonRequest personRegisterRequest = _createPersonRequestGenerator.Generate();
         HttpResponseMessage personRegisterResponseMessage =
             await _httpClient.PostAsJsonAsync("api/v1/persons", personRegisterRequest);
-        ApiResponses.CreatedWithIdResponse personRegisterResponse =
-            await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
+        IdResponse<PersonId> personId = await personRegisterResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<PersonId>>();
+        
         CreateCatRequest catCreateRequest = _createCatRequestGenerator.Generate();
         HttpResponseMessage catCreateResponseMessage =
-            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", catCreateRequest);
-        ApiResponses.CreatedWithIdResponse catCreateResponse =
-            await catCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personId}/cats", catCreateRequest);
+        IdResponse<CatId> catId = await catCreateResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<CatId>>();
+        
         CreateCatRequest secondCatCreateRequest = _createCatRequestGenerator.Generate();
         HttpResponseMessage secondCatCreateResponseMessage =
-            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats",
-                secondCatCreateRequest);
-        ApiResponses.CreatedWithIdResponse secondCatCreateResponse =
-            await secondCatCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
-    
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personId}/cats", secondCatCreateRequest);
+        IdResponse<CatId> secondCatId = await secondCatCreateResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<CatId>>();
+
         //Act
         CreateAdvertisementRequest request =
             new Faker<CreateAdvertisementRequest>()
                 .CustomInstantiator(faker =>
                     new CreateAdvertisementRequest(
-                        CatsIdsToAssign: [catCreateResponse.Id, secondCatCreateResponse.Id],
+                        CatsIdsToAssign: [catId, secondCatId],
                         Description: faker.Lorem.Lines(2),
                         PickupAddressCountry: faker.Address.CountryCode(),
                         PickupAddressState: faker.Address.State(),
@@ -139,16 +131,14 @@ public class DeleteAdvertisementEndpointsTests : IAsyncLifetime
                         ContactInfoEmail: faker.Person.Email,
                         ContactInfoPhoneNumber: faker.Person.Phone
                     ));
-    
+
         HttpResponseMessage responseMessage = 
-            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements", request);
-        ApiResponses.CreatedWithIdResponse advertisementResponse =
-            await responseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personId}/advertisements", request);
+        IdResponse<AdvertisementId> advertisementId = await responseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<AdvertisementId>>();
         
         //Act
         HttpResponseMessage deleteResponseMessage =
-            await _httpClient.DeleteAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{advertisementResponse.Id}");
+            await _httpClient.DeleteAsync($"api/v1/persons/{personId}/advertisements/{advertisementId}");
         
         //Assert
         deleteResponseMessage.StatusCode.Should().Be(HttpStatusCode.NoContent);
@@ -158,8 +148,8 @@ public class DeleteAdvertisementEndpointsTests : IAsyncLifetime
     public async Task DeleteAdvertisement_ShouldReturnNotFound_WhenInvalidPersonIdIsProvided()
     {
         //Arrange
-        Guid randomPersonId = Guid.NewGuid();
-        Guid randomAdvertisementId = Guid.NewGuid();
+        PersonId randomPersonId = PersonId.New();
+        AdvertisementId randomAdvertisementId = AdvertisementId.New();
         
         //Act
         HttpResponseMessage deleteResponse = await _httpClient.DeleteAsync($"api/v1/persons/{randomPersonId}/advertisements/{randomAdvertisementId}");
@@ -179,13 +169,11 @@ public class DeleteAdvertisementEndpointsTests : IAsyncLifetime
         CreatePersonRequest personRegisterRequest = _createPersonRequestGenerator.Generate();
         HttpResponseMessage personRegisterResponseMessage =
             await _httpClient.PostAsJsonAsync("api/v1/persons", personRegisterRequest);
-        ApiResponses.CreatedWithIdResponse personRegisterResponse =
-            await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
-        Guid randomAdvertisementId = Guid.NewGuid();
+        IdResponse<PersonId> personId = await personRegisterResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<PersonId>>();
+        AdvertisementId randomAdvertisementId = AdvertisementId.New();
         
         //Act
-        HttpResponseMessage deleteResponse = await _httpClient.DeleteAsync($"api/v1/persons/{personRegisterResponse.Id}/advertisements/{randomAdvertisementId}");
+        HttpResponseMessage deleteResponse = await _httpClient.DeleteAsync($"api/v1/persons/{personId}/advertisements/{randomAdvertisementId}");
         
         //Assert
         deleteResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -195,14 +183,12 @@ public class DeleteAdvertisementEndpointsTests : IAsyncLifetime
         notFoundProblemDetails.Detail.Should().Contain("Advertisement");
     }
     
-    
-    
     [Fact]
     public async Task DeleteAdvertisement_ShouldReturnBadRequest_WhenEmptyAdvertisementIdIsProvided()
     {
         //Arrange
-        Guid randomId = Guid.NewGuid();
-        Guid emptyId = Guid.Empty;
+        PersonId randomId = PersonId.New();
+        AdvertisementId emptyId = default;
         
         //Act
         HttpResponseMessage deleteResponse = await _httpClient.DeleteAsync($"api/v1/persons/{randomId}/advertisements/{emptyId}");

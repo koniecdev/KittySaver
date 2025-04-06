@@ -1,4 +1,5 @@
 ﻿using KittySaver.Auth.Api.Shared.Infrastructure.Services;
+using KittySaver.Auth.Api.Shared.Infrastructure.Services.Email;
 using KittySaver.Auth.Api.Shared.Persistence;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -50,8 +51,10 @@ public class KittySaverAuthApiFactory : WebApplicationFactory<IApiMarker>, IAsyn
 
         builder.ConfigureTestServices(services =>
         {
-            services.RemoveAll(typeof(IDateTimeProvider));
-            services.RemoveAll(typeof(ICurrentUserService));
+            services.RemoveAll<IDateTimeProvider>();
+            services.RemoveAll<ICurrentUserService>();
+            services.RemoveAll<IEmailService>();
+            IEmailService emailServiceStub = Substitute.For<IEmailService>();
             IDateTimeProvider dateTimeSub = Substitute.For<IDateTimeProvider>();
             ICurrentUserService currentUserService = Substitute.For<ICurrentUserService>();
             currentUserService.UserId.Returns(Guid.NewGuid().ToString());
@@ -60,9 +63,10 @@ public class KittySaverAuthApiFactory : WebApplicationFactory<IApiMarker>, IAsyn
             dateTimeSub.Now.Returns(FixedDateTime);
             services.AddScoped<IDateTimeProvider>(_ => dateTimeSub);
             services.AddScoped<ICurrentUserService>(_ => currentUserService);
+            services.AddScoped<IEmailService>(_ => emailServiceStub);
             
-            services.RemoveAll(typeof(IAuthenticationService));
-            services.RemoveAll(typeof(IAuthorizationHandler));
+            services.RemoveAll<IAuthenticationService>();
+            services.RemoveAll<IAuthorizationHandler>();
             
             services.AddAuthentication(options =>
             {

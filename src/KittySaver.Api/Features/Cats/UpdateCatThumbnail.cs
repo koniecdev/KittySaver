@@ -4,7 +4,10 @@ using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Infrastructure.Services.FileServices;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.DomainRepositories;
+using KittySaver.Domain.Persons.Entities;
 using KittySaver.Shared.Hateoas;
+using KittySaver.Shared.TypedIds;
 using MediatR;
 
 namespace KittySaver.Api.Features.Cats;
@@ -12,8 +15,8 @@ namespace KittySaver.Api.Features.Cats;
 public sealed class UpdateCatThumbnail : IEndpoint
 {
     public sealed record UpdateCatThumbnailCommand(
-        Guid PersonId,
-        Guid Id,
+        PersonId PersonId,
+        CatId Id,
         IFormFile Thumbnail) : ICommand<CatHateoasResponse>, IAuthorizedRequest, ICatRequest;
 
     public sealed class UpdateAdvertisementThumbnailCommandValidator
@@ -22,22 +25,20 @@ public sealed class UpdateCatThumbnail : IEndpoint
         public UpdateAdvertisementThumbnailCommandValidator()
         {
             RuleFor(x => x.PersonId)
-                .NotEmpty()
-                .NotEqual(x => x.Id);
-        
+                .NotEmpty();
+
             RuleFor(x => x.Id)
-                .NotEmpty()
-                .NotEqual(x => x.PersonId);
+                .NotEmpty();
 
             RuleFor(x => x.Thumbnail)
                 .NotNull()
-                .Must(file => IThumbnailStorageService.Constants.AllowedThumbnailTypes
+                .Must(file => AllowedPictureTypes.AllowedImageTypes
                     .ContainsKey(Path.GetExtension(file.FileName).ToLowerInvariant()))
                 .WithMessage("Only .jpg, .jpeg, .png and .webp files are allowed")
                 .Must(file =>
                 {
-                    string thumbnailType = IThumbnailStorageService.Constants
-                        .AllowedThumbnailTypes[Path.GetExtension(file.FileName).ToLowerInvariant()];
+                    string thumbnailType = AllowedPictureTypes
+                        .AllowedImageTypes[Path.GetExtension(file.FileName).ToLowerInvariant()];
                     return file.ContentType == thumbnailType;
                 }).WithMessage("Only .jpg, .jpeg, .png and .webp files content-types are allowed");
         }
@@ -86,7 +87,7 @@ public sealed class UpdateCatThumbnail : IEndpoint
                 CancellationToken cancellationToken) =>
             {
                 ArgumentNullException.ThrowIfNull(thumbnail);
-                UpdateCatThumbnailCommand command = new(personId, id, thumbnail);
+                UpdateCatThumbnailCommand command = new(new PersonId(personId), new CatId(id), thumbnail);
                 CatHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
                 return Results.Ok(hateoasResponse);
             })

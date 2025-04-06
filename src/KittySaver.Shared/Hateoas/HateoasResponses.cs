@@ -1,4 +1,6 @@
 ﻿using KittySaver.Shared.Common;
+using KittySaver.Shared.Common.Enums;
+using KittySaver.Shared.TypedIds;
 
 namespace KittySaver.Shared.Hateoas;
 
@@ -9,46 +11,46 @@ public interface IHateoasResponse
 
 public interface IHateoasPersonResponse : IHateoasResponse
 {
-    public Guid Id { get; }
+    public PersonId Id { get; }
 }
 
 public interface IHateoasCatResponse : IHateoasResponse
 {
-    public Guid Id { get; }
-    public Guid PersonId { get; }
-    public Guid? AdvertisementId { get; }
+    public CatId Id { get; }
+    public PersonId PersonId { get; }
+    public AdvertisementId? AdvertisementId { get; }
     public bool IsThumbnailUploaded { get; }
     public bool IsAdopted { get; }
 }
 
 public interface IHateoasAdvertisementResponse : IHateoasResponse
 {
-    public Guid Id { get; }
-    public Guid PersonId { get; }
+    public AdvertisementId Id { get; }
+    public PersonId PersonId { get; }
     public AdvertisementStatus Status { get; }
 }
 
-public class PersonHateoasResponse(Guid id) 
+public class PersonHateoasResponse(PersonId id) 
     : IHateoasPersonResponse
 {
-    public Guid Id { get; } = id;
+    public PersonId Id { get; } = id;
     public ICollection<Link> Links { get; set; } = new List<Link>();
 }
-public class CatHateoasResponse(Guid id, Guid personId, Guid? advertisementId, bool isThumbnailUploaded, bool isAdopted)
+public class CatHateoasResponse(CatId id, PersonId personId, AdvertisementId? advertisementId, bool isThumbnailUploaded, bool isAdopted)
     : IHateoasCatResponse
 {
-    public Guid Id { get; } = id;
-    public Guid PersonId { get; } = personId;
-    public Guid? AdvertisementId { get; } = advertisementId;
+    public CatId Id { get; } = id;
+    public PersonId PersonId { get; } = personId;
+    public AdvertisementId? AdvertisementId { get; } = advertisementId;
     public bool IsThumbnailUploaded { get; } = isThumbnailUploaded;
     public bool IsAdopted { get; } = isAdopted;
     public ICollection<Link> Links { get; set; } = new List<Link>();
 }
-public class AdvertisementHateoasResponse(Guid id, Guid personId, AdvertisementStatus status)
+public class AdvertisementHateoasResponse(AdvertisementId id, PersonId personId, AdvertisementStatus status)
     : IHateoasAdvertisementResponse
 {
-    public Guid Id { get; } = id;
-    public Guid PersonId { get; } = personId;
+    public AdvertisementId Id { get; } = id;
+    public PersonId PersonId { get; } = personId;
     public AdvertisementStatus Status { get; } = status;
     public ICollection<Link> Links { get; set; } = new List<Link>();
 }

@@ -4,6 +4,7 @@ using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Shared.Responses;
+using KittySaver.Shared.TypedIds;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,7 +12,7 @@ namespace KittySaver.Api.Features.Persons;
 
 public sealed class GetPerson : IEndpoint
 {
-    public sealed record GetPersonQuery(Guid Id) : IQuery<PersonResponse>, IAuthorizedRequest, IPersonRequest;
+    public sealed record GetPersonQuery(PersonId Id) : IQuery<PersonResponse>, IAuthorizedRequest, IPersonRequest;
 
     internal sealed class GetPersonQueryHandler(
         ApplicationReadDbContext db)
@@ -37,7 +38,7 @@ public sealed class GetPerson : IEndpoint
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            GetPersonQuery query = new(id);
+            GetPersonQuery query = new(new PersonId(id));
             PersonResponse person = await sender.Send(query, cancellationToken);
             return Results.Ok(person);
         }).RequireAuthorization()
