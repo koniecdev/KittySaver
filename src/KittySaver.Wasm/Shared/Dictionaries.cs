@@ -1,4 +1,6 @@
-﻿namespace KittySaver.Wasm.Shared;
+﻿using KittySaver.Shared.Common.Enums;
+
+namespace KittySaver.Wasm.Shared;
 
 public static class Dictionaries
 {

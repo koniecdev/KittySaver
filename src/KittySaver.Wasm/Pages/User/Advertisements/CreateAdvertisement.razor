@@ -6,6 +6,7 @@
 @using KittySaver.Shared.Pagination
 @using KittySaver.Shared.Requests
 @using KittySaver.Shared.Responses
+@using KittySaver.Shared.TypedIds
 @using KittySaver.Wasm.Shared
 @using KittySaver.Wasm.Shared.HttpClients
 @using KittySaver.Wasm.Shared.Validation
@@ -414,7 +415,7 @@
 @code {
     [Parameter]
     [SupplyParameterFromQuery]
-    public Guid? CatId { get; set; }
+    public CatId? CatId { get; set; }
     
     private int _currentStep = 1;
     private AdvertisementDto _advertisementDto = new();
@@ -440,7 +441,7 @@
         
         if (CatId.HasValue)
         {
-            var catToAdd = _availableCats.FirstOrDefault(c => c.Id == CatId.Value);
+            var catToAdd = _availableCats.FirstOrDefault(c => c.Id == CatId);
             if (catToAdd != null)
             {
                 ToggleSelectCat(catToAdd);

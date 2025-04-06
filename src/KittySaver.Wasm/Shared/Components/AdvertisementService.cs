@@ -1,29 +1,30 @@
 ﻿using KittySaver.Shared.Hateoas;
+using KittySaver.Shared.TypedIds;
 
 namespace KittySaver.Wasm.Shared.Components;
 
 public interface IAdvertisementStateService
 {
-    Link? GetSelectedAdvertisementLink(Guid id);
-    void SetSelectedAdvertisementLink(Guid id, Link link);
-    void ClearSelectedAdvertisementLink(Guid id);
+    Link? GetSelectedAdvertisementLink(AdvertisementId id);
+    void SetSelectedAdvertisementLink(AdvertisementId id, Link link);
+    void ClearSelectedAdvertisementLink(AdvertisementId id);
 }
 
 public class AdvertisementStateService : IAdvertisementStateService
 {
-    private readonly Dictionary<Guid, Link> _selectedAdvertisementLinks = new();
+    private readonly Dictionary<AdvertisementId, Link> _selectedAdvertisementLinks = new();
 
-    public Link? GetSelectedAdvertisementLink(Guid id)
+    public Link? GetSelectedAdvertisementLink(AdvertisementId id)
     {
         return _selectedAdvertisementLinks.GetValueOrDefault(id);
     }
 
-    public void SetSelectedAdvertisementLink(Guid id, Link link)
+    public void SetSelectedAdvertisementLink(AdvertisementId id, Link link)
     {
         _selectedAdvertisementLinks[id] = link;
     }
 
-    public void ClearSelectedAdvertisementLink(Guid id)
+    public void ClearSelectedAdvertisementLink(AdvertisementId id)
     {
         _selectedAdvertisementLinks.Remove(id);
     }
