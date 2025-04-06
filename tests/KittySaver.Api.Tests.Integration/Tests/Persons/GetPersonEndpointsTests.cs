@@ -4,7 +4,9 @@ using System.Text.Json;
 using Bogus;
 using FluentAssertions;
 using KittySaver.Api.Tests.Integration.Helpers;
+using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.Responses;
+using KittySaver.Shared.TypedIds;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using KittySaver.Tests.Shared;
@@ -47,15 +49,16 @@ public class GetPersonEndpointsTests : IAsyncLifetime
         //Arrange
         CreatePersonRequest request = _createPersonRequestGenerator.Generate();
         HttpResponseMessage registerResponseMessage = await _httpClient.PostAsJsonAsync("api/v1/persons", request);
-        ApiResponses.CreatedWithIdResponse registerResponse =
-            await registerResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
+        IdResponse<PersonId> personId = await registerResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<PersonId>>();
+
+        
         //Act
-        HttpResponseMessage response = await _httpClient.GetAsync($"api/v1/persons/{registerResponse.Id}");
+        HttpResponseMessage response = await _httpClient.GetAsync($"api/v1/persons/{personId}");
+        
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         PersonResponse person = await response.Content.ReadFromJsonAsync<PersonResponse>() ?? throw new JsonException();
-        person.Id.Should().Be(registerResponse.Id);
+        person.Id.Should().Be(personId.Id);
         person.Email.Should().Be(request.Email);
         person.PhoneNumber.Should().Be(request.PhoneNumber);
         person.Links.Count.Should().Be(7);
@@ -64,8 +67,12 @@ public class GetPersonEndpointsTests : IAsyncLifetime
     [Fact]
     public async Task GetPerson_ShouldReturnNotFound_WhenNoPersonExist()
     {
+        //Arrange
+        PersonId randomId = PersonId.New();
+        
         //Act
-        HttpResponseMessage response = await _httpClient.GetAsync($"api/v1/persons/{Guid.NewGuid()}");
+        HttpResponseMessage response = await _httpClient.GetAsync($"api/v1/persons/{randomId}");
+        
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         ProblemDetails? problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();

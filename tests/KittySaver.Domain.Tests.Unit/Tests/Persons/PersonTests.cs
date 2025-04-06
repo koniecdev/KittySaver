@@ -1,11 +1,15 @@
 using Bogus;
 using FluentAssertions;
 using KittySaver.Domain.Common.Exceptions;
-using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.DomainServices;
+using KittySaver.Domain.Persons.Entities;
+using KittySaver.Domain.Persons.ValueObjects;
 using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.Common.Enums;
+using KittySaver.Shared.TypedIds;
 using NSubstitute;
-using Person = KittySaver.Domain.Persons.Person;
+using Person = KittySaver.Domain.Persons.Entities.Person;
 
 namespace KittySaver.Domain.Tests.Unit.Tests.Persons;
 
@@ -49,7 +53,6 @@ public class PersonTests
         sut.SetUserIdentityId(_userIdentityId);
 
         //Assert
-        sut.Id.Should().NotBeEmpty();
         sut.Nickname.Should().Be(nickname);
         sut.Email.Should().Be(email);
         sut.PhoneNumber.Should().Be(phoneNumber);
@@ -57,7 +60,7 @@ public class PersonTests
         sut.DefaultAdvertisementsContactInfoEmail.Should().BeEquivalentTo(defaultEmail);
         sut.DefaultAdvertisementsContactInfoPhoneNumber.Should().BeEquivalentTo(defaultPhoneNumber);
         sut.UserIdentityId.Should().Be(_userIdentityId);
-        sut.CurrentRole.Should().Be(Person.Role.Regular);
+        sut.CurrentRole.Should().Be(PersonRole.Regular);
     }
     
     [Fact]
@@ -93,7 +96,6 @@ public class PersonTests
         sut.SetUserIdentityId(_userIdentityId);
 
         //Assert
-        sut.Id.Should().NotBeEmpty();
         sut.Nickname.Should().Be(nickname);
         sut.Email.Should().Be(email);
         sut.PhoneNumber.Should().Be(phoneNumber);
@@ -107,30 +109,7 @@ public class PersonTests
         sut.DefaultAdvertisementsContactInfoEmail.Should().BeEquivalentTo(defaultEmail);
         sut.DefaultAdvertisementsContactInfoPhoneNumber.Should().BeEquivalentTo(defaultPhoneNumber);
         sut.UserIdentityId.Should().Be(_userIdentityId);
-        sut.CurrentRole.Should().Be(Person.Role.Regular);
-    }
-    
-    [Fact]
-    public void UserIdentityIdSet_ShouldThrowArgumentException_WhenEmptyGuidIsProvided()
-    {
-        //Arrange
-        Guid emptyGuid = Guid.Empty;
-
-        Person user = Person.Create(
-            nickname: _defaultProperNickname,
-            email: _defaultProperEmail,
-            phoneNumber: _defaultProperPhone,
-            defaultAdvertisementPickupAddress: PickupAddress,
-            defaultAdvertisementContactInfoEmail: _defaultProperEmail,
-            defaultAdvertisementContactInfoPhoneNumber: _defaultProperPhone
-        );
-        
-        //Act
-        Action creation = () => user.SetUserIdentityId(emptyGuid);
-        
-        //Assert
-        creation.Should().Throw<ArgumentException>()
-            .WithMessage("Provided empty guid. (Parameter 'UserIdentityId')");
+        sut.CurrentRole.Should().Be(PersonRole.Regular);
     }
     
     [Fact]
@@ -403,7 +382,7 @@ public class PersonTests
         CatName nameForUpdate = CatName.Create("Krówka");
         Description descriptionForUpdate = Description.Create("Krówkaa");
         Action results = () => sut.UpdateCat(
-            catId: Guid.NewGuid(),
+            catId: CatId.New(),
             catPriorityCalculator: calculatorService,
             name: nameForUpdate,
             additionalRequirements: descriptionForUpdate,
@@ -556,7 +535,7 @@ public class PersonTests
         );
 
         // Act & Assert
-        Action act = () => sut.RemoveAdvertisement(Guid.NewGuid());
+        Action act = () => sut.RemoveAdvertisement(AdvertisementId.New());
         
         act.Should().Throw<NotFoundExceptions.AdvertisementNotFoundException>();
     }

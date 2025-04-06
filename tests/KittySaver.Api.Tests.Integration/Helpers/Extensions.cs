@@ -24,11 +24,9 @@ public static class Extensions
         return result.ToString();
     }
     
-    public static async Task<ApiResponses.CreatedWithIdResponse> GetIdResponseFromResponseMessageAsync(this HttpResponseMessage responseMessage)
+    public static async Task<TId> GetIdResponseFromResponseMessageAsync<TId>(this HttpResponseMessage responseMessage)
     {
-        ApiResponses.CreatedWithIdResponse response =
-            await responseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
+        TId response = await responseMessage.Content.ReadFromJsonAsync<TId>() ?? throw new JsonException();
         return response;
     }
     public static async Task<TResponse> GetResponseFromResponseMessageAsync<TResponse>(this HttpResponseMessage responseMessage)

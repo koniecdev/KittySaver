@@ -5,10 +5,11 @@ using Bogus;
 using FluentAssertions;
 using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Tests.Integration.Helpers;
-using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Shared.Common.Enums;
 using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.Pagination;
 using KittySaver.Shared.Responses;
+using KittySaver.Shared.TypedIds;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using KittySaver.Tests.Shared;
@@ -64,17 +65,14 @@ public class GetCatsEndpointsTests : IAsyncLifetime
         //Arrange
         HttpResponseMessage personRegisterResponseMessage =
             await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
-        ApiResponses.CreatedWithIdResponse personRegisterResponse =
-            await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
+        IdResponse<PersonId> personId = await personRegisterResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<PersonId>>();
+        
         HttpResponseMessage catCreateResponseMessage =
-            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personRegisterResponse.Id}/cats", _createCatRequest);
-        ApiResponses.CreatedWithIdResponse catCreateResponse =
-            await catCreateResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
+            await _httpClient.PostAsJsonAsync($"api/v1/persons/{personId}/cats", _createCatRequest);
+        IdResponse<CatId> catId = await catCreateResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<CatId>>();
 
         //Act
-        HttpResponseMessage response = await _httpClient.GetAsync($"/api/v1/persons/{personRegisterResponse.Id}/cats");
+        HttpResponseMessage response = await _httpClient.GetAsync($"/api/v1/persons/{personId}/cats");
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -87,7 +85,7 @@ public class GetCatsEndpointsTests : IAsyncLifetime
         cats.Links.First(x => x.Rel == "by-page").Href.Should().Contain("://");
         
         CatResponse cat = cats.Items.First();
-        cat.Id.Should().Be(catCreateResponse.Id);
+        cat.Id.Should().Be(catId);
         cat.Name.Should().Be(_createCatRequest.Name);
         cat.AdditionalRequirements.Should().Be(_createCatRequest.AdditionalRequirements);
         cat.Behavior.Should().Be(_createCatRequest.Behavior);
@@ -114,12 +112,10 @@ public class GetCatsEndpointsTests : IAsyncLifetime
         //Arrange
         HttpResponseMessage personRegisterResponseMessage =
             await _httpClient.PostAsJsonAsync("api/v1/persons", _createPersonRequest);
-        ApiResponses.CreatedWithIdResponse personRegisterResponse =
-            await personRegisterResponseMessage.Content.ReadFromJsonAsync<ApiResponses.CreatedWithIdResponse>()
-            ?? throw new JsonException();
+        IdResponse<PersonId> personId = await personRegisterResponseMessage.GetIdResponseFromResponseMessageAsync<IdResponse<PersonId>>();
 
         //Act
-        HttpResponseMessage response = await _httpClient.GetAsync($"/api/v1/persons/{personRegisterResponse.Id}/cats");
+        HttpResponseMessage response = await _httpClient.GetAsync($"/api/v1/persons/{personId}/cats");
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -135,8 +131,11 @@ public class GetCatsEndpointsTests : IAsyncLifetime
     [Fact]
     public async Task GetCats_ShouldReturnNotFound_WhenNonExistingPersonIsProvided()
     {
+        //Arrange
+        PersonId randomPersonId = PersonId.New();
+        
         //Act
-        HttpResponseMessage response = await _httpClient.GetAsync($"api/v1/persons/{Guid.NewGuid()}/cats");
+        HttpResponseMessage response = await _httpClient.GetAsync($"api/v1/persons/{randomPersonId}/cats");
 
         //Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);

@@ -1,25 +1,26 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using KittySaver.Domain.Common.Primitives;
 using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.TypedIds;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace KittySaver.Domain.Persons;
 
-public sealed class Advertisement : AuditableEntity
+public sealed class Advertisement : AuditableEntity<AdvertisementId>
 {
     public static readonly TimeSpan ExpiringPeriodInDays = new(days: 30, hours: 0, minutes: 0, seconds: 0);
     public static readonly TimeSpan ShelterExpiringPeriodInDays = new(days: 365, hours: 0, minutes: 0, seconds: 0);
 
-    private readonly Guid _personId;
+    private readonly PersonId _personId;
     private double _priorityScore;
 
-    public required Guid PersonId
+    public required PersonId PersonId
     {
         get => _personId;
         init
         {
-            if (value == Guid.Empty)
+            if (value == PersonId.Empty)
             {
                 throw new ArgumentException(ErrorMessages.EmptyPersonId, nameof(PersonId));
             }
@@ -56,7 +57,7 @@ public sealed class Advertisement : AuditableEntity
 
     [SetsRequiredMembers]
     private Advertisement(
-        Guid personId,
+        PersonId personId,
         Address pickupAddress,
         Email contactInfoEmail,
         PhoneNumber contactInfoPhoneNumber,
@@ -75,7 +76,7 @@ public sealed class Advertisement : AuditableEntity
 
     internal static Advertisement Create(
         DateTimeOffset dateOfCreation,
-        Guid ownerId,
+        PersonId ownerId,
         Person.Role ownerRole,
         Address pickupAddress,
         Email contactInfoEmail,

@@ -1,10 +1,14 @@
 using Bogus;
 using FluentAssertions;
-using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.DomainServices;
+using KittySaver.Domain.Persons.Entities;
+using KittySaver.Domain.Persons.ValueObjects;
 using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.Common.Enums;
+using KittySaver.Shared.TypedIds;
 using NSubstitute;
-using Person = KittySaver.Domain.Persons.Person;
+using Person = KittySaver.Domain.Persons.Entities.Person;
 
 namespace KittySaver.Domain.Tests.Unit.Tests.Cats;
 
@@ -61,7 +65,6 @@ public class CatTests
 
         //Assert
         cat.Should().NotBeNull();
-        cat.Id.Should().NotBeEmpty();
         cat.Name.Should().Be(name);
         cat.MedicalHelpUrgency.Should().Be(medicalHelpUrgency);
         cat.AgeCategory.Should().Be(ageCategory);
@@ -72,79 +75,6 @@ public class CatTests
         cat.AdditionalRequirements.Should().Be(additionalRequirements);
         cat.IsAdopted.Should().BeFalse();
         cat.PersonId.Should().Be(Person.Id);
-    }
-    
-    [Fact]
-    public void PersonIdSet_ShouldThrowArgumentException_WhenProvidedEmptyValue()
-    {
-        Person person = new Faker<Person>()
-        .CustomInstantiator(faker =>
-            Person.Create(
-                nickname: Nickname.Create(faker.Person.FirstName),
-                email: Email.Create(faker.Person.Email),
-                phoneNumber: PhoneNumber.Create(faker.Person.Phone),
-                defaultAdvertisementPickupAddress: PickupAddress,
-                defaultAdvertisementContactInfoEmail: Email.Create(faker.Person.Email),
-                defaultAdvertisementContactInfoPhoneNumber: PhoneNumber.Create(faker.Person.Phone)
-            )).Generate();
-    
-        SharedHelper.SetBackingField(person, nameof(Person.Id), Guid.Empty);
-        
-        //Act
-        Action createCat = () =>
-        {
-            new Faker<Cat>()
-             .CustomInstantiator(faker => person.AddCat(
-                     priorityScoreCalculator: Substitute.For<ICatPriorityCalculatorService>(),
-                     name: CatName.Create(faker.Person.FirstName),
-                     additionalRequirements: Description.Create(faker.Person.FirstName),
-                     medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
-                     ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
-                     behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
-                     healthStatus: faker.PickRandomParam( HealthStatus.ChronicSerious, HealthStatus.ChronicMinor, HealthStatus.Good),
-                     isCastrated: faker.PickRandomParam(true, false)
-                 )).Generate();
-        };
-        
-        //Assert
-        createCat.Should().Throw<ArgumentException>().WithMessage("Provided person id is empty (Parameter 'PersonId')");
-    }
-    
-    [Fact]
-    public void AdvertisementIdSet_ShouldThrowArgumentException_WhenProvidedEmptyValue()
-    {
-        Person person = new Faker<Person>()
-        .CustomInstantiator(faker =>
-            Person.Create(
-                nickname: Nickname.Create(faker.Person.FirstName),
-                email: Email.Create(faker.Person.Email),
-                phoneNumber: PhoneNumber.Create(faker.Person.Phone),
-                defaultAdvertisementPickupAddress: PickupAddress,
-                defaultAdvertisementContactInfoEmail: Email.Create(faker.Person.Email),
-                defaultAdvertisementContactInfoPhoneNumber: PhoneNumber.Create(faker.Person.Phone)
-            )).Generate();
-        ICatPriorityCalculatorService priorityScoreCalculator = Substitute.For<ICatPriorityCalculatorService>();
-        priorityScoreCalculator.Calculate(Arg.Any<Cat>()).Returns(420);
-        Cat cat = new Faker<Cat>()
-         .CustomInstantiator(faker => person.AddCat(
-                 priorityScoreCalculator: priorityScoreCalculator,
-                 name: CatName.Create(faker.Person.FirstName),
-                 additionalRequirements: Description.Create(faker.Person.FirstName),
-                 medicalHelpUrgency: faker.PickRandomParam(MedicalHelpUrgency.NoNeed, MedicalHelpUrgency.ShouldSeeVet, MedicalHelpUrgency.HaveToSeeVet),
-                 ageCategory: faker.PickRandomParam(AgeCategory.Baby, AgeCategory.Adult, AgeCategory.Senior),
-                 behavior: faker.PickRandomParam(Behavior.Unfriendly, Behavior.Friendly),
-                 healthStatus: faker.PickRandomParam( HealthStatus.ChronicSerious, HealthStatus.ChronicMinor, HealthStatus.Good),
-                 isCastrated: faker.PickRandomParam(true, false)
-             )).Generate();
-        
-        //Act
-        Action results = () =>
-        {
-            SharedHelper.SetPrivateSetProperty(cat, nameof(Cat.AdvertisementId), Guid.Empty);
-        };
-        
-        //Assert
-        results.Should().Throw<Exception>().WithInnerException<ArgumentException>().WithMessage("Provided advertisement id is empty (Parameter 'AdvertisementId')");
     }
 
     [Fact]
@@ -181,7 +111,7 @@ public class CatTests
             description: Description.Create("lorem ipsum"));
         
         //Act
-        sut.UnassignAdvertisement();
+        sut.RemoveFromAdvertisement();
         
         //Assert
         sut.AdvertisementId.Should().BeNull();
@@ -214,7 +144,7 @@ public class CatTests
         );
         
         //Act
-        Action results = () => cat.UnassignAdvertisement();
+        Action results = () => cat.RemoveFromAdvertisement();
         
         //Assert
         results.Should().ThrowExactly<InvalidOperationException>();
@@ -310,7 +240,7 @@ public class CatTests
             additionalRequirements: additionalRequirements,
             isCastrated: isCastrated
         );
-        Guid advertisementId = Guid.NewGuid();
+        AdvertisementId advertisementId = AdvertisementId.New();
 
         // Act
         cat.AssignAdvertisement(advertisementId);
@@ -344,46 +274,13 @@ public class CatTests
             additionalRequirements: additionalRequirements,
             isCastrated: isCastrated
         );
-        Guid firstAdvertisementId = Guid.NewGuid();
+        AdvertisementId firstAdvertisementId = AdvertisementId.New();
         cat.AssignAdvertisement(firstAdvertisementId);
 
         // Act
-        Action action = () => cat.AssignAdvertisement(Guid.NewGuid()); 
+        Action action = () => cat.AssignAdvertisement(AdvertisementId.New()); 
         
         //Assert
         action.Should().Throw<InvalidOperationException>();
-    }
-
-    [Fact]
-    public void AssignAdvertisement_WithEmptyGuid_ShouldAssignEmptyGuid()
-    {
-        // Arrange
-        ICatPriorityCalculatorService? calculator = Substitute.For<ICatPriorityCalculatorService>();
-        calculator.Calculate(Arg.Any<Cat>()).Returns(420);
-        
-        CatName name = CatName.Create("Whiskers");
-        Description additionalRequirements = Description.Create("Lorem ipsum");
-        MedicalHelpUrgency medicalHelpUrgency = MedicalHelpUrgency.NoNeed;
-        AgeCategory ageCategory = AgeCategory.Adult;
-        Behavior behavior = Behavior.Friendly;
-        HealthStatus healthStatus = HealthStatus.Good;
-        const bool isCastrated = true;
-        
-        Cat cat = Person.AddCat(
-            priorityScoreCalculator: calculator,
-            name: name,
-            medicalHelpUrgency: medicalHelpUrgency,
-            ageCategory: ageCategory,
-            behavior: behavior,
-            healthStatus: healthStatus,
-            additionalRequirements: additionalRequirements,
-            isCastrated: isCastrated
-        );
-
-        // Act
-        Action action = () => cat.AssignAdvertisement(Guid.Empty);
-        
-        //Assert
-        action.Should().Throw<ArgumentException>();
     }
 }

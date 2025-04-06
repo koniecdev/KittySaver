@@ -1,9 +1,12 @@
 using Bogus;
 using FluentAssertions;
-using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.DomainServices;
+using KittySaver.Domain.Persons.Entities;
+using KittySaver.Domain.Persons.ValueObjects;
 using KittySaver.Domain.ValueObjects;
-using Person = KittySaver.Domain.Persons.Person;
+using KittySaver.Shared.Common.Enums;
+using Person = KittySaver.Domain.Persons.Entities.Person;
 
 namespace KittySaver.Domain.Tests.Unit.Tests.Cats;
 

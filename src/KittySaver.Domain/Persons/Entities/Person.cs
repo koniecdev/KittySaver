@@ -2,14 +2,15 @@
 using KittySaver.Domain.Common.Primitives;
 using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.TypedIds;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace KittySaver.Domain.Persons;
 
-public sealed class Person : AggregateRoot
+public sealed class Person : AggregateRoot<PersonId>
 {
-    private Guid _userIdentityId;
+    private PersonId _userIdentityId;
     private readonly List<Cat> _cats = [];
     private readonly List<Advertisement> _advertisements = [];
 
@@ -23,14 +24,14 @@ public sealed class Person : AggregateRoot
 
     public Role CurrentRole { get; private init; } = Role.Regular;
 
-    public Guid UserIdentityId
+    public PersonId UserIdentityId
     {
         get => _userIdentityId;
         private set
         {
-            if (value == Guid.Empty)
+            if (value == PersonId.Empty)
             {
-                throw new ArgumentException("Provided empty guid.", nameof(UserIdentityId));
+                throw new ArgumentException("Provided empty PersonId.", nameof(UserIdentityId));
             }
 
             _userIdentityId = value;
@@ -49,7 +50,7 @@ public sealed class Person : AggregateRoot
     /// <remarks>
     /// Required by EF Core, and should never be used by programmer as it bypasses business rules.
     /// </remarks>
-    private Person()
+    private Person() : base(default)
     {
         Nickname = null!;
         Email = null!;
@@ -60,12 +61,13 @@ public sealed class Person : AggregateRoot
     }
 
     private Person(
+        PersonId id,
         Nickname nickname,
         Email email,
         PhoneNumber phoneNumber,
         Address defaultAdvertisementPickupAddress,
         Email defaultAdvertisementContactInfoEmail,
-        PhoneNumber defaultAdvertisementContactInfoPhone)
+        PhoneNumber defaultAdvertisementContactInfoPhone) : base(id)
     {
         Nickname = nickname;
         Email = email;
@@ -83,7 +85,9 @@ public sealed class Person : AggregateRoot
         Email defaultAdvertisementContactInfoEmail,
         PhoneNumber defaultAdvertisementContactInfoPhoneNumber)
     {
+        PersonId personId = PersonId.New();
         Person person = new(
+            personId,
             nickname: nickname,
             email: email,
             phoneNumber: phoneNumber,
@@ -118,7 +122,7 @@ public sealed class Person : AggregateRoot
         return cat;
     }
 
-    public void RemoveCat(Guid catId)
+    public void RemoveCat(CatId catId)
     {
         Cat cat = GetCatById(catId);
         ThrowIfCatIsAssignedToAdvertisement(cat);
@@ -126,7 +130,7 @@ public sealed class Person : AggregateRoot
     }
 
     public void UpdateCat(
-        Guid catId,
+        CatId catId,
         ICatPriorityCalculatorService catPriorityCalculator,
         CatName name,
         Description additionalRequirements,
@@ -151,13 +155,13 @@ public sealed class Person : AggregateRoot
 
     public Advertisement AddAdvertisement(
         DateTimeOffset dateOfCreation,
-        IEnumerable<Guid> catsIdsToAssign,
+        IEnumerable<CatId> catsIdsToAssign,
         Address pickupAddress,
         Email contactInfoEmail,
         PhoneNumber contactInfoPhoneNumber,
         Description description)
     {
-        List<Guid> catsIdsToAssignList = catsIdsToAssign.ToList();
+        List<CatId> catsIdsToAssignList = catsIdsToAssign.ToList();
         if (catsIdsToAssignList.Count == 0)
         {
             throw new ArgumentException(ErrorMessages.EmptyCatsList, nameof(catsIdsToAssign));
@@ -176,7 +180,7 @@ public sealed class Person : AggregateRoot
             description,
             catsToAssignToAdvertisementHighestPriorityScore);
         
-        foreach (Guid catId in catsIdsToAssignList)
+        foreach (CatId catId in catsIdsToAssignList)
         {
             AssignCatToAdvertisement(advertisement.Id, catId);
         }
@@ -186,7 +190,7 @@ public sealed class Person : AggregateRoot
         return advertisement;
     }
 
-    public void RemoveAdvertisement(Guid advertisementId)
+    public void RemoveAdvertisement(AdvertisementId advertisementId)
     {
         Advertisement advertisement = GetAdvertisementById(advertisementId);
         _advertisements.Remove(advertisement);
@@ -198,7 +202,7 @@ public sealed class Person : AggregateRoot
     }
 
     public void UpdateAdvertisement(
-        Guid advertisementId,
+        AdvertisementId advertisementId,
         Description description,
         Address pickupAddress,
         Email contactInfoEmail,
@@ -210,7 +214,7 @@ public sealed class Person : AggregateRoot
         advertisementToUpdate.ChangeContactInfo(contactInfoEmail, contactInfoPhoneNumber);
     }
 
-    public void CloseAdvertisement(Guid advertisementId, DateTimeOffset currentDate)
+    public void CloseAdvertisement(AdvertisementId advertisementId, DateTimeOffset currentDate)
     {
         Advertisement advertisement = GetAdvertisementById(advertisementId);
         IEnumerable<Cat> catsOfClosedAdvertisementQuery = GetAssignedToConcreteAdvertisementCats(advertisementId);
@@ -221,7 +225,7 @@ public sealed class Person : AggregateRoot
         }
     }
 
-    public void ActivateAdvertisementIfThumbnailIsUploadedForTheFirstTime(Guid advertisementId)
+    public void ActivateAdvertisementIfThumbnailIsUploadedForTheFirstTime(AdvertisementId advertisementId)
     {
         Advertisement advertisement = GetAdvertisementById(advertisementId);
         if (advertisement.Status is AdvertisementStatus.ThumbnailNotUploaded)
@@ -230,30 +234,30 @@ public sealed class Person : AggregateRoot
         }
     }
     
-    public void ExpireAdvertisement(Guid advertisementId, DateTimeOffset currentDate)
+    public void ExpireAdvertisement(AdvertisementId advertisementId, DateTimeOffset currentDate)
     {
         Advertisement advertisement = GetAdvertisementById(advertisementId);
         advertisement.Expire(currentDate);
     }
 
-    public void RefreshAdvertisement(Guid advertisementId, DateTimeOffset currentDate)
+    public void RefreshAdvertisement(AdvertisementId advertisementId, DateTimeOffset currentDate)
     {
         Advertisement advertisement = GetAdvertisementById(advertisementId);
         advertisement.Refresh(currentDate);
     }
 
-    public void ReplaceCatsOfAdvertisement(Guid advertisementId, IEnumerable<Guid> catsToAssignIds)
+    public void ReplaceCatsOfAdvertisement(AdvertisementId advertisementId, IEnumerable<CatId> catsToAssignIds)
     {
-        IEnumerable<Guid> catsIdsQuery = Cats
+        IEnumerable<CatId> catsIdsQuery = Cats
             .Where(x => x.AdvertisementId == advertisementId)
             .Select(x => x.Id);
         
-        foreach (Guid catId in catsIdsQuery)
+        foreach (CatId catId in catsIdsQuery)
         {
             UnassignCatFromAdvertisement(catId);
         }
 
-        foreach (Guid catId in catsToAssignIds)
+        foreach (CatId catId in catsToAssignIds)
         {
             AssignCatToAdvertisement(advertisementId, catId);
         }
@@ -286,9 +290,9 @@ public sealed class Person : AggregateRoot
         DefaultAdvertisementsContactInfoPhoneNumber = defaultAdvertisementsContactInfoPhoneNumber;
     }
 
-    public double GetHighestPriorityScoreFromGivenCats(IEnumerable<Guid> catsIds)
+    public double GetHighestPriorityScoreFromGivenCats(IEnumerable<CatId> catsIds)
     {
-        List<Guid> catsIdsList = catsIds.ToList();
+        List<CatId> catsIdsList = catsIds.ToList();
 
         ValidateCatsOwnership(catsIdsList);
 
@@ -299,30 +303,30 @@ public sealed class Person : AggregateRoot
         return highestPriorityScore;
     }
 
-    public void MarkCatAsThumbnailUploaded(Guid catId)
+    public void MarkCatAsThumbnailUploaded(CatId catId)
     {
         Cat cat = GetCatById(catId);
         cat.MarkAsThumbnailUploaded();
     }
     
-    public void SetUserIdentityId(Guid userIdentityId)
+    public void SetUserIdentityId(PersonId userIdentityId)
     {
         UserIdentityId = userIdentityId;
     }
     
-    private void AssignCatToAdvertisement(Guid advertisementId, Guid catId)
+    private void AssignCatToAdvertisement(AdvertisementId advertisementId, CatId catId)
     {
         Cat cat = GetCatById(catId);
         cat.AssignAdvertisement(advertisementId);
     }
 
-    private void UnassignCatFromAdvertisement(Guid catId)
+    private void UnassignCatFromAdvertisement(CatId catId)
     {
         Cat cat = GetCatById(catId);
         cat.UnassignAdvertisement();
     }
 
-    private void UpdateAdvertisementPriorityScore(Guid advertisementId)
+    private void UpdateAdvertisementPriorityScore(AdvertisementId advertisementId)
     {
         IEnumerable<Cat> catsQuery = GetAssignedToConcreteAdvertisementCats(advertisementId);
         double catsToAssignToAdvertisementHighestPriorityScore =
@@ -332,12 +336,12 @@ public sealed class Person : AggregateRoot
         advertisement.PriorityScore = catsToAssignToAdvertisementHighestPriorityScore;
     }
 
-    private IEnumerable<Cat> GetAssignedToConcreteAdvertisementCats(Guid advertisementId)
+    private IEnumerable<Cat> GetAssignedToConcreteAdvertisementCats(AdvertisementId advertisementId)
         => _cats.Where(x => x.AdvertisementId == advertisementId);
 
-    private void ValidateCatsOwnership(IEnumerable<Guid> catIds)
+    private void ValidateCatsOwnership(IEnumerable<CatId> catIds)
     {
-        HashSet<Guid> catIdsFromPersonCats = Cats.Select(cat => cat.Id).ToHashSet();
+        HashSet<CatId> catIdsFromPersonCats = Cats.Select(cat => cat.Id).ToHashSet();
         if (!catIds.All(catId => catIdsFromPersonCats.Contains(catId)))
         {
             throw new ArgumentException(ErrorMessages.InvalidCatsOwnership, nameof(catIds));
@@ -353,11 +357,11 @@ public sealed class Person : AggregateRoot
         }
     }
 
-    private Cat GetCatById(Guid catId) =>
+    private Cat GetCatById(CatId catId) =>
         _cats.FirstOrDefault(c => c.Id == catId) ??
         throw new NotFoundExceptions.CatNotFoundException(catId);
 
-    private Advertisement GetAdvertisementById(Guid advertisementId) =>
+    private Advertisement GetAdvertisementById(AdvertisementId advertisementId) =>
         _advertisements.FirstOrDefault(c => c.Id == advertisementId) ??
         throw new NotFoundExceptions.AdvertisementNotFoundException(advertisementId);
 

@@ -1,8 +1,9 @@
 using Bogus;
 using FluentAssertions;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.ValueObjects;
 using KittySaver.Domain.ValueObjects;
-using Person = KittySaver.Domain.Persons.Person;
+using Person = KittySaver.Domain.Persons.Entities.Person;
 
 namespace KittySaver.Domain.Tests.Unit.Tests.Persons;
 

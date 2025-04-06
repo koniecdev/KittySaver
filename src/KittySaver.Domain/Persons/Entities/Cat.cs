@@ -2,23 +2,24 @@
 using KittySaver.Domain.Common.Primitives;
 using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.TypedIds;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace KittySaver.Domain.Persons;
 
-public sealed class Cat : AuditableEntity
+public sealed class Cat : AuditableEntity<CatId>
 {
-    private readonly Guid _personId;
-    private Guid? _advertisementId;
+    private readonly PersonId _personId;
+    private AdvertisementId? _advertisementId;
     private double _priorityScore;
 
-    public Guid PersonId
+    public PersonId PersonId
     {
         get => _personId;
         private init
         {
-            if (value == Guid.Empty)
+            if (value == PersonId.Empty)
             {
                 throw new ArgumentException(ErrorMessages.EmptyPersonId, nameof(PersonId));
             }
@@ -26,12 +27,12 @@ public sealed class Cat : AuditableEntity
         }
     }
 
-    public Guid? AdvertisementId
+    public AdvertisementId? AdvertisementId
     {
         get => _advertisementId;
         private set
         {
-            if (value == Guid.Empty)
+            if (AdvertisementId == Shared.TypedIds.AdvertisementId.Empty)
             {
                 throw new ArgumentException(ErrorMessages.EmptyAdvertisementId, nameof(AdvertisementId));
             }
@@ -65,7 +66,7 @@ public sealed class Cat : AuditableEntity
     /// <remarks>
     /// Required by EF Core, and should never be used by programmer as it bypasses business rules.
     /// </remarks>
-    private Cat()
+    private Cat() : base(default)
     {
         Name = null!;
         AdditionalRequirements = null!;
@@ -75,16 +76,16 @@ public sealed class Cat : AuditableEntity
         AgeCategory = null!;
     }
 
-    [SetsRequiredMembers]
     private Cat(
-        Guid personId,
+        CatId id,
+        PersonId personId,
         CatName name,
         MedicalHelpUrgency medicalHelpUrgency,
         AgeCategory ageCategory,
         Behavior behavior,
         HealthStatus healthStatus,
         Description additionalRequirements,
-        bool isCastrated)
+        bool isCastrated) : base(id)
     {
         PersonId = personId;
         Name = name;
@@ -98,7 +99,7 @@ public sealed class Cat : AuditableEntity
 
     internal static Cat Create(
         ICatPriorityCalculatorService priorityScoreCalculator,
-        Guid personId,
+        PersonId personId,
         CatName name,
         MedicalHelpUrgency medicalHelpUrgency,
         AgeCategory ageCategory,
@@ -107,15 +108,17 @@ public sealed class Cat : AuditableEntity
         Description additionalRequirements,
         bool isCastrated)
     {
+        CatId id = CatId.New();
         Cat cat = new(
-            personId: personId,
-            name: name,
-            medicalHelpUrgency: medicalHelpUrgency,
-            ageCategory: ageCategory,
-            behavior: behavior,
-            healthStatus: healthStatus,
-            isCastrated: isCastrated,
-            additionalRequirements: additionalRequirements);
+            id,
+            personId,
+            name,
+            medicalHelpUrgency,
+            ageCategory,
+            behavior,
+            healthStatus,
+            additionalRequirements,
+            isCastrated);
         cat.RecalculatePriorityScore(priorityScoreCalculator);
         return cat;
     }
@@ -180,7 +183,7 @@ public sealed class Cat : AuditableEntity
     /// <remarks>
     /// Only for use within Person aggregate
     /// </remarks>
-    internal void AssignAdvertisement(Guid advertisementId)
+    internal void AssignAdvertisement(AdvertisementId advertisementId)
     {
         if (AdvertisementId is not null)
         {

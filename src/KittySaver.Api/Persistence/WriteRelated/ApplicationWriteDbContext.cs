@@ -2,6 +2,7 @@
 using KittySaver.Domain;
 using KittySaver.Domain.Common.Primitives;
 using KittySaver.Domain.Persons;
+using KittySaver.Shared.TypedIds;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -25,6 +26,7 @@ public sealed class ApplicationWriteDbContext(
     
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
+        configurationBuilder.RegisterAllStronglyTypedIdConverters();
         configurationBuilder.ConfigureSmartEnum();
         base.ConfigureConventions(configurationBuilder);
     }
