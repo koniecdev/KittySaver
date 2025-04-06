@@ -1,12 +1,13 @@
 ﻿using KittySaver.Shared.Hateoas;
+using KittySaver.Shared.TypedIds;
 
 namespace KittySaver.Shared.Responses;
 
 public sealed class CatResponse : IHateoasCatResponse
 {
-    public required Guid Id { get; init; }
-    public required Guid PersonId { get; init; }
-    public required Guid? AdvertisementId { get; init; }
+    public required CatId Id { get; init; }
+    public required PersonId PersonId { get; init; }
+    public required AdvertisementId? AdvertisementId { get; init; }
     public required string Name { get; init; }
     public required string? AdditionalRequirements { get; init; }
     public required bool IsCastrated { get; init; }
