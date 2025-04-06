@@ -3,6 +3,7 @@ using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Infrastructure.Services.FileServices;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
+using KittySaver.Shared.TypedIds;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 namespace KittySaver.Api.Features.Cats;
 public sealed class GetCatGalleryPicture : IEndpoint
 {
-    public sealed record GetCatGalleryPictureQuery(Guid PersonId, Guid Id, string Filename) : IQuery<(FileStream Stream, string ContentType)>;
+    public sealed record GetCatGalleryPictureQuery(PersonId PersonId, CatId Id, string Filename) : IQuery<(FileStream Stream, string ContentType)>;
 
     internal sealed class GetCatGalleryPictureQueryHandler(
         ApplicationReadDbContext db,
@@ -44,7 +45,7 @@ public sealed class GetCatGalleryPicture : IEndpoint
                 ISender sender,
                 CancellationToken cancellationToken) =>
             {
-                GetCatGalleryPictureQuery query = new(personId, id, filename);
+                GetCatGalleryPictureQuery query = new(new PersonId(personId), new CatId(id), filename);
                 (FileStream fileStream, string contentType) = await sender.Send(query, cancellationToken);
                 
                 return Results.Stream(

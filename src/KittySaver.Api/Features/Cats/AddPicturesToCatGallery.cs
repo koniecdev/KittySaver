@@ -5,7 +5,10 @@ using KittySaver.Api.Shared.Infrastructure.Services.FileServices;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.DomainRepositories;
+using KittySaver.Domain.Persons.Entities;
 using KittySaver.Shared.Hateoas;
+using KittySaver.Shared.TypedIds;
 using MediatR;
 
 namespace KittySaver.Api.Features.Cats;
@@ -13,8 +16,8 @@ namespace KittySaver.Api.Features.Cats;
 public sealed class AddPicturesToCatGallery : IEndpoint
 {
     public sealed record AddPicturesToCatGalleryCommand(
-        Guid PersonId,
-        Guid Id,
+        PersonId PersonId,
+        CatId Id,
         IFormFileCollection GalleryFiles) : ICommand<CatHateoasResponse>, IAuthorizedRequest, ICatRequest;
     
     public sealed class AddPicturesToCatGalleryCommandValidator
@@ -23,24 +26,22 @@ public sealed class AddPicturesToCatGallery : IEndpoint
         public AddPicturesToCatGalleryCommandValidator()
         {
             RuleFor(x => x.PersonId)
-                .NotEmpty()
-                .NotEqual(x => x.Id);
-        
+                .NotEmpty();
+
             RuleFor(x => x.Id)
-                .NotEmpty()
-                .NotEqual(x => x.PersonId);
+                .NotEmpty();
 
             RuleFor(x => x.GalleryFiles)
                 .NotNull()
                 .Must(files => files.Count > 0)
                 .WithMessage("At least one gallery file must be provided")
-                .Must(files => files.All(file => IGalleryStorageService.Constants.AllowedImageTypes
+                .Must(files => files.All(file => AllowedPictureTypes.AllowedImageTypes
                     .ContainsKey(Path.GetExtension(file.FileName).ToLowerInvariant())))
                 .WithMessage("Only .jpg, .jpeg, .png and .webp files are allowed")
                 .Must(files => files.All(file => 
                 {
                     string extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-                    if (!IGalleryStorageService.Constants.AllowedImageTypes.TryGetValue(extension, out string? imageType))
+                    if (!AllowedPictureTypes.AllowedImageTypes.TryGetValue(extension, out string? imageType))
                     {
                         return false;
                     }
@@ -94,7 +95,7 @@ public sealed class AddPicturesToCatGallery : IEndpoint
                 CancellationToken cancellationToken) =>
             {
                 ArgumentNullException.ThrowIfNull(galleryFiles);
-                AddPicturesToCatGalleryCommand command = new(personId, id, galleryFiles);
+                AddPicturesToCatGalleryCommand command = new(new PersonId(personId), new CatId(id), galleryFiles);
                 CatHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
                 return Results.Ok(hateoasResponse);
             })

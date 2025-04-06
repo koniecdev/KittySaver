@@ -3,13 +3,14 @@ using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Infrastructure.Services.FileServices;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
+using KittySaver.Shared.TypedIds;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace KittySaver.Api.Features.Cats;
 public sealed class GetCatThumbnail : IEndpoint
 {
-    public sealed record GetCatThumbnailQuery(Guid PersonId, Guid Id) : IQuery<(FileStream Stream, string ContentType)>;
+    public sealed record GetCatThumbnailQuery(PersonId PersonId, CatId Id) : IQuery<(FileStream Stream, string ContentType)>;
 
     internal sealed class GetCatThumbnailQueryHandler(
         ApplicationReadDbContext db,
@@ -48,7 +49,7 @@ public sealed class GetCatThumbnail : IEndpoint
                 ISender sender,
                 CancellationToken cancellationToken) =>
             {
-                GetCatThumbnailQuery query = new(personId, id);
+                GetCatThumbnailQuery query = new(new PersonId(personId), new CatId(id));
                 (FileStream fileStream, string contentType) = await sender.Send(query, cancellationToken);
                 
                 return Results.Stream(

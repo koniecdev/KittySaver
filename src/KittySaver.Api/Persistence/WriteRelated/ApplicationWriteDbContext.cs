@@ -1,7 +1,9 @@
-﻿using KittySaver.Api.Shared.Infrastructure.Services;
+﻿using KittySaver.Api.Persistence;
+using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Domain;
 using KittySaver.Domain.Common.Primitives;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.Entities;
 using KittySaver.Shared.TypedIds;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -33,18 +35,14 @@ public sealed class ApplicationWriteDbContext(
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        foreach (EntityEntry<AuditableEntity> entity in ChangeTracker.Entries<AuditableEntity>())
+        foreach (EntityEntry<IAuditableEntity> entity in ChangeTracker.Entries<IAuditableEntity>())
         {
             switch (entity.State)
             {
                 case EntityState.Added:
-                    entity.Entity.CreatedOn = dateTimeProvider.Now;
-                    entity.Entity.CreatedBy = currentUserService.GetCurrentUserIdentityId().ToString();
+                    entity.Entity.CreatedAt = dateTimeProvider.Now;
                     break;
                 case EntityState.Modified:
-                    entity.Entity.LastModificationOn = dateTimeProvider.Now;
-                    entity.Entity.LastModificationBy = currentUserService.GetCurrentUserIdentityId().ToString();
-                    break;
                 case EntityState.Detached:
                 case EntityState.Unchanged:
                 case EntityState.Deleted:
@@ -69,14 +67,14 @@ public sealed class ApplicationWriteDbContext(
             return;
         }
         
-        List<EntityEntry<AggregateRoot>> aggregateRootsEntryListQuery = ChangeTracker
-            .Entries<AggregateRoot>()
+        List<EntityEntry<IAggregateRoot>> aggregateRootsEntryListQuery = ChangeTracker
+            .Entries<IAggregateRoot>()
             .Where(entityEntry => entityEntry.Entity.GetDomainEvents().Count != 0)
             .ToList();
 
         List<DomainEvent> domainEvents = aggregateRootsEntryListQuery.SelectMany(entityEntry => entityEntry.Entity.GetDomainEvents()).ToList();
 
-        foreach (EntityEntry<AggregateRoot> aggregateRootEntry in aggregateRootsEntryListQuery)
+        foreach (EntityEntry<IAggregateRoot> aggregateRootEntry in aggregateRootsEntryListQuery)
         {
             aggregateRootEntry.Entity.ClearDomainEvents();
         }

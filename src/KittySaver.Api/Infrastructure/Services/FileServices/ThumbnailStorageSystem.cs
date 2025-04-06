@@ -2,39 +2,29 @@
 
 namespace KittySaver.Api.Shared.Infrastructure.Services.FileServices;
 
-public interface IThumbnailStorageService
+public interface IThumbnailStorageService<in TId> where TId : struct
 {
-    Task SaveThumbnailAsync(IFormFile sourceFile, string entityType, Guid entityId, CancellationToken cancellationToken);
-    FileStream GetThumbnail(string entityType, Guid entityId);
+    Task SaveThumbnailAsync(IFormFile sourceFile, string entityType, TId entityId, CancellationToken cancellationToken);
+    FileStream GetThumbnail(string entityType, TId entityId);
     string GetContentType(string fileName);
-    void DeleteThumbnail(string entityType, Guid entityId);
+    void DeleteThumbnail(string entityType, TId entityId);
     
-    public static class Constants
-    {
-        public static readonly IReadOnlyDictionary<string, string> AllowedThumbnailTypes = new Dictionary<string, string>
-        {
-            [".jpg"] = "image/jpeg",
-            [".jpeg"] = "image/jpeg",
-            [".png"] = "image/png",
-            [".webp"] = "image/webp"
-        };
-    }
 }
 
-public class ThumbnailStorageService(
+public class ThumbnailStorageService<TId>(
     IFileStorageService fileStorage,
     IWebHostEnvironment webHostEnvironment)
-    : IThumbnailStorageService
+    : IThumbnailStorageService<TId> where TId : struct
 {
     private readonly string _basePath = Path.Combine(webHostEnvironment.ContentRootPath, "PrivateFiles");
 
-    public async Task SaveThumbnailAsync(IFormFile sourceFile, string entityType, Guid entityId, CancellationToken cancellationToken)
+    public async Task SaveThumbnailAsync(IFormFile sourceFile, string entityType, TId entityId, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(sourceFile);
         ArgumentException.ThrowIfNullOrEmpty(entityType);
     
         string fileExtension = Path.GetExtension(sourceFile.FileName);
-        if (!IThumbnailStorageService.Constants.AllowedThumbnailTypes.ContainsKey(fileExtension.ToLowerInvariant()))
+        if (!AllowedPictureTypes.AllowedImageTypes.ContainsKey(fileExtension.ToLowerInvariant()))
         {
             throw new InvalidOperationException($"File extension {fileExtension} is not supported for thumbnails");
         }
@@ -63,7 +53,7 @@ public class ThumbnailStorageService(
         await fileStorage.SaveFileAsync(memoryStream, subdirectoryPath, fileName, cancellationToken);
     }
 
-    public FileStream GetThumbnail(string entityType, Guid entityId)
+    public FileStream GetThumbnail(string entityType, TId entityId)
     {
         string thumbnailDirectory = GetThumbnailFolderPath(entityType, entityId);
         
@@ -81,9 +71,9 @@ public class ThumbnailStorageService(
         return fileStorage.GetFileStream(files[0]);
     }
     
-    public string GetContentType(string fileName) => fileStorage.GetContentType(fileName, IThumbnailStorageService.Constants.AllowedThumbnailTypes);
+    public string GetContentType(string fileName) => fileStorage.GetContentType(fileName, AllowedPictureTypes.AllowedImageTypes);
 
-    public void DeleteThumbnail(string entityType, Guid entityId)
+    public void DeleteThumbnail(string entityType, TId entityId)
     {
         string thumbnailDirectory = GetThumbnailFolderPath(entityType, entityId);
 
@@ -104,7 +94,7 @@ public class ThumbnailStorageService(
         }
     }
 
-    private bool TryGetThumbnailPath(string entityType, Guid entityId, out string thumbnailPath)
+    private bool TryGetThumbnailPath(string entityType, TId entityId, out string thumbnailPath)
     {
         thumbnailPath = string.Empty;
         string thumbnailDirectory = GetThumbnailFolderPath(entityType, entityId);
@@ -124,6 +114,6 @@ public class ThumbnailStorageService(
         return true;
     }
     
-    private string GetThumbnailFolderPath(string entityType, Guid entityId) => 
-        Path.Combine(_basePath, entityType.ToLowerInvariant(), entityId.ToString(), "thumbnail");
+    private string GetThumbnailFolderPath(string entityType, TId entityId) => 
+        Path.Combine(_basePath, entityType.ToLowerInvariant(), entityId.ToString()!, "thumbnail");
 }

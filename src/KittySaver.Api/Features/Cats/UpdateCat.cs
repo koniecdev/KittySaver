@@ -2,11 +2,16 @@
 using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Persistence;
-using KittySaver.Domain.Common.Primitives.Enums;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.DomainRepositories;
+using KittySaver.Domain.Persons.DomainServices;
+using KittySaver.Domain.Persons.Entities;
+using KittySaver.Domain.Persons.ValueObjects;
 using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.Common.Enums;
 using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.Requests;
+using KittySaver.Shared.TypedIds;
 using MediatR;
 using Riok.Mapperly.Abstractions;
 
@@ -15,8 +20,8 @@ namespace KittySaver.Api.Features.Cats;
 public sealed class UpdateCat : IEndpoint
 {
     public sealed record UpdateCatCommand(
-        Guid PersonId,
-        Guid Id,
+        PersonId PersonId,
+        CatId Id,
         string Name,
         bool IsCastrated,
         string MedicalHelpUrgency,
@@ -30,12 +35,10 @@ public sealed class UpdateCat : IEndpoint
         public UpdateCatCommandValidator()
         {
             RuleFor(x => x.Id)
-                .NotEmpty()
-                .NotEqual(x => x.PersonId);
-            
+                .NotEmpty();
+
             RuleFor(x => x.PersonId)
-                .NotEmpty()
-                .NotEqual(x => x.Id);
+                .NotEmpty();
             
             RuleFor(x => x.Name)
                 .NotEmpty()

@@ -4,9 +4,12 @@ using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.DomainRepositories;
+using KittySaver.Domain.Persons.Entities;
 using KittySaver.Domain.ValueObjects;
 using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.Requests;
+using KittySaver.Shared.TypedIds;
 using MediatR;
 using Riok.Mapperly.Abstractions;
 
@@ -15,8 +18,8 @@ namespace KittySaver.Api.Features.Advertisements;
 public class CreateAdvertisement : IEndpoint
 {
     public sealed record CreateAdvertisementCommand(
-        Guid PersonId,
-        IEnumerable<Guid> CatsIdsToAssign,
+        PersonId PersonId,
+        IEnumerable<CatId> CatsIdsToAssign,
         string? Description,
         string PickupAddressCountry,
         string? PickupAddressState,

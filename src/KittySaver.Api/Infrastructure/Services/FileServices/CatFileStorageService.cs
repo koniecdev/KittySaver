@@ -1,58 +1,61 @@
-﻿namespace KittySaver.Api.Shared.Infrastructure.Services.FileServices;
+﻿using KittySaver.Api.Infrastructure.Services.FileServices;
+using KittySaver.Shared.TypedIds;
+
+namespace KittySaver.Api.Shared.Infrastructure.Services.FileServices;
 
 public interface ICatThumbnailService
 {
-    Task SaveThumbnailAsync(IFormFile sourceFile, Guid advertisementId, CancellationToken cancellationToken);
-    FileStream GetThumbnail(Guid advertisementId);
+    Task SaveThumbnailAsync(IFormFile sourceFile, CatId catId, CancellationToken cancellationToken);
+    FileStream GetThumbnail(CatId catId);
     string GetContentType(string fileName);
-    void DeleteThumbnail(Guid advertisementId);
+    void DeleteThumbnail(CatId catId);
 }
 
 public interface ICatGalleryService
 {
-    Task<IReadOnlyList<string>> SaveGalleryImagesAsync(IEnumerable<IFormFile> sourceFiles, Guid catId, CancellationToken cancellationToken);
-    IReadOnlyList<FileStream> GetGalleryImages(Guid catId);
-    FileStream GetGalleryImage(Guid catId, string filename);
-    IDictionary<string, string> GetGalleryImagePaths(Guid catId);
-    void DeleteGalleryImage(Guid catId, string filename);
-    void DeleteAllGalleryImages(Guid catId);
+    Task<IReadOnlyList<string>> SaveGalleryImagesAsync(IEnumerable<IFormFile> sourceFiles, CatId catId, CancellationToken cancellationToken);
+    IReadOnlyList<FileStream> GetGalleryImages(CatId catId);
+    FileStream GetGalleryImage(CatId catId, string filename);
+    IDictionary<string, string> GetGalleryImagePaths(CatId catId);
+    void DeleteGalleryImage(CatId catId, string filename);
+    void DeleteAllGalleryImages(CatId catId);
     public string GetContentType(string fileName);
 }
 
-public class CatFileStorageService(IThumbnailStorageService thumbnailStorage, IGalleryStorageService galleryStorage)
+public class CatFileStorageService(IThumbnailStorageService<CatId> thumbnailStorage, IGalleryStorageService<CatId> galleryStorage)
     : ICatThumbnailService, ICatGalleryService
 {
     private const string EntityType = "cats";
 
-    public Task SaveThumbnailAsync(IFormFile sourceFile, Guid advertisementId, CancellationToken cancellationToken) =>
-        thumbnailStorage.SaveThumbnailAsync(sourceFile, EntityType, advertisementId, cancellationToken);
+    public Task SaveThumbnailAsync(IFormFile sourceFile, CatId catId, CancellationToken cancellationToken) =>
+        thumbnailStorage.SaveThumbnailAsync(sourceFile, EntityType, catId, cancellationToken);
 
-    public FileStream GetThumbnail(Guid advertisementId) =>
-        thumbnailStorage.GetThumbnail(EntityType, advertisementId);
+    public FileStream GetThumbnail(CatId catId) =>
+        thumbnailStorage.GetThumbnail(EntityType, catId);
         
     public string GetContentType(string fileName) =>
         thumbnailStorage.GetContentType(fileName);
 
-    public void DeleteThumbnail(Guid advertisementId) => thumbnailStorage.DeleteThumbnail(EntityType, advertisementId);
+    public void DeleteThumbnail(CatId catId) => thumbnailStorage.DeleteThumbnail(EntityType, catId);
 
     public Task<IReadOnlyList<string>> SaveGalleryImagesAsync(
         IEnumerable<IFormFile> sourceFiles, 
-        Guid catId, 
+        CatId catId, 
         CancellationToken cancellationToken) =>
         galleryStorage.SaveGalleryImagesAsync(sourceFiles, EntityType, catId, cancellationToken);
 
-    public IReadOnlyList<FileStream> GetGalleryImages(Guid catId) =>
+    public IReadOnlyList<FileStream> GetGalleryImages(CatId catId) =>
         galleryStorage.GetGalleryImages(EntityType, catId);
 
-    public FileStream GetGalleryImage(Guid catId, string filename) =>
+    public FileStream GetGalleryImage(CatId catId, string filename) =>
         galleryStorage.GetGalleryImage(EntityType, catId, filename);
 
-    public IDictionary<string, string> GetGalleryImagePaths(Guid catId) =>
+    public IDictionary<string, string> GetGalleryImagePaths(CatId catId) =>
         galleryStorage.GetGalleryImagePaths(EntityType, catId);
     
-    public void DeleteGalleryImage(Guid catId, string filename) =>
+    public void DeleteGalleryImage(CatId catId, string filename) =>
         galleryStorage.DeleteGalleryImage(EntityType, catId, filename);
 
-    public void DeleteAllGalleryImages(Guid catId) =>
+    public void DeleteAllGalleryImages(CatId catId) =>
         galleryStorage.DeleteAllGalleryImages(EntityType, catId);
 }

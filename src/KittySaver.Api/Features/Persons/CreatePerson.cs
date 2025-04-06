@@ -4,6 +4,9 @@ using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.DomainRepositories;
+using KittySaver.Domain.Persons.Entities;
+using KittySaver.Domain.Persons.ValueObjects;
 using KittySaver.Domain.ValueObjects;
 using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.Requests;
@@ -134,7 +137,7 @@ public sealed class CreatePerson : IEndpoint
         {
             CreatePersonCommand command = request.MapToCreatePersonCommand();
             PersonHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
-            return Results.Created($"/api/v1/persons/{hateoasResponse.Id}", new { hateoasResponse.Id, hateoasResponse.Links });
+            return Results.Created($"/api/v1/persons/{hateoasResponse.Id}", new { id = hateoasResponse.Id, hateoasResponse.Links });
         }).AllowAnonymous()
         .WithName(EndpointNames.CreatePerson.EndpointName)
         .WithTags(EndpointNames.GroupNames.PersonGroup);

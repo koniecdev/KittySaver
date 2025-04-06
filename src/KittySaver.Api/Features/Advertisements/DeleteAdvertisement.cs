@@ -4,13 +4,17 @@ using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Infrastructure.Services.FileServices;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.DomainRepositories;
+using KittySaver.Domain.Persons.Entities;
+using KittySaver.Shared.TypedIds;
 using MediatR;
 
 namespace KittySaver.Api.Features.Advertisements;
 
 public sealed class DeleteAdvertisement : IEndpoint
 {
-    public sealed record DeleteAdvertisementCommand(Guid PersonId, Guid Id) : ICommand, IAuthorizedRequest, IAdvertisementRequest;
+    public sealed record DeleteAdvertisementCommand(PersonId PersonId, AdvertisementId Id)
+        : ICommand, IAuthorizedRequest, IAdvertisementRequest;
 
     public sealed class DeleteAdvertisementCommandValidator
         : AbstractValidator<DeleteAdvertisementCommand>
@@ -18,11 +22,9 @@ public sealed class DeleteAdvertisement : IEndpoint
         public DeleteAdvertisementCommandValidator()
         {
             RuleFor(x => x.PersonId)
-                .NotEmpty()
-                .NotEqual(x => x.Id);
+                .NotEmpty();
             RuleFor(x => x.Id)
-                .NotEmpty()
-                .NotEqual(x => x.PersonId);
+                .NotEmpty();
         }
     }
 
@@ -51,7 +53,7 @@ public sealed class DeleteAdvertisement : IEndpoint
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            DeleteAdvertisementCommand command = new(PersonId: personId, Id: id);
+            DeleteAdvertisementCommand command = new(new PersonId(personId), new AdvertisementId(id));
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
         }).RequireAuthorization()

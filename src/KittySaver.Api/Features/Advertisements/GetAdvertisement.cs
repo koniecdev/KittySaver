@@ -4,6 +4,7 @@ using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Shared.Responses;
+using KittySaver.Shared.TypedIds;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,7 +12,8 @@ namespace KittySaver.Api.Features.Advertisements;
 
 public class GetAdvertisement : IEndpoint
 {
-    public sealed record GetAdvertisementQuery(Guid PersonId, Guid Id) : IQuery<AdvertisementResponse>, IAuthorizedRequest, IAdvertisementRequest;
+    public sealed record GetAdvertisementQuery(PersonId PersonId, AdvertisementId Id) 
+        : IQuery<AdvertisementResponse>, IAuthorizedRequest, IAdvertisementRequest;
 
     internal sealed class GetAdvertisementQueryHandler(
         ApplicationReadDbContext db)
@@ -37,7 +39,7 @@ public class GetAdvertisement : IEndpoint
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            GetAdvertisementQuery query = new(PersonId: personId, Id: id);
+            GetAdvertisementQuery query = new(new PersonId(personId), new AdvertisementId(id));
             AdvertisementResponse advertisement = await sender.Send(query, cancellationToken);
             return Results.Ok(advertisement);
         }).RequireAuthorization()

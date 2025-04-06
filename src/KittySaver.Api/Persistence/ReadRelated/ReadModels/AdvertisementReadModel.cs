@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using KittySaver.Shared.Common.Enums;
+using KittySaver.Shared.TypedIds;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 // ReSharper disable CollectionNeverUpdated.Global
 
@@ -6,11 +8,8 @@ namespace KittySaver.Api.Shared.Persistence.ReadModels;
 
 public sealed class AdvertisementReadModel
 {
-    public required Guid Id { get; init; }
-    public required string CreatedBy { get; init; }
-    public required DateTimeOffset CreatedOn { get; init; }
-    public required string? LastModificationBy { get; init; }
-    public required DateTimeOffset? LastModificationOn { get; init; }
+    public required AdvertisementId Id { get; init; }
+    public required DateTimeOffset CreatedAt { get; init; }
     public required DateTimeOffset? ClosedOn { get; init; }
     public required DateTimeOffset ExpiresOn { get; init; }
     public required AdvertisementStatus Status { get; init; }
@@ -24,7 +23,7 @@ public sealed class AdvertisementReadModel
     public required string? PickupAddressState { get; init; }
     public required string? PickupAddressStreet { get; init; }
     public required string PickupAddressZipCode { get; init; }
-    public required Guid PersonId { get; init; }
+    public required PersonId PersonId { get; init; }
     public PersonReadModel Person { get; private set; } = null!;
     public ICollection<CatReadModel> Cats { get; } = new List<CatReadModel>();
 }

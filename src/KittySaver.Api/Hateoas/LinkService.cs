@@ -1,36 +1,41 @@
 ﻿using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.Entities;
+using KittySaver.Shared.Common.Enums;
 using KittySaver.Shared.Hateoas;
+using KittySaver.Shared.TypedIds;
 
 namespace KittySaver.Api.Shared.Hateoas;
 
 public interface ILinkService
 {
-    public List<Link> GeneratePersonRelatedLinks(Guid personId, CurrentlyLoggedInPerson? currentlyLoggedInPerson);
+    public List<Link> GeneratePersonRelatedLinks(PersonId personId, CurrentlyLoggedInPerson? currentlyLoggedInPerson);
 
-    public List<Link> GenerateCatRelatedLinks(Guid id,
-        Guid personId,
-        Guid? advertisementId,
+    public List<Link> GenerateCatRelatedLinks(
+        CatId catId,
+        PersonId personId,
+        AdvertisementId? advertisementId,
         bool isThumbnailUploaded,
         bool isAdopted,
         CurrentlyLoggedInPerson? currentlyLoggedInPerson);
 
-    public List<Link> GenerateAdvertisementRelatedLinks(Guid id,
+    public List<Link> GenerateAdvertisementRelatedLinks(
+        AdvertisementId advertisementId,
         AdvertisementStatus advertisementStatus,
-        Guid personId,
+        PersonId personId,
         CurrentlyLoggedInPerson? currentlyLoggedInPerson,
         bool doesRequestRequireAuthorization);
 
     Link Generate(string endpointName, object? routeValues, string rel, string verb = "GET", bool isTemplated = false);
-    List<Link> GeneratePaginationLinks(string endpointName, int? offset, int? limit, Guid? personId);
-    List<Link> GenerateApiDiscoveryV1Links(Guid? personId);
+    List<Link> GeneratePaginationLinks(string endpointName, int? offset, int? limit, PersonId? personId);
+    List<Link> GenerateApiDiscoveryV1Links(PersonId? personId);
 }
 
 public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccessor httpContextAccessor) : ILinkService
 {
     public List<Link> GeneratePersonRelatedLinks(
-        Guid personId,
+        PersonId personId,
         CurrentlyLoggedInPerson? currentlyLoggedInPerson)
     {
         List<Link> links =
@@ -47,7 +52,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         }
 
         bool isLoggedInPersonAnOwner = currentlyLoggedInPerson.PersonId == personId;
-        if (currentlyLoggedInPerson.Role is not Person.Role.Admin && isLoggedInPersonAnOwner)
+        if (currentlyLoggedInPerson.Role is not PersonRole.Admin && isLoggedInPersonAnOwner)
         {
             return links;
         }
@@ -80,9 +85,9 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
     }
 
     public List<Link> GenerateCatRelatedLinks(
-        Guid id,
-        Guid personId,
-        Guid? advertisementId,
+        CatId catId,
+        PersonId personId,
+        AdvertisementId? advertisementId,
         bool isThumbnailUploaded,
         bool isAdopted,
         CurrentlyLoggedInPerson? currentlyLoggedInPerson)
@@ -90,10 +95,10 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         List<Link> links =
         [
             Generate(endpointInfo: EndpointNames.GetCat,
-                    routeValues: new { id, personId },
+                    routeValues: new { id = catId, personId },
                     isSelf: true),
             Generate(endpointInfo: EndpointNames.GetCatGallery,
-                    routeValues: new {id, personId }),
+                    routeValues: new { id = catId, personId }),
             Generate(endpointInfo: EndpointNames.GetCatGalleryPicture,
                 routeValues: new { id = UrlPlaceholders.Id, personId = UrlPlaceholders.PersonId, filename = UrlPlaceholders.Filename },
                 isTemplated: true)
@@ -102,7 +107,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         if (isThumbnailUploaded)
         {
             links.Add(Generate(endpointInfo: EndpointNames.GetCatThumbnail,
-                routeValues: new { id, personId }));
+                routeValues: new { id = catId, personId }));
         }
         
         if (currentlyLoggedInPerson is null)
@@ -110,7 +115,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
             return links;
         }
 
-        if (currentlyLoggedInPerson.PersonId != personId && currentlyLoggedInPerson.Role is not Person.Role.Admin)
+        if (currentlyLoggedInPerson.PersonId != personId && currentlyLoggedInPerson.Role is not PersonRole.Admin)
         {
             return links;
         }
@@ -119,9 +124,9 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         {
             links.Add(Generate(
                 endpointInfo: EndpointNames.UpdateCatThumbnail,
-                routeValues: new { id, personId }));
+                routeValues: new { id = catId, personId }));
             links.Add(Generate(endpointInfo: EndpointNames.AddPicturesToCatGallery,
-                routeValues: new { id, personId }));
+                routeValues: new { id = catId, personId }));
             links.Add(Generate(endpointInfo: EndpointNames.RemovePictureFromCatGallery,
                 routeValues: new
                 {
@@ -130,7 +135,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
                 isTemplated: true));
             links.Add(Generate(
                 endpointInfo: EndpointNames.UpdateCat,
-                routeValues: new { id, personId }));
+                routeValues: new { id = catId, personId }));
         }
         
         
@@ -138,7 +143,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         {
             links.Add(Generate(
                 endpointInfo: EndpointNames.DeleteCat,
-                routeValues: new { id, personId }));
+                routeValues: new { id = catId, personId }));
             return links;
         }
         
@@ -150,9 +155,9 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
     }
 
     public List<Link> GenerateAdvertisementRelatedLinks(
-        Guid id,
+        AdvertisementId id,
         AdvertisementStatus advertisementStatus,
-        Guid personId,
+        PersonId personId,
         CurrentlyLoggedInPerson? currentlyLoggedInPerson,
         bool doesRequestRequireAuthorization)
     {
@@ -182,7 +187,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
                         isSelf: true)
             ];
 
-            if (currentlyLoggedInPerson?.Role is not Person.Role.Admin && currentlyLoggedInPerson?.PersonId != personId)
+            if (currentlyLoggedInPerson?.Role is not PersonRole.Admin && currentlyLoggedInPerson?.PersonId != personId)
             {
                 return links;
             }
@@ -217,7 +222,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
                         endpointInfo: EndpointNames.CloseAdvertisement,
                         routeValues: new { id, personId }));
 
-                    if (currentlyLoggedInPerson.Role is Person.Role.Job or Person.Role.Admin)
+                    if (currentlyLoggedInPerson.Role is PersonRole.Job or PersonRole.Admin)
                     {
                         links.Add(Generate(
                             endpointInfo: EndpointNames.ExpireAdvertisement,
@@ -308,7 +313,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         return link;
     }
 
-    public List<Link> GeneratePaginationLinks(string endpointName, int? offset, int? limit, Guid? personId)
+    public List<Link> GeneratePaginationLinks(string endpointName, int? offset, int? limit, PersonId? personId)
     {
         List<Link> links = [];
         string? href = linkGenerator.GetUriByName(httpContextAccessor.HttpContext!, endpointName, new { personId });
@@ -338,7 +343,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         return links;
     }
 
-    public List<Link> GenerateApiDiscoveryV1Links(Guid? personId)
+    public List<Link> GenerateApiDiscoveryV1Links(PersonId? personId)
     {
         List<Link> links =
         [

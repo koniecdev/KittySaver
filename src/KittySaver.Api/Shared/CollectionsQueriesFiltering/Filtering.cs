@@ -2,6 +2,7 @@
 using System.Linq.Expressions;
 using System.Numerics;
 using System.Reflection;
+using KittySaver.Shared.TypedIds;
 
 namespace KittySaver.Api.Shared.CollectionsQueriesFiltering;
 
@@ -181,6 +182,15 @@ public class GuidPropertyFilter<TEntity>(Expression<Func<TEntity, Guid>> propert
     protected override Guid ParseValue(string value)
     {
         return value.Equals("empty", StringComparison.CurrentCultureIgnoreCase) ? Guid.Empty : Guid.Parse(value);
+    }
+}
+
+public class PersonIdPropertyFilter<TEntity>(Expression<Func<TEntity, PersonId>> propertySelector)
+    : ComparablePropertyFilter<TEntity, PersonId>(propertySelector)
+{
+    protected override PersonId ParseValue(string value)
+    {
+        return value.Equals("empty", StringComparison.CurrentCultureIgnoreCase) ? PersonId.Empty : new PersonId(Guid.Parse(value));
     }
 }
 

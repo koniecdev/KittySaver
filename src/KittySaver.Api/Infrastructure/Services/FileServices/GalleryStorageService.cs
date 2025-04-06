@@ -1,41 +1,35 @@
 ﻿using ImageMagick;
+using KittySaver.Api.Shared.Infrastructure.Services.FileServices;
 using KittySaver.Domain.Common.Exceptions;
 
-namespace KittySaver.Api.Shared.Infrastructure.Services.FileServices;
+namespace KittySaver.Api.Infrastructure.Services.FileServices;
 
-public interface IGalleryStorageService
+public interface IGalleryStorageService<in TId> where TId : struct
 {
-    Task<IReadOnlyList<string>> SaveGalleryImagesAsync(IEnumerable<IFormFile> sourceFiles, string entityType, Guid entityId, CancellationToken cancellationToken);
-    IReadOnlyList<FileStream> GetGalleryImages(string entityType, Guid entityId);
-    FileStream GetGalleryImage(string entityType, Guid entityId, string filename);
-    IDictionary<string, string> GetGalleryImagePaths(string entityType, Guid entityId);
+    Task<IReadOnlyList<string>> SaveGalleryImagesAsync(
+        IEnumerable<IFormFile> sourceFiles,
+        string entityType,
+        TId entityId,
+        CancellationToken cancellationToken);
+    IReadOnlyList<FileStream> GetGalleryImages(string entityType, TId entityId);
+    FileStream GetGalleryImage(string entityType, TId entityId, string filename);
+    IDictionary<string, string> GetGalleryImagePaths(string entityType, TId entityId);
     string GetContentType(string fileName);
-    void DeleteGalleryImage(string entityType, Guid entityId, string filename);
-    void DeleteAllGalleryImages(string entityType, Guid entityId);
-    
-    public static class Constants
-    {
-        public static readonly IReadOnlyDictionary<string, string> AllowedImageTypes = new Dictionary<string, string>
-        {
-            [".jpg"] = "image/jpeg",
-            [".jpeg"] = "image/jpeg",
-            [".png"] = "image/png",
-            [".webp"] = "image/webp"
-        };
-    }
+    void DeleteGalleryImage(string entityType, TId entityId, string filename);
+    void DeleteAllGalleryImages(string entityType, TId entityId);
 }
 
-public class GalleryStorageService(
+public class GalleryStorageService<TId>(
     IFileStorageService fileStorage,
     IWebHostEnvironment webHostEnvironment)
-    : IGalleryStorageService
+    : IGalleryStorageService<TId> where TId : struct
 {
     private readonly string _basePath = Path.Combine(webHostEnvironment.ContentRootPath, "PrivateFiles");
 
     public async Task<IReadOnlyList<string>> SaveGalleryImagesAsync(
         IEnumerable<IFormFile> sourceFiles, 
         string entityType, 
-        Guid entityId, 
+        TId entityId, 
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(sourceFiles);
@@ -47,7 +41,7 @@ public class GalleryStorageService(
         {
             string fileExtension = Path.GetExtension(sourceFile.FileName);
             
-            if (!IGalleryStorageService.Constants.AllowedImageTypes.ContainsKey(fileExtension.ToLowerInvariant()))
+            if (!AllowedPictureTypes.AllowedImageTypes.ContainsKey(fileExtension.ToLowerInvariant()))
             {
                 throw new InvalidOperationException($"File extension {fileExtension} is not supported for gallery images");
             }
@@ -68,7 +62,7 @@ public class GalleryStorageService(
         return savedFilePaths;
     }
 
-    public IReadOnlyList<FileStream> GetGalleryImages(string entityType, Guid entityId)
+    public IReadOnlyList<FileStream> GetGalleryImages(string entityType, TId entityId)
     {
         string galleryDirectory = GetGalleryFolderPath(entityType, entityId);
         string fullDirectoryPath = Path.Combine(_basePath, galleryDirectory);
@@ -89,7 +83,7 @@ public class GalleryStorageService(
         return fileStreams;
     }
 
-    public FileStream GetGalleryImage(string entityType, Guid entityId, string filename)
+    public FileStream GetGalleryImage(string entityType, TId entityId, string filename)
     {
         string galleryDirectory = GetGalleryFolderPath(entityType, entityId);
         string fullPath = Path.Combine(_basePath, galleryDirectory, filename);
@@ -102,7 +96,7 @@ public class GalleryStorageService(
         return fileStorage.GetFileStream(fullPath);
     }
 
-    public IDictionary<string, string> GetGalleryImagePaths(string entityType, Guid entityId)
+    public IDictionary<string, string> GetGalleryImagePaths(string entityType, TId entityId)
     {
         string galleryDirectory = GetGalleryFolderPath(entityType, entityId);
         string fullDirectoryPath = Path.Combine(_basePath, galleryDirectory);
@@ -124,9 +118,9 @@ public class GalleryStorageService(
         return result;
     }
 
-    public string GetContentType(string fileName) => fileStorage.GetContentType(fileName, IGalleryStorageService.Constants.AllowedImageTypes);
+    public string GetContentType(string fileName) => fileStorage.GetContentType(fileName, AllowedPictureTypes.AllowedImageTypes);
 
-    public void DeleteGalleryImage(string entityType, Guid entityId, string filename)
+    public void DeleteGalleryImage(string entityType, TId entityId, string filename)
     {
         string galleryDirectory = GetGalleryFolderPath(entityType, entityId);
         string fullPath = Path.Combine(_basePath, galleryDirectory, filename);
@@ -139,7 +133,7 @@ public class GalleryStorageService(
         File.Delete(fullPath);
     }
 
-    public void DeleteAllGalleryImages(string entityType, Guid entityId)
+    public void DeleteAllGalleryImages(string entityType, TId entityId)
     {
         string galleryDirectory = GetGalleryFolderPath(entityType, entityId);
         string fullDirectoryPath = Path.Combine(_basePath, galleryDirectory);
@@ -182,6 +176,6 @@ public class GalleryStorageService(
         return resultStream;
     }
     
-    private static string GetGalleryFolderPath(string entityType, Guid entityId) => 
-        Path.Combine(entityType.ToLowerInvariant(), entityId.ToString(), "gallery");
+    private static string GetGalleryFolderPath(string entityType, TId entityId) => 
+        Path.Combine(entityType.ToLowerInvariant(), entityId.ToString()!, "gallery");
 }

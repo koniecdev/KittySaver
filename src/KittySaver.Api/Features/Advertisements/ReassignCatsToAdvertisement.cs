@@ -3,8 +3,12 @@ using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.DomainRepositories;
+using KittySaver.Domain.Persons.Entities;
+using KittySaver.Shared.Common.Enums;
 using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.Requests;
+using KittySaver.Shared.TypedIds;
 using MediatR;
 
 namespace KittySaver.Api.Features.Advertisements;
@@ -12,20 +16,18 @@ namespace KittySaver.Api.Features.Advertisements;
 public sealed class ReassignCatsToAdvertisement : IEndpoint
 {
     public sealed record ReassignCatsToAdvertisementCommand(
-        Guid PersonId,
-        Guid Id,
-        IEnumerable<Guid> CatIds) : ICommand<AdvertisementHateoasResponse>, IAuthorizedRequest, IAdvertisementRequest;
+        PersonId PersonId,
+        AdvertisementId Id,
+        IEnumerable<CatId> CatIds) : ICommand<AdvertisementHateoasResponse>, IAuthorizedRequest, IAdvertisementRequest;
 
     public sealed class AssignCatToAdvertisementCommandValidator : AbstractValidator<ReassignCatsToAdvertisementCommand>
     {
         public AssignCatToAdvertisementCommandValidator()
         {
             RuleFor(x => x.PersonId)
-                .NotEmpty()
-                .NotEqual(x => x.Id);
+                .NotEmpty();
             RuleFor(x => x.Id)
-                .NotEmpty()
-                .NotEqual(x => x.PersonId);
+                .NotEmpty();
             RuleFor(x => x.CatIds).NotEmpty();
         }
     }
@@ -55,9 +57,9 @@ public sealed class ReassignCatsToAdvertisement : IEndpoint
             CancellationToken cancellationToken) =>
         {
             ReassignCatsToAdvertisementCommand command = new(
-                PersonId: personId,
-                Id: id,
-                CatIds: request.CatIds);
+                new PersonId(personId),
+                new AdvertisementId(id),
+                request.CatIds);
             AdvertisementHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
             return Results.Ok(hateoasResponse);
         }).RequireAuthorization()

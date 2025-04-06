@@ -4,14 +4,18 @@ using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.DomainRepositories;
+using KittySaver.Domain.Persons.Entities;
+using KittySaver.Shared.Common.Enums;
 using KittySaver.Shared.Hateoas;
+using KittySaver.Shared.TypedIds;
 using MediatR;
 
 namespace KittySaver.Api.Features.Advertisements;
 
 public sealed class RefreshAdvertisement : IEndpoint
 {
-    public sealed record RefreshAdvertisementCommand(Guid PersonId, Guid Id) 
+    public sealed record RefreshAdvertisementCommand(PersonId PersonId, AdvertisementId Id) 
         : ICommand<AdvertisementHateoasResponse>, IAuthorizedRequest, IAdvertisementRequest;
 
     public sealed class RefreshAdvertisementCommandValidator
@@ -20,11 +24,9 @@ public sealed class RefreshAdvertisement : IEndpoint
         public RefreshAdvertisementCommandValidator()
         {
             RuleFor(x => x.PersonId)
-                .NotEmpty()
-                .NotEqual(x => x.Id);
+                .NotEmpty();
             RuleFor(x => x.Id)
-                .NotEmpty()
-                .NotEqual(x => x.PersonId);
+                .NotEmpty();
         }
     }
 
@@ -52,7 +54,7 @@ public sealed class RefreshAdvertisement : IEndpoint
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            RefreshAdvertisementCommand command = new(PersonId: personId, Id: id);
+            RefreshAdvertisementCommand command = new(new PersonId(personId), new AdvertisementId(id));
             AdvertisementHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
             return Results.Ok(hateoasResponse);
         }).RequireAuthorization()

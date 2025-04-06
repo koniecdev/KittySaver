@@ -3,25 +3,26 @@ using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.DomainRepositories;
+using KittySaver.Domain.Persons.Entities;
+using KittySaver.Shared.TypedIds;
 using MediatR;
 
 namespace KittySaver.Api.Features.Cats;
 
 public sealed class DeleteCat : IEndpoint
 {
-    public sealed record DeleteCatCommand(Guid PersonId, Guid Id) : ICommand, IAuthorizedRequest, ICatRequest;
+    public sealed record DeleteCatCommand(PersonId PersonId, CatId Id) : ICommand, IAuthorizedRequest, ICatRequest;
 
     public sealed class DeleteCatCommandValidator : AbstractValidator<DeleteCatCommand>
     {
         public DeleteCatCommandValidator()
         {
             RuleFor(x => x.Id)
-                .NotEmpty()
-                .NotEqual(x => x.PersonId);
-            
+                .NotEmpty();
+
             RuleFor(x => x.PersonId)
-                .NotEmpty()
-                .NotEqual(x => x.Id);
+                .NotEmpty();
         }
     }
 
@@ -46,7 +47,7 @@ public sealed class DeleteCat : IEndpoint
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            DeleteCatCommand command = new(personId, id);
+            DeleteCatCommand command = new(new PersonId(personId), new CatId(id));
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
         }).RequireAuthorization()

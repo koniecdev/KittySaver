@@ -1,6 +1,9 @@
 ﻿using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.Infrastructure.Services;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.Entities;
+using KittySaver.Shared.Common.Enums;
+using KittySaver.Shared.TypedIds;
 using MediatR;
 
 namespace KittySaver.Api.Shared.Behaviours;
@@ -18,14 +21,14 @@ public sealed class AuthorizationBehaviour<TRequest, TResponse>(
         if (request is IJobOrAdminOnlyRequest)
         {
             CurrentlyLoggedInPerson? person = await currentUserService.GetCurrentlyLoggedInPersonAsync(cancellationToken);
-            if (person is not { Role: Person.Role.Job or Person.Role.Admin })
+            if (person is not { Role: PersonRole.Job or PersonRole.Admin })
             {
                 throw new UnauthorizedAccessException();
             }
         }
         else if (request is not IAdminOnlyRequest && request is IAuthorizedRequest)
         {
-            Guid personId = request switch
+            PersonId personId = request switch
             {
                 ICatRequest x => x.PersonId,
                 IPersonRequest x => x.Id,

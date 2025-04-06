@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using KittySaver.Shared.TypedIds;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 // ReSharper disable CollectionNeverUpdated.Global
 
@@ -6,11 +7,8 @@ namespace KittySaver.Api.Shared.Persistence.ReadModels;
 
 public sealed class PersonReadModel
 {
-    public required Guid Id { get; init; }
-    public required string CreatedBy { get; init; }
-    public required DateTimeOffset CreatedOn { get; init; }
-    public required string? LastModificationBy { get; init; }
-    public required DateTimeOffset? LastModificationOn { get; init; }
+    public required PersonId Id { get; init; }
+    public required DateTimeOffset CreatedAt { get; init; }
     public required int CurrentRole { get; init; }
     public required Guid UserIdentityId { get; init; }
     public required string DefaultAdvertisementsContactInfoEmail { get; init; }

@@ -2,14 +2,17 @@
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.DomainRepositories;
+using KittySaver.Domain.Persons.Entities;
 using KittySaver.Shared.Requests;
+using KittySaver.Shared.TypedIds;
 using Microsoft.EntityFrameworkCore;
 
 namespace KittySaver.Api.Features.Persons.SharedContracts;
 
 public class PersonRepository(ApplicationWriteDbContext writeDb, IAuthApiHttpClient authApiHttpClient) : IPersonRepository
 {
-    public async Task<Person> GetPersonByIdAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<Person> GetPersonByIdAsync(PersonId id, CancellationToken cancellationToken)
         => await writeDb.Persons
             .Where(person => person.Id == id)
             .Include(person => person.Cats)

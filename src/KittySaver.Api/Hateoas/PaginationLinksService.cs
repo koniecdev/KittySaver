@@ -1,5 +1,6 @@
 ﻿using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Shared.Hateoas;
+using KittySaver.Shared.TypedIds;
 
 namespace KittySaver.Api.Shared.Pagination;
 public interface IPaginationLinksService
@@ -9,7 +10,7 @@ public interface IPaginationLinksService
         int? currentOffset,
         int? currentLimit,
         int totalRecords,
-        Guid? personId = null);
+        PersonId? personId = null);
 }
 public class PaginationLinksService(ILinkService linkService) : IPaginationLinksService
 {
@@ -18,7 +19,7 @@ public class PaginationLinksService(ILinkService linkService) : IPaginationLinks
         int? currentOffset,
         int? currentLimit,
         int totalRecords,
-        Guid? personId = null)
+        PersonId? personId = null)
     {
         List<Link> links =
         [

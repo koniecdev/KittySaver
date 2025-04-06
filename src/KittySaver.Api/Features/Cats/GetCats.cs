@@ -9,6 +9,7 @@ using KittySaver.Api.Shared.Persistence.ReadModels;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Shared.Pagination;
 using KittySaver.Shared.Responses;
+using KittySaver.Shared.TypedIds;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,7 +18,7 @@ namespace KittySaver.Api.Features.Cats;
 public sealed class GetCats : IEndpoint
 {
     public sealed class GetCatsQuery(
-        Guid personId,
+        PersonId personId,
         int? offset,
         int? limit,
         string? searchTerm,
@@ -25,7 +26,7 @@ public sealed class GetCats : IEndpoint
         string? sortOrder)
         : IQuery<IPagedList<CatResponse>>, IAuthorizedRequest, IPagedQuery, ICatRequest
     {
-        public Guid PersonId { get; } = personId;
+        public PersonId PersonId { get; } = personId;
         public int? Offset { get; } = offset;
         public int? Limit { get; } = limit;
         public string? SearchTerm { get; } = searchTerm;
@@ -124,7 +125,13 @@ public sealed class GetCats : IEndpoint
                 ISender sender,
                 CancellationToken cancellationToken) =>
             {
-                GetCatsQuery query = new(personId, offset, limit, searchTerm, sortColumn, sortOrder);
+                GetCatsQuery query = new(
+                    personId: new PersonId(personId),
+                    offset: offset,
+                    limit: limit,
+                    searchTerm: searchTerm,
+                    sortColumn: sortColumn,
+                    sortOrder: sortOrder);
                 IPagedList<CatResponse> cats = await sender.Send(query, cancellationToken);
                 return Results.Ok(cats);
             }).RequireAuthorization()

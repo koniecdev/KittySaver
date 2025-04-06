@@ -2,6 +2,7 @@
 using System.Text;
 using FluentValidation;
 using KittySaver.Api.Features.Persons.SharedContracts;
+using KittySaver.Api.Infrastructure.Services.FileServices;
 using KittySaver.Api.Shared.Behaviours;
 using KittySaver.Api.Shared.Hateoas;
 using KittySaver.Api.Shared.Infrastructure.Clients;
@@ -10,6 +11,8 @@ using KittySaver.Api.Shared.Infrastructure.Services.FileServices;
 using KittySaver.Api.Shared.Pagination;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.DomainRepositories;
+using KittySaver.Domain.Persons.DomainServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Protocols.Configuration;
@@ -40,8 +43,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<ICatPriorityCalculatorService, DefaultCatPriorityCalculatorService>();
         services.AddScoped<IFileStorageService, LocalFileStorageService>();
-        services.AddScoped<IThumbnailStorageService, ThumbnailStorageService>();
-        services.AddScoped<IGalleryStorageService, GalleryStorageService>();
+        services.AddScoped(typeof(IThumbnailStorageService<>), typeof(ThumbnailStorageService<>));
+        services.AddScoped(typeof(IGalleryStorageService<>), typeof(GalleryStorageService<>));
         services.AddScoped<IAdvertisementFileStorageService, AdvertisementFileStorageService>();
         services.AddScoped<CatFileStorageService>()
                 .AddScoped<ICatThumbnailService>(sp => sp.GetRequiredService<CatFileStorageService>())

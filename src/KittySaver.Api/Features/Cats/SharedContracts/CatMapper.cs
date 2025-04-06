@@ -1,5 +1,5 @@
 ﻿using KittySaver.Api.Shared.Persistence.ReadModels;
-using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Shared.Common.Enums;
 using KittySaver.Shared.Responses;
 
 namespace KittySaver.Api.Features.Cats.SharedContracts;

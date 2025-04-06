@@ -71,7 +71,7 @@ public sealed class LocalFileStorageService(IWebHostEnvironment webHostEnvironme
     public string GetContentType(string fileName, IReadOnlyDictionary<string ,string> allowedTypes)
     {
         string extension = Path.GetExtension(fileName).ToLowerInvariant();
-        return IThumbnailStorageService.Constants.AllowedThumbnailTypes
+        return AllowedPictureTypes.AllowedImageTypes
             .GetValueOrDefault(extension, "application/octet-stream");
     }
 }

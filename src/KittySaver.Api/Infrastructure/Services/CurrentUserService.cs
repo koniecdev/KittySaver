@@ -2,6 +2,9 @@
 using System.Security.Claims;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
+using KittySaver.Domain.Persons.Entities;
+using KittySaver.Shared.Common.Enums;
+using KittySaver.Shared.TypedIds;
 using Microsoft.EntityFrameworkCore;
 
 namespace KittySaver.Api.Shared.Infrastructure.Services;
@@ -10,14 +13,14 @@ public interface ICurrentUserService
 {
     public Guid GetCurrentUserIdentityId();
     public Task<CurrentlyLoggedInPerson?> GetCurrentlyLoggedInPersonAsync(CancellationToken cancellationToken);
-    public Task EnsureUserIsAuthorizedAsync(Guid personThatIsBeingModifiedIdOrUserIdentityId, CancellationToken cancellationToken);
+    public Task EnsureUserIsAuthorizedAsync(PersonId personId, CancellationToken cancellationToken);
     public Task EnsureUserIsAdminAsync(CancellationToken cancellationToken);
 }
 
 public sealed class CurrentlyLoggedInPerson
 {
-    public required Guid PersonId { get; init; }
-    public required Person.Role Role { get; init; }
+    public required PersonId PersonId { get; init; }
+    public required PersonRole Role { get; init; }
 }
 
 public sealed class CurrentUserService(
@@ -28,15 +31,10 @@ public sealed class CurrentUserService(
 {
     private CurrentlyLoggedInPerson? _cachedUser;
 
-    public async Task EnsureUserIsAuthorizedAsync(Guid personThatIsBeingModifiedIdOrUserIdentityId, CancellationToken cancellationToken)
+    public async Task EnsureUserIsAuthorizedAsync(PersonId personId, CancellationToken cancellationToken)
     {
-        if (GetCurrentUserIdentityId() == personThatIsBeingModifiedIdOrUserIdentityId)
-        {
-            return;
-        }
-        
         CurrentlyLoggedInPerson? issuingUser = await GetCurrentlyLoggedInPersonAsync(cancellationToken);
-        if (issuingUser is null || (issuingUser.PersonId != personThatIsBeingModifiedIdOrUserIdentityId && issuingUser.Role is not Person.Role.Admin))
+        if (issuingUser is null || (issuingUser.PersonId != personId && issuingUser.Role is not PersonRole.Admin))
         {
             throw new UnauthorizedAccessException();
         }
@@ -45,7 +43,7 @@ public sealed class CurrentUserService(
     public async Task EnsureUserIsAdminAsync(CancellationToken cancellationToken)
     {
         CurrentlyLoggedInPerson? loggedInUser = await GetCurrentlyLoggedInPersonAsync(cancellationToken);
-        if (loggedInUser?.Role is not Person.Role.Admin)
+        if (loggedInUser?.Role is not PersonRole.Admin)
         {
             throw new UnauthorizedAccessException();
         }
@@ -53,18 +51,15 @@ public sealed class CurrentUserService(
 
     public Guid GetCurrentUserIdentityId()
     {
-        // Sprawdź, czy to endpoint rejestracji
         bool isRegistrationEndpoint = httpContextAccessor.HttpContext?.Request.Path
                                           .ToString().EndsWith("/api/v1/persons", StringComparison.OrdinalIgnoreCase) == true
                                       && httpContextAccessor.HttpContext?.Request.Method == "POST";
     
-        // Jeśli to rejestracja, pozwól na pusty identyfikator
         if (isRegistrationEndpoint)
         {
             return Guid.Empty;
         }
     
-        // Dla innych przypadków zachowaj obecną logikę
         return Guid.TryParse(httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier),
             out Guid userId)
             ? userId
@@ -84,8 +79,8 @@ public sealed class CurrentUserService(
         {
             return new CurrentlyLoggedInPerson
             {
-                PersonId = Guid.NewGuid(),
-                Role = Person.Role.Admin
+                PersonId = new PersonId(),
+                Role = PersonRole.Admin
             };
         }
         
@@ -103,9 +98,8 @@ public sealed class CurrentUserService(
             .Select(x => new CurrentlyLoggedInPerson
             {
                 PersonId = x.Id,
-                Role = (Person.Role)x.CurrentRole
+                Role = (PersonRole)x.CurrentRole
             }).FirstOrDefaultAsync(cancellationToken);
-                      // ?? throw new AuthenticationException();
 
         return _cachedUser;
     }
@@ -116,9 +110,9 @@ public sealed class DesignTimeMigrationsCurrentUserService : ICurrentUserService
     public Guid GetCurrentUserIdentityId() => Guid.Empty;
     public async Task<CurrentlyLoggedInPerson?> GetCurrentlyLoggedInPersonAsync(CancellationToken cancellationToken)
     {
-        return await Task.FromResult(new CurrentlyLoggedInPerson { PersonId = Guid.Empty, Role = Person.Role.Admin });
+        return await Task.FromResult(new CurrentlyLoggedInPerson { PersonId = PersonId.Empty, Role = PersonRole.Admin });
     }
-    public async Task EnsureUserIsAuthorizedAsync(Guid personThatIsBeingModifiedIdOrUserIdentityId, CancellationToken cancellationToken)
+    public async Task EnsureUserIsAuthorizedAsync(PersonId personId, CancellationToken cancellationToken)
     {
         await Task.CompletedTask;
     }

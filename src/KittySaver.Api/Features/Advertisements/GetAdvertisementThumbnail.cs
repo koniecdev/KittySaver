@@ -3,13 +3,15 @@ using KittySaver.Api.Shared.Endpoints;
 using KittySaver.Api.Shared.Infrastructure.Services.FileServices;
 using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
+using KittySaver.Shared.Common.Enums;
+using KittySaver.Shared.TypedIds;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace KittySaver.Api.Features.Advertisements;
 public sealed class GetAdvertisementThumbnail : IEndpoint
 {
-    public sealed record GetAdvertisementThumbnailQuery(Guid Id) : IQuery<(FileStream Stream, string ContentType)>;
+    public sealed record GetAdvertisementThumbnailQuery(AdvertisementId Id) : IQuery<(FileStream Stream, string ContentType)>;
 
     internal sealed class GetAdvertisementThumbnailQueryHandler(
         ApplicationReadDbContext db,
@@ -53,7 +55,7 @@ public sealed class GetAdvertisementThumbnail : IEndpoint
                 ISender sender,
                 CancellationToken cancellationToken) =>
             {
-                GetAdvertisementThumbnailQuery query = new(id);
+                GetAdvertisementThumbnailQuery query = new(new AdvertisementId(id));
                 (FileStream fileStream, string contentType) = await sender.Send(query, cancellationToken);
                 
                 return Results.Stream(

@@ -5,6 +5,7 @@ using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Shared.Pagination;
 using KittySaver.Shared.Responses;
+using KittySaver.Shared.TypedIds;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +13,7 @@ namespace KittySaver.Api.Features.Cats;
 
 public sealed class GetCatGallery : IEndpoint
 {
-    public sealed record GetCatGalleryQuery(Guid PersonId, Guid Id) : IQuery<ICollection<PictureResponse>>;
+    public sealed record GetCatGalleryQuery(PersonId PersonId, CatId Id) : IQuery<ICollection<PictureResponse>>;
 
     internal sealed class GetCatGalleryQueryHandler(
         ApplicationReadDbContext db,
@@ -50,7 +51,7 @@ public sealed class GetCatGallery : IEndpoint
                 ISender sender,
                 CancellationToken cancellationToken) =>
             {
-                GetCatGalleryQuery query = new(personId, id);
+                GetCatGalleryQuery query = new(new PersonId(personId), new CatId(id));
                 ICollection<PictureResponse> response = await sender.Send(query, cancellationToken);
                 return Results.Ok(response);
             })

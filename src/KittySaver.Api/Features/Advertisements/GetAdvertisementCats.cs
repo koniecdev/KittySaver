@@ -8,6 +8,7 @@ using KittySaver.Api.Shared.Persistence;
 using KittySaver.Api.Shared.Persistence.ReadModels;
 using KittySaver.Shared.Pagination;
 using KittySaver.Shared.Responses;
+using KittySaver.Shared.TypedIds;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,8 +17,8 @@ namespace KittySaver.Api.Features.Advertisements;
 public sealed class GetAdvertisementCats : IEndpoint
 {
     public sealed record GetAdvertisementCatsQuery(
-        Guid PersonId,
-        Guid AdvertisementId,
+        PersonId PersonId,
+        AdvertisementId AdvertisementId,
         int? Offset,
         int? Limit,
         string? SearchTerm,
@@ -111,8 +112,8 @@ public sealed class GetAdvertisementCats : IEndpoint
             CancellationToken cancellationToken) =>
         {
             GetAdvertisementCatsQuery query = new(
-                PersonId: personId,
-                AdvertisementId: id,
+                new PersonId(personId),
+                new AdvertisementId(id),
                 Offset: offset,
                 Limit: limit,
                 SearchTerm: searchTerm,
