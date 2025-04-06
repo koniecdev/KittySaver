@@ -1,24 +1,24 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using KittySaver.Domain.Common.Primitives;
+﻿using KittySaver.Domain.Common.Primitives;
 using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.Common.Enums;
 using KittySaver.Shared.TypedIds;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace KittySaver.Domain.Persons;
+namespace KittySaver.Domain.Persons.Entities;
 
 public sealed class Advertisement : AuditableEntity<AdvertisementId>
 {
-    public static readonly TimeSpan ExpiringPeriodInDays = new(days: 30, hours: 0, minutes: 0, seconds: 0);
-    public static readonly TimeSpan ShelterExpiringPeriodInDays = new(days: 365, hours: 0, minutes: 0, seconds: 0);
+    public static readonly TimeSpan ExpiringPeriodInDays = TimeSpan.FromDays(30);
+    public static readonly TimeSpan ShelterExpiringPeriodInDays = TimeSpan.FromDays(365);
 
     private readonly PersonId _personId;
     private double _priorityScore;
 
-    public required PersonId PersonId
+    public PersonId PersonId
     {
         get => _personId;
-        init
+        private init
         {
             if (value == PersonId.Empty)
             {
@@ -47,7 +47,7 @@ public sealed class Advertisement : AuditableEntity<AdvertisementId>
     /// <remarks>
     /// Required by EF Core, and should never be used by programmer as it bypasses business rules.
     /// </remarks>
-    private Advertisement()
+    private Advertisement() : base(default)
     {
         Description = null!;
         PickupAddress = null!;
@@ -55,15 +55,15 @@ public sealed class Advertisement : AuditableEntity<AdvertisementId>
         ContactInfoPhoneNumber = null!;
     }
 
-    [SetsRequiredMembers]
     private Advertisement(
+        AdvertisementId id,
         PersonId personId,
         Address pickupAddress,
         Email contactInfoEmail,
         PhoneNumber contactInfoPhoneNumber,
         Description description,
         DateTimeOffset expiresOn,
-        double priorityScore)
+        double priorityScore) : base(id)
     {
         PersonId = personId;
         PickupAddress = pickupAddress;
@@ -77,36 +77,38 @@ public sealed class Advertisement : AuditableEntity<AdvertisementId>
     internal static Advertisement Create(
         DateTimeOffset dateOfCreation,
         PersonId ownerId,
-        Person.Role ownerRole,
+        PersonRole ownerRole,
         Address pickupAddress,
         Email contactInfoEmail,
         PhoneNumber contactInfoPhoneNumber,
         Description description,
         double priorityScore)
     {
-        DateTimeOffset expiresOn = dateOfCreation + (ownerRole == Person.Role.Shelter ? ShelterExpiringPeriodInDays : ExpiringPeriodInDays);
+        AdvertisementId id = AdvertisementId.New();
+        DateTimeOffset expiresOn = dateOfCreation + (ownerRole == PersonRole.Shelter ? ShelterExpiringPeriodInDays : ExpiringPeriodInDays);
         Advertisement advertisement = new(
-            personId: ownerId,
-            pickupAddress: pickupAddress,
-            contactInfoEmail: contactInfoEmail,
-            contactInfoPhoneNumber: contactInfoPhoneNumber,
-            description: description,
-            expiresOn: expiresOn,
-            priorityScore: priorityScore);
+            id,
+            ownerId,
+            pickupAddress,
+            contactInfoEmail,
+            contactInfoPhoneNumber,
+            description,
+            expiresOn,
+            priorityScore);
         return advertisement;
     }
 
-    internal void ChangeDescription(Description description)
+    internal void SetDescription(Description description)
     {
         Description = description;
     }
     
-    internal void ChangePickupAddress(Address pickupAddress)
+    internal void SetPickupAddress(Address pickupAddress)
     {
         PickupAddress = pickupAddress;
     }
 
-    internal void ChangeContactInfo(Email contactInfoEmail, PhoneNumber contactInfoPhoneNumber)
+    internal void UpdateContactInfo(Email contactInfoEmail, PhoneNumber contactInfoPhoneNumber)
     {
         ContactInfoEmail = contactInfoEmail;
         ContactInfoPhoneNumber = contactInfoPhoneNumber;

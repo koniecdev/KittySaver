@@ -1,35 +1,29 @@
 ﻿using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Common.Primitives;
-using KittySaver.Domain.Common.Primitives.Enums;
+using KittySaver.Domain.Persons.DomainServices;
+using KittySaver.Domain.Persons.ValueObjects;
 using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.Common.Enums;
 using KittySaver.Shared.TypedIds;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace KittySaver.Domain.Persons;
+namespace KittySaver.Domain.Persons.Entities;
 
 public sealed class Person : AggregateRoot<PersonId>
 {
-    private PersonId _userIdentityId;
+    private Guid _userIdentityId;
     private readonly List<Cat> _cats = [];
     private readonly List<Advertisement> _advertisements = [];
 
-    public enum Role
-    {
-        Regular,
-        Admin,
-        Job,
-        Shelter
-    }
+    public PersonRole CurrentRole { get; private init; } = PersonRole.Regular;
 
-    public Role CurrentRole { get; private init; } = Role.Regular;
-
-    public PersonId UserIdentityId
+    public Guid UserIdentityId
     {
         get => _userIdentityId;
         private set
         {
-            if (value == PersonId.Empty)
+            if (value == Guid.Empty)
             {
                 throw new ArgumentException("Provided empty PersonId.", nameof(UserIdentityId));
             }
@@ -141,10 +135,10 @@ public sealed class Person : AggregateRoot<PersonId>
         MedicalHelpUrgency medicalHelpUrgency)
     {
         Cat catToUpdate = GetCatById(catId);
-        catToUpdate.ChangeName(name);
-        catToUpdate.ChangeAdditionalRequirements(additionalRequirements);
-        catToUpdate.ChangeIsCastratedFlag(isCastrated);
-        catToUpdate.ChangePriorityCompounds(catPriorityCalculator, healthStatus, ageCategory, behavior,
+        catToUpdate.SetName(name);
+        catToUpdate.SetAdditionalRequirements(additionalRequirements);
+        catToUpdate.SetIsCastrated(isCastrated);
+        catToUpdate.UpdatePriorityFactors(catPriorityCalculator, healthStatus, ageCategory, behavior,
             medicalHelpUrgency);
 
         if (catToUpdate.AdvertisementId.HasValue)
@@ -197,7 +191,7 @@ public sealed class Person : AggregateRoot<PersonId>
         IEnumerable<Cat> catsOfAdvertisementQuery = GetAssignedToConcreteAdvertisementCats(advertisement.Id);
         foreach (Cat cat in catsOfAdvertisementQuery)
         {
-            cat.UnassignAdvertisement();
+            cat.RemoveFromAdvertisement();
         }
     }
 
@@ -209,9 +203,9 @@ public sealed class Person : AggregateRoot<PersonId>
         PhoneNumber contactInfoPhoneNumber)
     {
         Advertisement advertisementToUpdate = GetAdvertisementById(advertisementId);
-        advertisementToUpdate.ChangeDescription(description);
-        advertisementToUpdate.ChangePickupAddress(pickupAddress);
-        advertisementToUpdate.ChangeContactInfo(contactInfoEmail, contactInfoPhoneNumber);
+        advertisementToUpdate.SetDescription(description);
+        advertisementToUpdate.SetPickupAddress(pickupAddress);
+        advertisementToUpdate.UpdateContactInfo(contactInfoEmail, contactInfoPhoneNumber);
     }
 
     public void CloseAdvertisement(AdvertisementId advertisementId, DateTimeOffset currentDate)
@@ -309,7 +303,7 @@ public sealed class Person : AggregateRoot<PersonId>
         cat.MarkAsThumbnailUploaded();
     }
     
-    public void SetUserIdentityId(PersonId userIdentityId)
+    public void SetUserIdentityId(Guid userIdentityId)
     {
         UserIdentityId = userIdentityId;
     }
@@ -323,7 +317,7 @@ public sealed class Person : AggregateRoot<PersonId>
     private void UnassignCatFromAdvertisement(CatId catId)
     {
         Cat cat = GetCatById(catId);
-        cat.UnassignAdvertisement();
+        cat.RemoveFromAdvertisement();
     }
 
     private void UpdateAdvertisementPriorityScore(AdvertisementId advertisementId)

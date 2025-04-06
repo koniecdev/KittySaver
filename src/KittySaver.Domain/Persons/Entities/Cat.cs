@@ -1,12 +1,13 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using KittySaver.Domain.Common.Primitives;
-using KittySaver.Domain.Common.Primitives.Enums;
+﻿using KittySaver.Domain.Common.Primitives;
+using KittySaver.Domain.Persons.DomainServices;
+using KittySaver.Domain.Persons.ValueObjects;
 using KittySaver.Domain.ValueObjects;
+using KittySaver.Shared.Common.Enums;
 using KittySaver.Shared.TypedIds;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace KittySaver.Domain.Persons;
+namespace KittySaver.Domain.Persons.Entities;
 
 public sealed class Cat : AuditableEntity<CatId>
 {
@@ -126,7 +127,7 @@ public sealed class Cat : AuditableEntity<CatId>
     /// <remarks>
     /// Only for use within Person aggregate
     /// </remarks>
-    internal void ChangeName(CatName catName)
+    internal void SetName(CatName catName)
     {
         Name = catName;
     }
@@ -134,7 +135,7 @@ public sealed class Cat : AuditableEntity<CatId>
     /// <remarks>
     /// Only for use within Person aggregate
     /// </remarks>
-    internal void ChangeAdditionalRequirements(Description additionalRequirements)
+    internal void SetAdditionalRequirements(Description additionalRequirements)
     {
         AdditionalRequirements = additionalRequirements;
     }
@@ -142,7 +143,7 @@ public sealed class Cat : AuditableEntity<CatId>
     /// <remarks>
     /// Only for use within Person aggregate
     /// </remarks>
-    internal void ChangeIsCastratedFlag(bool isCastrated)
+    internal void SetIsCastrated(bool isCastrated)
     {
         IsCastrated = isCastrated;
     }
@@ -150,7 +151,7 @@ public sealed class Cat : AuditableEntity<CatId>
     /// <remarks>
     /// Only for use within Person aggregate
     /// </remarks>
-    internal void ChangePriorityCompounds(
+    internal void UpdatePriorityFactors(
         ICatPriorityCalculatorService priorityScoreCalculator,
         HealthStatus healthStatus,
         AgeCategory ageCategory,
@@ -195,7 +196,7 @@ public sealed class Cat : AuditableEntity<CatId>
     /// <remarks>
     /// Only for use within Person aggregate
     /// </remarks>
-    internal void UnassignAdvertisement()
+    internal void RemoveFromAdvertisement()
     {
         if (AdvertisementId is null)    
         {

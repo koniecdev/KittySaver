@@ -1,6 +1,6 @@
 ﻿using KittySaver.Domain.Common.Primitives;
 
-namespace KittySaver.Domain.Persons;
+namespace KittySaver.Domain.Persons.ValueObjects;
 
 public class Nickname : ValueObject
 {
