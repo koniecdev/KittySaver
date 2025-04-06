@@ -1,7 +1,6 @@
-﻿using Ardalis.SmartEnum;
-using KittySaver.Domain.Common.Primitives.Enums.Common;
+﻿using KittySaver.Shared.Common.Enums.Common;
 
-namespace KittySaver.Domain.Common.Primitives.Enums;
+namespace KittySaver.Shared.Common.Enums;
 
 public sealed class HealthStatus : SmartEnumBase<HealthStatus>
 {

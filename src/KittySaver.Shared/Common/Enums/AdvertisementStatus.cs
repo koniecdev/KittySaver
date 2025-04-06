@@ -1,4 +1,4 @@
-﻿namespace KittySaver.Shared.Common;
+﻿namespace KittySaver.Shared.Common.Enums;
 
 public enum AdvertisementStatus
 {

@@ -1,7 +1,6 @@
-﻿using Ardalis.SmartEnum;
-using KittySaver.Domain.Common.Primitives.Enums.Common;
+﻿using KittySaver.Shared.Common.Enums.Common;
 
-namespace KittySaver.Domain.Common.Primitives.Enums;
+namespace KittySaver.Shared.Common.Enums;
 public sealed class AgeCategory : SmartEnumBase<AgeCategory>
 {
     public static readonly AgeCategory Baby = new(nameof(Baby), 0, 10);

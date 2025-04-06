@@ -1,6 +1,6 @@
 ﻿using Ardalis.SmartEnum;
 
-namespace KittySaver.Domain.Common.Primitives.Enums.Common;
+namespace KittySaver.Shared.Common.Enums.Common;
 
 
 public abstract class SmartEnumBase<TEnum>(string name, int value) : SmartEnum<TEnum, int>(name, value)
