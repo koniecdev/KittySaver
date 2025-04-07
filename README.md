@@ -2,9 +2,19 @@
 
 KittySaver is a comprehensive cat adoption management platform designed to connect cat shelters and individuals with potential adopters. The application provides a robust API-driven backend that supports advertisement management, cat profiles, adoption processes, and user authentication.
 
-![KittySaver Logo](https://via.placeholder.com/300x100?text=KittySaver+Logo)
-
 Live at: [uratujkota.pl](https://uratujkota.pl)
+
+# Why KittySaver?
+
+KittySaver is more than just a technical project - it's a personal mission.
+
+As a .NET developer with two years of commercial experience, I wanted to build something that not only puts all of my backend, frontend, and architectural skills to the test - but also makes a real difference.
+
+The app is currently in its early test phase, open to everyone without advertisement approvals, and using test data only. But in the coming months, I plan to reach out to real people - individuals, shelters, and foundations - who have cats in need of adoption.
+
+I strongly believe feline homelessness is a serious issue. If this application helps even one cat find a safe, loving home - I'll consider it a true success.
+
+Beyond clean code and architecture, KittySaver is built to be a free, solid, and easy-to-maintain platform for anyone who truly cares about animal welfare. Because time is limited, and the need is real.
 
 ## 📋 Table of Contents
 
@@ -28,52 +38,46 @@ Live at: [uratujkota.pl](https://uratujkota.pl)
 
 KittySaver is designed to simplify the process of cat adoption by providing a centralized platform for shelters and individuals to manage and publish adoption advertisements. The system prioritizes cats based on various factors like health status, age, and behavior to ensure that cats with urgent needs receive greater visibility.
 
-The application follows Clean Architecture and Domain-Driven Design principles to create a maintainable, scalable solution with clear separation of concerns and a rich domain model.
+The application follows SOLID and Domain-Driven Design principles to create a maintainable, scalable solution with clear separation of concerns and a rich domain model.
 
 ## Architecture
+Solution contains three main services - API, Auth API, Blazor WASM Client.
 
-KittySaver implements a modern, clean architecture with the following key components:
+KittySaver API implements Vertical Slices Architecture with the following key components:
 
-### Backend Architecture
+- **API Layer:** REST API (Level 3 of Richardson Maturity Model) implemented with use of Vertical Slice Architecture to composite minimal API with CQRS and EF9.
+- **Domain Layer:** Core business entities, value objects, and domain services - with strong adhere to DDD principles.
+- **Shared Layer:** Layer that contains shared contracts between API's and Blazor front-end application, to ensure consistency within the solution.
 
-- **Domain Layer:** Core business entities, value objects, and domain services
-- **Application Layer:** Application services, DTOs, and business logic
-- **Infrastructure Layer:** External services, repositories, and data access
-- **API Layer:** REST API controllers and endpoints
-- **Shared Components:** Cross-cutting concerns like authentication, logging, and configuration
+### Why This Architecture?
 
-### Key Architectural Patterns
-
-- **Clean Architecture**: Separation of concerns with dependencies pointing inward
-- **CQRS (Command Query Responsibility Segregation)**: Separation of read and write operations
-- **Mediator Pattern**: Using MediatR for handling commands and queries
-- **Repository Pattern**: Abstraction over data access
-- **Domain-Driven Design**: Rich domain model with encapsulated business rules
-- **HATEOAS**: Hypermedia as the Engine of Application State for RESTful API design
+- **Vertical Slice Architecture**: This project uses Vertical Slice Architecture instead of Onion Architecture to optimize development time, reduce the need to jump between layers, and minimize the surface area for bugs. Based on my personal experience, while Onion Architecture has its strengths, it often results in a time-consuming and hard-to-navigate codebase that becomes increasingly difficult to maintain as the project scales.
+- **CQRS (Command Query Responsibility Segregation)**: I follow DDD principles for state-changing operations that require maximum consistency and a rich, expressive domain model. For read-only purposes, I use optimized Read Models with dedicated DbContext instances to improve query performance.
+- **Mediator Pattern**: I use MediatR to handle commands and queries, as well as manage cross-cutting concerns such as command validation and HATEOAS support. MediatR also lays the groundwork for future domain event handling.
+- **Domain-Driven Design**: The project features a rich domain model with encapsulated business rules. I've aimed to follow Eric Evans' principles as closely as possible. Currently, the project contains a single Aggregate - the Person Aggregate. The design allows for easy extension with future aggregates as needed. The Person entity acts as the Aggregate Root, with Cat and Advertisement as entities within the aggregate. I use Value Objects and domain repositories based on a generic repository pattern to encapsulate common operations on aggregate roots.
+- **HATEOAS**: Hypermedia as the Engine of Application State is used for RESTful API design. The Blazor front-end is free from hard-coded API endpoint URLs. Instead, API responses include available actions on the resource for the user who triggered the endpoint.
 
 ## Key Features
 
 ### Authentication and Authorization
 - JWT-based authentication with refresh tokens
-- Role-based access control (Regular, Admin, Shelter roles)
 - Email verification and password reset
 
 ### User Management
 - User registration and profile management
 - Personalized user dashboard
-- Different user types (individual, shelter)
 
 ### Cat Management
-- Comprehensive cat profiles with health information
-- Prioritization system based on health, age, and behavior
-- Photo gallery for each cat
-- Thumbnail management
+- The first thing to do after successfully logging into the system is to create your cats. You can define the cats that are available for adoption. Each cat can have attributes such as health status, urgency for veterinary assistance, behavior, and age. You can also provide a detailed description of the cat and its needs. Upload as many gallery images as you'd like, and choose one image to be used as the thumbnail.
+- Cats are private by default after creation. To make them publicly visible, you need to create an advertisement for each cat or group of cats.
 
 ### Advertisement Management
-- Create, edit, and manage adoption advertisements
-- CRUD operations for advertisements
-- Status tracking (Active, Closed, Expired)
-- Thumbnail and image management
+- Once you've created your cat, you can make it publicly visible by creating an advertisement.
+- If a cat can be adopted individually, you can create a separate advertisement for that single cat.
+- If you have bonded cats that should only be adopted together, you can include them all in one advertisement. This clearly signals to users that the cats are only available as a group.
+- If a cat from an active advertisement becomes unavailable for any reason, you can remove it from the advertisement. You can then either delete the cat or move it to a different advertisement. All cat properties are preserved after removal - this is the main benefit of managing cats independently from advertisements.
+- After a successful adoption, you can close the advertisement. All cats assigned to that advertisement will be marked as adopted and cannot be reused in the system.
+- Advertisements can have their own optional description. You can use it to describe the relationship between cats in a group, or to provide any additional context about the adoption.
 
 ### Discovery
 - Search and filtering capabilities
@@ -88,27 +92,28 @@ KittySaver implements a modern, clean architecture with the following key compon
 - **Entity Framework Core**: ORM for data access
 - **SQL Server**: Database
 - **MediatR**: Mediator pattern implementation
-- **FluentValidation**: Request validation
-- **Mapster/Mapperly**: Object mapping
+- **FluentValidation**: Commands validation
+- **Mapperly**: Source generated object mapping
 - **Swagger/OpenAPI**: API documentation
 
-### DevOps & Tools
-- **xUnit**: Testing framework
-- **Docker**: Containerization
-- **Azure/IIS**: Hosting
-- **GitHub Actions**: CI/CD (presumed)
+### Frontend
+- **Blazor WebAssembly**: Core framework
+
+### Tests
+- **xUnit**: Testing framework - both for unit tests and integration tests.
 
 ## Project Structure
 
 The solution is organized into the following projects:
 
-- **KittySaver.Api**: Main API project with endpoints and application logic
-- **KittySaver.Auth.Api**: Authentication and authorization API
-- **KittySaver.Domain**: Domain entities, aggregates, and business logic
-- **KittySaver.Shared**: Shared models, DTOs, and utilities
-- **KittySaver.SharedForApi**: Shared API components
+- **KittySaver.Api**: Main API project with endpoints and application logic (VSA)
+- **KittySaver.Domain**: Domain entities, aggregates, and business logic (DDD)
+- **KittySaver.Shared**: Shared DTOs, and utilities
 - **KittySaver.Api.Tests**: API tests (unit and integration)
-- **KittySaver.Auth.Api.Tests**: Authentication API tests
+- **KittySaver.Auth.Api**: Authentication and authorization API
+- **KittySaver.Auth.Api.Tests**: Authentication API tests (unit and integration)
+- **KittySaver.Wasm**: Blazor WASM frontend client.
+- **KittySaver.Aspire**: .NET Aspire support for Development environment.
 
 Key folders within the API project:
 
@@ -235,7 +240,6 @@ The API is documented using Swagger/OpenAPI. When running the application, you c
 - Main API: https://localhost:7127/swagger
 - Auth API: https://localhost:7124/swagger
 
-The API follows RESTful design principles and implements HATEOAS for resource discovery. Key API endpoints include:
 
 ### Authentication API
 
@@ -249,18 +253,11 @@ The API follows RESTful design principles and implements HATEOAS for resource di
 
 ### Main API
 
-- **Advertisements**
-  - `GET /api/v1/advertisements` - Get all public advertisements
-  - `GET /api/v1/advertisements/{id}` - Get a specific public advertisement
-  - `GET /api/v1/persons/{personId}/advertisements` - Get advertisements for a person
-  - `POST /api/v1/persons/{personId}/advertisements` - Create a new advertisement
-  - Additional endpoints for updating, deleting, and managing advertisement status
+The API follows RESTful design principles and implements HATEOAS for resource discovery.
+Thanks to the use of CQRS and Domain-Driven Design, the REST API structure is aligned with the aggregate hierarchy, making the endpoints consistent with the domain model. This improves clarity, maintainability, and makes the API more intuitive for consumers.
 
-- **Cats**
-  - `GET /api/v1/persons/{personId}/cats` - Get cats for a person
-  - `POST /api/v1/persons/{personId}/cats` - Create a new cat
-  - `GET /api/v1/persons/{personId}/cats/{id}` - Get a specific cat
-  - Additional endpoints for cat thumbnail, gallery, and management
+- **Discovery endpoint**
+  - `GET /api/v1/`
 
 - **Persons**
   - `POST /api/v1/persons` - Create a new person
@@ -268,9 +265,23 @@ The API follows RESTful design principles and implements HATEOAS for resource di
   - `PUT /api/v1/persons/{id}` - Update a person
   - `DELETE /api/v1/persons/{id}` - Delete a person
 
+- **Cats**
+  - `GET /api/v1/persons/{personId}/cats` - Get cats for a person
+  - `POST /api/v1/persons/{personId}/cats` - Create a new cat
+  - `GET /api/v1/persons/{personId}/cats/{id}` - Get a specific cat
+  - Additional endpoints for cat thumbnail, gallery, and management
+
+- **Advertisements**
+  - `GET /api/v1/advertisements` - Get all public advertisements
+  - `GET /api/v1/advertisements/{id}` - Get a specific public advertisement
+  - `GET /api/v1/persons/{personId}/advertisements` - Get advertisements for a person
+  - `POST /api/v1/persons/{personId}/advertisements` - Create a new advertisement
+  - Additional endpoints for updating, deleting, and managing advertisement status
+
+
 ## Testing
 
-The project includes over 300 comprehensive tests covering both unit tests and integration tests for the API and Auth API components.
+The project includes almost 300 comprehensive tests covering both unit tests and integration tests for the API and Auth API components.
 
 To run the tests:
 
@@ -293,49 +304,10 @@ dotnet test ./tests/KittySaver.Auth.Api.Tests
 
 The application is currently deployed at [uratujkota.pl](https://uratujkota.pl).
 
-### Deployment Options
-
-1. **IIS Deployment**
-   - Publish the application using `dotnet publish`
-   - Configure IIS with the appropriate application pools
-   - Set up the necessary bindings and SSL certificates
-
-2. **Docker Deployment**
-   - Build Docker images for each API
-   - Use Docker Compose to orchestrate the services
-   - Deploy to a container orchestration platform like Kubernetes
-
-3. **Azure Deployment**
-   - Publish directly to Azure App Service
-   - Set up Azure SQL Database
-   - Configure application settings in Azure
-
-### CI/CD
-
-The project can be set up with GitHub Actions or Azure DevOps for continuous integration and deployment.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Coding Standards
-
-- Follow the existing code style and architecture
-- Write unit tests for new features
-- Keep domain logic in the domain layer
-- Use MediatR for commands and queries
-- Follow SOLID principles
-
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 ---
 
-© 2025 KittySaver. All rights reserved.
+© 2025 KittySaver - Artur Koniec. All rights reserved.
