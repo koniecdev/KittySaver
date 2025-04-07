@@ -48,6 +48,12 @@ try
             {
                 corsBuilder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
             });
+        options.AddPolicy("ProductionPolicies",
+            corsBuilder =>
+            {
+                corsBuilder.WithOrigins("https://uratujkota.pl").AllowAnyHeader().AllowAnyMethod();
+                corsBuilder.WithOrigins("https://api.uratujkota.pl").AllowAnyHeader().AllowAnyMethod();
+            });
     });
 
     builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
@@ -58,7 +64,7 @@ try
     app.UseExceptionHandler();
     app.UseHttpsRedirection();
     app.UseSerilogRequestLogging();
-    app.UseCors("AllowedPolicies");
+    app.UseCors(app.Environment.IsDevelopment() ? "AllowedPolicies" : "ProductionPolicies");
     app.UseAuthentication();
     app.UseAuthorization();
 
