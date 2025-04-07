@@ -44,6 +44,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\KittySaver.Aspire\KittySaver.ServiceDefaults\KittySaver.ServiceDefaults.csproj" />
       <ProjectReference Include="..\KittySaver.SharedForApi\KittySaver.SharedForApi.csproj" />
       <ProjectReference Include="..\KittySaver.Shared\KittySaver.Shared.csproj" />
     </ItemGroup>

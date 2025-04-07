@@ -1,5 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35919.96 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{74DEC7A6-AEB4-444C-A522-11F65EAFA372}"
 	ProjectSection(SolutionItems) = preProject
 		docker-compose.yml = docker-compose.yml
@@ -30,6 +33,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.SharedForApi", "src\KittySaver.SharedForApi\KittySaver.SharedForApi.csproj", "{1F23DE0A-0647-4352-8A56-AF08525E50D1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.Shared", "src\KittySaver.Shared\KittySaver.Shared.csproj", "{1C158C5C-3336-4C6F-8305-9209525BBBB8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.AppHost", "src\KittySaver.Aspire\KittySaver.AppHost\KittySaver.AppHost.csproj", "{5F69A6DE-0AF2-4B43-BE10-4B33512BF2E2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.ServiceDefaults", "src\KittySaver.Aspire\KittySaver.ServiceDefaults\KittySaver.ServiceDefaults.csproj", "{EF86B5D0-4670-9638-077E-5B70E7071718}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Aspire", "Aspire", "{9F80EF5F-3384-4365-93D2-F6851CB6EBFA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +90,17 @@ Global
 		{1C158C5C-3336-4C6F-8305-9209525BBBB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1C158C5C-3336-4C6F-8305-9209525BBBB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1C158C5C-3336-4C6F-8305-9209525BBBB8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F69A6DE-0AF2-4B43-BE10-4B33512BF2E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F69A6DE-0AF2-4B43-BE10-4B33512BF2E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F69A6DE-0AF2-4B43-BE10-4B33512BF2E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F69A6DE-0AF2-4B43-BE10-4B33512BF2E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF86B5D0-4670-9638-077E-5B70E7071718}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF86B5D0-4670-9638-077E-5B70E7071718}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF86B5D0-4670-9638-077E-5B70E7071718}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF86B5D0-4670-9638-077E-5B70E7071718}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{8E9504A6-C398-4B17-864D-58F6254B0F7D} = {74DEC7A6-AEB4-444C-A522-11F65EAFA372}
@@ -96,5 +116,11 @@ Global
 		{3D149D26-E276-42BD-BF97-26594B3AC452} = {8E9504A6-C398-4B17-864D-58F6254B0F7D}
 		{1F23DE0A-0647-4352-8A56-AF08525E50D1} = {8E9504A6-C398-4B17-864D-58F6254B0F7D}
 		{1C158C5C-3336-4C6F-8305-9209525BBBB8} = {8E9504A6-C398-4B17-864D-58F6254B0F7D}
+		{5F69A6DE-0AF2-4B43-BE10-4B33512BF2E2} = {9F80EF5F-3384-4365-93D2-F6851CB6EBFA}
+		{EF86B5D0-4670-9638-077E-5B70E7071718} = {9F80EF5F-3384-4365-93D2-F6851CB6EBFA}
+		{9F80EF5F-3384-4365-93D2-F6851CB6EBFA} = {74DEC7A6-AEB4-444C-A522-11F65EAFA372}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {763CB504-D4CF-47F3-976D-8CF35CFDEEC2}
 	EndGlobalSection
 EndGlobal
