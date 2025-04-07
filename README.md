@@ -40,6 +40,12 @@ KittySaver is designed to simplify the process of cat adoption by providing a ce
 
 The application follows SOLID and Domain-Driven Design principles to create a maintainable, scalable solution with clear separation of concerns and a rich domain model.
 
+The frontend is built with Blazor WebAssembly. The infrastructure of Blazor components (such as routing, code sections and base architecture) was generated with the help of latest and smartest model of Claude.ai - which allowed me to focus on the core logic and UI design.
+
+The HTML, CSS, and application logic are fully written by me.
+
+I treat AI as a supportive tool - it helps me work faster, skip the repetetive work, and focus more on the things that really matter. In the end, time is the most important thing.
+
 ## Architecture
 Solution contains three main services - API, Auth API, Blazor WASM Client.
 
