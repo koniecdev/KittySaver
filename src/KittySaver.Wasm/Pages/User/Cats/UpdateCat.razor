@@ -526,7 +526,6 @@
         }
     }
 
-    // Obsługa etapu zdjęcia głównego (thumbnail)
     private async Task OnMainPhotoSelected(InputFileChangeEventArgs e)
     {
         _mainPhoto = e.File;
@@ -547,15 +546,16 @@
             _mainPhotoFileName = _mainPhoto.Name;
             _mainPhotoContentType = _mainPhoto.ContentType;
 
-            // Read and cache file data
-            await using Stream stream = _mainPhoto.OpenReadStream();
+            // Read and cache file data - używamy jawnie dużego limitu
+            await using Stream stream = _mainPhoto.OpenReadStream(20 * 1024 * 1024);
             _mainPhotoFileData = new byte[_mainPhoto.Size];
             await stream.ReadAsync(_mainPhotoFileData);
 
-            // Create a preview URL
+            // Create a preview URL - używamy jawnie dużego limitu dla strumienia podglądu
             IBrowserFile imageFile = await e.File.RequestImageFileAsync("image/jpeg", 300, 300);
             byte[] buffer = new byte[imageFile.Size];
-            await imageFile.OpenReadStream().ReadAsync(buffer);
+            await using Stream previewStream = imageFile.OpenReadStream(20 * 1024 * 1024);
+            await previewStream.ReadAsync(buffer);
             string imageDataUrl = $"data:image/jpeg;base64,{Convert.ToBase64String(buffer)}";
             _mainPhotoPreviewUrl = imageDataUrl;
         }
@@ -671,8 +671,8 @@
             // Przetwarzamy każdy plik osobno
             foreach (IBrowserFile file in _selectedGalleryFiles)
             {
-                // Otwieramy strumień z określonym maksymalnym rozmiarem
-                Stream stream = file.OpenReadStream();
+                // Otwieramy strumień z określonym maksymalnym rozmiarem - użyjmy 5MB
+                Stream stream = file.OpenReadStream(5 * 1024 * 1024); // 5MB
 
                 // Tworzymy bufor o rozmiarze pliku
                 byte[] buffer = new byte[file.Size];

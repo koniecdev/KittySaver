@@ -676,7 +676,6 @@
         return "/imgs/defaultCat.webp";
     }
     
-    // Obsługa miniaturki ogłoszenia
     private async Task OnThumbnailSelected(InputFileChangeEventArgs e)
     {
         _thumbnailFile = e.File;
@@ -696,16 +695,17 @@
             // Save file details
             _thumbnailFileName = _thumbnailFile.Name;
             _thumbnailContentType = _thumbnailFile.ContentType;
-            
+        
             // Read and cache file data
-            await using var stream = _thumbnailFile.OpenReadStream(MaxAllowedSize);
+            await using var stream = _thumbnailFile.OpenReadStream(MaxAllowedSize); // MaxAllowedSize już jest zdefiniowane jako 5MB
             _thumbnailFileData = new byte[_thumbnailFile.Size];
             await stream.ReadAsync(_thumbnailFileData);
 
-            // Create a preview URL
+            // Create a preview URL - dodajemy jawne określenie limitu
             var imageFile = await e.File.RequestImageFileAsync("image/jpeg", 300, 300);
             var buffer = new byte[imageFile.Size];
-            await imageFile.OpenReadStream().ReadAsync(buffer);
+            await using var previewStream = imageFile.OpenReadStream(MaxAllowedSize); // Dodany limit
+            await previewStream.ReadAsync(buffer);
             var imageDataUrl = $"data:image/jpeg;base64,{Convert.ToBase64String(buffer)}";
             _thumbnailPreviewUrl = imageDataUrl;
         }
