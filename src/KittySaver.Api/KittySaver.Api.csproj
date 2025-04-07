@@ -50,10 +50,17 @@
     <ItemGroup>
       <ProjectReference Include="..\KittySaver.Aspire\KittySaver.ServiceDefaults\KittySaver.ServiceDefaults.csproj" />
       <ProjectReference Include="..\KittySaver.Domain\KittySaver.Domain.csproj" />
-      <ProjectReference Include="..\KittySaver.SharedForApi\KittySaver.SharedForApi.csproj" />
       <ProjectReference Include="..\KittySaver.Shared\KittySaver.Shared.csproj" />
     </ItemGroup>
     <ItemGroup>
       <Folder Include="PrivateFiles\cats\" />
+    </ItemGroup>
+    <ItemGroup>
+      <Compile Update="Swagger\ConfigureSwaggerGenOptions.cs">
+        <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
+      </Compile>
+      <Compile Update="Swagger\SwaggerExtensions.cs">
+        <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
+      </Compile>
     </ItemGroup>
 </Project>

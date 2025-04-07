@@ -45,8 +45,22 @@
 
     <ItemGroup>
       <ProjectReference Include="..\KittySaver.Aspire\KittySaver.ServiceDefaults\KittySaver.ServiceDefaults.csproj" />
-      <ProjectReference Include="..\KittySaver.SharedForApi\KittySaver.SharedForApi.csproj" />
       <ProjectReference Include="..\KittySaver.Shared\KittySaver.Shared.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="Swagger\Auth\DevelopmentAuthorization.cs">
+        <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
+      </Compile>
+      <Compile Update="Swagger\Swagger\ConfigureSwaggerGenOptions.cs">
+        <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
+      </Compile>
+      <Compile Update="Swagger\Swagger\SwaggerExtensions.cs">
+        <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
+      </Compile>
+      <Compile Update="Swagger\SeedData.cs">
+        <Generator>MSBuild:GenerateCodeFromAttributes</Generator>
+      </Compile>
     </ItemGroup>
 
 </Project>
