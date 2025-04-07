@@ -343,9 +343,11 @@ select{
     fill: #fff;
 }
 .btn_listing_contact_inner{
-    display: flex;
-    gap: 1rem;
+    display: grid;
+    grid-gap: 1rem;
     align-items: center;
+    grid-template-columns: max-content 1fr max-content;
+    grid-column: 1/-1;
 }
 .btn_listing_contact_clickable_link{
     background-color: var(--kitty-green);
@@ -1940,5 +1942,20 @@ button.disabled {
     }
     .login_form_tile{
         padding: .75rem .5rem;
+    }
+    .btn_listing_contact_inner{
+        display: grid;
+        grid-gap: 1rem;
+        align-items: center;
+        grid-template-columns: 1fr;
+        justify-items: center;
+        grid-column: 1/-1;
+    }
+    .listing_element{
+        padding: 1rem .5rem;    
+    }
+    .btn_listing_contact_clickable_link{
+        padding: .5rem 1rem;
+        height: auto;
     }
 }
