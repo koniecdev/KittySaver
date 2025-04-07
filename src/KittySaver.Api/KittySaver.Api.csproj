@@ -19,11 +19,11 @@
     <ItemGroup>
         <PackageReference Include="Ardalis.SmartEnum" Version="8.2.0" />
         <PackageReference Include="Ardalis.SmartEnum.EFCore" Version="8.2.0" />
-        <PackageReference Include="Asp.Versioning.Http" Version="8.1.0"/>
-        <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.0"/>
-        <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0"/>
+        <PackageReference Include="Asp.Versioning.Http" Version="8.1.0" />
+        <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.0" />
+        <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
         <PackageReference Include="Magick.NET-Q16-AnyCPU" Version="14.4.0" />
-        <PackageReference Include="MediatR" Version="12.4.1"/>
+        <PackageReference Include="MediatR" Version="12.4.1" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.1" />
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.1" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.1" />
@@ -39,15 +39,16 @@
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
         <PackageReference Include="Riok.Mapperly" Version="4.1.1" />
         <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
-        <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1"/>
-        <PackageReference Include="Serilog.Enrichers.Process" Version="3.0.0"/>
-        <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0"/>
+        <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
+        <PackageReference Include="Serilog.Enrichers.Process" Version="3.0.0" />
+        <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
     </ItemGroup>
     <ItemGroup>
         <InternalsVisibleTo Include="KittySaver.Api.Tests.Unit" />
     </ItemGroup>
     <ItemGroup>
+      <ProjectReference Include="..\KittySaver.Aspire\KittySaver.ServiceDefaults\KittySaver.ServiceDefaults.csproj" />
       <ProjectReference Include="..\KittySaver.Domain\KittySaver.Domain.csproj" />
       <ProjectReference Include="..\KittySaver.SharedForApi\KittySaver.SharedForApi.csproj" />
       <ProjectReference Include="..\KittySaver.Shared\KittySaver.Shared.csproj" />

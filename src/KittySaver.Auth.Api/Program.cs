@@ -52,6 +52,8 @@ try
 
     builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
 
+    builder.AddServiceDefaults();
+
     WebApplication app = builder.Build();
     app.UseExceptionHandler();
     app.UseHttpsRedirection();
@@ -72,8 +74,10 @@ try
 
     if (app.Environment.IsDevelopment())
     {
+        app.MapDefaultEndpoints();
         app.AddSwagger();
     }
+
 
     app.Run();
 }

@@ -49,13 +49,21 @@ try
     });
 
     builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
+    builder.AddServiceDefaults();
 
     WebApplication app = builder.Build();
     app.UseExceptionHandler();
     app.UseHttpsRedirection();
     app.UseSerilogRequestLogging();
-    app.UseCors("AllowedPolicies");
-    app.UseAuthentication();
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseCors("AllowedPolicies");
+    }
+    else
+    {
+        app.UseCors("");
+    }
+        app.UseAuthentication();
     app.UseAuthorization();
 
     ApiVersionSet apiVersionSet = app.NewApiVersionSet()
@@ -70,8 +78,10 @@ try
 
     if (app.Environment.IsDevelopment())
     {
+        app.MapDefaultEndpoints();
         app.AddSwagger();
     }
+
 
     app.Run();
 }

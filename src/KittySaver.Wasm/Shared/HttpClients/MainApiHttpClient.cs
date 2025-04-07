@@ -122,6 +122,7 @@ public class ApiClient(
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
             //Well, we do need the Result pattern for Response<TResponse || ProblemDetails>
+            
             logger.LogError(ex, "Error making POST request to {Endpoint}", endpointUrl);
             throw;
         }
