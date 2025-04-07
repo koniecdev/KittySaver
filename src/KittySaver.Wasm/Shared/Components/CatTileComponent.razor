@@ -29,7 +29,7 @@
                                  TData="object">
                         @if (Cat.IsThumbnailUploaded)
                         {
-                            <MudCarouselItem Transition="Transition.None" Class="pointer-events-none">
+                            <MudCarouselItem Transition="Transition.None" >
                                 <div class="d-flex justify-center" style="height:100%">
                                     <div class="img_wrapper">
                                         <img src="@Cat.Links.FirstOrDefault(x => x.Rel == EndpointRels.Cat.GetCatThumbnailRel)?.Href?cachebuster=@DateTimeOffset.Now"
@@ -42,7 +42,7 @@
 
                         @foreach (PictureResponse image in _galleryImages)
                         {
-                            <MudCarouselItem Transition="Transition.None" Class="pointer-events-none">
+                            <MudCarouselItem Transition="Transition.None">
                                 <div class="d-flex justify-center" style="height:100%">
                                     <div class="img_wrapper">
                                         <img src="@GetGalleryImageUrl(image.FilenameWithExtension)?cachebuster=@DateTimeOffset.Now"

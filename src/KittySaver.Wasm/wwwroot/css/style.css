@@ -1255,7 +1255,6 @@ button.disabled {
 }
 .subpage_cat_image .img_wrapper > img{
     max-height: 280px;
-    pointer-events: none;
 }
 .profile_form h4{
     grid-column: 1/-1;

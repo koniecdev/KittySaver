@@ -574,16 +574,17 @@
             // Save file details
             _thumbnailFileName = _thumbnailFile.Name;
             _thumbnailContentType = _thumbnailFile.ContentType;
-            
-            // Read and cache file data
-            await using Stream stream = _thumbnailFile.OpenReadStream();
+        
+            // Read and cache file data - zwiększamy limit
+            await using Stream stream = _thumbnailFile.OpenReadStream(5 * 1024 * 1024); // 5MB
             _thumbnailFileData = new byte[_thumbnailFile.Size];
             await stream.ReadAsync(_thumbnailFileData);
 
-            // Create a preview URL
+            // Create a preview URL - zwiększamy limit
             IBrowserFile imageFile = await e.File.RequestImageFileAsync("image/jpeg", 300, 300);
             byte[] buffer = new byte[imageFile.Size];
-            await imageFile.OpenReadStream().ReadAsync(buffer);
+            await using Stream previewStream = imageFile.OpenReadStream(5 * 1024 * 1024); // 5MB
+            await previewStream.ReadAsync(buffer);
             string imageDataUrl = $"data:image/jpeg;base64,{Convert.ToBase64String(buffer)}";
             _thumbnailPreviewUrl = imageDataUrl;
         }
