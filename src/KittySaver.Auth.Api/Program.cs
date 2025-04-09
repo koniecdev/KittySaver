@@ -4,7 +4,8 @@ using Asp.Versioning.Builder;
 using KittySaver.Auth.Api.Shared.Endpoints;
 using KittySaver.Auth.Api.Shared.Exceptions;
 using KittySaver.Auth.Api.Shared.Infrastructure;
-using KittySaver.SharedForApi.Swagger;
+using KittySaver.Auth.Api.Swagger.Swagger;
+using KittySaver.ServiceDefaults;
 using Serilog;
 
 IConfigurationRoot configuration = new ConfigurationBuilder()

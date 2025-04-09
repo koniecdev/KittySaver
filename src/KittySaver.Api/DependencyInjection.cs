@@ -1,16 +1,14 @@
 ﻿using System.Reflection;
 using System.Text;
 using FluentValidation;
+using KittySaver.Api.Behaviours;
 using KittySaver.Api.Features.Persons.SharedContracts;
+using KittySaver.Api.Hateoas;
+using KittySaver.Api.Infrastructure.Clients;
+using KittySaver.Api.Infrastructure.Services;
 using KittySaver.Api.Infrastructure.Services.FileServices;
-using KittySaver.Api.Shared.Behaviours;
-using KittySaver.Api.Shared.Hateoas;
-using KittySaver.Api.Shared.Infrastructure.Clients;
-using KittySaver.Api.Shared.Infrastructure.Services;
-using KittySaver.Api.Shared.Infrastructure.Services.FileServices;
-using KittySaver.Api.Shared.Pagination;
-using KittySaver.Api.Shared.Persistence;
-using KittySaver.Domain.Persons;
+using KittySaver.Api.Persistence.ReadRelated;
+using KittySaver.Api.Persistence.WriteRelated;
 using KittySaver.Domain.Persons.DomainRepositories;
 using KittySaver.Domain.Persons.DomainServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -18,7 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
-namespace KittySaver.Api.Shared.Infrastructure.Extensions;
+namespace KittySaver.Api;
 
 public static class ServiceCollectionExtensions
 {

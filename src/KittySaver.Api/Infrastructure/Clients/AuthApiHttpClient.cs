@@ -6,7 +6,7 @@ using KittySaver.Shared.Requests;
 using KittySaver.Shared.Responses;
 using Microsoft.AspNetCore.Mvc;
 
-namespace KittySaver.Api.Shared.Infrastructure.Clients;
+namespace KittySaver.Api.Infrastructure.Clients;
 
 
 public class ApiException(ProblemDetails problemDetails)

@@ -1,4 +1,4 @@
-﻿namespace KittySaver.Api.Shared.Persistence;
+﻿namespace KittySaver.Api.Persistence.WriteRelated;
 
 public interface IUnitOfWork
 {

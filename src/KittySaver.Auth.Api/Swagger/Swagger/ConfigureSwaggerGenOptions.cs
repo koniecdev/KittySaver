@@ -1,10 +1,9 @@
 ﻿using Asp.Versioning.ApiExplorer;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace KittySaver.SharedForApi.Swagger;
+namespace KittySaver.Auth.Api.Swagger.Swagger;
 
 public class ConfigureSwaggerGenOptions(IApiVersionDescriptionProvider provider) : IConfigureNamedOptions<SwaggerGenOptions>
 {

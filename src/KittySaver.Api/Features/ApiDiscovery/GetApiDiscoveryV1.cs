@@ -1,6 +1,6 @@
-﻿using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Endpoints;
-using KittySaver.Api.Shared.Infrastructure.Services;
+﻿using KittySaver.Api.Infrastructure.Endpoints;
+using KittySaver.Api.Infrastructure.Services;
+using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Shared.Responses;
 using MediatR;
 

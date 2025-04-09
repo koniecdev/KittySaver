@@ -1,9 +1,11 @@
 using System.Reflection;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
-using KittySaver.Api.Shared.Endpoints;
-using KittySaver.Api.Shared.Exceptions;
-using KittySaver.SharedForApi.Swagger;
+using KittySaver.Api;
+using KittySaver.Api.Exceptions;
+using KittySaver.Api.Infrastructure.Endpoints;
+using KittySaver.Api.Swagger;
+using KittySaver.ServiceDefaults;
 using Serilog;
 
 IConfigurationRoot configuration = new ConfigurationBuilder()

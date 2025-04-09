@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace KittySaver.Api.Shared.Exceptions.Handlers;
+namespace KittySaver.Api.Exceptions.Handlers;
 
 internal sealed class NotFoundExceptionHandler(ILogger<NotFoundExceptionHandler> logger) : IExceptionHandler
 {

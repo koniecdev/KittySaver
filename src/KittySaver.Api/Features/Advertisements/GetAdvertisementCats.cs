@@ -1,12 +1,11 @@
 ﻿using System.Linq.Expressions;
 using KittySaver.Api.Features.Cats.SharedContracts;
+using KittySaver.Api.Hateoas;
+using KittySaver.Api.Infrastructure.Endpoints;
+using KittySaver.Api.Persistence.ReadRelated;
+using KittySaver.Api.Persistence.ReadRelated.ReadModels;
 using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Api.Shared.CollectionsQueriesFiltering;
-using KittySaver.Api.Shared.Endpoints;
-using KittySaver.Api.Shared.Pagination;
-using KittySaver.Api.Shared.Persistence;
-using KittySaver.Api.Shared.Persistence.ReadModels;
-using KittySaver.Shared.Pagination;
 using KittySaver.Shared.Responses;
 using KittySaver.Shared.TypedIds;
 using MediatR;

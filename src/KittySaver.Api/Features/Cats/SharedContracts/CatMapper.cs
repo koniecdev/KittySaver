@@ -1,4 +1,4 @@
-﻿using KittySaver.Api.Shared.Persistence.ReadModels;
+﻿using KittySaver.Api.Persistence.ReadRelated.ReadModels;
 using KittySaver.Shared.Common.Enums;
 using KittySaver.Shared.Responses;
 

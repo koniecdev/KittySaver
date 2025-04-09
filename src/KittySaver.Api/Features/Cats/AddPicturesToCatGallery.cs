@@ -1,8 +1,7 @@
 ﻿using FluentValidation;
+using KittySaver.Api.Infrastructure.Endpoints;
+using KittySaver.Api.Infrastructure.Services.FileServices;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Endpoints;
-using KittySaver.Api.Shared.Infrastructure.Services.FileServices;
-using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.Persons.DomainRepositories;

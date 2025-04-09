@@ -6,7 +6,7 @@ using KittySaver.Auth.Api.Shared.Domain.Entites;
 using KittySaver.Auth.Api.Shared.Infrastructure.Services;
 using KittySaver.Auth.Api.Shared.Infrastructure.Services.Email;
 using KittySaver.Auth.Api.Shared.Persistence;
-using KittySaver.SharedForApi.Auth;
+using KittySaver.Auth.Api.Swagger.Auth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;

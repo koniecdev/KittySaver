@@ -1,8 +1,8 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Features.Persons.SharedContracts;
+using KittySaver.Api.Infrastructure.Endpoints;
+using KittySaver.Api.Persistence.WriteRelated;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Endpoints;
-using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.Persons.DomainRepositories;
 using KittySaver.Domain.Persons.Entities;

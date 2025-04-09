@@ -1,4 +1,4 @@
-﻿namespace KittySaver.SharedForApi;
+﻿namespace KittySaver.Auth.Api.Swagger;
 
 public static class FixedIdsHelper
 {

@@ -4,7 +4,6 @@ using Bogus;
 using FluentAssertions;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Shared.Hateoas;
-using KittySaver.Shared.Pagination;
 using KittySaver.Shared.Responses;
 using KittySaver.Shared.TypedIds;
 

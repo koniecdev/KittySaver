@@ -2,7 +2,7 @@
 using System.Net.Http.Json;
 using Bogus;
 using FluentAssertions;
-using KittySaver.Api.Shared.Endpoints;
+using KittySaver.Api.Infrastructure.Endpoints;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.ValueObjects;
 using KittySaver.Shared.Common.Enums;

@@ -1,12 +1,10 @@
-﻿using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Infrastructure.Services;
-using KittySaver.Domain.Persons;
-using KittySaver.Domain.Persons.Entities;
+﻿using KittySaver.Api.Infrastructure.Services;
+using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Shared.Common.Enums;
 using KittySaver.Shared.TypedIds;
 using MediatR;
 
-namespace KittySaver.Api.Shared.Behaviours;
+namespace KittySaver.Api.Behaviours;
 
 public sealed class AuthorizationBehaviour<TRequest, TResponse>(
     ICurrentUserService currentUserService)

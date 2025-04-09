@@ -1,8 +1,6 @@
 ﻿using Asp.Versioning.ApiExplorer;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
 
-namespace KittySaver.SharedForApi.Swagger;
+namespace KittySaver.Auth.Api.Swagger.Swagger;
 
 public static class SwaggerExtensions
 {

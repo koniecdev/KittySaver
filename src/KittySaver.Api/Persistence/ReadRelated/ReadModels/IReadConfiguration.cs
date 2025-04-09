@@ -1,3 +1,3 @@
-﻿namespace KittySaver.Api.Shared.Persistence.ReadModels;
+﻿namespace KittySaver.Api.Persistence.ReadRelated.ReadModels;
 
 public interface IReadConfiguration;

@@ -1,4 +1,4 @@
-﻿namespace KittySaver.Api.Shared.Infrastructure.Services;
+﻿namespace KittySaver.Api.Infrastructure.Services;
 
 public interface IDateTimeService
 {

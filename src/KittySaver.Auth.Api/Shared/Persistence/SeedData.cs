@@ -1,5 +1,5 @@
 ﻿using KittySaver.Auth.Api.Shared.Domain.Entites;
-using KittySaver.SharedForApi;
+using KittySaver.Auth.Api.Swagger;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

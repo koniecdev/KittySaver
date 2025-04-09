@@ -1,6 +1,6 @@
 ﻿using KittySaver.Shared.Hateoas;
 
-namespace KittySaver.Shared.Pagination;
+namespace KittySaver.Shared.Responses;
 
 public interface IPagedList<TResponse>
 {

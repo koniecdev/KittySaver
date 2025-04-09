@@ -1,5 +1,5 @@
-﻿using KittySaver.Api.Shared.Infrastructure.Clients;
-using KittySaver.Api.Shared.Persistence;
+﻿using KittySaver.Api.Infrastructure.Clients;
+using KittySaver.Api.Persistence.WriteRelated;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Persons;
 using KittySaver.Domain.Persons.DomainRepositories;

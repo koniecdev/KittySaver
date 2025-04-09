@@ -4,7 +4,7 @@ using System.Text.Json;
 using Bogus;
 using FluentAssertions;
 using KittySaver.Api.Features.Advertisements;
-using KittySaver.Api.Shared.Endpoints;
+using KittySaver.Api.Infrastructure.Endpoints;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Shared.Common.Enums;
 using KittySaver.Shared.Hateoas;

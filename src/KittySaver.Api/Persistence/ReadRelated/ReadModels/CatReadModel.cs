@@ -1,9 +1,10 @@
 ﻿using KittySaver.Shared.TypedIds;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
 // ReSharper disable CollectionNeverUpdated.Global
 
-namespace KittySaver.Api.Shared.Persistence.ReadModels;
+namespace KittySaver.Api.Persistence.ReadRelated.ReadModels;
 
 public sealed class CatReadModel
 {

@@ -1,6 +1,6 @@
 ﻿using ImageMagick;
 
-namespace KittySaver.Api.Shared.Infrastructure.Services.FileServices;
+namespace KittySaver.Api.Infrastructure.Services.FileServices;
 
 public interface IThumbnailStorageService<in TId> where TId : struct
 {
