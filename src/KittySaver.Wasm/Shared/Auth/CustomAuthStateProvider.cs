@@ -100,7 +100,7 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
             
             // Call the refresh token endpoint
             LoginResponse? response = await _apiClient.PostAsync<RefreshTokenRequest, LoginResponse>(
-                $"{StaticDetails.AuthUrl}application-users/refresh-token",
+                $"{EnvironmentConfiguration.AuthUrl}application-users/refresh-token",
                 new RefreshTokenRequest(accessToken, refreshToken));
 
             if (response is null)

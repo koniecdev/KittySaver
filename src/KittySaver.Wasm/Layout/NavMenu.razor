@@ -65,7 +65,7 @@
                 try
                 {
                     await ApiClient.PostAsync(
-                        $"{StaticDetails.AuthUrl}application-users/logout",
+                        $"{EnvironmentConfiguration.AuthUrl}application-users/logout",
                         new LogoutRequest(refreshToken));
                 }
                 catch

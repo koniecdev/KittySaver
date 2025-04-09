@@ -87,7 +87,7 @@
         {
             // Call API to confirm email
             await ApiClient.PostAsync(
-                $"{StaticDetails.AuthUrl}application-users/confirm-email?userId={Uri.EscapeDataString(userId)}&token={Uri.EscapeDataString(token)}");
+                $"{EnvironmentConfiguration.AuthUrl}application-users/confirm-email?userId={Uri.EscapeDataString(userId)}&token={Uri.EscapeDataString(token)}");
             
             // If we got here, confirmation was successful
             _isConfirmed = true;
