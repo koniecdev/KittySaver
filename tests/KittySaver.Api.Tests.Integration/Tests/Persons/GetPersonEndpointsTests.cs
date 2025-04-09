@@ -4,12 +4,10 @@ using System.Text.Json;
 using Bogus;
 using FluentAssertions;
 using KittySaver.Api.Tests.Integration.Helpers;
-using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.Responses;
 using KittySaver.Shared.TypedIds;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using KittySaver.Tests.Shared;
 
 namespace KittySaver.Api.Tests.Integration.Tests.Persons;
 

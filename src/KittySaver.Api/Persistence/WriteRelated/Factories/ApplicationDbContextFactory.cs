@@ -1,7 +1,7 @@
-﻿using KittySaver.Api.Shared.Infrastructure.Services;
+﻿using KittySaver.Api.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 
-namespace KittySaver.Api.Shared.Persistence.Factories;
+namespace KittySaver.Api.Persistence.WriteRelated.Factories;
 
 internal sealed class ApplicationDbContextFactoryFactory : DesignTimeDbContextFactoryBase<ApplicationWriteDbContext>
 {

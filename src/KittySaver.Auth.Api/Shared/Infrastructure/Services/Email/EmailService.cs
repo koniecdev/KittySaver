@@ -1,30 +1,29 @@
-﻿using System.Net;
-using System.Net.Mail;
-using FluentEmail.Core;
-using Microsoft.Extensions.Options;
+﻿using FluentEmail.Core;
+using FluentEmail.Core.Models;
 
 namespace KittySaver.Auth.Api.Shared.Infrastructure.Services.Email;
 
 public interface IEmailService
 {
-    Task SendEmailAsync(string email, string subject, string htmlMessage);
     Task SendEmailConfirmationAsync(string email, string confirmationLink);
     Task SendPasswordResetAsync(string email, string resetLink);
 }
 
 public class EmailService(
-    IOptions<EmailSettings> emailSettings,
     IFluentEmail fluentEmail,
+    ICurrentEnvironmentService currentEnvironmentService,
     ILogger<EmailService> logger)
     : IEmailService
 {
-    private readonly EmailSettings _emailSettings = emailSettings.Value;
-
-    public async Task SendEmailAsync(string email, string subject, string htmlMessage)
+    private async Task SendEmailAsync(string email, string subject, string htmlMessage)
     {
+        if (currentEnvironmentService.IsDevelopmentTheCurrentEnvironment())
+        {
+            return;
+        }
         try
         {
-            var result = await fluentEmail
+            SendResponse? result = await fluentEmail
                 .To(email)
                 .Subject(subject)
                 .Body(htmlMessage, true)
@@ -50,40 +49,40 @@ public class EmailService(
 
     public async Task SendEmailConfirmationAsync(string email, string confirmationLink)
     {
-        string subject = "Potwierdź swoje konto w KittySaver";
-        string htmlMessage = $@"
-        <h1>Witamy w KittySaver!</h1>
-        <p>Dziękujemy za rejestrację. Kliknij poniższy link, aby potwierdzić swój adres email:</p>
-        <p><a href='{confirmationLink}'>Potwierdź swój email</a></p>
-        <p>Jeśli nie rejestrowałeś się w naszym serwisie, możesz zignorować tę wiadomość.</p>
-        <p>Pozdrawiamy,<br>Zespół KittySaver</p>";
+        if (currentEnvironmentService.IsDevelopmentTheCurrentEnvironment())
+        {
+            return;
+        }
+        const string subject = "Potwierdź swoje konto w KittySaver";
+        string htmlMessage = $"""
+                              
+                                      <h1>Witamy w KittySaver!</h1>
+                                      <p>Dziękujemy za rejestrację. Kliknij poniższy link, aby potwierdzić swój adres email:</p>
+                                      <p><a href='{confirmationLink}'>Potwierdź swój email</a></p>
+                                      <p>Jeśli nie rejestrowałeś się w naszym serwisie, możesz zignorować tę wiadomość.</p>
+                                      <p>Pozdrawiamy,<br>Zespół KittySaver</p>
+                              """;
         
         await SendEmailAsync(email, subject, htmlMessage);
     }
 
     public async Task SendPasswordResetAsync(string email, string resetLink)
     {
-        string subject = "Reset hasła w KittySaver";
-        string htmlMessage = $@"
-        <h1>Reset hasła</h1>
-        <p>Otrzymaliśmy prośbę o reset hasła dla Twojego konta. Kliknij poniższy link, aby zresetować swoje hasło:</p>
-        <p><a href='{resetLink}'>Resetuj hasło</a></p>
-        <p>Link wygaśnie po 24 godzinach.</p>
-        <p>Jeśli nie prosiłeś o reset hasła, możesz zignorować tę wiadomość.</p>
-        <p>Pozdrawiamy,<br>Zespół KittySaver</p>";
+        if (currentEnvironmentService.IsDevelopmentTheCurrentEnvironment())
+        {
+            return;
+        }
+        const string subject = "Reset hasła w KittySaver";
+        string htmlMessage = $"""
+                              
+                                      <h1>Reset hasła</h1>
+                                      <p>Otrzymaliśmy prośbę o reset hasła dla Twojego konta. Kliknij poniższy link, aby zresetować swoje hasło:</p>
+                                      <p><a href='{resetLink}'>Resetuj hasło</a></p>
+                                      <p>Link wygaśnie po 24 godzinach.</p>
+                                      <p>Jeśli nie prosiłeś o reset hasła, możesz zignorować tę wiadomość.</p>
+                                      <p>Pozdrawiamy,<br>Zespół uratujkota.pl</p>
+                              """;
         
         await SendEmailAsync(email, subject, htmlMessage);
     }
-}
-
-public class EmailConfirmationModel
-{
-    public string ConfirmationLink { get; set; } = string.Empty;
-    public string WebsiteBaseUrl { get; set; } = string.Empty;
-}
-
-public class PasswordResetModel
-{
-    public string ResetLink { get; set; } = string.Empty;
-    public string WebsiteBaseUrl { get; set; } = string.Empty;
 }

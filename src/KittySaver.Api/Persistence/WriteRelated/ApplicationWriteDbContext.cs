@@ -1,16 +1,13 @@
-﻿using KittySaver.Api.Persistence;
-using KittySaver.Api.Shared.Infrastructure.Services;
+﻿using KittySaver.Api.Infrastructure.Services;
 using KittySaver.Domain;
 using KittySaver.Domain.Common.Primitives;
-using KittySaver.Domain.Persons;
 using KittySaver.Domain.Persons.Entities;
-using KittySaver.Shared.TypedIds;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using SmartEnum.EFCore;
 
-namespace KittySaver.Api.Shared.Persistence;
+namespace KittySaver.Api.Persistence.WriteRelated;
 
 public sealed class ApplicationWriteDbContext(
     DbContextOptions<ApplicationWriteDbContext> options,

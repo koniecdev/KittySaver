@@ -1,12 +1,10 @@
 ﻿using Bogus;
 using FluentAssertions;
-using KittySaver.Domain.Persons;
 using KittySaver.Domain.Persons.DomainServices;
 using KittySaver.Domain.Persons.Entities;
 using KittySaver.Domain.Persons.ValueObjects;
 using KittySaver.Domain.ValueObjects;
 using KittySaver.Shared.Common.Enums;
-using KittySaver.Shared.TypedIds;
 using Address = KittySaver.Domain.ValueObjects.Address;
 using Person = KittySaver.Domain.Persons.Entities.Person;
 

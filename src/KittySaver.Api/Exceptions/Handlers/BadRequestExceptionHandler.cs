@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace KittySaver.Api.Shared.Exceptions.Handlers;
+namespace KittySaver.Api.Exceptions.Handlers;
 
 internal sealed class DomainExceptionHandler(ILogger<DomainExceptionHandler> logger) : IExceptionHandler
 {
@@ -19,7 +19,8 @@ internal sealed class DomainExceptionHandler(ILogger<DomainExceptionHandler> log
         {
             Status = StatusCodes.Status400BadRequest,
             Type = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400",
-            Title = "Validation error occurred",
+            // Title = "Validation error occurred",
+            Title = "Wystąpił błąd walidacji",
             Detail = exception.Message
         };
 

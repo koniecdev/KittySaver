@@ -1,7 +1,6 @@
-﻿using KittySaver.Api.Infrastructure.Services.FileServices;
-using KittySaver.Shared.TypedIds;
+﻿using KittySaver.Shared.TypedIds;
 
-namespace KittySaver.Api.Shared.Infrastructure.Services.FileServices;
+namespace KittySaver.Api.Infrastructure.Services.FileServices;
 
 public interface ICatThumbnailService
 {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace KittySaver.Api.Shared.Exceptions.Handlers;
+namespace KittySaver.Api.Exceptions.Handlers;
 
 internal sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
 {
@@ -15,7 +15,8 @@ internal sealed class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> log
         {
             Status = StatusCodes.Status500InternalServerError,
             Type = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500",
-            Title = "Sorry, an internal server error has occurred, there is nothing You can do."
+            // Title = "Sorry, an internal server error has occurred, there is nothing You can do."
+            Title = "Przepraszamy, wystąpił wewnętrzny błąd serwera. Nie możesz nic z tym zrobić."
         };
 
         logger.LogError(

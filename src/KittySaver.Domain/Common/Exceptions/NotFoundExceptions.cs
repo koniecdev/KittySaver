@@ -1,16 +1,22 @@
-﻿using KittySaver.Domain.Persons;
-using KittySaver.Domain.Persons.Entities;
+﻿using KittySaver.Domain.Persons.Entities;
 using KittySaver.Shared.TypedIds;
 
 namespace KittySaver.Domain.Common.Exceptions;
 
-public abstract class NotFoundException(string entity, string identifier)
-    : Exception($"'{entity}' with identifier '{identifier}' was not found.");
+public abstract class NotFoundException(string entity, string identifier, bool shouldBeInPolish)
+    : Exception(shouldBeInPolish 
+        ? $"Nie znaleziono zasobu '{entity}' z identyfikatorem '{identifier}'" 
+        : $"'{entity}' with identifier '{identifier}' was not found.");
 
 public static class NotFoundExceptions
 {
-    public sealed class PersonNotFoundException(PersonId id) : NotFoundException(nameof(Person), id.ToString());
-    public sealed class CatNotFoundException(CatId id) : NotFoundException(nameof(Cat), id.ToString());
-    public sealed class AdvertisementNotFoundException(AdvertisementId id) : NotFoundException(nameof(Advertisement), id.ToString());
-    public sealed class FileNotFoundException(string filename) : NotFoundException("File", filename);
+    private const bool ShouldBeInPolish = true;
+    public sealed class PersonNotFoundException(PersonId id) 
+        : NotFoundException(ShouldBeInPolish ? "Użytkownik" : nameof(Person), id.ToString(), ShouldBeInPolish);
+    public sealed class CatNotFoundException(CatId id) 
+        : NotFoundException(ShouldBeInPolish ? "Kot" : nameof(Cat), id.ToString(), ShouldBeInPolish);
+    public sealed class AdvertisementNotFoundException(AdvertisementId id) 
+        : NotFoundException(ShouldBeInPolish ? "Ogłoszenie" : nameof(Advertisement), id.ToString(), ShouldBeInPolish);
+    public sealed class FileNotFoundException(string filename) 
+        : NotFoundException(ShouldBeInPolish ? "Plik" : "File", filename, ShouldBeInPolish);
 }

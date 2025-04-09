@@ -1,5 +1,4 @@
-﻿using KittySaver.Shared.Common;
-using KittySaver.Shared.Common.Enums;
+﻿using KittySaver.Shared.Common.Enums;
 using KittySaver.Shared.TypedIds;
 
 namespace KittySaver.Shared.Hateoas;

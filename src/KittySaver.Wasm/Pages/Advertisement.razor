@@ -1,9 +1,7 @@
 ﻿@page "/advertisement/{Id:guid}"
 @using KittySaver.Shared.Hateoas
-@using KittySaver.Shared.Pagination
 @using KittySaver.Shared.Responses
 @using KittySaver.Shared.TypedIds
-@using KittySaver.Wasm.Shared
 @using KittySaver.Wasm.Shared.Components
 @using KittySaver.Wasm.Shared.HttpClients
 @inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
@@ -14,7 +12,7 @@
 
 @if (_advertisement == null)
 {
-    <p>Ładowanie szczegółów ogłoszenia...</p>
+    <p class="p2">Ładowanie szczegółów ogłoszenia...</p>
 }
 else
 {

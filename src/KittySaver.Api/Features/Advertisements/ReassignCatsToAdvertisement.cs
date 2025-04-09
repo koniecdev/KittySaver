@@ -1,8 +1,7 @@
 ﻿using FluentValidation;
+using KittySaver.Api.Infrastructure.Endpoints;
+using KittySaver.Api.Persistence.WriteRelated;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Endpoints;
-using KittySaver.Api.Shared.Persistence;
-using KittySaver.Domain.Persons;
 using KittySaver.Domain.Persons.DomainRepositories;
 using KittySaver.Domain.Persons.Entities;
 using KittySaver.Shared.Common.Enums;
@@ -20,15 +19,21 @@ public sealed class ReassignCatsToAdvertisement : IEndpoint
         AdvertisementId Id,
         IEnumerable<CatId> CatIds) : ICommand<AdvertisementHateoasResponse>, IAuthorizedRequest, IAdvertisementRequest;
 
-    public sealed class AssignCatToAdvertisementCommandValidator : AbstractValidator<ReassignCatsToAdvertisementCommand>
+    public sealed class AssignCatToAdvertisementCommandValidator : AbstractValidator<ReassignCatsToAdvertisement.ReassignCatsToAdvertisementCommand>
     {
         public AssignCatToAdvertisementCommandValidator()
         {
             RuleFor(x => x.PersonId)
-                .NotEmpty();
+                .NotEmpty()
+                // .WithMessage("'Person Id' cannot be empty.");
+                .WithMessage("'Id osoby' nie może być puste.");
             RuleFor(x => x.Id)
-                .NotEmpty();
-            RuleFor(x => x.CatIds).NotEmpty();
+                .NotEmpty()
+                // .WithMessage("'Id' cannot be empty.");
+                .WithMessage("'Id' nie może być puste.");
+            RuleFor(x => x.CatIds).NotEmpty()
+                // .WithMessage("'Cat Ids' cannot be empty.");
+                .WithMessage("'Identyfikatory kotów' nie mogą być puste.");
         }
     }
     

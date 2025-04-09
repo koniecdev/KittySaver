@@ -1,8 +1,7 @@
 ﻿using FluentValidation;
+using KittySaver.Api.Infrastructure.Endpoints;
+using KittySaver.Api.Persistence.WriteRelated;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Endpoints;
-using KittySaver.Api.Shared.Persistence;
-using KittySaver.Domain.Persons;
 using KittySaver.Domain.Persons.DomainRepositories;
 using KittySaver.Domain.Persons.Entities;
 using KittySaver.Domain.ValueObjects;
@@ -31,49 +30,83 @@ public sealed class UpdateAdvertisement : IEndpoint
         string ContactInfoPhoneNumber) : ICommand<AdvertisementHateoasResponse>, IAuthorizedRequest, IAdvertisementRequest;
 
     public sealed class UpdateAdvertisementCommandValidator
-        : AbstractValidator<UpdateAdvertisementCommand>
+    : AbstractValidator<UpdateAdvertisement.UpdateAdvertisementCommand>
+{
+    public UpdateAdvertisementCommandValidator()
     {
-        public UpdateAdvertisementCommandValidator()
-        {
-            RuleFor(x => x.PersonId)
-                .NotEmpty();
+        RuleFor(x => x.PersonId)
+            .NotEmpty()
+            // .WithMessage("'Person Id' cannot be empty.");
+            .WithMessage("'Id osoby' nie może być puste.");
 
-            RuleFor(x => x.Id)
-                .NotEmpty();
-            
-            RuleFor(x => x.Description).MaximumLength(Description.MaxLength);
-            
-            RuleFor(x => x.ContactInfoPhoneNumber)
-                .NotEmpty()
-                .MaximumLength(PhoneNumber.MaxLength);
+        RuleFor(x => x.Id)
+            .NotEmpty()
+            // .WithMessage("'Id' cannot be empty.");
+            .WithMessage("'Id' nie może być puste.");
+        
+        RuleFor(x => x.Description).MaximumLength(Description.MaxLength)
+            // .WithMessage("'Description' must not exceed {MaxLength} characters.");
+            .WithMessage("'Opis' nie może przekraczać {MaxLength} znaków.");
+        
+        RuleFor(x => x.ContactInfoPhoneNumber)
+            .NotEmpty()
+            // .WithMessage("'Contact Info Phone Number' cannot be empty.")
+            .WithMessage("'Numer telefonu kontaktowego' nie może być pusty.")
+            .MaximumLength(PhoneNumber.MaxLength)
+            // .WithMessage("'Contact Info Phone Number' must not exceed {MaxLength} characters.");
+            .WithMessage("'Numer telefonu kontaktowego' nie może przekraczać {MaxLength} znaków.");
 
-            RuleFor(x => x.ContactInfoEmail)
-                .NotEmpty()
-                .MaximumLength(Email.MaxLength)
-                .Matches(Email.RegexPattern);
-            
-            RuleFor(x => x.PickupAddressCountry)
-                .NotEmpty()
-                .MaximumLength(Address.CountryMaxLength);
-            
-            RuleFor(x => x.PickupAddressState)
-                .MaximumLength(Address.StateMaxLength);
-            
-            RuleFor(x => x.PickupAddressZipCode)
-                .NotEmpty()
-                .MaximumLength(Address.ZipCodeMaxLength);
-            
-            RuleFor(x => x.PickupAddressCity)
-                .NotEmpty()
-                .MaximumLength(Address.CityMaxLength);
-            
-            RuleFor(x => x.PickupAddressStreet)
-                .MaximumLength(Address.StreetMaxLength);
-            
-            RuleFor(x => x.PickupAddressBuildingNumber)
-                .MaximumLength(Address.BuildingNumberMaxLength);
-        }
+        RuleFor(x => x.ContactInfoEmail)
+            .NotEmpty()
+            // .WithMessage("'Contact Info Email' cannot be empty.")
+            .WithMessage("'Email kontaktowy' nie może być pusty.")
+            .MaximumLength(Email.MaxLength)
+            // .WithMessage("'Contact Info Email' must not exceed {MaxLength} characters.")
+            .WithMessage("'Email kontaktowy' nie może przekraczać {MaxLength} znaków.")
+            .Matches(Email.RegexPattern)
+            // .WithMessage("'Contact Info Email' is not in the correct format.");
+            .WithMessage("'Email kontaktowy' ma niepoprawny format.");
+        
+        RuleFor(x => x.PickupAddressCountry)
+            .NotEmpty()
+            // .WithMessage("'Pickup Address Country' cannot be empty.")
+            .WithMessage("'Kraj w adresie odbioru' nie może być pusty.")
+            .MaximumLength(Address.CountryMaxLength)
+            // .WithMessage("'Pickup Address Country' must not exceed {MaxLength} characters.");
+            .WithMessage("'Kraj w adresie odbioru' nie może przekraczać {MaxLength} znaków.");
+        
+        RuleFor(x => x.PickupAddressState)
+            .MaximumLength(Address.StateMaxLength)
+            // .WithMessage("'Pickup Address State' must not exceed {MaxLength} characters.");
+            .WithMessage("'Województwo w adresie odbioru' nie może przekraczać {MaxLength} znaków.");
+        
+        RuleFor(x => x.PickupAddressZipCode)
+            .NotEmpty()
+            // .WithMessage("'Pickup Address Zip Code' cannot be empty.")
+            .WithMessage("'Kod pocztowy w adresie odbioru' nie może być pusty.")
+            .MaximumLength(Address.ZipCodeMaxLength)
+            // .WithMessage("'Pickup Address Zip Code' must not exceed {MaxLength} characters.");
+            .WithMessage("'Kod pocztowy w adresie odbioru' nie może przekraczać {MaxLength} znaków.");
+        
+        RuleFor(x => x.PickupAddressCity)
+            .NotEmpty()
+            // .WithMessage("'Pickup Address City' cannot be empty.")
+            .WithMessage("'Miasto w adresie odbioru' nie może być puste.")
+            .MaximumLength(Address.CityMaxLength)
+            // .WithMessage("'Pickup Address City' must not exceed {MaxLength} characters.");
+            .WithMessage("'Miasto w adresie odbioru' nie może przekraczać {MaxLength} znaków.");
+        
+        RuleFor(x => x.PickupAddressStreet)
+            .MaximumLength(Address.StreetMaxLength)
+            // .WithMessage("'Pickup Address Street' must not exceed {MaxLength} characters.");
+            .WithMessage("'Ulica w adresie odbioru' nie może przekraczać {MaxLength} znaków.");
+        
+        RuleFor(x => x.PickupAddressBuildingNumber)
+            .MaximumLength(Address.BuildingNumberMaxLength)
+            // .WithMessage("'Pickup Address Building Number' must not exceed {MaxLength} characters.");
+            .WithMessage("'Numer budynku w adresie odbioru' nie może przekraczać {MaxLength} znaków.");
     }
+}
 
     internal sealed class UpdateAdvertisementCommandHandler(
         IPersonRepository personRepository,

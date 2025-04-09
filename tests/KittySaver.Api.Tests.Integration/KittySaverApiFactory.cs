@@ -1,10 +1,9 @@
-﻿using KittySaver.Api.Shared.Infrastructure.Clients;
-using KittySaver.Api.Shared.Infrastructure.Services;
-using KittySaver.Api.Shared.Infrastructure.Services.FileServices;
-using KittySaver.Api.Shared.Persistence;
+﻿using KittySaver.Api.Infrastructure.Clients;
+using KittySaver.Api.Infrastructure.Services;
+using KittySaver.Api.Infrastructure.Services.FileServices;
+using KittySaver.Api.Persistence.ReadRelated;
+using KittySaver.Api.Persistence.WriteRelated;
 using KittySaver.Api.Tests.Integration.Helpers;
-using KittySaver.Domain.Persons;
-using KittySaver.Domain.Persons.Entities;
 using KittySaver.Shared.Common.Enums;
 using KittySaver.Shared.TypedIds;
 using Microsoft.AspNetCore.Authentication;

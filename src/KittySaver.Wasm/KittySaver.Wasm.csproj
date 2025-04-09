@@ -13,6 +13,7 @@
     </PropertyGroup>
     
     <ItemGroup>
+        <PackageReference Include="Ardalis.Result" Version="10.1.0" />
         <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
         <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.1" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.1" />

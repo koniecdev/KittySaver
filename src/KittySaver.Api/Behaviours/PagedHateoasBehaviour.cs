@@ -1,11 +1,10 @@
-﻿using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Hateoas;
-using KittySaver.Api.Shared.Infrastructure.Services;
-using KittySaver.Shared.Pagination;
+﻿using KittySaver.Api.Hateoas;
+using KittySaver.Api.Infrastructure.Services;
+using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Shared.Responses;
 using MediatR;
 
-namespace KittySaver.Api.Shared.Behaviours;
+namespace KittySaver.Api.Behaviours;
 
 public sealed class PagedHateoasBehaviour<TRequest, TResponse>(
     ICurrentUserService currentUserService,

@@ -1,12 +1,10 @@
-﻿using KittySaver.Api.Shared.Endpoints;
-using KittySaver.Api.Shared.Infrastructure.Services;
-using KittySaver.Domain.Persons;
-using KittySaver.Domain.Persons.Entities;
+﻿using KittySaver.Api.Infrastructure.Endpoints;
+using KittySaver.Api.Infrastructure.Services;
 using KittySaver.Shared.Common.Enums;
 using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.TypedIds;
 
-namespace KittySaver.Api.Shared.Hateoas;
+namespace KittySaver.Api.Hateoas;
 
 public interface ILinkService
 {

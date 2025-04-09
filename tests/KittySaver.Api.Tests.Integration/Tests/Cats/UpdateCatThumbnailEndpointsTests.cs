@@ -9,7 +9,6 @@ using KittySaver.Shared.Responses;
 using KittySaver.Shared.TypedIds;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using KittySaver.Tests.Shared;
 
 namespace KittySaver.Api.Tests.Integration.Tests.Cats;
 

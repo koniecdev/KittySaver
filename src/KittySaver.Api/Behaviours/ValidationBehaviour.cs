@@ -3,7 +3,7 @@ using FluentValidation.Results;
 using KittySaver.Api.Shared.Abstractions;
 using MediatR;
 
-namespace KittySaver.Api.Shared.Behaviours;
+namespace KittySaver.Api.Behaviours;
 
 public sealed class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators)
     : IPipelineBehavior<TRequest, TResponse>

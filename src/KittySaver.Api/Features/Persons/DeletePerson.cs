@@ -1,8 +1,7 @@
 ﻿using FluentValidation;
+using KittySaver.Api.Infrastructure.Endpoints;
+using KittySaver.Api.Persistence.WriteRelated;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Endpoints;
-using KittySaver.Api.Shared.Persistence;
-using KittySaver.Domain.Persons;
 using KittySaver.Domain.Persons.DomainRepositories;
 using KittySaver.Domain.Persons.Entities;
 using KittySaver.Shared.TypedIds;
@@ -14,11 +13,13 @@ public sealed class DeletePerson : IEndpoint
 {
     public sealed record DeletePersonCommand(PersonId Id, string AuthHeader) : ICommand, IAuthorizedRequest, IPersonRequest;
 
-    public sealed class DeletePersonCommandValidator : AbstractValidator<DeletePersonCommand>
+    public sealed class DeletePersonCommandValidator : AbstractValidator<DeletePerson.DeletePersonCommand>
     {
         public DeletePersonCommandValidator()
         {
-            RuleFor(x => x.Id).NotEmpty();
+            RuleFor(x => x.Id).NotEmpty()
+                // .WithMessage("'Id' cannot be empty.");
+                .WithMessage("'Id' nie może być puste.");
         }
     }
 

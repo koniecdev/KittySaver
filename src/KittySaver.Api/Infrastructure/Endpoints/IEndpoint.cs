@@ -1,4 +1,4 @@
-﻿namespace KittySaver.Api.Shared.Endpoints;
+﻿namespace KittySaver.Api.Infrastructure.Endpoints;
 
 public interface IEndpoint
 {

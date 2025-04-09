@@ -1,10 +1,9 @@
 ﻿using System.Security.Claims;
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace KittySaver.SharedForApi.Auth;
+namespace KittySaver.Auth.Api.Swagger.Auth;
 
 public class TestAuthHandler(
     IOptionsMonitor<AuthenticationSchemeOptions> options,

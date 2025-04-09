@@ -1,4 +1,4 @@
-﻿using KittySaver.Api.Shared.Persistence;
+﻿using KittySaver.Api.Persistence.WriteRelated;
 using KittySaver.Shared.TypedIds;
 using Microsoft.EntityFrameworkCore;
 

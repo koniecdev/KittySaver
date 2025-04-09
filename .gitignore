@@ -487,6 +487,8 @@ logs
 
 src/KittySaver.Api/PrivateFiles/**/*
 src/KittySaver.Auth.Api/appsettings.Local.json
+src/KittySaver.Auth.Api/appsettings.Development.json
 src/KittySaver.Auth.Api/appsettings.Production.json
 src/KittySaver.Api/appsettings.Local.json
+src/KittySaver.Api/appsettings.Development.json
 src/KittySaver.Api/appsettings.Production.json

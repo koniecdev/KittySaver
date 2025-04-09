@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-namespace KittySaver.Api.Shared.Exceptions.Handlers;
+namespace KittySaver.Api.Exceptions.Handlers;
 
 internal sealed class NotFoundExceptionHandler(ILogger<NotFoundExceptionHandler> logger) : IExceptionHandler
 {
@@ -20,7 +20,8 @@ internal sealed class NotFoundExceptionHandler(ILogger<NotFoundExceptionHandler>
         {
             Status = StatusCodes.Status404NotFound,
             Type = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404",
-            Title = "Resource could not be found",
+            // Title = "Resource could not be found",
+            Title = "Zasób nie został znaleziony",
             Detail = notFoundException.Message
         };
 

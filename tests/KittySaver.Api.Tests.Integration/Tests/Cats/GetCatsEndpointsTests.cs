@@ -1,18 +1,15 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json;
 using Bogus;
 using FluentAssertions;
-using KittySaver.Api.Shared.Endpoints;
+using KittySaver.Api.Infrastructure.Endpoints;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Shared.Common.Enums;
 using KittySaver.Shared.Hateoas;
-using KittySaver.Shared.Pagination;
 using KittySaver.Shared.Responses;
 using KittySaver.Shared.TypedIds;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using KittySaver.Tests.Shared;
 
 namespace KittySaver.Api.Tests.Integration.Tests.Cats;
 

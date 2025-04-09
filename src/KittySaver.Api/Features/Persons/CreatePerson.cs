@@ -1,9 +1,8 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Features.Persons.SharedContracts;
+using KittySaver.Api.Infrastructure.Endpoints;
+using KittySaver.Api.Persistence.WriteRelated;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Endpoints;
-using KittySaver.Api.Shared.Persistence;
-using KittySaver.Domain.Persons;
 using KittySaver.Domain.Persons.DomainRepositories;
 using KittySaver.Domain.Persons.Entities;
 using KittySaver.Domain.Persons.ValueObjects;
@@ -37,72 +36,132 @@ public sealed class CreatePerson : IEndpoint
         {
             RuleFor(x => x.Nickname)
                 .NotEmpty()
-                .MaximumLength(Nickname.MaxLength);
-            
+                // .WithMessage("'Nickname' cannot be empty.")
+                .WithMessage("'Nazwa użytkownika' nie może być pusta.")
+                .MaximumLength(Nickname.MaxLength)
+                // .WithMessage("'Nickname' must not exceed {MaxLength} characters.")
+                .WithMessage("'Nazwa użytkownika' nie może przekraczać {MaxLength} znaków.");
+
             RuleFor(x => x.Password)
                 .NotEmpty()
-                .MinimumLength(8).WithMessage("'Password' is not in the correct format. Your password length must be at least 8.")
-                .Matches("[A-Z]+").WithMessage("'Password' is not in the correct format. Your password must contain at least one uppercase letter.")
-                .Matches("[a-z]+").WithMessage("'Password' is not in the correct format. Your password must contain at least one lowercase letter.")
-                .Matches("[0-9]+").WithMessage("'Password' is not in the correct format. Your password must contain at least one number.");
-            
+                .MinimumLength(8)
+                // .WithMessage("'Password' is not in the correct format. Your password length must be at least 8.")
+                .WithMessage("Twoje hasło musi mieć co najmniej 8 znaków.")
+                .Matches("[A-Z]+")
+                // .WithMessage("'Password' is not in the correct format. Your password must contain at least one uppercase letter.")
+                .WithMessage(
+                    "Twoje hasło musi zawierać co najmniej jedną wielką literę.")
+                .Matches("[a-z]+")
+                // .WithMessage("'Password' is not in the correct format. Your password must contain at least one lowercase letter.")
+                .WithMessage("Twoje hasło musi zawierać co najmniej jedną małą literę.")
+                .Matches("[0-9]+")
+                // .WithMessage("'Password' is not in the correct format. Your password must contain at least one number.")
+                .WithMessage("Twoje hasło musi zawierać co najmniej jedną cyfrę.");
+
             RuleFor(x => x.PhoneNumber)
                 .NotEmpty()
+                // .WithMessage("'Phone Number' cannot be empty.")
+                .WithMessage("'Numer telefonu' nie może być pusty.")
                 .MaximumLength(PhoneNumber.MaxLength)
-                .MustAsync(async (phoneNumber, ct) => 
+                // .WithMessage("'Phone Number' must not exceed {MaxLength} characters.")
+                .WithMessage("'Numer telefonu' nie może przekraczać {MaxLength} znaków.")
+                .MustAsync(async (phoneNumber, ct) =>
                     await personRepository.IsPhoneNumberUniqueAsync(phoneNumber, null, ct))
-                .WithMessage("'Phone Number' is already used by another user.");
-            
+                // .WithMessage("'Phone Number' is already used by another user.");
+                .WithMessage("'Numer telefonu' jest już używany przez innego użytkownika.");
+
             RuleFor(x => x.Email)
                 .NotEmpty()
+                // .WithMessage("'Email' cannot be empty.")
+                .WithMessage("'Email' nie może być pusty.")
                 .MaximumLength(Email.MaxLength)
+                // .WithMessage("'Email' must not exceed {MaxLength} characters.")
+                .WithMessage("'Email' nie może przekraczać {MaxLength} znaków.")
                 .Matches(Email.RegexPattern)
+                // .WithMessage("'Email' is not in the correct format.")
+                .WithMessage("'Email' ma niepoprawny format.")
                 .MustAsync(async (email, ct) => await personRepository.IsEmailUniqueAsync(email, null, ct))
-                .WithMessage("'Email' is already used by another user.");
-            
+                // .WithMessage("'Email' is already used by another user.");
+                .WithMessage("'Email' jest już używany przez innego użytkownika.");
+
             RuleFor(x => x.DefaultAdvertisementContactInfoPhoneNumber)
                 .NotEmpty()
-                .MaximumLength(PhoneNumber.MaxLength);
+                // .WithMessage("'Default Advertisement Contact Info Phone Number' cannot be empty.")
+                .WithMessage("'Domyślny numer telefonu kontaktowego dla ogłoszeń' nie może być pusty.")
+                .MaximumLength(PhoneNumber.MaxLength)
+                // .WithMessage("'Default Advertisement Contact Info Phone Number' must not exceed {MaxLength} characters.");
+                .WithMessage(
+                    "'Domyślny numer telefonu kontaktowego dla ogłoszeń' nie może przekraczać {MaxLength} znaków.");
 
             RuleFor(x => x.DefaultAdvertisementContactInfoEmail)
                 .NotEmpty()
+                // .WithMessage("'Default Advertisement Contact Info Email' cannot be empty.")
+                .WithMessage("'Domyślny email kontaktowy dla ogłoszeń' nie może być pusty.")
                 .MaximumLength(Email.MaxLength)
-                .Matches(Email.RegexPattern);
-            
+                // .WithMessage("'Default Advertisement Contact Info Email' must not exceed {MaxLength} characters.")
+                .WithMessage("'Domyślny email kontaktowy dla ogłoszeń' nie może przekraczać {MaxLength} znaków.")
+                .Matches(Email.RegexPattern)
+                // .WithMessage("'Default Advertisement Contact Info Email' is not in the correct format.");
+                .WithMessage("'Domyślny email kontaktowy dla ogłoszeń' ma niepoprawny format.");
+
             RuleFor(x => x.DefaultAdvertisementPickupAddressCountry)
                 .NotEmpty()
-                .MaximumLength(Address.CountryMaxLength);
-            
+                // .WithMessage("'Default Advertisement Pickup Address Country' cannot be empty.")
+                .WithMessage("'Domyślny kraj w adresie odbioru dla ogłoszeń' nie może być pusty.")
+                .MaximumLength(Address.CountryMaxLength)
+                // .WithMessage("'Default Advertisement Pickup Address Country' must not exceed {MaxLength} characters.");
+                .WithMessage("'Domyślny kraj w adresie odbioru dla ogłoszeń' nie może przekraczać {MaxLength} znaków.");
+
             RuleFor(x => x.DefaultAdvertisementPickupAddressState)
-                .MaximumLength(Address.StateMaxLength);
-            
+                .MaximumLength(Address.StateMaxLength)
+                // .WithMessage("'Default Advertisement Pickup Address State' must not exceed {MaxLength} characters.");
+                .WithMessage(
+                    "'Domyślne województwo w adresie odbioru dla ogłoszeń' nie może przekraczać {MaxLength} znaków.");
+
             RuleFor(x => x.DefaultAdvertisementPickupAddressZipCode)
                 .NotEmpty()
-                .MaximumLength(Address.ZipCodeMaxLength);
-            
+                // .WithMessage("'Default Advertisement Pickup Address Zip Code' cannot be empty.")
+                .WithMessage("'Domyślny kod pocztowy w adresie odbioru dla ogłoszeń' nie może być pusty.")
+                .MaximumLength(Address.ZipCodeMaxLength)
+                // .WithMessage("'Default Advertisement Pickup Address Zip Code' must not exceed {MaxLength} characters.");
+                .WithMessage(
+                    "'Domyślny kod pocztowy w adresie odbioru dla ogłoszeń' nie może przekraczać {MaxLength} znaków.");
+
             RuleFor(x => x.DefaultAdvertisementPickupAddressCity)
                 .NotEmpty()
-                .MaximumLength(Address.CityMaxLength);
-            
+                // .WithMessage("'Default Advertisement Pickup Address City' cannot be empty.")
+                .WithMessage("'Domyślne miasto w adresie odbioru dla ogłoszeń' nie może być puste.")
+                .MaximumLength(Address.CityMaxLength)
+                // .WithMessage("'Default Advertisement Pickup Address City' must not exceed {MaxLength} characters.");
+                .WithMessage(
+                    "'Domyślne miasto w adresie odbioru dla ogłoszeń' nie może przekraczać {MaxLength} znaków.");
+
             RuleFor(x => x.DefaultAdvertisementPickupAddressStreet)
-                .MaximumLength(Address.StreetMaxLength);
-            
+                .MaximumLength(Address.StreetMaxLength)
+                // .WithMessage("'Default Advertisement Pickup Address Street' must not exceed {MaxLength} characters.");
+                .WithMessage(
+                    "'Domyślna ulica w adresie odbioru dla ogłoszeń' nie może przekraczać {MaxLength} znaków.");
+
             RuleFor(x => x.DefaultAdvertisementPickupAddressBuildingNumber)
-                .MaximumLength(Address.BuildingNumberMaxLength);
+                .MaximumLength(Address.BuildingNumberMaxLength)
+                // .WithMessage("'Default Advertisement Pickup Address Building Number' must not exceed {MaxLength} characters.");
+                .WithMessage(
+                    "'Domyślny numer budynku w adresie odbioru dla ogłoszeń' nie może przekraczać {MaxLength} znaków.");
         }
     }
-    
+
     internal sealed class CreatePersonCommandHandler(
         IPersonRepository personRepository,
         IUnitOfWork unitOfWork)
         : IRequestHandler<CreatePersonCommand, PersonHateoasResponse>
     {
-        public async Task<PersonHateoasResponse> Handle(CreatePersonCommand request, CancellationToken cancellationToken)
+        public async Task<PersonHateoasResponse> Handle(CreatePersonCommand request,
+            CancellationToken cancellationToken)
         {
             Nickname nickname = Nickname.Create(request.Nickname);
             Email email = Email.Create(request.Email);
             PhoneNumber phoneNumber = PhoneNumber.Create(request.PhoneNumber);
-            
+
             Address defaultAdvertisementPickupAddress = Address.Create(
                 country: request.DefaultAdvertisementPickupAddressCountry,
                 state: request.DefaultAdvertisementPickupAddressState,
@@ -110,10 +169,11 @@ public sealed class CreatePerson : IEndpoint
                 city: request.DefaultAdvertisementPickupAddressCity,
                 street: request.DefaultAdvertisementPickupAddressStreet,
                 buildingNumber: request.DefaultAdvertisementPickupAddressBuildingNumber);
-            
+
             Email defaultAdvertisementContactInfoEmail = Email.Create(request.DefaultAdvertisementContactInfoEmail);
-            PhoneNumber defaultAdvertisementContactInfoPhoneNumber = PhoneNumber.Create(request.DefaultAdvertisementContactInfoPhoneNumber);
-            
+            PhoneNumber defaultAdvertisementContactInfoPhoneNumber =
+                PhoneNumber.Create(request.DefaultAdvertisementContactInfoPhoneNumber);
+
             Person person = Person.Create(
                 nickname: nickname,
                 email: email,
@@ -121,26 +181,27 @@ public sealed class CreatePerson : IEndpoint
                 defaultAdvertisementPickupAddress: defaultAdvertisementPickupAddress,
                 defaultAdvertisementContactInfoEmail: defaultAdvertisementContactInfoEmail,
                 defaultAdvertisementContactInfoPhoneNumber: defaultAdvertisementContactInfoPhoneNumber);
-            
+
             await personRepository.InsertAsync(person, request.Password);
             await unitOfWork.SaveChangesAsync(cancellationToken);
             return new PersonHateoasResponse(person.Id);
         }
     }
-    
+
     public void MapEndpoint(IEndpointRouteBuilder endpointRouteBuilder)
     {
         endpointRouteBuilder.MapPost("persons", async (
-            CreatePersonRequest request,
-            ISender sender,
-            CancellationToken cancellationToken) =>
-        {
-            CreatePersonCommand command = request.MapToCreatePersonCommand();
-            PersonHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
-            return Results.Created($"/api/v1/persons/{hateoasResponse.Id}", new { id = hateoasResponse.Id, hateoasResponse.Links });
-        }).AllowAnonymous()
-        .WithName(EndpointNames.CreatePerson.EndpointName)
-        .WithTags(EndpointNames.GroupNames.PersonGroup);
+                CreatePersonRequest request,
+                ISender sender,
+                CancellationToken cancellationToken) =>
+            {
+                CreatePersonCommand command = request.MapToCreatePersonCommand();
+                PersonHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
+                return Results.Created($"/api/v1/persons/{hateoasResponse.Id}",
+                    new { id = hateoasResponse.Id, hateoasResponse.Links });
+            }).AllowAnonymous()
+            .WithName(EndpointNames.CreatePerson.EndpointName)
+            .WithTags(EndpointNames.GroupNames.PersonGroup);
     }
 }
 
@@ -150,4 +211,3 @@ public static partial class CreatePersonMapper
     public static partial CreatePerson.CreatePersonCommand MapToCreatePersonCommand(
         this CreatePersonRequest request);
 }
-    

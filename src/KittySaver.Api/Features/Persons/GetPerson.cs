@@ -1,7 +1,7 @@
 ﻿using KittySaver.Api.Features.Persons.SharedContracts;
+using KittySaver.Api.Infrastructure.Endpoints;
+using KittySaver.Api.Persistence.ReadRelated;
 using KittySaver.Api.Shared.Abstractions;
-using KittySaver.Api.Shared.Endpoints;
-using KittySaver.Api.Shared.Persistence;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Shared.Responses;
 using KittySaver.Shared.TypedIds;

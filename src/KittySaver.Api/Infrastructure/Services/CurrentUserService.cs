@@ -1,13 +1,11 @@
 ﻿using System.Security.Authentication;
 using System.Security.Claims;
-using KittySaver.Api.Shared.Persistence;
-using KittySaver.Domain.Persons;
-using KittySaver.Domain.Persons.Entities;
+using KittySaver.Api.Persistence.ReadRelated;
 using KittySaver.Shared.Common.Enums;
 using KittySaver.Shared.TypedIds;
 using Microsoft.EntityFrameworkCore;
 
-namespace KittySaver.Api.Shared.Infrastructure.Services;
+namespace KittySaver.Api.Infrastructure.Services;
 
 public interface ICurrentUserService
 {

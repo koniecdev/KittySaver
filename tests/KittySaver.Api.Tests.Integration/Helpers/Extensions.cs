@@ -1,7 +1,6 @@
 ﻿using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
-using KittySaver.Tests.Shared;
 
 namespace KittySaver.Api.Tests.Integration.Helpers;
 

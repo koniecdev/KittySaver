@@ -2,7 +2,7 @@
 using System.Net.Http.Json;
 using Bogus;
 using FluentAssertions;
-using KittySaver.Api.Shared.Endpoints;
+using KittySaver.Api.Infrastructure.Endpoints;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Domain.ValueObjects;
 using KittySaver.Shared.Common.Enums;
@@ -11,7 +11,6 @@ using KittySaver.Shared.Responses;
 using KittySaver.Shared.TypedIds;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using KittySaver.Tests.Shared;
 
 namespace KittySaver.Api.Tests.Integration.Tests.Advertisements;
 

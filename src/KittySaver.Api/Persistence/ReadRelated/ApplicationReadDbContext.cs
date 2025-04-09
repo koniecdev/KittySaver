@@ -1,9 +1,8 @@
-﻿using KittySaver.Api.Persistence;
-using KittySaver.Api.Shared.Persistence.ReadModels;
+﻿using KittySaver.Api.Persistence.ReadRelated.ReadModels;
 using Microsoft.EntityFrameworkCore;
 using SmartEnum.EFCore;
 
-namespace KittySaver.Api.Shared.Persistence;
+namespace KittySaver.Api.Persistence.ReadRelated;
 
 public sealed class ApplicationReadDbContext(
     DbContextOptions<ApplicationReadDbContext> options)

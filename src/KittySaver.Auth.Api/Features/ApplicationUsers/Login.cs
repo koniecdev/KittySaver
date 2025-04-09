@@ -11,7 +11,6 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Riok.Mapperly.Abstractions;
-using UnauthorizedAccessException = System.UnauthorizedAccessException;
 
 namespace KittySaver.Auth.Api.Features.ApplicationUsers;
 

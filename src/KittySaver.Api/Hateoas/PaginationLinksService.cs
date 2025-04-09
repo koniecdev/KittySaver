@@ -1,8 +1,7 @@
-﻿using KittySaver.Api.Shared.Hateoas;
-using KittySaver.Shared.Hateoas;
+﻿using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.TypedIds;
 
-namespace KittySaver.Api.Shared.Pagination;
+namespace KittySaver.Api.Hateoas;
 public interface IPaginationLinksService
 {
     List<Link> GeneratePaginationLinks(

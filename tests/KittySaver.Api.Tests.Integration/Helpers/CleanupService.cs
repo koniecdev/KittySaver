@@ -1,5 +1,4 @@
 ﻿using System.Net.Http.Json;
-using KittySaver.Shared.Pagination;
 using KittySaver.Shared.Responses;
 using Microsoft.AspNetCore.Mvc;
 

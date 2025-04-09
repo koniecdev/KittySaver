@@ -1,6 +1,5 @@
 using Bogus;
 using FluentAssertions;
-using KittySaver.Domain.Persons;
 using KittySaver.Domain.Persons.DomainServices;
 using KittySaver.Domain.Persons.Entities;
 using KittySaver.Domain.Persons.ValueObjects;

@@ -1,5 +1,4 @@
 ﻿using ImageMagick;
-using KittySaver.Api.Shared.Infrastructure.Services.FileServices;
 using KittySaver.Domain.Common.Exceptions;
 
 namespace KittySaver.Api.Infrastructure.Services.FileServices;
