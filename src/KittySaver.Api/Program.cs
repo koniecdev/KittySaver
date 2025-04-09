@@ -38,17 +38,18 @@ try
         options.GroupNameFormat = "'v'V";
         options.SubstituteApiVersionInUrl = true;
     });
-
+    
     builder.Services.AddCors(options =>
     {
-        options.AddPolicy("AllowedPolicies",
+        options.AddPolicy("DevelopmentPolicy",
             corsBuilder =>
             {
                 corsBuilder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
             });
-        options.AddPolicy("ProductionPolicies",
+        options.AddPolicy("ProductionPolicy",
             corsBuilder =>
             {
+                corsBuilder.WithOrigins("https://uratujkota.koniec.dev").AllowAnyHeader().AllowAnyMethod();
                 corsBuilder.WithOrigins("https://uratujkota.pl").AllowAnyHeader().AllowAnyMethod();
                 corsBuilder.WithOrigins("https://auth.uratujkota.pl").AllowAnyHeader().AllowAnyMethod();
             });
@@ -61,7 +62,8 @@ try
     app.UseExceptionHandler();
     app.UseHttpsRedirection();
     app.UseSerilogRequestLogging();
-    app.UseCors(app.Environment.IsDevelopment() ? "AllowedPolicies" : "ProductionPolicies");
+    string corsPolicy = app.Environment.EnvironmentName == "Development" ? "DevelopmentPolicy" : "ProductionPolicy";
+    app.UseCors(corsPolicy);
     app.UseAuthentication();
     app.UseAuthorization();
 
