@@ -1,5 +1,4 @@
-﻿using System.Security.Authentication;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 
 namespace KittySaver.Auth.Api.Shared.Infrastructure.Services;
 
@@ -9,8 +8,7 @@ public interface ICurrentUserService
     public ICollection<string> UserRoles { get; }
 }
 
-public sealed class CurrentUserService(IHttpContextAccessor httpContextAccessor, ICurrentEnvironmentService currentEnvironmentService)
-    : ICurrentUserService
+public sealed class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICurrentUserService
 {
     private const string NotLoggedInValueForDevelopment = "NotLoggedInWhileDev";
 

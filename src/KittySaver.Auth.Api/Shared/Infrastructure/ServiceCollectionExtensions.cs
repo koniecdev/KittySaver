@@ -33,7 +33,20 @@ public static class ServiceCollectionExtensions
             cfg.RegisterServicesFromAssembly(assembly);
             cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
         });
-        AddAuth();
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(x =>
+            {
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                    IssuerSigningKey =
+                        new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["AppSettings:Token"]!))
+                };
+            });
+        services.AddAuthorization();
+        
         services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
         EmailSettings emailSettings = configuration.GetSection("EmailSettings").Get<EmailSettings>()
             ?? throw new Exception("Missing email settings");
@@ -49,53 +62,9 @@ public static class ServiceCollectionExtensions
                 UseDefaultCredentials = false,
                 Credentials = new System.Net.NetworkCredential(emailSettings.Username, emailSettings.Password)
             });
+        
         services.AddScoped<IEmailService, EmailService>();
         return services;
-
-        void AddAuth()
-        {
-            if (environment.IsDevelopment())
-            {
-                // AddDevSchemeAuth();
-                AddJwtAuth();
-            }
-            else
-            {
-                AddJwtAuth();
-            }
-        }
-        
-        void AddDevSchemeAuth()
-        {
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = "DevScheme";
-                options.DefaultChallengeScheme = "DevScheme";
-            }).AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("DevScheme", _ => { });
-            
-            services.AddAuthorizationBuilder()
-                .SetDefaultPolicy(new AuthorizationPolicyBuilder()
-                    .AddAuthenticationSchemes("DevScheme")
-                    .RequireAssertion(_ => true)
-                    .Build());
-        }
-
-        void AddJwtAuth()
-        {
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(x =>
-                {
-                    x.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuerSigningKey = true,
-                        ValidateAudience = false,
-                        ValidateIssuer = false,
-                        IssuerSigningKey =
-                            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["AppSettings:Token"]!))
-                    };
-                });
-            services.AddAuthorization();
-        }
     }
     public static IServiceCollection RegisterPersistenceServices(this IServiceCollection services,
         IConfiguration configuration)
@@ -106,7 +75,6 @@ public static class ServiceCollectionExtensions
         services
             .AddIdentityCore<ApplicationUser>(options =>
             {
-                // Opcje haseł
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireDigit = true;
                 options.Password.RequiredLength = 8;
@@ -114,17 +82,14 @@ public static class ServiceCollectionExtensions
                 options.Password.RequireUppercase = true;
                 options.Password.RequiredUniqueChars = 0;
             
-                // Opcje blokady konta
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
                 options.Lockout.MaxFailedAccessAttempts = 5;
                 options.Lockout.AllowedForNewUsers = true;
             
-                // Opcje potwierdzenia emaila
                 options.SignIn.RequireConfirmedEmail = true;
                 options.SignIn.RequireConfirmedPhoneNumber = false;
                 options.SignIn.RequireConfirmedAccount = true;
             
-                // Opcje użytkownika
                 options.User.RequireUniqueEmail = true;
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
             })
@@ -136,7 +101,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static class Exceptions
+    private static class Exceptions
     {
         public static class Database
         {
