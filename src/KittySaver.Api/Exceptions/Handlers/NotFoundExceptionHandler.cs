@@ -20,7 +20,8 @@ internal sealed class NotFoundExceptionHandler(ILogger<NotFoundExceptionHandler>
         {
             Status = StatusCodes.Status404NotFound,
             Type = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404",
-            Title = "Resource could not be found",
+            // Title = "Resource could not be found",
+            Title = "Zasób nie został znaleziony",
             Detail = notFoundException.Message
         };
 

@@ -126,6 +126,9 @@ main{
 p{
     margin: 0;
 }
+.p2{
+    padding: 2rem;
+}
 .listing_grid, .subpage_advertisements_grid{
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -225,6 +228,9 @@ img{
 .filtering_tile{
     display: grid;
     grid-gap: .5rem;
+}
+.input_error{
+    color: #f44;
 }
 input{
     box-sizing: border-box;

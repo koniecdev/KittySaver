@@ -20,7 +20,8 @@ internal sealed class UnauthenticatedAccessExceptionHandler(ILogger<Unauthentica
         {
             Status = StatusCodes.Status401Unauthorized,
             Type = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401",
-            Title = "You have to log in first."
+            // Title = "You have to log in first."
+            Title = "Musisz najpierw się zalogować."
         };
 
         logger.LogError(

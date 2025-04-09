@@ -28,25 +28,41 @@ public sealed class CreateCat : IEndpoint
         string HealthStatus,
         string? AdditionalRequirements = null) : ICommand<CatHateoasResponse>, IAuthorizedRequest, ICatRequest;
 
-    public sealed class CreateCatCommandValidator : AbstractValidator<CreateCatCommand>
+    public sealed class CreateCatCommandValidator : AbstractValidator<CreateCat.CreateCatCommand>
     {
         public CreateCatCommandValidator()
         {
-            RuleFor(x => x.PersonId).NotEmpty();
-            
+            RuleFor(x => x.PersonId).NotEmpty()
+                // .WithMessage("'Person Id' cannot be empty.");
+                .WithMessage("'Id osoby' nie może być puste.");
+        
             RuleFor(x => x.Name)
                 .NotEmpty()
-                .MaximumLength(CatName.MaxLength);
-            
-            RuleFor(x => x.AdditionalRequirements).MaximumLength(Description.MaxLength);
+                // .WithMessage("'Name' cannot be empty.")
+                .WithMessage("'Imię kota' nie może być puste.")
+                .MaximumLength(CatName.MaxLength)
+                // .WithMessage("'Name' must not exceed {MaxLength} characters.");
+                .WithMessage("'Imię kota' nie może przekraczać {MaxLength} znaków.");
+        
+            RuleFor(x => x.AdditionalRequirements).MaximumLength(Description.MaxLength)
+                // .WithMessage("'Additional Requirements' must not exceed {MaxLength} characters.");
+                .WithMessage("'Dodatkowe wymagania' nie mogą przekraczać {MaxLength} znaków.");
 
-            RuleFor(x => x.HealthStatus).NotEmpty();
+            RuleFor(x => x.HealthStatus).NotEmpty()
+                // .WithMessage("'Health Status' cannot be empty.");
+                .WithMessage("'Stan zdrowia' nie może być pusty.");
 
-            RuleFor(x => x.AgeCategory).NotEmpty();
+            RuleFor(x => x.AgeCategory).NotEmpty()
+                // .WithMessage("'Age Category' cannot be empty.");
+                .WithMessage("'Kategoria wiekowa' nie może być pusta.");
 
-            RuleFor(x => x.Behavior).NotEmpty();
+            RuleFor(x => x.Behavior).NotEmpty()
+                // .WithMessage("'Behavior' cannot be empty.");
+                .WithMessage("'Zachowanie' nie może być puste.");
 
-            RuleFor(x => x.MedicalHelpUrgency).NotEmpty();
+            RuleFor(x => x.MedicalHelpUrgency).NotEmpty()
+                // .WithMessage("'Medical Help Urgency' cannot be empty.");
+                .WithMessage("'Pilność pomocy medycznej' nie może być pusta.");
         }
     }
     

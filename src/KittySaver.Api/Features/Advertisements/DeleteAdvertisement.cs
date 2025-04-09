@@ -15,17 +15,21 @@ public sealed class DeleteAdvertisement : IEndpoint
     public sealed record DeleteAdvertisementCommand(PersonId PersonId, AdvertisementId Id)
         : ICommand, IAuthorizedRequest, IAdvertisementRequest;
 
-    public sealed class DeleteAdvertisementCommandValidator
-        : AbstractValidator<DeleteAdvertisementCommand>
+    public sealed class DeleteAdvertisementCommandValidator : AbstractValidator<DeleteAdvertisement.DeleteAdvertisementCommand>
     {
         public DeleteAdvertisementCommandValidator()
         {
             RuleFor(x => x.PersonId)
-                .NotEmpty();
+                .NotEmpty()
+                // .WithMessage("'Person Id' cannot be empty.");
+                .WithMessage("'Id osoby' nie może być puste.");
             RuleFor(x => x.Id)
-                .NotEmpty();
+                .NotEmpty()
+                // .WithMessage("'Id' cannot be empty.");
+                .WithMessage("'Id' nie może być puste.");
         }
     }
+
 
     internal sealed class DeleteAdvertisementCommandHandler(
         IPersonRepository personRepository,

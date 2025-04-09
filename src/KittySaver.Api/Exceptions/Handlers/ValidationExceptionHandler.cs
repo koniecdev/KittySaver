@@ -12,7 +12,7 @@ internal sealed class ValidationExceptionHandler(ILogger<ValidationExceptionHand
         Exception exception,
         CancellationToken cancellationToken)
     {
-        if (exception is not ValidationException validationException || !validationException.Errors.Any())
+        if (exception is not FluentValidation.ValidationException validationException || !validationException.Errors.Any())
         {
             return false;
         }
@@ -25,7 +25,8 @@ internal sealed class ValidationExceptionHandler(ILogger<ValidationExceptionHand
         {
             Status = StatusCodes.Status400BadRequest,
             Type = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400",
-            Title = "One or more request processing validation errors occurred"
+            // Title = "One or more request processing validation errors occurred"
+            Title = "Wystąpiły błędy walidacji podczas przetwarzania żądania"
         };
         
         logger.LogError(

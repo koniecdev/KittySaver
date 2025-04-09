@@ -31,62 +31,108 @@ public sealed class UpdatePerson : IEndpoint
         string DefaultAdvertisementContactInfoEmail,
         string DefaultAdvertisementContactInfoPhoneNumber) : ICommand<PersonHateoasResponse>, IAuthorizedRequest, IPersonRequest;
 
-    public sealed class UpdatePersonCommandValidator : AbstractValidator<UpdatePersonCommand>, IAsyncValidator
+    public sealed class UpdatePersonCommandValidator : AbstractValidator<UpdatePerson.UpdatePersonCommand>, IAsyncValidator
+{
+    public UpdatePersonCommandValidator(IPersonUniquenessChecksRepository personRepository)
     {
-        public UpdatePersonCommandValidator(IPersonUniquenessChecksRepository personRepository)
-        {
-            RuleFor(x => x.Id).NotEmpty();
+        RuleFor(x => x.Id).NotEmpty()
+            // .WithMessage("'Id' cannot be empty.");
+            .WithMessage("'Id' nie może być puste.");
 
-            RuleFor(x => x.Nickname)
-                .NotEmpty()
-                .MaximumLength(Nickname.MaxLength);
+        RuleFor(x => x.Nickname)
+            .NotEmpty()
+            // .WithMessage("'Nickname' cannot be empty.")
+            .WithMessage("'Nazwa użytkownika' nie może być pusta.")
+            .MaximumLength(Nickname.MaxLength)
+            // .WithMessage("'Nickname' must not exceed {MaxLength} characters.");
+            .WithMessage("'Nazwa użytkownika' nie może przekraczać {MaxLength} znaków.");
 
-            RuleFor(x => x.Email)
-                .NotEmpty()
-                .MaximumLength(Email.MaxLength)
-                .Matches(Email.RegexPattern)
-                .MustAsync(async (command, email, ct) =>
-                    await personRepository.IsEmailUniqueAsync(email, command.Id, ct))
-                .WithMessage("'Email' is already used by another user.");
+        RuleFor(x => x.Email)
+            .NotEmpty()
+            // .WithMessage("'Email' cannot be empty.")
+            .WithMessage("'Email' nie może być pusty.")
+            .MaximumLength(Email.MaxLength)
+            // .WithMessage("'Email' must not exceed {MaxLength} characters.")
+            .WithMessage("'Email' nie może przekraczać {MaxLength} znaków.")
+            .Matches(Email.RegexPattern)
+            // .WithMessage("'Email' is not in the correct format.")
+            .WithMessage("'Email' ma niepoprawny format.")
+            .MustAsync(async (command, email, ct) =>
+                await personRepository.IsEmailUniqueAsync(email, command.Id, ct))
+            // .WithMessage("'Email' is already used by another user.");
+            .WithMessage("'Email' jest już używany przez innego użytkownika.");
 
-            RuleFor(x => x.PhoneNumber)
-                .NotEmpty()
-                .MaximumLength(PhoneNumber.MaxLength)
-                .MustAsync(async (command, phoneNumber, ct) =>
-                    await personRepository.IsPhoneNumberUniqueAsync(phoneNumber, command.Id, ct))
-                .WithMessage("'Phone Number' is already used by another user.");
+        RuleFor(x => x.PhoneNumber)
+            .NotEmpty()
+            // .WithMessage("'Phone Number' cannot be empty.")
+            .WithMessage("'Numer telefonu' nie może być pusty.")
+            .MaximumLength(PhoneNumber.MaxLength)
+            // .WithMessage("'Phone Number' must not exceed {MaxLength} characters.")
+            .WithMessage("'Numer telefonu' nie może przekraczać {MaxLength} znaków.")
+            .MustAsync(async (command, phoneNumber, ct) =>
+                await personRepository.IsPhoneNumberUniqueAsync(phoneNumber, command.Id, ct))
+            // .WithMessage("'Phone Number' is already used by another user.");
+            .WithMessage("'Numer telefonu' jest już używany przez innego użytkownika.");
 
-            RuleFor(x => x.DefaultAdvertisementContactInfoPhoneNumber)
-                .NotEmpty()
-                .MaximumLength(PhoneNumber.MaxLength);
+        RuleFor(x => x.DefaultAdvertisementContactInfoPhoneNumber)
+            .NotEmpty()
+            // .WithMessage("'Default Advertisement Contact Info Phone Number' cannot be empty.")
+            .WithMessage("'Domyślny numer telefonu kontaktowego dla ogłoszeń' nie może być pusty.")
+            .MaximumLength(PhoneNumber.MaxLength)
+            // .WithMessage("'Default Advertisement Contact Info Phone Number' must not exceed {MaxLength} characters.");
+            .WithMessage("'Domyślny numer telefonu kontaktowego dla ogłoszeń' nie może przekraczać {MaxLength} znaków.");
 
-            RuleFor(x => x.DefaultAdvertisementContactInfoEmail)
-                .NotEmpty()
-                .MaximumLength(Email.MaxLength)
-                .Matches(Email.RegexPattern);
+        RuleFor(x => x.DefaultAdvertisementContactInfoEmail)
+            .NotEmpty()
+            // .WithMessage("'Default Advertisement Contact Info Email' cannot be empty.")
+            .WithMessage("'Domyślny email kontaktowy dla ogłoszeń' nie może być pusty.")
+            .MaximumLength(Email.MaxLength)
+            // .WithMessage("'Default Advertisement Contact Info Email' must not exceed {MaxLength} characters.")
+            .WithMessage("'Domyślny email kontaktowy dla ogłoszeń' nie może przekraczać {MaxLength} znaków.")
+            .Matches(Email.RegexPattern)
+            // .WithMessage("'Default Advertisement Contact Info Email' is not in the correct format.");
+            .WithMessage("'Domyślny email kontaktowy dla ogłoszeń' ma niepoprawny format.");
 
-            RuleFor(x => x.DefaultAdvertisementPickupAddressCountry)
-                .NotEmpty()
-                .MaximumLength(Address.CountryMaxLength);
+        RuleFor(x => x.DefaultAdvertisementPickupAddressCountry)
+            .NotEmpty()
+            // .WithMessage("'Default Advertisement Pickup Address Country' cannot be empty.")
+            .WithMessage("'Domyślny kraj w adresie odbioru dla ogłoszeń' nie może być pusty.")
+            .MaximumLength(Address.CountryMaxLength)
+            // .WithMessage("'Default Advertisement Pickup Address Country' must not exceed {MaxLength} characters.");
+            .WithMessage("'Domyślny kraj w adresie odbioru dla ogłoszeń' nie może przekraczać {MaxLength} znaków.");
 
-            RuleFor(x => x.DefaultAdvertisementPickupAddressState)
-                .MaximumLength(Address.StateMaxLength);
+        RuleFor(x => x.DefaultAdvertisementPickupAddressState)
+            .MaximumLength(Address.StateMaxLength)
+            // .WithMessage("'Default Advertisement Pickup Address State' must not exceed {MaxLength} characters.");
+            .WithMessage("'Domyślne województwo w adresie odbioru dla ogłoszeń' nie może przekraczać {MaxLength} znaków.");
 
-            RuleFor(x => x.DefaultAdvertisementPickupAddressZipCode)
-                .NotEmpty()
-                .MaximumLength(Address.ZipCodeMaxLength);
+        RuleFor(x => x.DefaultAdvertisementPickupAddressZipCode)
+            .NotEmpty()
+            // .WithMessage("'Default Advertisement Pickup Address Zip Code' cannot be empty.")
+            .WithMessage("'Domyślny kod pocztowy w adresie odbioru dla ogłoszeń' nie może być pusty.")
+            .MaximumLength(Address.ZipCodeMaxLength)
+            // .WithMessage("'Default Advertisement Pickup Address Zip Code' must not exceed {MaxLength} characters.");
+            .WithMessage("'Domyślny kod pocztowy w adresie odbioru dla ogłoszeń' nie może przekraczać {MaxLength} znaków.");
 
-            RuleFor(x => x.DefaultAdvertisementPickupAddressCity)
-                .NotEmpty()
-                .MaximumLength(Address.CityMaxLength);
+        RuleFor(x => x.DefaultAdvertisementPickupAddressCity)
+            .NotEmpty()
+            // .WithMessage("'Default Advertisement Pickup Address City' cannot be empty.")
+            .WithMessage("'Domyślne miasto w adresie odbioru dla ogłoszeń' nie może być puste.")
+            .MaximumLength(Address.CityMaxLength)
+            // .WithMessage("'Default Advertisement Pickup Address City' must not exceed {MaxLength} characters.");
+            .WithMessage("'Domyślne miasto w adresie odbioru dla ogłoszeń' nie może przekraczać {MaxLength} znaków.");
 
-            RuleFor(x => x.DefaultAdvertisementPickupAddressStreet)
-                .MaximumLength(Address.StreetMaxLength);
+        RuleFor(x => x.DefaultAdvertisementPickupAddressStreet)
+            .MaximumLength(Address.StreetMaxLength)
+            // .WithMessage("'Default Advertisement Pickup Address Street' must not exceed {MaxLength} characters.");
+            .WithMessage("'Domyślna ulica w adresie odbioru dla ogłoszeń' nie może przekraczać {MaxLength} znaków.");
 
-            RuleFor(x => x.DefaultAdvertisementPickupAddressBuildingNumber)
-                .MaximumLength(Address.BuildingNumberMaxLength);
-        }
+        RuleFor(x => x.DefaultAdvertisementPickupAddressBuildingNumber)
+            .MaximumLength(Address.BuildingNumberMaxLength)
+            // .WithMessage("'Default Advertisement Pickup Address Building Number' must not exceed {MaxLength} characters.");
+            .WithMessage("'Domyślny numer budynku w adresie odbioru dla ogłoszeń' nie może przekraczać {MaxLength} znaków.");
     }
+}
 
     internal sealed class UpdatePersonCommandHandler(
         IPersonRepository personRepository,

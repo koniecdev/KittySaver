@@ -18,24 +18,31 @@ public sealed class AddPicturesToCatGallery : IEndpoint
         CatId Id,
         IFormFileCollection GalleryFiles) : ICommand<CatHateoasResponse>, IAuthorizedRequest, ICatRequest;
     
-    public sealed class AddPicturesToCatGalleryCommandValidator
-        : AbstractValidator<AddPicturesToCatGalleryCommand>
+    public sealed class AddPicturesToCatGalleryCommandValidator : AbstractValidator<AddPicturesToCatGallery.AddPicturesToCatGalleryCommand>
     {
         public AddPicturesToCatGalleryCommandValidator()
         {
             RuleFor(x => x.PersonId)
-                .NotEmpty();
+                .NotEmpty()
+                // .WithMessage("'Person Id' cannot be empty.");
+                .WithMessage("'Id osoby' nie może być puste.");
 
             RuleFor(x => x.Id)
-                .NotEmpty();
+                .NotEmpty()
+                // .WithMessage("'Id' cannot be empty.");
+                .WithMessage("'Id' nie może być puste.");
 
             RuleFor(x => x.GalleryFiles)
                 .NotNull()
+                // .WithMessage("'Gallery Files' cannot be null.")
+                .WithMessage("'Pliki galerii' nie mogą być puste.")
                 .Must(files => files.Count > 0)
-                .WithMessage("At least one gallery file must be provided")
+                // .WithMessage("At least one gallery file must be provided")
+                .WithMessage("Należy dostarczyć co najmniej jeden plik galerii")
                 .Must(files => files.All(file => AllowedPictureTypes.AllowedImageTypes
                     .ContainsKey(Path.GetExtension(file.FileName).ToLowerInvariant())))
-                .WithMessage("Only .jpg, .jpeg, .png and .webp files are allowed")
+                // .WithMessage("Only .jpg, .jpeg, .png and .webp files are allowed")
+                .WithMessage("Dozwolone są tylko pliki .jpg, .jpeg, .png i .webp")
                 .Must(files => files.All(file => 
                 {
                     string extension = Path.GetExtension(file.FileName).ToLowerInvariant();
@@ -45,9 +52,11 @@ public sealed class AddPicturesToCatGallery : IEndpoint
                     }
                     return file.ContentType == imageType;
                 }))
-                .WithMessage("Only .jpg, .jpeg, .png and .webp files content-types are allowed");
+                // .WithMessage("Only .jpg, .jpeg, .png and .webp files content-types are allowed");
+                .WithMessage("Dozwolone są tylko typy treści plików .jpg, .jpeg, .png i .webp");
         }
     }
+
     
     internal sealed class AddPicturesToCatGalleryCommandHandler(
         IPersonRepository personRepository,

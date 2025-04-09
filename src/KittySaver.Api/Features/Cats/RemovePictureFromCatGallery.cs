@@ -18,18 +18,23 @@ public sealed class RemovePictureFromCatGallery : IEndpoint
         CatId Id,
         string FileNameWithExtension) : ICommand<CatHateoasResponse>, IAuthorizedRequest, ICatRequest;
     
-    public sealed class RemovePictureFromCatGalleryCommandValidator
-        : AbstractValidator<RemovePictureFromCatGalleryCommand>
+    public sealed class RemovePictureFromCatGalleryCommandValidator : AbstractValidator<RemovePictureFromCatGallery.RemovePictureFromCatGalleryCommand>
     {
         public RemovePictureFromCatGalleryCommandValidator()
         {
             RuleFor(x => x.PersonId)
-                .NotEmpty();
+                .NotEmpty()
+                // .WithMessage("'Person Id' cannot be empty.");
+                .WithMessage("'Id osoby' nie może być puste.");
 
             RuleFor(x => x.Id)
-                .NotEmpty();
+                .NotEmpty()
+                // .WithMessage("'Id' cannot be empty.");
+                .WithMessage("'Id' nie może być puste.");
 
-            RuleFor(x => x.FileNameWithExtension).NotNull();
+            RuleFor(x => x.FileNameWithExtension).NotNull()
+                // .WithMessage("'File Name With Extension' cannot be null.");
+                .WithMessage("'Nazwa pliku z rozszerzeniem' nie może być pusta.");
         }
     }
     

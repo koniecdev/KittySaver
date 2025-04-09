@@ -19,7 +19,8 @@ internal sealed class UnauthorizedAccessExceptionHandler(ILogger<UnauthorizedAcc
         {
             Status = StatusCodes.Status403Forbidden,
             Type = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403",
-            Title = "You do not have permission to modify resource that do not belong to You."
+            // Title = "You do not have permission to modify resource that do not belong to You."
+            Title = "Nie masz uprawnień do modyfikowania zasobów, które do Ciebie nie należą."
         };
 
         logger.LogError(

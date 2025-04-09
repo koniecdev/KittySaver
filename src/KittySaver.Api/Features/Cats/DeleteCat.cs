@@ -13,15 +13,19 @@ public sealed class DeleteCat : IEndpoint
 {
     public sealed record DeleteCatCommand(PersonId PersonId, CatId Id) : ICommand, IAuthorizedRequest, ICatRequest;
 
-    public sealed class DeleteCatCommandValidator : AbstractValidator<DeleteCatCommand>
+    public sealed class DeleteCatCommandValidator : AbstractValidator<DeleteCat.DeleteCatCommand>
     {
         public DeleteCatCommandValidator()
         {
             RuleFor(x => x.Id)
-                .NotEmpty();
+                .NotEmpty()
+                // .WithMessage("'Id' cannot be empty.");
+                .WithMessage("'Id' nie może być puste.");
 
             RuleFor(x => x.PersonId)
-                .NotEmpty();
+                .NotEmpty()
+                // .WithMessage("'Person Id' cannot be empty.");
+                .WithMessage("'Id osoby' nie może być puste.");
         }
     }
 

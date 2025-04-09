@@ -13,11 +13,13 @@ public sealed class DeletePerson : IEndpoint
 {
     public sealed record DeletePersonCommand(PersonId Id, string AuthHeader) : ICommand, IAuthorizedRequest, IPersonRequest;
 
-    public sealed class DeletePersonCommandValidator : AbstractValidator<DeletePersonCommand>
+    public sealed class DeletePersonCommandValidator : AbstractValidator<DeletePerson.DeletePersonCommand>
     {
         public DeletePersonCommandValidator()
         {
-            RuleFor(x => x.Id).NotEmpty();
+            RuleFor(x => x.Id).NotEmpty()
+                // .WithMessage("'Id' cannot be empty.");
+                .WithMessage("'Id' nie może być puste.");
         }
     }
 
