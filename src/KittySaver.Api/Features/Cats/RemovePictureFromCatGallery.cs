@@ -3,13 +3,11 @@ using KittySaver.Api.Infrastructure.Endpoints;
 using KittySaver.Api.Infrastructure.Services.FileServices;
 using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Domain.Common.Exceptions;
-using KittySaver.Domain.Persons;
 using KittySaver.Domain.Persons.DomainRepositories;
 using KittySaver.Domain.Persons.Entities;
 using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.TypedIds;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
 
 namespace KittySaver.Api.Features.Cats;
 

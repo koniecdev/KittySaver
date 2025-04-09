@@ -5,7 +5,6 @@ using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Shared.TypedIds;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace KittySaver.Api.Features.Cats;

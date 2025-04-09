@@ -6,7 +6,6 @@ using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Shared.Common.Enums;
 using KittySaver.Shared.Responses;
 using KittySaver.Shared.TypedIds;
-using KittySaver.Tests.Shared;
 
 namespace KittySaver.Api.Tests.Integration.Tests.ReadModels;
 

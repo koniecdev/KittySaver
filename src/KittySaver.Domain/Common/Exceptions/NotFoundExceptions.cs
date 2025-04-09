@@ -1,5 +1,4 @@
-﻿using KittySaver.Domain.Persons;
-using KittySaver.Domain.Persons.Entities;
+﻿using KittySaver.Domain.Persons.Entities;
 using KittySaver.Shared.TypedIds;
 
 namespace KittySaver.Domain.Common.Exceptions;

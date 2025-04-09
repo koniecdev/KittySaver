@@ -1,5 +1,4 @@
 using FluentAssertions;
-using KittySaver.Domain.Persons;
 using KittySaver.Domain.Persons.ValueObjects;
 
 namespace KittySaver.Domain.Tests.Unit.Tests.Cats;

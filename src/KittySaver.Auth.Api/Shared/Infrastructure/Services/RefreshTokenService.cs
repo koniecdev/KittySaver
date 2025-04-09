@@ -1,5 +1,4 @@
-﻿using System.Security.Cryptography;
-using KittySaver.Auth.Api.Shared.Domain.Entites;
+﻿using KittySaver.Auth.Api.Shared.Domain.Entites;
 using KittySaver.Auth.Api.Shared.Persistence;
 using Microsoft.EntityFrameworkCore;
 

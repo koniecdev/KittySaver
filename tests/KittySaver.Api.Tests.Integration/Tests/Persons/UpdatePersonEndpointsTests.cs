@@ -5,7 +5,6 @@ using Bogus.Extensions;
 using FluentAssertions;
 using KittySaver.Api.Infrastructure.Endpoints;
 using KittySaver.Api.Tests.Integration.Helpers;
-using KittySaver.Domain.Persons;
 using KittySaver.Domain.Persons.ValueObjects;
 using KittySaver.Domain.ValueObjects;
 using KittySaver.Shared.Hateoas;

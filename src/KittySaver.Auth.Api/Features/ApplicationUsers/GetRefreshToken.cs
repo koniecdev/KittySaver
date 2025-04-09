@@ -1,6 +1,4 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using FluentValidation;
+﻿using FluentValidation;
 using KittySaver.Auth.Api.Shared.Abstractions;
 using KittySaver.Auth.Api.Shared.Domain.Entites;
 using KittySaver.Auth.Api.Shared.Endpoints;
