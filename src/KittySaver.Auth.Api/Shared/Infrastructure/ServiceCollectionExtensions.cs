@@ -43,22 +43,25 @@ public static class ServiceCollectionExtensions
                 };
             });
         services.AddAuthorization();
-        
-        services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
-        EmailSettings emailSettings = configuration.GetSection("EmailSettings").Get<EmailSettings>()
-            ?? throw new Exception("Missing email settings");
-        services
-            .AddFluentEmail(emailSettings.SenderEmail, emailSettings.SenderName)
-            .AddRazorRenderer()
-            .AddSmtpSender(new System.Net.Mail.SmtpClient
-            {
-                Host = emailSettings.Server,
-                Port = emailSettings.Port,
-                EnableSsl = emailSettings.UseSsl,
-                DeliveryMethod = System.Net.Mail.SmtpDeliveryMethod.Network,
-                UseDefaultCredentials = false,
-                Credentials = new System.Net.NetworkCredential(emailSettings.Username, emailSettings.Password)
-            });
+
+        if (environment.EnvironmentName != "Development")
+        {
+            services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
+            EmailSettings emailSettings = configuration.GetSection("EmailSettings").Get<EmailSettings>()
+                ?? throw new Exception("Missing email settings");
+            services
+                .AddFluentEmail(emailSettings.SenderEmail, emailSettings.SenderName)
+                .AddRazorRenderer()
+                .AddSmtpSender(new System.Net.Mail.SmtpClient
+                {
+                    Host = emailSettings.Server,
+                    Port = emailSettings.Port,
+                    EnableSsl = emailSettings.UseSsl,
+                    DeliveryMethod = System.Net.Mail.SmtpDeliveryMethod.Network,
+                    UseDefaultCredentials = false,
+                    Credentials = new System.Net.NetworkCredential(emailSettings.Username, emailSettings.Password)
+                });
+        }
         
         services.AddScoped<IEmailService, EmailService>();
         return services;
