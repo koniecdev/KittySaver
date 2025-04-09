@@ -18,12 +18,12 @@ public class ApiNavigationService(IApiClient apiClient) : IApiNavigationService
 
     public async Task InitializeAsync()
     {
-        Response ??= await apiClient.GetAsync<GetApiDiscoveryV1Response>(StaticDetails.ApiUrl);
+        Response ??= await apiClient.GetAsync<GetApiDiscoveryV1Response>(EnvironmentConfiguration.ApiUrl);
     }
     
     public async Task RefreshAsync()
     {
-        Response = await apiClient.GetAsync<GetApiDiscoveryV1Response>(StaticDetails.ApiUrl);
+        Response = await apiClient.GetAsync<GetApiDiscoveryV1Response>(EnvironmentConfiguration.ApiUrl);
     }
 
     public Link? GetLink(string rel) => Response?.Links.FirstOrDefault(x => x.Rel == rel);

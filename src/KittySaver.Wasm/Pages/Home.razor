@@ -7,7 +7,8 @@
 @inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
 @inject IApiClient MainApiClient
 
-<PageTitle>Uratujkota.pl - Ogłoszenia - Bo życie kotków jest priorytetem - Portal adopcyjny dla potrzebujących kotów.</PageTitle>
+<PageTitle>Uratujkota.pl - Ogłoszenia - Bo życie kotków jest priorytetem - Portal adopcyjny dla potrzebujących kotów.
+</PageTitle>
 <div class="index_grid">
     <aside class="index_aside">
         <header>
@@ -46,13 +47,13 @@
         <button @onclick="ApplyFilters">Zatwierdź filtry</button>
     </aside>
 
-    @if (_advertisements == null)
-    {
-        <p>Ładujemy ogłoszenia ze słodkimi kotkami...</p>
-    }
-    else
-    {
-        <div class="listing_grid">
+    <div class="listing_grid">
+        @if (_advertisements == null)
+        {
+            <p>Ładujemy ogłoszenia ze słodkimi kotkami...</p>
+        }
+        else
+        {
             <header>
                 <h1>
                     Uratuj kota - ogłoszenia adopcyjne
@@ -61,9 +62,12 @@
             </header>
             @foreach (AdvertisementResponse ad in _advertisements.Items)
             {
-                <a @onclick="@(() => NavigateToAdvertisement(ad))" @onclick:preventDefault href="/advertisement/@ad.Id" class="listing_tile">
+                <a @onclick="@(() => NavigateToAdvertisement(ad))" @onclick:preventDefault href="/advertisement/@ad.Id"
+                   class="listing_tile">
                     <div class="listing_tile_img_wrapper">
-                        <img src="@ad.Links.FirstOrDefault(x => x.Rel == EndpointRels.Advertisement.GetAdvertisementThumbnailRel)?.Href" class="listing_tile_img" alt="uratujkota.pl - @ad.Title">
+                        <img
+                            src="@ad.Links.FirstOrDefault(x => x.Rel == EndpointRels.Advertisement.GetAdvertisementThumbnailRel)?.Href"
+                            class="listing_tile_img" alt="uratujkota.pl - @ad.Title">
                     </div>
                     <div class="listing_tile_content">
                         <strong>@ad.Title</strong>
@@ -71,17 +75,15 @@
                     </div>
                 </a>
             }
-        </div>
-    }
+        }
+    </div>
 </div>
 
 @code {
-    [Inject] 
-    private IAdvertisementStateService AdvertisementState { get; set; } = null!;
-    
-    [Inject] 
-    private NavigationManager Navigation { get; set; } = null!;
-    
+    [Inject] private IAdvertisementStateService AdvertisementState { get; set; } = null!;
+
+    [Inject] private NavigationManager Navigation { get; set; } = null!;
+
     private PagedList<AdvertisementResponse>? _advertisements;
     private string? City { get; set; }
     private string? State { get; set; }
@@ -100,7 +102,7 @@
         {
             string searchTerms = BuildSearchTerms();
             string url = getAdvertisementsLink.Href;
-            
+
             if (!string.IsNullOrEmpty(searchTerms))
             {
                 url = $"{url}?searchTerm={searchTerms}";
@@ -136,7 +138,7 @@
     {
         await LoadAdvertisements();
     }
-    
+
     private void NavigateToAdvertisement(AdvertisementResponse ad)
     {
         Link? link = ad.Links.FirstOrDefault(x => x.Rel == EndpointRels.SelfRel);
@@ -144,7 +146,9 @@
         {
             return;
         }
+
         AdvertisementState.SetSelectedAdvertisementLink(ad.Id, link);
         Navigation.NavigateTo($"/advertisement/{ad.Id}");
     }
+
 }

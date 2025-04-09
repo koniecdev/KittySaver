@@ -502,7 +502,7 @@
         
         // Endpoint do zmiany hasła
         await ApiClient.PostAsync<ChangePasswordRequest, object>(
-            $"{StaticDetails.AuthUrl}application-users/change-password",
+            $"{EnvironmentConfiguration.AuthUrl}application-users/change-password",
             new ChangePasswordRequest(_person.Email, _changePasswordDto.CurrentPassword, _changePasswordDto.NewPassword));
         
         // Wyświetl komunikat o sukcesie
