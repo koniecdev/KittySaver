@@ -1,11 +1,9 @@
 ﻿using KittySaver.Shared.Common.Enums;
 using KittySaver.Shared.TypedIds;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 // ReSharper disable CollectionNeverUpdated.Global
 
-namespace KittySaver.Api.Persistence.ReadRelated.ReadModels;
+namespace KittySaver.ReadModels.EntityFramework.PersonAggregate;
 
 public sealed class AdvertisementReadModel
 {
@@ -27,19 +25,4 @@ public sealed class AdvertisementReadModel
     public required PersonId PersonId { get; init; }
     public PersonReadModel Person { get; private set; } = null!;
     public ICollection<CatReadModel> Cats { get; } = new List<CatReadModel>();
-}
-
-internal sealed class AdvertisementReadModelConfiguration : IEntityTypeConfiguration<AdvertisementReadModel>, IReadConfiguration
-{
-    public void Configure(EntityTypeBuilder<AdvertisementReadModel> builder)
-    {
-        builder.ToTable("Advertisements");
-
-        builder.HasKey(advertisement => advertisement.Id);
-
-        builder.HasMany(advertisement => advertisement.Cats)
-            .WithOne(cat => cat.Advertisement)
-            .HasForeignKey(cat => cat.AdvertisementId)
-            .IsRequired(false);
-    }
 }
