@@ -38,6 +38,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.ServiceDefaults"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Aspire", "Aspire", "{9F80EF5F-3384-4365-93D2-F6851CB6EBFA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.Domain.EntityFramework", "src\KittySaver.Domain.EntityFramework\KittySaver.Domain.EntityFramework.csproj", "{DB2F9CB3-93A7-450E-B96E-1EBAD27DA63A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.ReadModels", "src\KittySaver.ReadModels\KittySaver.ReadModels.csproj", "{CFB7640B-1C77-47EE-81D7-B17A6DD90CC4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.ReadModels.EntityFramework", "src\KittySaver.ReadModels.EntityFramework\KittySaver.ReadModels.EntityFramework.csproj", "{0EA59ACE-B7CA-454B-AA8D-AEB522208BBB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -92,6 +98,18 @@ Global
 		{EF86B5D0-4670-9638-077E-5B70E7071718}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EF86B5D0-4670-9638-077E-5B70E7071718}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EF86B5D0-4670-9638-077E-5B70E7071718}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DB2F9CB3-93A7-450E-B96E-1EBAD27DA63A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB2F9CB3-93A7-450E-B96E-1EBAD27DA63A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB2F9CB3-93A7-450E-B96E-1EBAD27DA63A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB2F9CB3-93A7-450E-B96E-1EBAD27DA63A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CFB7640B-1C77-47EE-81D7-B17A6DD90CC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CFB7640B-1C77-47EE-81D7-B17A6DD90CC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CFB7640B-1C77-47EE-81D7-B17A6DD90CC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CFB7640B-1C77-47EE-81D7-B17A6DD90CC4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0EA59ACE-B7CA-454B-AA8D-AEB522208BBB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EA59ACE-B7CA-454B-AA8D-AEB522208BBB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EA59ACE-B7CA-454B-AA8D-AEB522208BBB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EA59ACE-B7CA-454B-AA8D-AEB522208BBB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -112,6 +130,9 @@ Global
 		{5F69A6DE-0AF2-4B43-BE10-4B33512BF2E2} = {9F80EF5F-3384-4365-93D2-F6851CB6EBFA}
 		{EF86B5D0-4670-9638-077E-5B70E7071718} = {9F80EF5F-3384-4365-93D2-F6851CB6EBFA}
 		{9F80EF5F-3384-4365-93D2-F6851CB6EBFA} = {74DEC7A6-AEB4-444C-A522-11F65EAFA372}
+		{DB2F9CB3-93A7-450E-B96E-1EBAD27DA63A} = {8E9504A6-C398-4B17-864D-58F6254B0F7D}
+		{CFB7640B-1C77-47EE-81D7-B17A6DD90CC4} = {8E9504A6-C398-4B17-864D-58F6254B0F7D}
+		{0EA59ACE-B7CA-454B-AA8D-AEB522208BBB} = {8E9504A6-C398-4B17-864D-58F6254B0F7D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {763CB504-D4CF-47F3-976D-8CF35CFDEEC2}

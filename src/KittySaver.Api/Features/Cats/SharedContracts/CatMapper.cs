@@ -1,4 +1,4 @@
-﻿using KittySaver.Api.Persistence.ReadRelated.ReadModels;
+﻿using KittySaver.ReadModels.PersonAggregate;
 using KittySaver.Shared.Common.Enums;
 using KittySaver.Shared.Responses;
 

@@ -1,4 +1,5 @@
-﻿using KittySaver.Api.Persistence.ReadRelated.ReadModels;
+﻿using KittySaver.ReadModels.EntityFramework;
+using KittySaver.ReadModels.PersonAggregate;
 using Microsoft.EntityFrameworkCore;
 using SmartEnum.EFCore;
 
@@ -22,6 +23,6 @@ public sealed class ApplicationReadDbContext(
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        builder.ApplyConfigurationsFromAssembly(typeof(IApiMarker).Assembly);
+        builder.ApplyConfigurationsFromAssembly(typeof(IReadConfiguration).Assembly);
     }
 }
