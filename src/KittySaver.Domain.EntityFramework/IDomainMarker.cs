@@ -1,3 +1,3 @@
-﻿namespace KittySaver.Domain;
+﻿namespace KittySaver.Domain.EntityFramework;
 
-public interface IDomainMarker;
+public interface IDomainConfigurationsMarker;

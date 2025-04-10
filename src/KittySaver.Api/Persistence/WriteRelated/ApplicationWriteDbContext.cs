@@ -1,6 +1,7 @@
 ﻿using KittySaver.Api.Infrastructure.Services;
 using KittySaver.Domain;
 using KittySaver.Domain.Common.Primitives;
+using KittySaver.Domain.EntityFramework;
 using KittySaver.Domain.Persons.Entities;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,6 @@ namespace KittySaver.Api.Persistence.WriteRelated;
 public sealed class ApplicationWriteDbContext(
     DbContextOptions<ApplicationWriteDbContext> options,
     IDateTimeService dateTimeProvider,
-    ICurrentUserService currentUserService,
     IPublisher? publisher = null)
     : DbContext(options), IUnitOfWork
 {
@@ -20,7 +20,7 @@ public sealed class ApplicationWriteDbContext(
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        builder.ApplyConfigurationsFromAssembly(typeof(IDomainMarker).Assembly);
+        builder.ApplyConfigurationsFromAssembly(typeof(IDomainConfigurationsMarker).Assembly);
     }
     
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

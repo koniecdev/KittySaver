@@ -3,7 +3,7 @@ using KittySaver.Shared.TypedIds;
 
 // ReSharper disable CollectionNeverUpdated.Global
 
-namespace KittySaver.ReadModels.EntityFramework.PersonAggregate;
+namespace KittySaver.ReadModels.PersonAggregate;
 
 public sealed class AdvertisementReadModel
 {

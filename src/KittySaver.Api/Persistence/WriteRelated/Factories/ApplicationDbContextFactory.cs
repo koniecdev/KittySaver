@@ -7,7 +7,7 @@ internal sealed class ApplicationDbContextFactoryFactory : DesignTimeDbContextFa
 {
     protected override ApplicationWriteDbContext CreateNewInstance(DbContextOptions<ApplicationWriteDbContext> options)
     {
-        ApplicationWriteDbContext writeDb = new ApplicationWriteDbContext(options, new DefaultDateTimeService(), new DesignTimeMigrationsCurrentUserService());
+        ApplicationWriteDbContext writeDb = new ApplicationWriteDbContext(options, new DefaultDateTimeService());
         return writeDb;
     }
 }

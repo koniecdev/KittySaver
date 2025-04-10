@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
