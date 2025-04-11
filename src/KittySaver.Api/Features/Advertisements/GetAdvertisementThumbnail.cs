@@ -64,8 +64,8 @@ public sealed class GetAdvertisementThumbnail : IEndpoint
                     enableRangeProcessing: true);
             })
             .AllowAnonymous()
-            .WithName(EndpointNames.GetAdvertisementThumbnail.EndpointName)
-            .WithTags(EndpointNames.GroupNames.AdvertisementGroup)
+            .WithName(EndpointNames.Advertisements.GetThumbnail.EndpointName)
+            .WithTags(EndpointNames.Advertisements.Group)
             .Produces<FileStream>()
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status401Unauthorized);

@@ -19,7 +19,7 @@ public sealed class UpdateAdvertisementThumbnail : IEndpoint
         AdvertisementId Id,
         IFormFile Thumbnail) : ICommand<AdvertisementHateoasResponse>, IAuthorizedRequest, IAdvertisementRequest;
 
-    public sealed class UpdateAdvertisementThumbnailCommandValidator : AbstractValidator<UpdateAdvertisementThumbnail.UpdateAdvertisementThumbnailCommand>
+    public sealed class UpdateAdvertisementThumbnailCommandValidator : AbstractValidator<UpdateAdvertisementThumbnailCommand>
     {
         public UpdateAdvertisementThumbnailCommandValidator()
         {
@@ -97,7 +97,7 @@ public sealed class UpdateAdvertisementThumbnail : IEndpoint
             .DisableAntiforgery()
             .Accepts<IFormFile>("multipart/form-data")
             .RequireAuthorization()
-            .WithName(EndpointNames.UpdateAdvertisementThumbnail.EndpointName)
-            .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
+            .WithName(EndpointNames.Advertisements.UpdateThumbnail.EndpointName)
+            .WithTags(EndpointNames.Advertisements.Group);
     }
 }

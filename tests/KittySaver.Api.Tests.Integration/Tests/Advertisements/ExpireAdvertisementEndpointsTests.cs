@@ -115,9 +115,9 @@ public class ExpireAdvertisementEndpointsTests : IAsyncLifetime
         List<string> expectedRels =
         [
             EndpointRels.SelfRel,
-            EndpointNames.DeleteAdvertisement.Rel,
-            EndpointNames.GetAdvertisementThumbnail.Rel,
-            EndpointNames.RefreshAdvertisement.Rel
+            EndpointNames.Advertisements.Delete.Rel,
+            EndpointNames.Advertisements.GetThumbnail.Rel,
+            EndpointNames.Advertisements.Refresh.Rel
         ];
         List<string> responseRels = hateoasResponse.Links.Select(x => x.Rel).ToList();
         responseRels.Should().BeEquivalentTo(expectedRels);

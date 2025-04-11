@@ -122,11 +122,11 @@ public class UpdateAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Status.Should().Be(AdvertisementStatus.ThumbnailNotUploaded);
         hateoasResponse.Links.Select(x => x.Rel).Should().BeEquivalentTo(
             EndpointRels.SelfRel,
-            EndpointNames.UpdateAdvertisementThumbnail.Rel,
-            EndpointNames.UpdateAdvertisement.Rel,
-            EndpointNames.DeleteAdvertisement.Rel,
-            EndpointNames.ReassignCatsToAdvertisement.Rel,
-            EndpointNames.GetAdvertisementCats.Rel);
+            EndpointNames.Advertisements.UpdateThumbnail.Rel,
+            EndpointNames.Advertisements.Update.Rel,
+            EndpointNames.Advertisements.Delete.Rel,
+            EndpointNames.Advertisements.ReassignCats.Rel,
+            EndpointNames.Advertisements.GetAdvertisementCats.Rel);
         hateoasResponse.Links.Select(x => x.Href).All(x => !string.IsNullOrEmpty(x)).Should().BeTrue();
     }
 

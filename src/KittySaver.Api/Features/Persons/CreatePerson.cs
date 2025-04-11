@@ -200,8 +200,8 @@ public sealed class CreatePerson : IEndpoint
                 return Results.Created($"/api/v1/persons/{hateoasResponse.Id}",
                     new { id = hateoasResponse.Id, hateoasResponse.Links });
             }).AllowAnonymous()
-            .WithName(EndpointNames.CreatePerson.EndpointName)
-            .WithTags(EndpointNames.GroupNames.PersonGroup);
+            .WithName(EndpointNames.Persons.Create.EndpointName)
+            .WithTags(EndpointNames.Persons.Group);
     }
 }
 

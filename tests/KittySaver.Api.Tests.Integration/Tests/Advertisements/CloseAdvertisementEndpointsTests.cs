@@ -112,7 +112,7 @@ public class CloseAdvertisementEndpointsTests : IAsyncLifetime
         hateoasResponse.Status.Should().Be(AdvertisementStatus.Closed);
         hateoasResponse.Links.Count.Should().Be(2);
         hateoasResponse.Links.Select(x => x.Rel).Should()
-            .BeEquivalentTo(EndpointRels.SelfRel, EndpointNames.GetAdvertisementThumbnail.Rel);
+            .BeEquivalentTo(EndpointRels.SelfRel, EndpointNames.Advertisements.GetThumbnail.Rel);
         hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
 
         

@@ -53,8 +53,8 @@ public sealed class GetCatGalleryPicture : IEndpoint
                     enableRangeProcessing: true);
             })
             .AllowAnonymous()
-            .WithName(EndpointNames.GetCatGalleryPicture.EndpointName)
-            .WithTags(EndpointNames.GroupNames.CatGroup)
+            .WithName(EndpointNames.Cats.GetGalleryPicture.EndpointName)
+            .WithTags(EndpointNames.Cats.Group)
             .Produces<FileStream>()
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status401Unauthorized);

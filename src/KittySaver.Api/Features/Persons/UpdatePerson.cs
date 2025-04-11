@@ -31,7 +31,7 @@ public sealed class UpdatePerson : IEndpoint
         string DefaultAdvertisementContactInfoEmail,
         string DefaultAdvertisementContactInfoPhoneNumber) : ICommand<PersonHateoasResponse>, IAuthorizedRequest, IPersonRequest;
 
-    public sealed class UpdatePersonCommandValidator : AbstractValidator<UpdatePerson.UpdatePersonCommand>, IAsyncValidator
+    public sealed class UpdatePersonCommandValidator : AbstractValidator<UpdatePersonCommand>, IAsyncValidator
 {
     public UpdatePersonCommandValidator(IPersonUniquenessChecksRepository personRepository)
     {
@@ -184,8 +184,8 @@ public sealed class UpdatePerson : IEndpoint
                 PersonHateoasResponse response = await sender.Send(command, cancellationToken);
                 return Results.Ok(response);
             }).RequireAuthorization()
-            .WithName(EndpointNames.UpdatePerson.EndpointName)
-            .WithTags(EndpointNames.GroupNames.PersonGroup);
+            .WithName(EndpointNames.Persons.Update.EndpointName)
+            .WithTags(EndpointNames.Persons.Group);
     }
 }
 

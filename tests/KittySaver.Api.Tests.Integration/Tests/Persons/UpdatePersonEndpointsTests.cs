@@ -84,12 +84,12 @@ public class UpdatePersonEndpointsTests : IAsyncLifetime
             ?? throw new JsonException();
         hateoasResponse.Links.Select(x => x.Rel).Should()
             .BeEquivalentTo(EndpointRels.SelfRel,
-                EndpointNames.UpdatePerson.Rel,
-                EndpointNames.DeletePerson.Rel,
-                EndpointNames.GetCats.Rel,
-                EndpointNames.GetAdvertisements.Rel,
-                EndpointNames.CreateCat.Rel,
-                EndpointNames.CreateAdvertisement.Rel);
+                EndpointNames.Persons.Update.Rel,
+                EndpointNames.Persons.Delete.Rel,
+                EndpointNames.Cats.GetAll.Rel,
+                EndpointNames.Advertisements.GetAll.Rel,
+                EndpointNames.Cats.Create.Rel,
+                EndpointNames.Advertisements.Create.Rel);
         hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         hateoasResponse.Id.Should().Be(person.Id);
 

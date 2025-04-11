@@ -72,7 +72,7 @@ public sealed class GetAdvertisementCats : IEndpoint
                 Items = advertisements,
                 Total = totalRecords,
                 Links = paginationLinksService.GeneratePaginationLinks(
-                    EndpointNames.GetAdvertisementCats.EndpointName,
+                    EndpointNames.Advertisements.GetAdvertisementCats.EndpointName,
                     request.Offset,
                     request.Limit,
                     totalRecords,
@@ -121,7 +121,7 @@ public sealed class GetAdvertisementCats : IEndpoint
             IPagedList<CatResponse> cats = await sender.Send(query, cancellationToken);
             return Results.Ok(cats);
         }).AllowAnonymous()
-        .WithName(EndpointNames.GetAdvertisementCats.EndpointName)
-        .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
+        .WithName(EndpointNames.Advertisements.GetAdvertisementCats.EndpointName)
+        .WithTags(EndpointNames.Advertisements.Group);
     }
 }

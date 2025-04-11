@@ -15,7 +15,7 @@ public sealed class DeleteAdvertisement : IEndpoint
     public sealed record DeleteAdvertisementCommand(PersonId PersonId, AdvertisementId Id)
         : ICommand, IAuthorizedRequest, IAdvertisementRequest;
 
-    public sealed class DeleteAdvertisementCommandValidator : AbstractValidator<DeleteAdvertisement.DeleteAdvertisementCommand>
+    public sealed class DeleteAdvertisementCommandValidator : AbstractValidator<DeleteAdvertisementCommand>
     {
         public DeleteAdvertisementCommandValidator()
         {
@@ -60,7 +60,7 @@ public sealed class DeleteAdvertisement : IEndpoint
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
         }).RequireAuthorization()
-        .WithName(EndpointNames.DeleteAdvertisement.EndpointName)
-        .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
+        .WithName(EndpointNames.Advertisements.Delete.EndpointName)
+        .WithTags(EndpointNames.Advertisements.Group);
     }
 }

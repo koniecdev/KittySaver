@@ -33,7 +33,7 @@ public class GetApiDiscoveryV1 : IEndpoint
                 GetApiDiscoveryV1Response response = await sender.Send(new GetApiDiscoveryV1Query(), cancellationToken);
                 return Results.Ok(response);
             }).AllowAnonymous()
-            .WithName(EndpointNames.GetApiDiscoveryV1.EndpointName)
-            .WithTags(EndpointNames.GroupNames.Discovery);
+            .WithName(EndpointNames.Discovery.GetApiDiscoveryV1.EndpointName)
+            .WithTags(EndpointNames.Discovery.Group);
     }
 }

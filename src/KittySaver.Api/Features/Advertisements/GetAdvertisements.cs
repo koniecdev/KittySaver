@@ -71,7 +71,7 @@ public sealed class GetAdvertisements : IEndpoint
                 Items = advertisements,
                 Total = totalRecords,
                 Links = paginationLinksService.GeneratePaginationLinks(
-                    EndpointNames.GetAdvertisements.EndpointName,
+                    EndpointNames.Advertisements.GetAll.EndpointName,
                     request.Offset,
                     request.Limit,
                     totalRecords,
@@ -122,7 +122,7 @@ public sealed class GetAdvertisements : IEndpoint
             IPagedList<AdvertisementResponse> advertisements = await sender.Send(query, cancellationToken);
             return Results.Ok(advertisements);
         }).RequireAuthorization()
-        .WithName(EndpointNames.GetAdvertisements.EndpointName)
-        .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
+        .WithName(EndpointNames.Advertisements.GetAll.EndpointName)
+        .WithTags(EndpointNames.Advertisements.Group);
     }
 }
