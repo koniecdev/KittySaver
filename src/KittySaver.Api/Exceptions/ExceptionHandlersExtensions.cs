@@ -8,8 +8,10 @@ internal static class ExceptionHandlersExtensions
     {
         serviceCollection.AddExceptionHandler<UnauthenticatedAccessExceptionHandler>();
         serviceCollection.AddExceptionHandler<UnauthorizedAccessExceptionHandler>();
+        serviceCollection.AddExceptionHandler<ApiValidationExceptionHandler>();
         serviceCollection.AddExceptionHandler<ValidationExceptionHandler>();
         serviceCollection.AddExceptionHandler<NotFoundExceptionHandler>();
+        serviceCollection.AddExceptionHandler<ApiExceptionHandler>();
         serviceCollection.AddExceptionHandler<DomainExceptionHandler>();
         serviceCollection.AddExceptionHandler<GlobalExceptionHandler>();
         serviceCollection.AddProblemDetails();

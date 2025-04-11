@@ -1538,11 +1538,20 @@ button.disabled {
 
 /* Komunikaty statusu */
 .status-message {
-    margin-bottom: 20px;
-    padding: 15px;
+    display: grid;
+    grid-gap: 1rem;
+    padding: 2rem;
     border-radius: 4px;
+    text-align: center;
 }
-
+.status-message .login_form_tile_buttons{
+    grid-template-columns: 50%;
+    justify-content: center;
+    margin-top: .5rem;
+}
+.tac{
+    text-align: center;
+}
 .status-success {
     background-color: rgba(47, 156, 38, 0.2);
     border: 1px solid var(--kitty-green);
@@ -1585,7 +1594,7 @@ button.disabled {
 
 .status-icon {
     font-size: 48px;
-    margin-bottom: 20px;
+    justify-self: center;
 }
 
 .status-icon.success {
@@ -1761,6 +1770,11 @@ button.disabled {
 /* Formularz ponownego wysyłania */
 .resend-form {
     margin-top: 20px;
+}
+
+.validation_summary{
+    display: grid;
+    grid-gap: .5rem;
 }
 
 @media screen and (max-width: 1600px){

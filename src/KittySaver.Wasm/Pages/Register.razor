@@ -19,9 +19,11 @@
             <div class="success-container">
                 <div class="success-icon">✓</div>
                 <h2>Rejestracja przebiegła pomyślnie!</h2>
-                <p>Na Twój adres email <strong>@_registerDto.Email</strong> wysłaliśmy wiadomość z linkiem aktywacyjnym.</p>
+                <p>Na Twój adres email <strong>@_registerDto.Email</strong> wysłaliśmy wiadomość z linkiem aktywacyjnym.
+                </p>
                 <p>Proszę kliknij w link w wiadomości, aby potwierdzić swój adres email i aktywować konto.</p>
-                <p>Jeśli nie otrzymasz wiadomości w ciągu kilku minut, sprawdź folder spam lub kliknij poniższy link, aby wysłać link aktywacyjny ponownie.</p>
+                <p>Jeśli nie otrzymasz wiadomości w ciągu kilku minut, sprawdź folder spam lub kliknij poniższy link,
+                    aby wysłać link aktywacyjny ponownie.</p>
                 <div class="action-buttons">
                     <a href="/login" class="default_btn">Przejdź do logowania</a>
                     <a href="/resend-email-confirmation" class="default_btn">Wyślij link aktywacyjny ponownie</a>
@@ -34,7 +36,8 @@
         <section class="register_container">
             <header>
                 <h2>Rejestracja konta</h2>
-                <p>Konto w naszym serwisie umożliwia dodawanie ogłoszeń adopcyjnych - nie potrzebujesz konta, jeżeli chcesz tylko adoptować kociaki!</p>
+                <p>Konto w naszym serwisie umożliwia dodawanie ogłoszeń adopcyjnych - nie potrzebujesz konta, jeżeli
+                    chcesz tylko adoptować kociaki!</p>
             </header>
 
             @if (!string.IsNullOrEmpty(_errorMessage))
@@ -52,14 +55,16 @@
                     <p>
                         Nikomu nie udostępnimy twojego prywatnego adresu email oraz prywatnego numeru telefonu.
                         <br>
-                        Twój kontaktowy adres email i kontaktowy numer telefonu będą widoczne dopiero po dodaniu ogłoszenia.
+                        Twój kontaktowy adres email i kontaktowy numer telefonu będą widoczne dopiero po dodaniu
+                        ogłoszenia.
                         <br>
-                        Zarówno konkaktowy adres email, kontaktowy numer telefonu, kontaktowy adres - Można modyfikować dowolnie przy późniejszym dodawaniu ogłoszeń.
+                        Zarówno konkaktowy adres email, kontaktowy numer telefonu, kontaktowy adres - Można modyfikować
+                        dowolnie przy późniejszym dodawaniu ogłoszeń.
                     </p>
                 </header>
                 <div class="login_form_tile">
                     <label for="email">Twój prywatny adres email:</label>
-                    <InputText id="email" type="email" @bind-Value="_registerDto.Email" required />
+                    <InputText id="email" type="email" @bind-Value="_registerDto.Email" required/>
                     <div class="login_form_errors">
                         @if (_emailIsInvalid)
                         {
@@ -72,7 +77,7 @@
                 </div>
                 <div class="login_form_tile">
                     <label for="phoneNumber">Twój prywatny numer telefonu:</label>
-                    <InputText id="phoneNumber" type="text" @bind-Value="_registerDto.PhoneNumber" required />
+                    <InputText id="phoneNumber" type="text" @bind-Value="_registerDto.PhoneNumber" required/>
                     <div class="login_form_errors">
                         @if (_phoneNumberIsInvalid)
                         {
@@ -85,7 +90,7 @@
                 </div>
                 <div class="login_form_tile">
                     <label for="password">Twoje hasło (conajmniej 8 znaków, duża i mała litera, cyfra):</label>
-                    <InputText id="password" type="password" @bind-Value="_registerDto.Password" required />
+                    <InputText id="password" type="password" @bind-Value="_registerDto.Password" required/>
                     <div class="login_form_errors">
                         @if (_passwordIsInvalid)
                         {
@@ -98,38 +103,79 @@
                 </div>
                 <div class="login_form_tile">
                     <label for="confirmPassword">Potwierdź hasło:</label>
-                    <InputText id="confirmPassword" type="password" @bind-Value="_registerDto.ConfirmPassword" required />
+                    <InputText id="confirmPassword" type="password" @bind-Value="_registerDto.ConfirmPassword" required/>
                 </div>
                 <div class="login_form_tile">
-                    <label for="contactEmail">Twój domyślny kontaktowy adres email, który ma być wyświetlany w Twoich ogłoszeniach:</label>
-                    <InputText id="contactEmail" type="email" @bind-Value="_registerDto.DefaultAdvertisementContactInfoEmail" required />
+                    <label for="contactEmail">Twój domyślny kontaktowy adres email, który ma być wyświetlany w Twoich
+                        ogłoszeniach:</label>
+                    <InputText id="contactEmail" type="email" @bind-Value="_registerDto.DefaultAdvertisementContactInfoEmail" required/>
+                    <div class="login_form_errors">
+                        @if (_defaultAdvertisementContactInfoEmailIsInvalid)
+                        {
+                            foreach (string error in _defaultAdvertisementContactInfoEmailErrors)
+                            {
+                                <div class="input_error">@error</div>
+                            }
+                        }
+                    </div>
                 </div>
                 <div class="login_form_tile">
-                    <label for="contactPhone">Twój domyślnie kontaktowy numer telefonu, który ma być wyświetlany w twoich ogłoszeniach:</label>
-                    <InputText id="contactPhone" type="text" @bind-Value="_registerDto.DefaultAdvertisementContactInfoPhoneNumber" required />
+                    <label for="contactPhone">Twój domyślnie kontaktowy numer telefonu, który ma być wyświetlany w
+                        twoich ogłoszeniach:</label>
+                    <InputText id="contactPhone" type="text" @bind-Value="_registerDto.DefaultAdvertisementContactInfoPhoneNumber" required/>
+                    <div class="login_form_errors">
+                        @if (_defaultAdvertisementContactInfoPhoneNumberIsInvalid)
+                        {
+                            foreach (string error in _defaultAdvertisementContactInfoPhoneNumberErrors)
+                            {
+                                <div class="input_error">@error</div>
+                            }
+                        }
+                    </div>
                 </div>
                 <div class="login_form_tile">
                     <label for="nickname">Twoja nazwa/imię jakie chcesz by się wyświetlało w Twoich ogłoszeniach:</label>
-                    <InputText id="nickname" type="text" @bind-Value="_registerDto.Nickname" required />
+                    <InputText id="nickname" type="text" @bind-Value="_registerDto.Nickname" required/>
+                    <div class="login_form_errors">
+                        @if (_nicknameIsInvalid)
+                        {
+                            foreach (string error in _nicknameErrors)
+                            {
+                                <div class="input_error">@error</div>
+                            }
+                        }
+                    </div>
                 </div>
                 <header>
                     <h3>Wypełnij domyślny adres odbioru kotów z twoich ogłoszeń</h3>
                     <p>
                         Przy dodawaniu ogłoszenia, będziesz mógł wpisać inny adres.
                         <br>
-                        W trosce o Twoje bezpieczeństwo nie musisz podawać ulicy i numeru domu - przekażesz je sam po kontakcie z ogłoszeniobiorcą.
+                        W trosce o Twoje bezpieczeństwo nie musisz podawać ulicy i numeru domu - przekażesz je sam po
+                        kontakcie z ogłoszeniobiorcą.
                     </p>
                 </header>
                 <div class="login_form_tile">
                     <label for="DefaultAdvertisementPickupAddressCountry">Kraj:</label>
-                    <InputSelect id="DefaultAdvertisementPickupAddressCountry" @bind-Value="_registerDto.DefaultAdvertisementPickupAddressCountry" required >
+                    <InputSelect id="DefaultAdvertisementPickupAddressCountry"
+                                 @bind-Value="_registerDto.DefaultAdvertisementPickupAddressCountry" required>
                         <option value="">-- Wybierz kraj --</option>
                         <option value="PL">Polska</option>
                     </InputSelect>
+                    <div class="login_form_errors">
+                        @if (_defaultAdvertisementPickupAddressCountryIsInvalid)
+                        {
+                            foreach (string error in _defaultAdvertisementPickupAddressCountryErrors)
+                            {
+                                <div class="input_error">@error</div>
+                            }
+                        }
+                    </div>
                 </div>
                 <div class="login_form_tile">
                     <label for="DefaultAdvertisementPickupAddressState">Województwo:</label>
-                    <InputSelect id="DefaultAdvertisementPickupAddressState" @bind-Value="_registerDto.DefaultAdvertisementPickupAddressState" required >
+                    <InputSelect id="DefaultAdvertisementPickupAddressState"
+                                 @bind-Value="_registerDto.DefaultAdvertisementPickupAddressState" required>
                         <option value="">-- Wybierz województwo --</option>
                         <option value="Dolnośląskie">Dolnośląskie</option>
                         <option value="Kujawsko-pomorskie">Kujawsko-pomorskie</option>
@@ -148,23 +194,79 @@
                         <option value="Wielkopolskie">Wielkopolskie</option>
                         <option value="Zachodniopomorskie">Zachodniopomorskie</option>
                     </InputSelect>
+                    <div class="login_form_errors">
+                        @if (_defaultAdvertisementPickupAddressStateIsInvalid)
+                        {
+                            foreach (string error in _defaultAdvertisementPickupAddressStateErrors)
+                            {
+                                <div class="input_error">@error</div>
+                            }
+                        }
+                    </div>
                 </div>
                 <div class="login_form_tile">
                     <label for="DefaultAdvertisementPickupAddressZipCode">Kod pocztowy:</label>
-                    <InputText id="DefaultAdvertisementPickupAddressZipCode" type="text" @bind-Value="_registerDto.DefaultAdvertisementPickupAddressZipCode" required />
+                    <InputText id="DefaultAdvertisementPickupAddressZipCode" type="text" @bind-Value="_registerDto.DefaultAdvertisementPickupAddressZipCode" required/>
+                    <div class="login_form_errors">
+                        @if (_defaultAdvertisementPickupAddressZipCodeIsInvalid)
+                        {
+                            foreach (string error in _defaultAdvertisementPickupAddressZipCodeErrors)
+                            {
+                                <div class="input_error">@error</div>
+                            }
+                        }
+                    </div>
                 </div>
                 <div class="login_form_tile">
                     <label for="DefaultAdvertisementPickupAddressCity">Miasto:</label>
-                    <InputText id="DefaultAdvertisementPickupAddressCity" type="text" @bind-Value="_registerDto.DefaultAdvertisementPickupAddressCity" required />
+                    <InputText id="DefaultAdvertisementPickupAddressCity" type="text" @bind-Value="_registerDto.DefaultAdvertisementPickupAddressCity" required/>
+                    <div class="login_form_errors">
+                        @if (_defaultAdvertisementPickupAddressCityIsInvalid)
+                        {
+                            foreach (string error in _defaultAdvertisementPickupAddressCityErrors)
+                            {
+                                <div class="input_error">@error</div>
+                            }
+                        }
+                    </div>
                 </div>
                 <div class="login_form_tile">
                     <label for="DefaultAdvertisementPickupAddressStreet">Ulica:</label>
                     <InputText id="DefaultAdvertisementPickupAddressStreet" type="text" @bind-Value="_registerDto.DefaultAdvertisementPickupAddressStreet"/>
+                    <div class="login_form_errors">
+                        @if (_defaultAdvertisementPickupAddressStreetIsInvalid)
+                        {
+                            foreach (string error in _defaultAdvertisementPickupAddressStreetErrors)
+                            {
+                                <div class="input_error">@error</div>
+                            }
+                        }
+                    </div>
                 </div>
                 <div class="login_form_tile">
                     <label for="DefaultAdvertisementPickupAddressBuildingNumber">Numer budynku:</label>
                     <InputText id="DefaultAdvertisementPickupAddressBuildingNumber" type="text" @bind-Value="_registerDto.DefaultAdvertisementPickupAddressBuildingNumber"/>
+                    <div class="login_form_errors">
+                        @if (_defaultAdvertisementPickupAddressBuildingNumberIsInvalid)
+                        {
+                            foreach (string error in _defaultAdvertisementPickupAddressBuildingNumberErrors)
+                            {
+                                <div class="input_error">@error</div>
+                            }
+                        }
+                    </div>
                 </div>
+                @if (_everyRegisterErrorList.Count > 0)
+                {
+                    <div class="validation_summary">
+                        @foreach (var error in _everyRegisterErrorList)
+                        {
+                            <div class="input_error">
+                                @error
+                            </div>
+                        }
+                    </div>
+                }
                 <div class="login_form_tile_buttons">
                     <button class="default_btn btn_green" type="submit" disabled="@_isProcessing">
                         @if (_isProcessing)
@@ -193,12 +295,31 @@
     private Link _createPersonLink = null!;
     private string? _errorMessage;
 
+    private ICollection<string> _everyRegisterErrorList = [];
+    private bool _nicknameIsInvalid;
+    private ICollection<string> _nicknameErrors = [];
     private bool _emailIsInvalid;
     private ICollection<string> _emailErrors = [];
     private bool _phoneNumberIsInvalid;
     private ICollection<string> _phoneNumberErrors = [];
     private bool _passwordIsInvalid;
     private ICollection<string> _passwordErrors = [];
+    private bool _defaultAdvertisementPickupAddressCountryIsInvalid;
+    private ICollection<string> _defaultAdvertisementPickupAddressCountryErrors = [];
+    private bool _defaultAdvertisementPickupAddressStateIsInvalid;
+    private ICollection<string> _defaultAdvertisementPickupAddressStateErrors = [];
+    private bool _defaultAdvertisementPickupAddressZipCodeIsInvalid;
+    private ICollection<string> _defaultAdvertisementPickupAddressZipCodeErrors = [];
+    private bool _defaultAdvertisementPickupAddressCityIsInvalid;
+    private ICollection<string> _defaultAdvertisementPickupAddressCityErrors = [];
+    private bool _defaultAdvertisementPickupAddressStreetIsInvalid;
+    private ICollection<string> _defaultAdvertisementPickupAddressStreetErrors = [];
+    private bool _defaultAdvertisementPickupAddressBuildingNumberIsInvalid;
+    private ICollection<string> _defaultAdvertisementPickupAddressBuildingNumberErrors = [];
+    private bool _defaultAdvertisementContactInfoEmailIsInvalid;
+    private ICollection<string> _defaultAdvertisementContactInfoEmailErrors = [];
+    private bool _defaultAdvertisementContactInfoPhoneNumberIsInvalid;
+    private ICollection<string> _defaultAdvertisementContactInfoPhoneNumberErrors = [];
 
     protected override void OnInitialized()
     {
@@ -216,6 +337,34 @@
     {
         _isProcessing = true;
         _errorMessage = null;
+
+        // Resetowanie wszystkich flag błędów i list z błędami
+        _nicknameIsInvalid = false;
+        _emailIsInvalid = false;
+        _phoneNumberIsInvalid = false;
+        _passwordIsInvalid = false;
+        _defaultAdvertisementPickupAddressCountryIsInvalid = false;
+        _defaultAdvertisementPickupAddressStateIsInvalid = false;
+        _defaultAdvertisementPickupAddressZipCodeIsInvalid = false;
+        _defaultAdvertisementPickupAddressCityIsInvalid = false;
+        _defaultAdvertisementPickupAddressStreetIsInvalid = false;
+        _defaultAdvertisementPickupAddressBuildingNumberIsInvalid = false;
+        _defaultAdvertisementContactInfoEmailIsInvalid = false;
+        _defaultAdvertisementContactInfoPhoneNumberIsInvalid = false;
+
+        _nicknameErrors = [];
+        _emailErrors = [];
+        _phoneNumberErrors = [];
+        _passwordErrors = [];
+        _defaultAdvertisementPickupAddressCountryErrors = [];
+        _defaultAdvertisementPickupAddressStateErrors = [];
+        _defaultAdvertisementPickupAddressZipCodeErrors = [];
+        _defaultAdvertisementPickupAddressCityErrors = [];
+        _defaultAdvertisementPickupAddressStreetErrors = [];
+        _defaultAdvertisementPickupAddressBuildingNumberErrors = [];
+        _defaultAdvertisementContactInfoEmailErrors = [];
+        _defaultAdvertisementContactInfoPhoneNumberErrors = [];
+        _everyRegisterErrorList = [];
 
         // Validate passwords match
         if (_registerDto.Password != _registerDto.ConfirmPassword)
@@ -253,20 +402,55 @@
 
             if (createPersonResult.IsInvalid())
             {
-                _emailErrors = createPersonResult.ExtractErrorMessagesForProperty(nameof(CreatePersonRequest.Email));
-                if (_emailErrors.Count > 0)
+                // Funkcja pomocnicza zwracająca krotkę zamiast używania parametrów ref
+                (bool isInvalid, ICollection<string> errors) ProcessFieldErrors(string propertyName)
                 {
-                    _emailIsInvalid = true;
+                    var fieldErrors = createPersonResult.ExtractErrorMessagesForProperty(propertyName);
+                    var hasErrors = fieldErrors.Count > 0;
+                    return (hasErrors, fieldErrors);
                 }
-                _phoneNumberErrors = createPersonResult.ExtractErrorMessagesForProperty(nameof(CreatePersonRequest.PhoneNumber));
-                if (_phoneNumberErrors.Count > 0)
+
+                // Walidacja danych osobowych
+                (_nicknameIsInvalid, _nicknameErrors) = ProcessFieldErrors(nameof(CreatePersonRequest.Nickname));
+                (_emailIsInvalid, _emailErrors) = ProcessFieldErrors(nameof(CreatePersonRequest.Email));
+                (_phoneNumberIsInvalid, _phoneNumberErrors) = ProcessFieldErrors(nameof(CreatePersonRequest.PhoneNumber));
+                (_passwordIsInvalid, _passwordErrors) = ProcessFieldErrors(nameof(CreatePersonRequest.Password));
+
+                // Walidacja adresu odbioru
+                (_defaultAdvertisementPickupAddressCountryIsInvalid, _defaultAdvertisementPickupAddressCountryErrors) =
+                    ProcessFieldErrors(nameof(CreatePersonRequest.DefaultAdvertisementPickupAddressCountry));
+                (_defaultAdvertisementPickupAddressStateIsInvalid, _defaultAdvertisementPickupAddressStateErrors) =
+                    ProcessFieldErrors(nameof(CreatePersonRequest.DefaultAdvertisementPickupAddressState));
+                (_defaultAdvertisementPickupAddressZipCodeIsInvalid, _defaultAdvertisementPickupAddressZipCodeErrors) =
+                    ProcessFieldErrors(nameof(CreatePersonRequest.DefaultAdvertisementPickupAddressZipCode));
+                (_defaultAdvertisementPickupAddressCityIsInvalid, _defaultAdvertisementPickupAddressCityErrors) =
+                    ProcessFieldErrors(nameof(CreatePersonRequest.DefaultAdvertisementPickupAddressCity));
+                (_defaultAdvertisementPickupAddressStreetIsInvalid, _defaultAdvertisementPickupAddressStreetErrors) =
+                    ProcessFieldErrors(nameof(CreatePersonRequest.DefaultAdvertisementPickupAddressStreet));
+                (_defaultAdvertisementPickupAddressBuildingNumberIsInvalid, _defaultAdvertisementPickupAddressBuildingNumberErrors) =
+                    ProcessFieldErrors(nameof(CreatePersonRequest.DefaultAdvertisementPickupAddressBuildingNumber));
+
+                // Walidacja informacji kontaktowych
+                (_defaultAdvertisementContactInfoEmailIsInvalid, _defaultAdvertisementContactInfoEmailErrors) =
+                    ProcessFieldErrors(nameof(CreatePersonRequest.DefaultAdvertisementContactInfoEmail));
+                (_defaultAdvertisementContactInfoPhoneNumberIsInvalid, _defaultAdvertisementContactInfoPhoneNumberErrors) =
+                    ProcessFieldErrors(nameof(CreatePersonRequest.DefaultAdvertisementContactInfoPhoneNumber));
+
+                // Zbieranie wszystkich błędów do jednej listy
+                _everyRegisterErrorList = [];
+                foreach (var errorList in new[]
+                         {
+                             _nicknameErrors, _emailErrors, _phoneNumberErrors, _passwordErrors,
+                             _defaultAdvertisementPickupAddressCountryErrors, _defaultAdvertisementPickupAddressStateErrors,
+                             _defaultAdvertisementPickupAddressZipCodeErrors, _defaultAdvertisementPickupAddressCityErrors,
+                             _defaultAdvertisementPickupAddressStreetErrors, _defaultAdvertisementPickupAddressBuildingNumberErrors,
+                             _defaultAdvertisementContactInfoEmailErrors, _defaultAdvertisementContactInfoPhoneNumberErrors
+                         })
                 {
-                    _phoneNumberIsInvalid = true;
-                }
-                _passwordErrors = createPersonResult.ExtractErrorMessagesForProperty(nameof(CreatePersonRequest.Password));
-                if (_passwordErrors.Count > 0)
-                {
-                    _passwordIsInvalid = true;
+                    foreach (var error in errorList)
+                    {
+                        _everyRegisterErrorList.Add(error);
+                    }
                 }
             }
         }

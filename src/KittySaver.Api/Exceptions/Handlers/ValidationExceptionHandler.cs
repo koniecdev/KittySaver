@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using KittySaver.Api.Infrastructure.Clients;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,7 +12,8 @@ internal sealed class ValidationExceptionHandler(ILogger<ValidationExceptionHand
         Exception exception,
         CancellationToken cancellationToken)
     {
-        if (exception is not FluentValidation.ValidationException validationException || !validationException.Errors.Any())
+        if (exception is not FluentValidation.ValidationException validationException ||
+            !validationException.Errors.Any())
         {
             return false;
         }
