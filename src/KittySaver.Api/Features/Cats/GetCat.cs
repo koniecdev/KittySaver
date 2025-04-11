@@ -42,7 +42,7 @@ public sealed class GetCat : IEndpoint
             CatResponse cat = await sender.Send(query, cancellationToken);
             return Results.Ok(cat);
         }).RequireAuthorization()
-        .WithName(EndpointNames.GetCat.EndpointName)
-        .WithTags(EndpointNames.GroupNames.CatGroup);
+        .WithName(EndpointNames.Cats.GetById.EndpointName)
+        .WithTags(EndpointNames.Cats.Group);
     }
 }

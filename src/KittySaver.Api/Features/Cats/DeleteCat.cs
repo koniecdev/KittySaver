@@ -13,7 +13,7 @@ public sealed class DeleteCat : IEndpoint
 {
     public sealed record DeleteCatCommand(PersonId PersonId, CatId Id) : ICommand, IAuthorizedRequest, ICatRequest;
 
-    public sealed class DeleteCatCommandValidator : AbstractValidator<DeleteCat.DeleteCatCommand>
+    public sealed class DeleteCatCommandValidator : AbstractValidator<DeleteCatCommand>
     {
         public DeleteCatCommandValidator()
         {
@@ -54,7 +54,7 @@ public sealed class DeleteCat : IEndpoint
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
         }).RequireAuthorization()
-        .WithName(EndpointNames.DeleteCat.EndpointName)
-        .WithTags(EndpointNames.GroupNames.CatGroup);
+        .WithName(EndpointNames.Cats.Delete.EndpointName)
+        .WithTags(EndpointNames.Cats.Group);
     }
 }

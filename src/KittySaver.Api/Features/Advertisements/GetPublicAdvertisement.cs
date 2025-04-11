@@ -44,7 +44,7 @@ public class GetPublicAdvertisement : IEndpoint
             AdvertisementResponse advertisement = await sender.Send(query, cancellationToken);
             return Results.Ok(advertisement);
         }).AllowAnonymous()
-        .WithName(EndpointNames.GetPublicAdvertisement.EndpointName)
-        .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
+        .WithName(EndpointNames.Advertisements.GetPublicById.EndpointName)
+        .WithTags(EndpointNames.Advertisements.Group);
     }
 }

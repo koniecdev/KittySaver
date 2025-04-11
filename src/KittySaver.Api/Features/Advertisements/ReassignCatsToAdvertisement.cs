@@ -19,7 +19,7 @@ public sealed class ReassignCatsToAdvertisement : IEndpoint
         AdvertisementId Id,
         IEnumerable<CatId> CatIds) : ICommand<AdvertisementHateoasResponse>, IAuthorizedRequest, IAdvertisementRequest;
 
-    public sealed class AssignCatToAdvertisementCommandValidator : AbstractValidator<ReassignCatsToAdvertisement.ReassignCatsToAdvertisementCommand>
+    public sealed class AssignCatToAdvertisementCommandValidator : AbstractValidator<ReassignCatsToAdvertisementCommand>
     {
         public AssignCatToAdvertisementCommandValidator()
         {
@@ -68,7 +68,7 @@ public sealed class ReassignCatsToAdvertisement : IEndpoint
             AdvertisementHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
             return Results.Ok(hateoasResponse);
         }).RequireAuthorization()
-        .WithName(EndpointNames.ReassignCatsToAdvertisement.EndpointName)
-        .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
+        .WithName(EndpointNames.Advertisements.ReassignCats.EndpointName)
+        .WithTags(EndpointNames.Advertisements.Group);
     }
 }

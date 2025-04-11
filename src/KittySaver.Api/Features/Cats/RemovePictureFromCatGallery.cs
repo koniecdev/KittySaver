@@ -18,7 +18,7 @@ public sealed class RemovePictureFromCatGallery : IEndpoint
         CatId Id,
         string FileNameWithExtension) : ICommand<CatHateoasResponse>, IAuthorizedRequest, ICatRequest;
     
-    public sealed class RemovePictureFromCatGalleryCommandValidator : AbstractValidator<RemovePictureFromCatGallery.RemovePictureFromCatGalleryCommand>
+    public sealed class RemovePictureFromCatGalleryCommandValidator : AbstractValidator<RemovePictureFromCatGalleryCommand>
     {
         public RemovePictureFromCatGalleryCommandValidator()
         {
@@ -87,7 +87,7 @@ public sealed class RemovePictureFromCatGallery : IEndpoint
                 return Results.Ok(hateoasResponse);
             })
             .RequireAuthorization()
-            .WithName(EndpointNames.RemovePictureFromCatGallery.EndpointName)
-            .WithTags(EndpointNames.GroupNames.CatGroup);
+            .WithName(EndpointNames.Cats.RemovePicture.EndpointName)
+            .WithTags(EndpointNames.Cats.Group);
     }
 }

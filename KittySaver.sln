@@ -36,7 +36,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.AppHost", "src\K
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.ServiceDefaults", "src\KittySaver.Aspire\KittySaver.ServiceDefaults\KittySaver.ServiceDefaults.csproj", "{EF86B5D0-4670-9638-077E-5B70E7071718}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Aspire", "Aspire", "{9F80EF5F-3384-4365-93D2-F6851CB6EBFA}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "aspire", "aspire", "{9F80EF5F-3384-4365-93D2-F6851CB6EBFA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KittySaver.Domain.EntityFramework", "src\KittySaver.Domain.EntityFramework\KittySaver.Domain.EntityFramework.csproj", "{DB2F9CB3-93A7-450E-B96E-1EBAD27DA63A}"
 EndProject

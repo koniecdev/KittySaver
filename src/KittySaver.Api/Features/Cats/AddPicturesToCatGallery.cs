@@ -18,7 +18,7 @@ public sealed class AddPicturesToCatGallery : IEndpoint
         CatId Id,
         IFormFileCollection GalleryFiles) : ICommand<CatHateoasResponse>, IAuthorizedRequest, ICatRequest;
     
-    public sealed class AddPicturesToCatGalleryCommandValidator : AbstractValidator<AddPicturesToCatGallery.AddPicturesToCatGalleryCommand>
+    public sealed class AddPicturesToCatGalleryCommandValidator : AbstractValidator<AddPicturesToCatGalleryCommand>
     {
         public AddPicturesToCatGalleryCommandValidator()
         {
@@ -109,7 +109,7 @@ public sealed class AddPicturesToCatGallery : IEndpoint
             .DisableAntiforgery()
             .Accepts<IFormFileCollection>("multipart/form-data")
             .RequireAuthorization()
-            .WithName(EndpointNames.AddPicturesToCatGallery.EndpointName)
-            .WithTags(EndpointNames.GroupNames.CatGroup);
+            .WithName(EndpointNames.Cats.AddPictures.EndpointName)
+            .WithTags(EndpointNames.Cats.Group);
     }
 }

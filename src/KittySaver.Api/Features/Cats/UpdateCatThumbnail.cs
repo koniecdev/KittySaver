@@ -18,7 +18,7 @@ public sealed class UpdateCatThumbnail : IEndpoint
         CatId Id,
         IFormFile Thumbnail) : ICommand<CatHateoasResponse>, IAuthorizedRequest, ICatRequest;
 
-    public sealed class UpdateCatThumbnailCommandValidator : AbstractValidator<UpdateCatThumbnail.UpdateCatThumbnailCommand>
+    public sealed class UpdateCatThumbnailCommandValidator : AbstractValidator<UpdateCatThumbnailCommand>
     {
         public UpdateCatThumbnailCommandValidator()
         {
@@ -101,7 +101,7 @@ public sealed class UpdateCatThumbnail : IEndpoint
             .DisableAntiforgery()
             .Accepts<IFormFile>("multipart/form-data")
             .RequireAuthorization()
-            .WithName(EndpointNames.UpdateCatThumbnail.EndpointName)
-            .WithTags(EndpointNames.GroupNames.CatGroup);
+            .WithName(EndpointNames.Cats.UpdateThumbnail.EndpointName)
+            .WithTags(EndpointNames.Cats.Group);
     }
 }

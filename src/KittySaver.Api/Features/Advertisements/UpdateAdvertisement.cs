@@ -30,7 +30,7 @@ public sealed class UpdateAdvertisement : IEndpoint
         string ContactInfoPhoneNumber) : ICommand<AdvertisementHateoasResponse>, IAuthorizedRequest, IAdvertisementRequest;
 
     public sealed class UpdateAdvertisementCommandValidator
-    : AbstractValidator<UpdateAdvertisement.UpdateAdvertisementCommand>
+    : AbstractValidator<UpdateAdvertisementCommand>
 {
     public UpdateAdvertisementCommandValidator()
     {
@@ -154,8 +154,8 @@ public sealed class UpdateAdvertisement : IEndpoint
             AdvertisementHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
             return Results.Ok(hateoasResponse);
         }).RequireAuthorization()
-        .WithName(EndpointNames.UpdateAdvertisement.EndpointName)
-        .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
+        .WithName(EndpointNames.Advertisements.Update.EndpointName)
+        .WithTags(EndpointNames.Advertisements.Group);
     }
 }
 

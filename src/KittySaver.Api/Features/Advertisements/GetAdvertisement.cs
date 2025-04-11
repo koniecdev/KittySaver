@@ -43,7 +43,7 @@ public class GetAdvertisement : IEndpoint
             AdvertisementResponse advertisement = await sender.Send(query, cancellationToken);
             return Results.Ok(advertisement);
         }).RequireAuthorization()
-        .WithName(EndpointNames.GetAdvertisement.EndpointName)
-        .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
+        .WithName(EndpointNames.Advertisements.GetById.EndpointName)
+        .WithTags(EndpointNames.Advertisements.Group);
     }
 }

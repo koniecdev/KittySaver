@@ -58,8 +58,8 @@ public sealed class GetCatThumbnail : IEndpoint
                     enableRangeProcessing: true);
             })
             .AllowAnonymous()
-            .WithName(EndpointNames.GetCatThumbnail.EndpointName)
-            .WithTags(EndpointNames.GroupNames.CatGroup)
+            .WithName(EndpointNames.Cats.GetThumbnail.EndpointName)
+            .WithTags(EndpointNames.Cats.Group)
             .Produces<FileStream>()
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status401Unauthorized);

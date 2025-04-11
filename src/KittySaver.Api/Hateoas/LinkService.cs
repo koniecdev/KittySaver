@@ -39,7 +39,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         List<Link> links =
         [
             Generate(
-                endpointInfo: EndpointNames.GetPerson,
+                endpointInfo: EndpointNames.Persons.GetById,
                 routeValues: new { id = personId },
                 isSelf: true),
         ];
@@ -56,27 +56,27 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         }
 
         links.Add(Generate(
-            endpointInfo: EndpointNames.UpdatePerson,
+            endpointInfo: EndpointNames.Persons.Update,
             routeValues: new { id = personId }));
 
         links.Add(Generate(
-            endpointInfo: EndpointNames.DeletePerson,
+            endpointInfo: EndpointNames.Persons.Delete,
             routeValues: new { id = personId }));
 
         links.Add(Generate(
-            endpointInfo: EndpointNames.GetCats,
+            endpointInfo: EndpointNames.Cats.GetAll,
             routeValues: new { personId }));
 
         links.Add(Generate(
-            endpointInfo: EndpointNames.CreateCat,
+            endpointInfo: EndpointNames.Cats.Create,
             routeValues: new { personId }));
 
         links.Add(Generate(
-            endpointInfo: EndpointNames.GetAdvertisements,
+            endpointInfo: EndpointNames.Advertisements.GetAll,
             routeValues: new { personId }));
 
         links.Add(Generate(
-            endpointInfo: EndpointNames.CreateAdvertisement,
+            endpointInfo: EndpointNames.Advertisements.Create,
             routeValues: new { personId }));
 
         return links;
@@ -92,19 +92,19 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
     {
         List<Link> links =
         [
-            Generate(endpointInfo: EndpointNames.GetCat,
+            Generate(endpointInfo: EndpointNames.Cats.GetById,
                     routeValues: new { id = catId, personId },
                     isSelf: true),
-            Generate(endpointInfo: EndpointNames.GetCatGallery,
+            Generate(endpointInfo: EndpointNames.Cats.GetGallery,
                     routeValues: new { id = catId, personId }),
-            Generate(endpointInfo: EndpointNames.GetCatGalleryPicture,
+            Generate(endpointInfo: EndpointNames.Cats.GetGalleryPicture,
                 routeValues: new { id = UrlPlaceholders.Id, personId = UrlPlaceholders.PersonId, filename = UrlPlaceholders.Filename },
                 isTemplated: true)
         ];
 
         if (isThumbnailUploaded)
         {
-            links.Add(Generate(endpointInfo: EndpointNames.GetCatThumbnail,
+            links.Add(Generate(endpointInfo: EndpointNames.Cats.GetThumbnail,
                 routeValues: new { id = catId, personId }));
         }
         
@@ -121,18 +121,18 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         if (!isAdopted)
         {
             links.Add(Generate(
-                endpointInfo: EndpointNames.UpdateCatThumbnail,
+                endpointInfo: EndpointNames.Cats.UpdateThumbnail,
                 routeValues: new { id = catId, personId }));
-            links.Add(Generate(endpointInfo: EndpointNames.AddPicturesToCatGallery,
+            links.Add(Generate(endpointInfo: EndpointNames.Cats.AddPictures,
                 routeValues: new { id = catId, personId }));
-            links.Add(Generate(endpointInfo: EndpointNames.RemovePictureFromCatGallery,
+            links.Add(Generate(endpointInfo: EndpointNames.Cats.RemovePicture,
                 routeValues: new
                 {
                     id = UrlPlaceholders.Id, personId = UrlPlaceholders.PersonId, filename = UrlPlaceholders.Filename
                 },
                 isTemplated: true));
             links.Add(Generate(
-                endpointInfo: EndpointNames.UpdateCat,
+                endpointInfo: EndpointNames.Cats.Update,
                 routeValues: new { id = catId, personId }));
         }
         
@@ -140,13 +140,13 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         if (advertisementId is null)
         {
             links.Add(Generate(
-                endpointInfo: EndpointNames.DeleteCat,
+                endpointInfo: EndpointNames.Cats.Delete,
                 routeValues: new { id = catId, personId }));
             return links;
         }
         
         links.Add(Generate(
-            endpointInfo: EndpointNames.GetAdvertisement,
+            endpointInfo: EndpointNames.Advertisements.GetById,
             routeValues: new { id = advertisementId.Value, personId }));
         
         return links;
@@ -165,12 +165,12 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         {
             List<Link> links =
             [
-                Generate(endpointInfo: EndpointNames.GetPublicAdvertisement,
+                Generate(endpointInfo: EndpointNames.Advertisements.GetPublicById,
                     routeValues: new { id },
                     isSelf: true),
-                Generate(endpointInfo: EndpointNames.GetAdvertisementThumbnail,
+                Generate(endpointInfo: EndpointNames.Advertisements.GetThumbnail,
                     routeValues: new { id }),
-                Generate(endpointInfo: EndpointNames.GetAdvertisementCats,
+                Generate(endpointInfo: EndpointNames.Advertisements.GetAdvertisementCats,
                     routeValues: new { id, personId })
             ];
             return links;
@@ -180,7 +180,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         {
             List<Link> links =
             [
-                Generate(endpointInfo: EndpointNames.GetAdvertisement,
+                Generate(endpointInfo: EndpointNames.Advertisements.GetById,
                         routeValues: new { id, personId },
                         isSelf: true)
             ];
@@ -194,36 +194,36 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
             {
                 case AdvertisementStatus.Active:
                     links.Add(Generate(
-                        endpointInfo: EndpointNames.UpdateAdvertisement,
+                        endpointInfo: EndpointNames.Advertisements.Update,
                         routeValues: new { id, personId }));
                     
-                    links.Add(Generate(endpointInfo: EndpointNames.GetAdvertisementThumbnail,
+                    links.Add(Generate(endpointInfo: EndpointNames.Advertisements.GetThumbnail,
                         routeValues: new { id }));
                     
                     links.Add(Generate(
-                        endpointInfo: EndpointNames.DeleteAdvertisement,
+                        endpointInfo: EndpointNames.Advertisements.Delete,
                         routeValues: new { id, personId }));
 
                     links.Add(Generate(
-                        endpointInfo: EndpointNames.ReassignCatsToAdvertisement,
+                        endpointInfo: EndpointNames.Advertisements.ReassignCats,
                         routeValues: new { id, personId }));
                     
                     links.Add(Generate(
-                        endpointInfo: EndpointNames.GetAdvertisementCats,
+                        endpointInfo: EndpointNames.Advertisements.GetAdvertisementCats,
                         routeValues: new { id, personId }));
                     
                     links.Add(Generate(
-                        endpointInfo: EndpointNames.UpdateAdvertisementThumbnail,
+                        endpointInfo: EndpointNames.Advertisements.UpdateThumbnail,
                         routeValues: new { id, personId }));
 
                     links.Add(Generate(
-                        endpointInfo: EndpointNames.CloseAdvertisement,
+                        endpointInfo: EndpointNames.Advertisements.Close,
                         routeValues: new { id, personId }));
 
                     if (currentlyLoggedInPerson.Role is PersonRole.Job or PersonRole.Admin)
                     {
                         links.Add(Generate(
-                            endpointInfo: EndpointNames.ExpireAdvertisement,
+                            endpointInfo: EndpointNames.Advertisements.Expire,
                             routeValues: new { id, personId }));
                     }
 
@@ -231,42 +231,42 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
 
                 case AdvertisementStatus.Expired:
                     links.Add(Generate(
-                        endpointInfo: EndpointNames.RefreshAdvertisement,
+                        endpointInfo: EndpointNames.Advertisements.Refresh,
                         routeValues: new { id, personId }));
                     
-                    links.Add(Generate(endpointInfo: EndpointNames.GetAdvertisementThumbnail,
+                    links.Add(Generate(endpointInfo: EndpointNames.Advertisements.GetThumbnail,
                         routeValues: new { id }));
                     
                     links.Add(Generate(
-                        endpointInfo: EndpointNames.DeleteAdvertisement,
+                        endpointInfo: EndpointNames.Advertisements.Delete,
                         routeValues: new { id, personId }));
                     
                     break;
 
                 case AdvertisementStatus.ThumbnailNotUploaded:
                     links.Add(Generate(
-                        endpointInfo: EndpointNames.UpdateAdvertisementThumbnail,
+                        endpointInfo: EndpointNames.Advertisements.UpdateThumbnail,
                         routeValues: new { id, personId }));
                     
                     links.Add(Generate(
-                        endpointInfo: EndpointNames.UpdateAdvertisement,
+                        endpointInfo: EndpointNames.Advertisements.Update,
                         routeValues: new { id, personId }));
 
                     links.Add(Generate(
-                        endpointInfo: EndpointNames.DeleteAdvertisement,
+                        endpointInfo: EndpointNames.Advertisements.Delete,
                         routeValues: new { id, personId }));
 
                     links.Add(Generate(
-                        endpointInfo: EndpointNames.ReassignCatsToAdvertisement,
+                        endpointInfo: EndpointNames.Advertisements.ReassignCats,
                         routeValues: new { id, personId }));
                     
                     links.Add(Generate(
-                        endpointInfo: EndpointNames.GetAdvertisementCats,
+                        endpointInfo: EndpointNames.Advertisements.GetAdvertisementCats,
                         routeValues: new { id, personId }));
                     break;
                 
                 case AdvertisementStatus.Closed:
-                    links.Add(Generate(endpointInfo: EndpointNames.GetAdvertisementThumbnail,
+                    links.Add(Generate(endpointInfo: EndpointNames.Advertisements.GetThumbnail,
                         routeValues: new { id }));
                     break;
             }
@@ -345,56 +345,56 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
     {
         List<Link> links =
         [
-            Generate(endpointInfo: EndpointNames.GetApiDiscoveryV1,
+            Generate(endpointInfo: EndpointNames.Discovery.GetApiDiscoveryV1,
                 routeValues: null,
                 isSelf: true),
 
-            Generate(endpointInfo: EndpointNames.GetPublicAdvertisements,
+            Generate(endpointInfo: EndpointNames.Advertisements.GetPublicAll,
                 routeValues: null),
 
-            Generate(endpointInfo: EndpointNames.GetPublicAdvertisement,
+            Generate(endpointInfo: EndpointNames.Advertisements.GetPublicById,
                 routeValues: new { id = UrlPlaceholders.Id },
                 isTemplated: true),
 
-            Generate(endpointInfo: EndpointNames.GetPublicPersonAdvertisements,
+            Generate(endpointInfo: EndpointNames.Advertisements.GetPublicPersonAdvertisements,
                 routeValues: new { searchTerm = $"personid-eq-{UrlPlaceholders.Id}" },
                 isTemplated: true)
         ];
 
         if (personId is null)
         {
-            links.Add(Generate(endpointInfo: EndpointNames.CreatePerson));
+            links.Add(Generate(endpointInfo: EndpointNames.Persons.Create));
             return links;
         }
 
         links.Add(Generate(
-            endpointInfo: EndpointNames.GetPerson,
+            endpointInfo: EndpointNames.Persons.GetById,
             routeValues: new { id = personId.Value }));
         
         links.Add(Generate(
-            endpointInfo: EndpointNames.GetCats,
+            endpointInfo: EndpointNames.Cats.GetAll,
             routeValues: new { personId = personId.Value }));
         
         links.Add(Generate(
-            endpointInfo: EndpointNames.GetCat,
+            endpointInfo: EndpointNames.Cats.GetById,
             isTemplated: true,
             routeValues: new { personId = UrlPlaceholders.PersonId, id = UrlPlaceholders.Id }));
         
         links.Add(Generate(
-            endpointInfo: EndpointNames.GetPersonAdvertisements,
+            endpointInfo: EndpointNames.Advertisements.GetPersonAdvertisements,
             routeValues: new { personId = personId.Value }));
         
         links.Add(Generate(
-            endpointInfo: EndpointNames.GetPersonAdvertisement,
+            endpointInfo: EndpointNames.Advertisements.GetPersonAdvertisement,
             isTemplated: true,
             routeValues: new { personId = UrlPlaceholders.PersonId, id = UrlPlaceholders.Id }));
 
         links.Add(Generate(
-            endpointInfo: EndpointNames.CreateCat,
+            endpointInfo: EndpointNames.Cats.Create,
             routeValues: new { personId = personId.Value }));
 
         links.Add(Generate(
-            endpointInfo: EndpointNames.CreateAdvertisement,
+            endpointInfo: EndpointNames.Advertisements.Create,
             routeValues: new { personId = personId.Value }));
 
         return links;

@@ -73,7 +73,7 @@ public sealed class GetPersons : IEndpoint
                 Items = persons,
                 Total = totalRecords,
                 Links = paginationLinksService.GeneratePaginationLinks(
-                    EndpointNames.GetPersons.EndpointName,
+                    EndpointNames.Persons.GetAll.EndpointName,
                     request.Offset,
                     request.Limit,
                     totalRecords)
@@ -116,7 +116,7 @@ public sealed class GetPersons : IEndpoint
                 IPagedList<PersonResponse> persons = await sender.Send(query, cancellationToken);
                 return Results.Ok(persons);
             }).RequireAuthorization()
-            .WithName(EndpointNames.GetPersons.EndpointName)
-            .WithTags(EndpointNames.GroupNames.PersonGroup);
+            .WithName(EndpointNames.Persons.GetAll.EndpointName)
+            .WithTags(EndpointNames.Persons.Group);;
     }
 }

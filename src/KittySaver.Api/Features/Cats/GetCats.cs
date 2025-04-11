@@ -86,7 +86,7 @@ public sealed class GetCats : IEndpoint
                 Items = cats,
                 Total = totalRecords,
                 Links = paginationLinksService.GeneratePaginationLinks(
-                    EndpointNames.GetCats.EndpointName,
+                    EndpointNames.Cats.GetAll.EndpointName,
                     request.Offset,
                     request.Limit,
                     totalRecords,
@@ -134,7 +134,7 @@ public sealed class GetCats : IEndpoint
                 IPagedList<CatResponse> cats = await sender.Send(query, cancellationToken);
                 return Results.Ok(cats);
             }).RequireAuthorization()
-            .WithName(EndpointNames.GetCats.EndpointName)
-            .WithTags(EndpointNames.GroupNames.CatGroup);
+            .WithName(EndpointNames.Cats.GetAll.EndpointName)
+            .WithTags(EndpointNames.Cats.Group);
     }
 }

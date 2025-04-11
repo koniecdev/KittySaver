@@ -162,8 +162,8 @@ public class GetPublicAdvertisementsEndpointsTests : IAsyncLifetime
         firstPersonAdvertisement.PriorityScore.Should().BeGreaterThan(0);
         firstPersonAdvertisement.Links.Select(x => x.Rel).Should().BeEquivalentTo(
             EndpointRels.SelfRel,
-            EndpointNames.GetAdvertisementThumbnail.Rel,
-            EndpointNames.GetAdvertisementCats.Rel
+            EndpointNames.Advertisements.GetThumbnail.Rel,
+            EndpointNames.Advertisements.GetAdvertisementCats.Rel
         );
         firstPersonAdvertisement.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();        
 
@@ -180,8 +180,8 @@ public class GetPublicAdvertisementsEndpointsTests : IAsyncLifetime
         secondPersonAdvertisement.PriorityScore.Should().BeGreaterThan(0);
         secondPersonAdvertisement.Links.Select(x => x.Rel).Should().BeEquivalentTo(
             EndpointRels.SelfRel,
-            EndpointNames.GetAdvertisementThumbnail.Rel,
-            EndpointNames.GetAdvertisementCats.Rel
+            EndpointNames.Advertisements.GetThumbnail.Rel,
+            EndpointNames.Advertisements.GetAdvertisementCats.Rel
         );
         secondPersonAdvertisement.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
     }

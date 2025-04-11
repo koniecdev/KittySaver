@@ -42,7 +42,7 @@ public sealed class GetPerson : IEndpoint
             PersonResponse person = await sender.Send(query, cancellationToken);
             return Results.Ok(person);
         }).RequireAuthorization()
-        .WithName(EndpointNames.GetPerson.EndpointName)
-        .WithTags(EndpointNames.GroupNames.PersonGroup);
+        .WithName(EndpointNames.Persons.GetById.EndpointName)
+        .WithTags(EndpointNames.Persons.Group);;
     }
 }

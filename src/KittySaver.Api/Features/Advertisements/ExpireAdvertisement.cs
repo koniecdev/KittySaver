@@ -57,7 +57,7 @@ public sealed class ExpireAdvertisement : IEndpoint
             AdvertisementHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
             return Results.Ok(hateoasResponse);
         }).RequireAuthorization()
-        .WithName(EndpointNames.ExpireAdvertisement.EndpointName)
-        .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
+        .WithName(EndpointNames.Advertisements.Expire.EndpointName)
+        .WithTags(EndpointNames.Advertisements.Group);
     }
 }

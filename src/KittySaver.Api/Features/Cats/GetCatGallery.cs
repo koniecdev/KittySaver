@@ -55,8 +55,8 @@ public sealed class GetCatGallery : IEndpoint
                 return Results.Ok(response);
             })
             .AllowAnonymous()
-            .WithName(EndpointNames.GetCatGallery.EndpointName)
-            .WithTags(EndpointNames.GroupNames.CatGroup)
+            .WithName(EndpointNames.Cats.GetGallery.EndpointName)
+            .WithTags(EndpointNames.Cats.Group)
             .Produces<ICollection<PictureResponse>>()
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status401Unauthorized);

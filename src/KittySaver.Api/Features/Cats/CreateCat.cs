@@ -28,7 +28,7 @@ public sealed class CreateCat : IEndpoint
         string HealthStatus,
         string? AdditionalRequirements = null) : ICommand<CatHateoasResponse>, IAuthorizedRequest, ICatRequest;
 
-    public sealed class CreateCatCommandValidator : AbstractValidator<CreateCat.CreateCatCommand>
+    public sealed class CreateCatCommandValidator : AbstractValidator<CreateCatCommand>
     {
         public CreateCatCommandValidator()
         {
@@ -117,8 +117,8 @@ public sealed class CreateCat : IEndpoint
                 hateoasResponse.Links
             });
         }).RequireAuthorization()
-        .WithName(EndpointNames.CreateCat.EndpointName)
-        .WithTags(EndpointNames.GroupNames.CatGroup);
+        .WithName(EndpointNames.Cats.Create.EndpointName)
+        .WithTags(EndpointNames.Cats.Group);
     }
 }
 

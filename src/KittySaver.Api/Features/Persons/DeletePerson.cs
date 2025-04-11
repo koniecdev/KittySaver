@@ -13,7 +13,7 @@ public sealed class DeletePerson : IEndpoint
 {
     public sealed record DeletePersonCommand(PersonId Id, string AuthHeader) : ICommand, IAuthorizedRequest, IPersonRequest;
 
-    public sealed class DeletePersonCommandValidator : AbstractValidator<DeletePerson.DeletePersonCommand>
+    public sealed class DeletePersonCommandValidator : AbstractValidator<DeletePersonCommand>
     {
         public DeletePersonCommandValidator()
         {
@@ -51,7 +51,7 @@ public sealed class DeletePerson : IEndpoint
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
         }).RequireAuthorization()
-        .WithName(EndpointNames.DeletePerson.EndpointName)
-        .WithTags(EndpointNames.GroupNames.PersonGroup);
+        .WithName(EndpointNames.Persons.Delete.EndpointName)
+        .WithTags(EndpointNames.Persons.Group);
     }
 }

@@ -57,7 +57,7 @@ public sealed class RefreshAdvertisement : IEndpoint
             AdvertisementHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
             return Results.Ok(hateoasResponse);
         }).RequireAuthorization()
-        .WithName(EndpointNames.RefreshAdvertisement.EndpointName)
-        .WithTags(EndpointNames.GroupNames.AdvertisementGroup);
+        .WithName(EndpointNames.Advertisements.Refresh.EndpointName)
+        .WithTags(EndpointNames.Advertisements.Group);
     }
 }

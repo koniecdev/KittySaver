@@ -29,7 +29,7 @@ public sealed class UpdateCat : IEndpoint
         string HealthStatus,
         string? AdditionalRequirements = null) : ICommand<CatHateoasResponse>, IAuthorizedRequest, ICatRequest;
 
-    public sealed class UpdateCatCommandValidator : AbstractValidator<UpdateCat.UpdateCatCommand>
+    public sealed class UpdateCatCommandValidator : AbstractValidator<UpdateCatCommand>
     {
         public UpdateCatCommandValidator()
         {
@@ -135,8 +135,8 @@ public sealed class UpdateCat : IEndpoint
             CatHateoasResponse hateoasResponse = await sender.Send(command, cancellationToken);
             return Results.Ok(hateoasResponse);
         }).RequireAuthorization()
-        .WithName(EndpointNames.UpdateCat.EndpointName)
-        .WithTags(EndpointNames.GroupNames.CatGroup);
+        .WithName(EndpointNames.Cats.Update.EndpointName)
+        .WithTags(EndpointNames.Cats.Group);
     }
 }
 

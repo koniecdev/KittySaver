@@ -79,13 +79,13 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Links.Select(x => x.Rel).Should()
             .BeEquivalentTo(EndpointRels.SelfRel,
-                EndpointNames.UpdateCat.Rel,
-                EndpointNames.DeleteCat.Rel,
-                EndpointNames.UpdateCatThumbnail.Rel,
-                EndpointNames.AddPicturesToCatGallery.Rel,
-                EndpointNames.RemovePictureFromCatGallery.Rel,
-                EndpointNames.GetCatGallery.Rel,
-                EndpointNames.GetCatGalleryPicture.Rel);
+                EndpointNames.Cats.Update.Rel,
+                EndpointNames.Cats.Delete.Rel,
+                EndpointNames.Cats.UpdateThumbnail.Rel,
+                EndpointNames.Cats.AddPictures.Rel,
+                EndpointNames.Cats.RemovePicture.Rel,
+                EndpointNames.Cats.GetGallery.Rel,
+                EndpointNames.Cats.GetGalleryPicture.Rel);
         hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         response.Headers.Location!.ToString().Should()
             .Contain($"/api/v1/persons/{hateoasResponse.PersonId}/cats/{hateoasResponse.Id}");
@@ -117,13 +117,13 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Links.Select(x => x.Rel).Should()
             .BeEquivalentTo(EndpointRels.SelfRel,
-                EndpointNames.UpdateCat.Rel,
-                EndpointNames.DeleteCat.Rel,
-                EndpointNames.UpdateCatThumbnail.Rel,
-                EndpointNames.GetCatGallery.Rel,
-                EndpointNames.AddPicturesToCatGallery.Rel,
-                EndpointNames.RemovePictureFromCatGallery.Rel,
-                EndpointNames.GetCatGalleryPicture.Rel);
+                EndpointNames.Cats.Update.Rel,
+                EndpointNames.Cats.Delete.Rel,
+                EndpointNames.Cats.UpdateThumbnail.Rel,
+                EndpointNames.Cats.GetGallery.Rel,
+                EndpointNames.Cats.AddPictures.Rel,
+                EndpointNames.Cats.RemovePicture.Rel,
+                EndpointNames.Cats.GetGalleryPicture.Rel);
         hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         response.Headers.Location!.ToString().Should()
             .Contain($"/api/v1/persons/{hateoasResponse.PersonId}/cats/{hateoasResponse.Id}");
@@ -156,13 +156,13 @@ public class CreateCatEndpointsTests : IAsyncLifetime
         hateoasResponse.Should().NotBeNull();
         hateoasResponse!.Links.Select(x => x.Rel).Should()
             .BeEquivalentTo(EndpointRels.SelfRel,
-                EndpointNames.UpdateCat.Rel,
-                EndpointNames.DeleteCat.Rel,
-                EndpointNames.UpdateCatThumbnail.Rel,
-                EndpointNames.AddPicturesToCatGallery.Rel,
-                EndpointNames.RemovePictureFromCatGallery.Rel,
-                EndpointNames.GetCatGallery.Rel,
-                EndpointNames.GetCatGalleryPicture.Rel);
+                EndpointNames.Cats.Update.Rel,
+                EndpointNames.Cats.Delete.Rel,
+                EndpointNames.Cats.UpdateThumbnail.Rel,
+                EndpointNames.Cats.GetGallery.Rel,
+                EndpointNames.Cats.AddPictures.Rel,
+                EndpointNames.Cats.RemovePicture.Rel,
+                EndpointNames.Cats.GetGalleryPicture.Rel);
         hateoasResponse.Links.Select(x => x.Href).All(x => x.Contains("://")).Should().BeTrue();
         response.Headers.Location!.ToString().Should()
             .Contain($"/api/v1/persons/{hateoasResponse.PersonId}/cats/{hateoasResponse.Id}");
