@@ -11,16 +11,11 @@ public interface IEmailService
 
 public class EmailService(
     IFluentEmail fluentEmail,
-    ICurrentEnvironmentService currentEnvironmentService,
     ILogger<EmailService> logger)
     : IEmailService
 {
     private async Task SendEmailAsync(string email, string subject, string htmlMessage)
     {
-        if (currentEnvironmentService.IsDevelopmentTheCurrentEnvironment())
-        {
-            return;
-        }
         try
         {
             SendResponse? result = await fluentEmail
@@ -49,10 +44,6 @@ public class EmailService(
 
     public async Task SendEmailConfirmationAsync(string email, string confirmationLink)
     {
-        if (currentEnvironmentService.IsDevelopmentTheCurrentEnvironment())
-        {
-            return;
-        }
         const string subject = "Potwierdź swoje konto w KittySaver";
         string htmlMessage = $"""
                               
@@ -68,10 +59,6 @@ public class EmailService(
 
     public async Task SendPasswordResetAsync(string email, string resetLink)
     {
-        if (currentEnvironmentService.IsDevelopmentTheCurrentEnvironment())
-        {
-            return;
-        }
         const string subject = "Reset hasła w KittySaver";
         string htmlMessage = $"""
                               
