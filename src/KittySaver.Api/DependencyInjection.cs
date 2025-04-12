@@ -13,6 +13,7 @@ using KittySaver.Domain.Persons.DomainRepositories;
 using KittySaver.Domain.Persons.DomainServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Protocols.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
