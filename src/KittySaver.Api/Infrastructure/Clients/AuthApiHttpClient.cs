@@ -21,8 +21,7 @@ public class ApiValidationException(ValidationProblemDetails problemDetails)
 
 public interface IAuthApiHttpClient
 {
-    public Task<TResponse?> RegisterAsync<TResponse>(RegisterRequest request,
-        CancellationToken cancellationToken);
+    public Task<TResponse?> RegisterAsync<TResponse>(RegisterRequest request, CancellationToken cancellationToken);
 
     public Task DeletePersonAsync(Guid id);
 }
@@ -49,14 +48,14 @@ public class AuthApiHttpClient(HttpClient client, IHttpContextAccessor httpConte
         HttpResponseMessage responseMessage =
             await client.PostAsync("v1/application-users", bodyContent, cancellationToken);
 
+        var contentString = await responseMessage.Content.ReadAsStringAsync(cancellationToken);
+        
         if (responseMessage.IsSuccessStatusCode)
         {
-            return await responseMessage.Content.ReadFromJsonAsync<TResponse?>(_jsonOptions, cancellationToken);
+            return JsonSerializer.Deserialize<TResponse>(contentString, _jsonOptions) ??
+                   throw new JsonException("Nie można zdeserializować TResponse");
         }
-
-        // Zachowujemy oryginalną zawartość, aby nie odczytywać jej wielokrotnie
-        var contentString = await responseMessage.Content.ReadAsStringAsync(cancellationToken);
-
+        
         // Najpierw próbujemy ValidationProblemDetails
         if (responseMessage.StatusCode is HttpStatusCode.BadRequest)
         {

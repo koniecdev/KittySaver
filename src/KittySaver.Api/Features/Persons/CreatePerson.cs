@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using System.Text.Json;
+using FluentValidation;
 using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Infrastructure.Clients;
 using KittySaver.Api.Infrastructure.Endpoints;
@@ -10,6 +11,7 @@ using KittySaver.Domain.Persons.ValueObjects;
 using KittySaver.Domain.ValueObjects;
 using KittySaver.Shared.Hateoas;
 using KittySaver.Shared.Requests;
+using KittySaver.Shared.Responses;
 using MediatR;
 using Riok.Mapperly.Abstractions;
 
@@ -184,7 +186,8 @@ public sealed class CreatePerson : IEndpoint
                 PhoneNumber: person.PhoneNumber,
                 Password: request.Password);
         
-            Guid userIdentityId = await authApiHttpClient.RegisterAsync<Guid>(registerDto, cancellationToken);
+            IdResponse<Guid> userIdentityId = await authApiHttpClient.RegisterAsync<IdResponse<Guid>>(registerDto, cancellationToken) 
+                                              ?? throw new JsonException("Nie można zdeserializować ID, skontaktuj sie z administratorem strony pod adresem koniecdev@gmail.com");
 
             person.SetUserIdentityId(userIdentityId);
             
