@@ -5,6 +5,7 @@ using KittySaver.Api.Persistence.ReadRelated;
 using KittySaver.Api.Persistence.WriteRelated;
 using KittySaver.Api.Tests.Integration.Helpers;
 using KittySaver.Shared.Common.Enums;
+using KittySaver.Shared.Responses;
 using KittySaver.Shared.TypedIds;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -131,8 +132,8 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
             }
             
             IAuthApiHttpClient mockKittySaverApiClient = Substitute.For<IAuthApiHttpClient>();
-            mockKittySaverApiClient.RegisterAsync<Guid>(Arg.Any<RegisterRequest>(), Arg.Any<CancellationToken>())
-                .Returns(Guid.NewGuid());
+            mockKittySaverApiClient.RegisterAsync<IdResponse<Guid>>(Arg.Any<RegisterRequest>(), Arg.Any<CancellationToken>())
+                .Returns(new IdResponse<Guid>(Guid.NewGuid()));
             services.AddSingleton(mockKittySaverApiClient);
             
             ServiceDescriptor? descriptorOfReadDbContext = services
