@@ -41,19 +41,17 @@ public sealed class ResetPassword : IEndpoint
     {
         public async Task Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
         {
-            ApplicationUser? user = await userManager.FindByEmailAsync(request.Email)
+            ApplicationUser user = await userManager.FindByEmailAsync(request.Email)
                 ?? throw new ApplicationUser.Exceptions.ApplicationUserNotFoundException();
 
-            // Dekodujemy token
             string decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.Token));
             
-            // Resetujemy hasło
             IdentityResult result = await userManager.ResetPasswordAsync(user, decodedToken, request.Password);
             
             if (!result.Succeeded)
             {
                 string errorMessage = result.Errors.FirstOrDefault()?.Description ?? "Password reset failed";
-                throw new BadRequestException("ApplicationUser.PasswordReset.Failed", errorMessage);
+                throw new InvalidOperationException(errorMessage);
             }
         }
     }

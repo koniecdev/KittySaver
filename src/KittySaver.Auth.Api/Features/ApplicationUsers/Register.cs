@@ -70,7 +70,7 @@ public sealed class Register : IEndpoint
             if (!result.Succeeded)
             {
                 string errorMessage = result.Errors.FirstOrDefault()?.Description ?? "User creation failed";
-                throw new BadRequestException("ApplicationUser.Registration.Failed", errorMessage);
+                throw new InvalidOperationException(errorMessage);
             }
             
             // Generuj token potwierdzenia email

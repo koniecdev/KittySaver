@@ -1,9 +1,7 @@
-﻿using Ardalis.Result;
-using FluentValidation;
+﻿using FluentValidation;
 using KittySaver.Api.Features.Persons.SharedContracts;
 using KittySaver.Api.Infrastructure.Clients;
 using KittySaver.Api.Infrastructure.Endpoints;
-using KittySaver.Api.Infrastructure.Extensions;
 using KittySaver.Api.Persistence.WriteRelated;
 using KittySaver.Api.Shared.Abstractions;
 using KittySaver.Domain.Persons.DomainRepositories;

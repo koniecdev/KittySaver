@@ -269,43 +269,34 @@ public class ApiClient : IApiClient
             return response;
         }
 
-        switch (responseMessage.StatusCode)
+        var contentString = await responseMessage.Content.ReadAsStringAsync(cancellationToken);
+        
+        if (responseMessage.StatusCode is HttpStatusCode.BadRequest)
         {
-            case HttpStatusCode.BadRequest:
-                try
+            try
+            {
+                var validationProblemDetails = JsonSerializer.Deserialize<ValidationProblemDetails>(
+                    contentString, _jsonOptions);
+                
+                if (validationProblemDetails is not null && validationProblemDetails.Errors.Count > 0)
                 {
-                    // var jsonString = await responseMessage.Content.ReadAsStringAsync(cancellationToken);
-                    ValidationProblemDetails validationProblemDetails = 
-                        await responseMessage.Content.ReadFromJsonAsync<ValidationProblemDetails>(_jsonOptions, cancellationToken)
-                        ?? throw new JsonException();
                     return Result.Invalid(validationProblemDetails.ToValidationErrors());
                 }
-                catch
-                {
-                    try
-                    {
-                        ProblemDetails validationProblemDetails = 
-                            await responseMessage.Content.ReadFromJsonAsync<ProblemDetails>(_jsonOptions, cancellationToken)
-                            ?? throw new JsonException();
-                        return Result.Invalid(validationProblemDetails.ToValidationErrors());
-                    }
-                    catch (Exception e)
-                    {
-                        return Result.Invalid(new ValidationError(e.Message));
-                    }
-                }
-            default:
-                try
-                {
-                    ProblemDetails validationProblemDetails = 
-                        await responseMessage.Content.ReadFromJsonAsync<ProblemDetails>(_jsonOptions, cancellationToken)
-                        ?? throw new JsonException();
-                    return Result.Invalid(validationProblemDetails.ToValidationErrors());
-                }
-                catch (Exception e)
-                {
-                    return Result.Invalid(new ValidationError(e.Message));
-                }
+            }
+            catch (JsonException)
+            {
+            }
+        }
+        
+        try
+        {
+            ProblemDetails problemDetails = JsonSerializer.Deserialize<ProblemDetails>(contentString, _jsonOptions)
+                ?? throw new JsonException();
+            return Result.Invalid(problemDetails.ToValidationErrors());
+        }
+        catch (Exception e)
+        {
+            return Result.Invalid(new ValidationError(e.Message));
         }
     }
     

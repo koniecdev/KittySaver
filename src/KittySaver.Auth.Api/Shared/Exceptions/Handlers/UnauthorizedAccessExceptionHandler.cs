@@ -15,15 +15,17 @@ internal sealed class UnauthorizedAccessExceptionHandler(ILogger<UnauthorizedAcc
             return false;
         }
         
-        ProblemDetails problemDetails = new()
+        var problemDetails = new ProblemDetails
         {
             Status = StatusCodes.Status403Forbidden,
+            Type = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403",
             Title = "You do not have permission to modify resource that do not belong to You."
         };
 
         logger.LogError(
-            exception, "Bad Login Exception occurred: {type} | {message}",
+            exception, "Unauthorized Exception occurred: {status} | {type} | {message}",
             problemDetails.Status.Value,
+            exception.GetType().Name,
             exception.Message);
 
         httpContext.Response.StatusCode = problemDetails.Status.Value;

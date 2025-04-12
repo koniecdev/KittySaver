@@ -1,19 +1,14 @@
 ﻿namespace KittySaver.Auth.Api.Shared.Exceptions;
 
-public interface IApplicationError
-{
-    string ApplicationCode { get; }
-    string Description { get; }
-}
+public abstract class NotFoundException(string entity, string identifier) 
+    : Exception($"'{entity}' with identifier '{identifier}' was not found.");
 
-public class NotFoundException(string applicationCode, string description) : Exception, IApplicationError
+// Możesz dodać konkretne typy wyjątków Not Found tutaj w razie potrzeby
+public static class NotFoundExceptions
 {
-    public string ApplicationCode { get; } = applicationCode;
-    public string Description { get; } = description;
-}
-
-public class BadRequestException(string applicationCode, string description) : Exception, IApplicationError
-{
-    public string ApplicationCode { get; } = applicationCode;
-    public string Description { get; } = description;
+    public sealed class ApplicationUserNotFoundException() 
+        : NotFoundException("ApplicationUser", "unknown");
+        
+    public sealed class RefreshTokenNotFoundException() 
+        : NotFoundException("RefreshToken", "unknown");
 }

@@ -18,10 +18,10 @@ public sealed class RefreshToken : AuditableEntity
     public static class Exceptions
     {
         public sealed class RefreshTokenExpiredException()
-            : BadRequestException("RefreshToken.Expired", "Refresh token has expired");
+            : InvalidOperationException("Refresh token has expired");
             
         public sealed class RefreshTokenRevokedException()
-            : BadRequestException("RefreshToken.Revoked", "Refresh token has been revoked");
+            : InvalidOperationException("Refresh token has been revoked");
             
         public sealed class RefreshTokenNotFoundException()
             : NotFoundException("RefreshToken.NotFound", "Refresh token not found");

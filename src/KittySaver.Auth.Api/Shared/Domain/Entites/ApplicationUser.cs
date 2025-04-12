@@ -56,16 +56,7 @@ public sealed class ApplicationUser : IdentityUser<Guid>
         public static class Email
         {
             public sealed class InvalidFormatException()
-                : BadRequestException("ApplicationUser.Email.InvalidFormat", "Email format is invalid");
-
-            public sealed class NotUniqueException()
-                : BadRequestException("ApplicationUser.Email.NotUnique", "Email is not unique");
-                
-            public sealed class EmailConfirmationFailedException(string errorMessage)
-                : BadRequestException("ApplicationUser.Email.ConfirmationFailed", errorMessage);
-                
-            public sealed class EmailNotConfirmedException()
-                : BadRequestException("ApplicationUser.Email.NotConfirmed", "Email address is not confirmed");
+                : FormatException("Email format is invalid");
         }
     }
 }
