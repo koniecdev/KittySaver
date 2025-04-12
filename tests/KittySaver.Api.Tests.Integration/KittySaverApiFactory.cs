@@ -131,7 +131,8 @@ public class KittySaverApiFactory : WebApplicationFactory<IApiMarker>, IAsyncLif
             }
             
             IAuthApiHttpClient mockKittySaverApiClient = Substitute.For<IAuthApiHttpClient>();
-            mockKittySaverApiClient.RegisterAsync(Arg.Any<RegisterRequest>()).Returns(Guid.NewGuid());
+            mockKittySaverApiClient.RegisterAsync<Guid>(Arg.Any<RegisterRequest>(), Arg.Any<CancellationToken>())
+                .Returns(Guid.NewGuid());
             services.AddSingleton(mockKittySaverApiClient);
             
             ServiceDescriptor? descriptorOfReadDbContext = services

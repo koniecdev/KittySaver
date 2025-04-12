@@ -49,7 +49,7 @@ public sealed class ConfirmEmail : IEndpoint
             if (!result.Succeeded)
             {
                 string errorDescription = result.Errors.FirstOrDefault()?.Description ?? "Email confirmation failed";
-                throw new ApplicationUser.Exceptions.Email.EmailConfirmationFailedException(errorDescription);
+                throw new InvalidOperationException(errorDescription);
             }
         }
     }

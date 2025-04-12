@@ -65,7 +65,7 @@ public class AuthApiHttpClient(HttpClient client, IHttpContextAccessor httpConte
                 var validationProblemDetails = JsonSerializer.Deserialize<ValidationProblemDetails>(
                     contentString, _jsonOptions);
                 
-                if (validationProblemDetails is not null)
+                if (validationProblemDetails is not null && validationProblemDetails.Errors.Count > 0)
                 {
                     throw new ApiValidationException(validationProblemDetails);
                 }

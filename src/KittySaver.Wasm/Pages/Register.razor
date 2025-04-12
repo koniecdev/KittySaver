@@ -295,7 +295,7 @@
     private Link _createPersonLink = null!;
     private string? _errorMessage;
 
-    private ICollection<string> _everyRegisterErrorList = [];
+    private List<string> _everyRegisterErrorList = [];
     private bool _nicknameIsInvalid;
     private ICollection<string> _nicknameErrors = [];
     private bool _emailIsInvalid;
@@ -451,6 +451,12 @@
                     {
                         _everyRegisterErrorList.Add(error);
                     }
+                }
+
+                if (_everyRegisterErrorList.Count == 0)
+                {
+                    _everyRegisterErrorList.AddRange(createPersonResult.Errors);
+                    _everyRegisterErrorList.AddRange(createPersonResult.ValidationErrors.Select(x=>x.ErrorMessage));
                 }
             }
         }

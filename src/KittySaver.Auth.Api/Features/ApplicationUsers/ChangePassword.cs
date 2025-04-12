@@ -56,10 +56,9 @@ public sealed class ChangePassword : IEndpoint
             if (!result.Succeeded)
             {
                 string errorMessage = result.Errors.FirstOrDefault()?.Description ?? "Password change failed";
-                throw new BadRequestException("ApplicationUser.PasswordChange.Failed", errorMessage);
+                throw new InvalidOperationException(errorMessage);
             }
             
-            // Unieważnij wszystkie tokeny odświeżające po zmianie hasła
             await refreshTokenService.RevokeAllUserRefreshTokensAsync(userId, cancellationToken);
         }
     }

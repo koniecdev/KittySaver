@@ -46,7 +46,7 @@ public sealed class ForgotPassword : IEndpoint
             // Sprawdzamy czy email został potwierdzony
             if (!await userManager.IsEmailConfirmedAsync(user))
             {
-                throw new ApplicationUser.Exceptions.Email.EmailNotConfirmedException();
+                throw new InvalidOperationException("Email nie jest potwierdzony.");
             }
 
             // Generujemy token resetu hasła
