@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using KittySaver.Api.Infrastructure.Clients;
 using KittySaver.Api.Infrastructure.Endpoints;
 using KittySaver.Api.Persistence.WriteRelated;
 using KittySaver.Api.Shared.Abstractions;
@@ -11,7 +12,7 @@ namespace KittySaver.Api.Features.Persons;
 
 public sealed class DeletePerson : IEndpoint
 {
-    public sealed record DeletePersonCommand(PersonId Id, string AuthHeader) : ICommand, IAuthorizedRequest, IPersonRequest;
+    public sealed record DeletePersonCommand(PersonId Id) : ICommand, IAuthorizedRequest, IPersonRequest;
 
     public sealed class DeletePersonCommandValidator : AbstractValidator<DeletePersonCommand>
     {
@@ -25,14 +26,17 @@ public sealed class DeletePerson : IEndpoint
 
     internal sealed class DeletePersonCommandHandler(
         IPersonRepository personRepository,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IAuthApiHttpClient authApiHttpClient)
         : IRequestHandler<DeletePersonCommand>
     {
         public async Task Handle(DeletePersonCommand request, CancellationToken cancellationToken)
         {
             Person person = await personRepository.GetPersonByIdAsync(request.Id, cancellationToken);
             
-            await personRepository.RemoveAsync(person, request.AuthHeader);
+            personRepository.Remove(person);
+            
+            await authApiHttpClient.DeletePersonAsync(person.UserIdentityId);
             
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }
@@ -43,11 +47,9 @@ public sealed class DeletePerson : IEndpoint
         endpointRouteBuilder.MapDelete("persons/{id:guid}", async (
             Guid id,
             ISender sender,
-            HttpContext httpContext,
             CancellationToken cancellationToken) =>
         {
-            string authHeader = httpContext.Request.Headers.Authorization.ToString();
-            DeletePersonCommand command = new(new PersonId(id), authHeader);
+            DeletePersonCommand command = new(new PersonId(id));
             await sender.Send(command, cancellationToken);
             return Results.NoContent();
         }).RequireAuthorization()

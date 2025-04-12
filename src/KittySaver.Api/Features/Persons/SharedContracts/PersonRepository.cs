@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KittySaver.Api.Features.Persons.SharedContracts;
 
-public class PersonRepository(ApplicationWriteDbContext writeDb, IAuthApiHttpClient authApiHttpClient) : IPersonRepository
+public class PersonRepository(ApplicationWriteDbContext writeDb) : IPersonRepository
 {
     public async Task<Person> GetPersonByIdAsync(PersonId id, CancellationToken cancellationToken)
         => await writeDb.Persons
@@ -19,23 +19,13 @@ public class PersonRepository(ApplicationWriteDbContext writeDb, IAuthApiHttpCli
             .FirstOrDefaultAsync(cancellationToken) 
             ?? throw new NotFoundExceptions.PersonNotFoundException(id);
     
-    public async Task InsertAsync(Person person, string password)
+    public void Insert(Person person)
     {
         writeDb.Persons.Add(person);
-        
-        RegisterRequest registerDto = new(
-            UserName: person.Nickname.Value,
-            Email: person.Email.Value,
-            PhoneNumber: person.PhoneNumber.Value,
-            Password: password);
-        
-        Guid userIdentityId = await authApiHttpClient.RegisterAsync(registerDto);
-        person.SetUserIdentityId(userIdentityId);
     }
 
-    public async Task RemoveAsync(Person person, string authHeader)
+    public void Remove(Person person)
     {
         writeDb.Persons.Remove(person);
-        await authApiHttpClient.DeletePersonAsync(person.UserIdentityId, authHeader);
     }
 }

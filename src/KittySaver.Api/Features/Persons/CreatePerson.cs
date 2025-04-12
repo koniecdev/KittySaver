@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using KittySaver.Api.Features.Persons.SharedContracts;
+using KittySaver.Api.Infrastructure.Clients;
 using KittySaver.Api.Infrastructure.Endpoints;
 using KittySaver.Api.Persistence.WriteRelated;
 using KittySaver.Api.Shared.Abstractions;
@@ -152,7 +153,8 @@ public sealed class CreatePerson : IEndpoint
 
     internal sealed class CreatePersonCommandHandler(
         IPersonRepository personRepository,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        IAuthApiHttpClient authApiHttpClient)
         : IRequestHandler<CreatePersonCommand, PersonHateoasResponse>
     {
         public async Task<PersonHateoasResponse> Handle(CreatePersonCommand request,
@@ -182,7 +184,18 @@ public sealed class CreatePerson : IEndpoint
                 defaultAdvertisementContactInfoEmail: defaultAdvertisementContactInfoEmail,
                 defaultAdvertisementContactInfoPhoneNumber: defaultAdvertisementContactInfoPhoneNumber);
 
-            await personRepository.InsertAsync(person, request.Password);
+            personRepository.Insert(person);
+            
+            RegisterRequest registerDto = new(
+                UserName: person.Nickname,
+                Email: person.Email,
+                PhoneNumber: person.PhoneNumber,
+                Password: request.Password);
+        
+            Guid userIdentityId = await authApiHttpClient.RegisterAsync(registerDto);
+            
+            person.SetUserIdentityId(userIdentityId);
+            
             await unitOfWork.SaveChangesAsync(cancellationToken);
             return new PersonHateoasResponse(person.Id);
         }

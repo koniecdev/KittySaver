@@ -24,10 +24,10 @@ public class ApiValidationException(ValidationProblemDetails problemDetails)
 public interface IAuthApiHttpClient
 {
     public Task<Guid> RegisterAsync(RegisterRequest request);
-    public Task DeletePersonAsync(Guid id, string authToken);
+    public Task DeletePersonAsync(Guid id);
 }
 
-public class AuthApiHttpClient(HttpClient client) : IAuthApiHttpClient
+public class AuthApiHttpClient(HttpClient client, IHttpContextAccessor httpContextAccessor) : IAuthApiHttpClient
 {
     private static class Exceptions
     {
@@ -64,8 +64,11 @@ public class AuthApiHttpClient(HttpClient client) : IAuthApiHttpClient
         return idResponse.Id;
     }
     
-    public async Task DeletePersonAsync(Guid id, string authHeader)
+    public async Task DeletePersonAsync(Guid id)
     {
+        ArgumentNullException.ThrowIfNull(httpContextAccessor);
+        ArgumentNullException.ThrowIfNull(httpContextAccessor.HttpContext);
+        string authHeader = httpContextAccessor.HttpContext.Request.Headers.Authorization.ToString();
         client.DefaultRequestHeaders.Authorization = AuthenticationHeaderValue.Parse(authHeader);
         HttpResponseMessage response = await client.DeleteAsync($"v1/application-users/{id}");
         if (!response.IsSuccessStatusCode)
