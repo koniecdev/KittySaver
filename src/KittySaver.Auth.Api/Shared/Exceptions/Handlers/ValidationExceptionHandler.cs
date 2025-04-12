@@ -53,7 +53,7 @@ internal sealed class ValidationExceptionHandler(ILogger<ValidationExceptionHand
             JsonSerializer.Serialize(validationException.Errors)
             );
 
-        httpContext.Response.StatusCode = problemDetails.Status.Value;
+        httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
 
         await httpContext.Response
             .WriteAsJsonAsync(problemDetails, cancellationToken);

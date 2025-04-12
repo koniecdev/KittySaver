@@ -274,7 +274,7 @@ public class ApiClient : IApiClient
             case HttpStatusCode.BadRequest:
                 try
                 {
-                    var jsonString = await responseMessage.Content.ReadAsStringAsync(cancellationToken);
+                    // var jsonString = await responseMessage.Content.ReadAsStringAsync(cancellationToken);
                     ValidationProblemDetails validationProblemDetails = 
                         await responseMessage.Content.ReadFromJsonAsync<ValidationProblemDetails>(_jsonOptions, cancellationToken)
                         ?? throw new JsonException();

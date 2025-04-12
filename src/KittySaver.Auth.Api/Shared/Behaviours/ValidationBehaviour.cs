@@ -49,7 +49,7 @@ public sealed class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidat
             throw new ValidationException(errors);
         }
 
-        TResponse response = await next();
+        TResponse response = await next(cancellationToken);
 
         return response;
     }
