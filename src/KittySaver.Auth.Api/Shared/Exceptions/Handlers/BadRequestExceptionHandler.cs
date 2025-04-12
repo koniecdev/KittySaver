@@ -39,7 +39,7 @@ internal sealed class BadRequestExceptionHandler(ILogger<BadRequestExceptionHand
             badRequestException.ApplicationCode,
             badRequestException.Description);
 
-        httpContext.Response.StatusCode = problemDetails.Status.Value;
+        httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
 
         await httpContext.Response
             .WriteAsJsonAsync(problemDetails, cancellationToken);
