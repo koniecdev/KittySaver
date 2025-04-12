@@ -107,8 +107,7 @@
         try
         {
             LoginRequest loginRequest = new(Email: _loginDto.Email, Password: _loginDto.Password);
-            LoginResponse? response =
-                await ApiClient.PostAsync<LoginRequest, LoginResponse>($"{EnvironmentConfiguration.AuthUrl}application-users/login", loginRequest);
+            LoginResponse? response = await ApiClient.PostAsync<LoginRequest, LoginResponse>($"{EnvironmentConfiguration.AuthUrl}application-users/login", loginRequest);
 
             if (response is not null)
             {

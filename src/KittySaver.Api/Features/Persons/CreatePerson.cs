@@ -50,8 +50,7 @@ public sealed class CreatePerson : IEndpoint
                 .WithMessage("Twoje hasło musi mieć co najmniej 8 znaków.")
                 .Matches("[A-Z]+")
                 // .WithMessage("'Password' is not in the correct format. Your password must contain at least one uppercase letter.")
-                .WithMessage(
-                    "Twoje hasło musi zawierać co najmniej jedną wielką literę.")
+                .WithMessage("Twoje hasło musi zawierać co najmniej jedną wielką literę.")
                 .Matches("[a-z]+")
                 // .WithMessage("'Password' is not in the correct format. Your password must contain at least one lowercase letter.")
                 .WithMessage("Twoje hasło musi zawierać co najmniej jedną małą literę.")
@@ -91,8 +90,7 @@ public sealed class CreatePerson : IEndpoint
                 .WithMessage("'Domyślny numer telefonu kontaktowego dla ogłoszeń' nie może być pusty.")
                 .MaximumLength(PhoneNumber.MaxLength)
                 // .WithMessage("'Default Advertisement Contact Info Phone Number' must not exceed {MaxLength} characters.");
-                .WithMessage(
-                    "'Domyślny numer telefonu kontaktowego dla ogłoszeń' nie może przekraczać {MaxLength} znaków.");
+                .WithMessage("'Domyślny numer telefonu kontaktowego dla ogłoszeń' nie może przekraczać {MaxLength} znaków.");
 
             RuleFor(x => x.DefaultAdvertisementContactInfoEmail)
                 .NotEmpty()
@@ -116,8 +114,7 @@ public sealed class CreatePerson : IEndpoint
             RuleFor(x => x.DefaultAdvertisementPickupAddressState)
                 .MaximumLength(Address.StateMaxLength)
                 // .WithMessage("'Default Advertisement Pickup Address State' must not exceed {MaxLength} characters.");
-                .WithMessage(
-                    "'Domyślne województwo w adresie odbioru dla ogłoszeń' nie może przekraczać {MaxLength} znaków.");
+                .WithMessage("'Domyślne województwo w adresie odbioru dla ogłoszeń' nie może przekraczać {MaxLength} znaków.");
 
             RuleFor(x => x.DefaultAdvertisementPickupAddressZipCode)
                 .NotEmpty()
@@ -125,8 +122,7 @@ public sealed class CreatePerson : IEndpoint
                 .WithMessage("'Domyślny kod pocztowy w adresie odbioru dla ogłoszeń' nie może być pusty.")
                 .MaximumLength(Address.ZipCodeMaxLength)
                 // .WithMessage("'Default Advertisement Pickup Address Zip Code' must not exceed {MaxLength} characters.");
-                .WithMessage(
-                    "'Domyślny kod pocztowy w adresie odbioru dla ogłoszeń' nie może przekraczać {MaxLength} znaków.");
+                .WithMessage("'Domyślny kod pocztowy w adresie odbioru dla ogłoszeń' nie może przekraczać {MaxLength} znaków.");
 
             RuleFor(x => x.DefaultAdvertisementPickupAddressCity)
                 .NotEmpty()
@@ -134,20 +130,17 @@ public sealed class CreatePerson : IEndpoint
                 .WithMessage("'Domyślne miasto w adresie odbioru dla ogłoszeń' nie może być puste.")
                 .MaximumLength(Address.CityMaxLength)
                 // .WithMessage("'Default Advertisement Pickup Address City' must not exceed {MaxLength} characters.");
-                .WithMessage(
-                    "'Domyślne miasto w adresie odbioru dla ogłoszeń' nie może przekraczać {MaxLength} znaków.");
+                .WithMessage("'Domyślne miasto w adresie odbioru dla ogłoszeń' nie może przekraczać {MaxLength} znaków.");
 
             RuleFor(x => x.DefaultAdvertisementPickupAddressStreet)
                 .MaximumLength(Address.StreetMaxLength)
                 // .WithMessage("'Default Advertisement Pickup Address Street' must not exceed {MaxLength} characters.");
-                .WithMessage(
-                    "'Domyślna ulica w adresie odbioru dla ogłoszeń' nie może przekraczać {MaxLength} znaków.");
+                .WithMessage("'Domyślna ulica w adresie odbioru dla ogłoszeń' nie może przekraczać {MaxLength} znaków.");
 
             RuleFor(x => x.DefaultAdvertisementPickupAddressBuildingNumber)
                 .MaximumLength(Address.BuildingNumberMaxLength)
                 // .WithMessage("'Default Advertisement Pickup Address Building Number' must not exceed {MaxLength} characters.");
-                .WithMessage(
-                    "'Domyślny numer budynku w adresie odbioru dla ogłoszeń' nie może przekraczać {MaxLength} znaków.");
+                .WithMessage("'Domyślny numer budynku w adresie odbioru dla ogłoszeń' nie może przekraczać {MaxLength} znaków.");
         }
     }
 
@@ -157,8 +150,7 @@ public sealed class CreatePerson : IEndpoint
         IAuthApiHttpClient authApiHttpClient)
         : IRequestHandler<CreatePersonCommand, PersonHateoasResponse>
     {
-        public async Task<PersonHateoasResponse> Handle(CreatePersonCommand request,
-            CancellationToken cancellationToken)
+        public async Task<PersonHateoasResponse> Handle(CreatePersonCommand request, CancellationToken cancellationToken)
         {
             Nickname nickname = Nickname.Create(request.Nickname);
             Email email = Email.Create(request.Email);
