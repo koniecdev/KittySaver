@@ -13,6 +13,7 @@ using MudBlazor.Services;
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
+builder.Services.AddSingleton<IApiUrlProvider, ApiUrlProvider>();
 builder.Services.AddScoped<IApiNavigationService, ApiNavigationService>();
 builder.Services.AddScoped<IAdvertisementStateService, AdvertisementStateService>();
 builder.Services.AddScoped<IFileValidationService, FileValidationService>();
