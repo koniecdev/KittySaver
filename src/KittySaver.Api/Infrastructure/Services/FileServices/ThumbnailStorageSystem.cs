@@ -41,7 +41,7 @@ public class ThumbnailStorageService<TId>(
         using MagickImage image = new(sourceStream);
     
         double ratio = (double)image.Height / image.Width;
-        const uint newWidth = 300;
+        const uint newWidth = 600;
         uint newHeight = (uint)(newWidth * ratio);
     
         image.Resize(width: newWidth, height: newHeight);
