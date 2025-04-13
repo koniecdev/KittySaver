@@ -30,17 +30,14 @@ public sealed class Logout : IEndpoint
     {
         public async Task Handle(LogoutCommand request, CancellationToken cancellationToken)
         {
-            // Unieważniamy refresh token
             try
             {
                 await refreshTokenService.RevokeRefreshTokenAsync(request.RefreshToken, cancellationToken);
             }
             catch (RefreshToken.Exceptions.RefreshTokenNotFoundException)
             {
-                // Ignorujemy brak tokena - użytkownik jest już wylogowany
             }
 
-            // Opcjonalnie: unieważniamy wszystkie tokeny użytkownika
             if (Guid.TryParse(currentUserService.UserId, out Guid userId))
             {
                 await refreshTokenService.RevokeAllUserRefreshTokensAsync(userId, cancellationToken);

@@ -2,9 +2,11 @@
 using KittySaver.Auth.Api.Shared.Abstractions;
 using KittySaver.Auth.Api.Shared.Domain.Entites;
 using KittySaver.Auth.Api.Shared.Endpoints;
+using KittySaver.Auth.Api.Shared.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using UnauthorizedAccessException = System.UnauthorizedAccessException;
 
 namespace KittySaver.Auth.Api.Features.ApplicationUsers;
 
@@ -27,8 +29,8 @@ public sealed class DeleteApplicationUser : IEndpoint
         public async Task Handle(DeleteApplicationUserCommand request, CancellationToken cancellationToken)
         {
             ApplicationUser user = await userManager.Users
-                .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken)
-                ?? throw new ApplicationUser.Exceptions.ApplicationUserNotFoundException();
+                                       .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken)
+                                   ?? throw new NotFoundExceptions.ApplicationUserNotFoundException();
             await userManager.DeleteAsync(user);
         }
     }

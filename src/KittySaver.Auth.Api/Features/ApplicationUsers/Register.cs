@@ -37,10 +37,14 @@ public sealed class Register : IEndpoint
             RuleFor(x => x.Password)
                 .NotEmpty();
             RuleFor(x => x.Password)
-                .MinimumLength(8).WithMessage("'Password' is not in the correct format. Your password length must be at least 8.")
-                .Matches("[A-Z]+").WithMessage("'Password' is not in the correct format. Your password must contain at least one uppercase letter.")
-                .Matches("[a-z]+").WithMessage("'Password' is not in the correct format. Your password must contain at least one lowercase letter.")
-                .Matches("[0-9]+").WithMessage("'Password' is not in the correct format. Your password must contain at least one number.");
+                .MinimumLength(8)
+                .WithMessage("'Password' is not in the correct format. Your password length must be at least 8.")
+                .Matches("[A-Z]+")
+                .WithMessage("'Password' is not in the correct format. Your password must contain at least one uppercase letter.")
+                .Matches("[a-z]+")
+                .WithMessage("'Password' is not in the correct format. Your password must contain at least one lowercase letter.")
+                .Matches("[0-9]+")
+                .WithMessage("'Password' is not in the correct format. Your password must contain at least one number.");
             RuleFor(x => x.UserName).NotEmpty();
             RuleFor(x => x.PhoneNumber).NotEmpty();
             RuleFor(x => x.Email)
@@ -73,14 +77,11 @@ public sealed class Register : IEndpoint
                 throw new InvalidOperationException(errorMessage);
             }
             
-            // Generuj token potwierdzenia email
             string token = await userManager.GenerateEmailConfirmationTokenAsync(user);
             string encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
             
-            // Utwórz link potwierdzający
             string confirmationLink = $"{emailSettings.Value.WebsiteBaseUrl}/confirm-email?userId={user.Id}&token={encodedToken}";
             
-            // Wyślij email z potwierdzeniem
             await emailService.SendEmailConfirmationAsync(user.Email!, confirmationLink);
             
             return user.Id;

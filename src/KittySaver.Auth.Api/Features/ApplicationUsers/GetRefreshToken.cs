@@ -2,6 +2,7 @@
 using KittySaver.Auth.Api.Shared.Abstractions;
 using KittySaver.Auth.Api.Shared.Domain.Entites;
 using KittySaver.Auth.Api.Shared.Endpoints;
+using KittySaver.Auth.Api.Shared.Exceptions;
 using KittySaver.Auth.Api.Shared.Infrastructure.Services;
 using KittySaver.Shared.Requests;
 using KittySaver.Shared.Responses;
@@ -42,7 +43,7 @@ public sealed class GetRefreshToken : IEndpoint
             ApplicationUser user = refreshToken.ApplicationUser ?? 
                 await userManager.Users
                     .FirstOrDefaultAsync(u => u.Id == refreshToken.ApplicationUserId, cancellationToken)
-                ?? throw new ApplicationUser.Exceptions.ApplicationUserNotFoundException();
+                ?? throw new NotFoundExceptions.ApplicationUserNotFoundException();
 
             (string token, DateTimeOffset expiresAt) = await jwtTokenService.GenerateTokenAsync(user);
             

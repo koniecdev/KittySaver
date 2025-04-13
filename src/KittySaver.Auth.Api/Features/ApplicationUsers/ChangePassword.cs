@@ -46,7 +46,7 @@ public sealed class ChangePassword : IEndpoint
             }
 
             ApplicationUser user = await userManager.FindByIdAsync(userId.ToString())
-                ?? throw new ApplicationUser.Exceptions.ApplicationUserNotFoundException();
+                ?? throw new NotFoundExceptions.ApplicationUserNotFoundException();
 
             IdentityResult result = await userManager.ChangePasswordAsync(
                 user, 

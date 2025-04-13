@@ -11,6 +11,7 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Riok.Mapperly.Abstractions;
+using UnauthorizedAccessException = System.UnauthorizedAccessException;
 
 namespace KittySaver.Auth.Api.Features.ApplicationUsers;
 
@@ -27,10 +28,18 @@ public sealed class Login : IEndpoint
         public LoginCommandValidator()
         {
             RuleFor(x => x.Password)
-                .NotEmpty();
+                .NotEmpty()
+                .WithMessage("'Hasło' nie może być puste");
             RuleFor(x => x.Email)
                 .NotEmpty()
-                .Matches(ValidationPatterns.EmailPattern);
+                // .WithMessage("'Email' cannot be empty.")
+                .WithMessage("'Email' nie może być pusty.")
+                .MaximumLength(255)
+                // .WithMessage("'Email' must not exceed {MaxLength} characters.")
+                .WithMessage("'Email' nie może przekraczać {MaxLength} znaków.")
+                .Matches(@"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$")
+                // .WithMessage("'Email' is not in the correct format.")
+                .WithMessage("'Email' ma niepoprawny format.");
         }
     }
 
@@ -45,7 +54,7 @@ public sealed class Login : IEndpoint
             ApplicationUser user = await userManager.Users
                                        .AsNoTracking()
                                        .FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken)
-                                   ?? throw new ApplicationUser.Exceptions.ApplicationUserNotFoundException();
+                                   ?? throw new AuthenticationException();
 
             bool areUserCredentialsValid = await userManager.CheckPasswordAsync(user, request.Password);
 
@@ -58,7 +67,7 @@ public sealed class Login : IEndpoint
 
             if (!isEmailConfirmed)
             {
-                throw new Exception("Nie znaleziono potwierdzenia maila");
+                throw new InvalidOperationException("Musisz najpierw potwierdzić swój mail. Sprawdź także folder SPAM.");
             }
             
             (string token, DateTimeOffset expiresAt) = await jwtTokenService.GenerateTokenAsync(user);

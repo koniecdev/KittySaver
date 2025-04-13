@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using Riok.Mapperly.Abstractions;
 using System.Text;
+using KittySaver.Auth.Api.Shared.Exceptions;
 
 namespace KittySaver.Auth.Api.Features.ApplicationUsers;
 
@@ -39,24 +40,22 @@ public sealed class ForgotPassword : IEndpoint
         public async Task Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
         {
             ApplicationUser? user = await userManager.FindByEmailAsync(request.Email);
-            
-            // Ze względów bezpieczeństwa, nie informujemy czy użytkownik istnieje
-            if (user == null) return;
 
-            // Sprawdzamy czy email został potwierdzony
+            if (user == null)
+            {
+                throw new NotFoundExceptions.ApplicationUserNotFoundException();
+            }
+
             if (!await userManager.IsEmailConfirmedAsync(user))
             {
                 throw new InvalidOperationException("Email nie jest potwierdzony.");
             }
 
-            // Generujemy token resetu hasła
             string token = await userManager.GeneratePasswordResetTokenAsync(user);
             string encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
             
-            // Tworzymy link do resetu hasła
             string resetLink = $"{emailSettings.Value.WebsiteBaseUrl}/reset-password?email={WebUtility.UrlEncode(user.Email!)}&token={encodedToken}";
             
-            // Wysyłamy email z linkiem do resetu hasła
             await emailService.SendPasswordResetAsync(user.Email!, resetLink);
         }
     }
