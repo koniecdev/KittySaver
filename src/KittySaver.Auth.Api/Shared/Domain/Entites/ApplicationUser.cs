@@ -31,7 +31,7 @@ public sealed class ApplicationUser : IdentityUser<Guid>
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(Email));
             if (!Regex.IsMatch(value, EmailPattern))
             {
-                throw new Exceptions.Email.InvalidFormatException();
+                throw new FormatException();
             }
 
             _email = value;
@@ -45,18 +45,6 @@ public sealed class ApplicationUser : IdentityUser<Guid>
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value, nameof(PhoneNumber));
             _phoneNumber = value;
-        }
-    }
-
-    public static class Exceptions
-    {
-        public sealed class ApplicationUserNotFoundException()
-            : NotFoundException("ApplicationUser.Email.Empty", "Email is empty");
-
-        public static class Email
-        {
-            public sealed class InvalidFormatException()
-                : FormatException("Email format is invalid");
         }
     }
 }

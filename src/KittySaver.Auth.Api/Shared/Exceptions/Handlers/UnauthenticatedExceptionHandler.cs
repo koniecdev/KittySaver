@@ -16,11 +16,12 @@ internal sealed class UnauthenticatedExceptionHandler(ILogger<UnauthenticatedExc
             return false;
         }
         
-        var problemDetails = new ProblemDetails
+        ProblemDetails problemDetails = new ProblemDetails
         {
             Status = StatusCodes.Status401Unauthorized,
             Type = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401",
-            Title = "You have to log in first."
+            Title = "Błąd autoryzacji",
+            Detail = "Podałeś nieprawidłowe dane logowania."
         };
 
         logger.LogError(

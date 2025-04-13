@@ -298,10 +298,10 @@
     private List<string> _everyRegisterErrorList = [];
     private bool _nicknameIsInvalid;
     private ICollection<string> _nicknameErrors = [];
-    private bool _emailIsInvalid;
-    private ICollection<string> _emailErrors = [];
     private bool _phoneNumberIsInvalid;
     private ICollection<string> _phoneNumberErrors = [];
+    private bool _emailIsInvalid;
+    private ICollection<string> _emailErrors = [];
     private bool _passwordIsInvalid;
     private ICollection<string> _passwordErrors = [];
     private bool _defaultAdvertisementPickupAddressCountryIsInvalid;
@@ -341,8 +341,8 @@
         // Resetowanie wszystkich flag błędów i list z błędami
         _nicknameIsInvalid = false;
         _emailIsInvalid = false;
-        _phoneNumberIsInvalid = false;
         _passwordIsInvalid = false;
+        _phoneNumberIsInvalid = false;
         _defaultAdvertisementPickupAddressCountryIsInvalid = false;
         _defaultAdvertisementPickupAddressStateIsInvalid = false;
         _defaultAdvertisementPickupAddressZipCodeIsInvalid = false;
@@ -405,16 +405,16 @@
                 // Funkcja pomocnicza zwracająca krotkę zamiast używania parametrów ref
                 (bool isInvalid, ICollection<string> errors) ProcessFieldErrors(string propertyName)
                 {
-                    var fieldErrors = createPersonResult.ExtractErrorMessagesForProperty(propertyName);
-                    var hasErrors = fieldErrors.Count > 0;
+                    ICollection<string> fieldErrors = createPersonResult.ExtractErrorMessagesForProperty(propertyName);
+                    bool hasErrors = fieldErrors.Count > 0;
                     return (hasErrors, fieldErrors);
                 }
 
                 // Walidacja danych osobowych
                 (_nicknameIsInvalid, _nicknameErrors) = ProcessFieldErrors(nameof(CreatePersonRequest.Nickname));
                 (_emailIsInvalid, _emailErrors) = ProcessFieldErrors(nameof(CreatePersonRequest.Email));
-                (_phoneNumberIsInvalid, _phoneNumberErrors) = ProcessFieldErrors(nameof(CreatePersonRequest.PhoneNumber));
                 (_passwordIsInvalid, _passwordErrors) = ProcessFieldErrors(nameof(CreatePersonRequest.Password));
+                (_phoneNumberIsInvalid, _phoneNumberErrors) = ProcessFieldErrors(nameof(CreatePersonRequest.PhoneNumber));
 
                 // Walidacja adresu odbioru
                 (_defaultAdvertisementPickupAddressCountryIsInvalid, _defaultAdvertisementPickupAddressCountryErrors) =
@@ -438,7 +438,7 @@
 
                 // Zbieranie wszystkich błędów do jednej listy
                 _everyRegisterErrorList = [];
-                foreach (var errorList in new[]
+                foreach (ICollection<string> errorList in new[]
                          {
                              _nicknameErrors, _emailErrors, _phoneNumberErrors, _passwordErrors,
                              _defaultAdvertisementPickupAddressCountryErrors, _defaultAdvertisementPickupAddressStateErrors,
@@ -447,7 +447,7 @@
                              _defaultAdvertisementContactInfoEmailErrors, _defaultAdvertisementContactInfoPhoneNumberErrors
                          })
                 {
-                    foreach (var error in errorList)
+                    foreach (string error in errorList)
                     {
                         _everyRegisterErrorList.Add(error);
                     }

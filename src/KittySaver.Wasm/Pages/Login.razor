@@ -1,6 +1,8 @@
 ﻿@page "/login"
+@using Ardalis.Result
 @using KittySaver.Shared.Requests
 @using KittySaver.Shared.Responses
+@using KittySaver.Wasm.Shared.Extensions
 @using KittySaver.Wasm.Shared.HttpClients
 @inherits KittySaver.Wasm.Shared.Components.ApiAwareComponentBase
 @inject IApiClient ApiClient
@@ -26,7 +28,16 @@
         <EditForm Model="_loginDto" OnSubmit="HandleLogin" class="login_form">
             <div class="login_form_tile">
                 <label for="email">Twój adres email:</label>
-                <InputText id="email" type="email" @bind-Value="_loginDto.Email" />
+                <InputText id="email" type="email" @bind-Value="_loginDto.Email" required />
+                <div class="login_form_errors">
+                    @if (_emailIsInvalid)
+                    {
+                        foreach (string error in _emailErrors)
+                        {
+                            <div class="input_error">@error</div>
+                        }
+                    }
+                </div>
             </div>
             <div class="login_form_tile">
                 <label for="password" class="two_part_label">
@@ -37,8 +48,28 @@
                         <a class="tdu" href="/reset-password">Zapomniałeś hasła?</a>
                     </small>
                 </label>
-                <InputText id="password" type="password" @bind-Value="_loginDto.Password" />
+                <InputText id="password" type="password" @bind-Value="_loginDto.Password" required />
+                <div class="login_form_errors">
+                    @if (_passwordIsInvalid)
+                    {
+                        foreach (string error in _passwordErrors)
+                        {
+                            <div class="input_error">@error</div>
+                        }
+                    }
+                </div>
             </div>
+            @if (_everyRegisterErrorList.Count > 0)
+            {
+                <div class="validation_summary">
+                    @foreach (var error in _everyRegisterErrorList)
+                    {
+                        <div class="input_error">
+                            @error
+                        </div>
+                    }
+                </div>
+            }
             <div class="login_form_tile_buttons">
                 <button class="default_btn btn_green" type="submit" disabled="@_isProcessing">
                     @if (_isProcessing)
@@ -68,6 +99,13 @@
     private bool _isProcessing;
     private string? _statusMessage;
     private bool _statusSuccess;
+    
+    private bool _emailIsInvalid;
+    private ICollection<string> _emailErrors = [];
+    private bool _passwordIsInvalid;
+    private ICollection<string> _passwordErrors = [];
+    
+    private List<string> _everyRegisterErrorList = [];
 
     protected override void OnInitialized()
     {
@@ -103,54 +141,68 @@
     {
         _isProcessing = true;
         _statusMessage = null;
+        
+        _emailIsInvalid = false;
+        _passwordIsInvalid = false;
+        _emailErrors = [];
+        _passwordErrors = [];
+        
+        StateHasChanged();
+        
+        LoginRequest loginRequest = new(Email: _loginDto.Email, Password: _loginDto.Password);
 
-        try
+        Result<LoginResponse?> response =
+            await ApiClient.PostWithResultAsync<LoginRequest, LoginResponse>(
+                $"{EnvironmentConfiguration.AuthUrl}application-users/login",
+                loginRequest);
+            
+        if (response is { IsSuccess: true, Value: not null })
         {
-            LoginRequest loginRequest = new(Email: _loginDto.Email, Password: _loginDto.Password);
-            LoginResponse? response = await ApiClient.PostAsync<LoginRequest, LoginResponse>($"{EnvironmentConfiguration.AuthUrl}application-users/login", loginRequest);
+            string parsedToken = response.Value.AccessToken.Replace("\"", string.Empty);
+            await LocalStorage.SetItemAsync("token", parsedToken);
+            await LocalStorage.SetItemAsync("token_expires", response.Value.AccessTokenExpiresAt);
 
-            if (response is not null)
+            // Store refresh token if it's provided
+            if (!string.IsNullOrEmpty(response.Value.RefreshToken))
             {
-                string parsedToken = response.AccessToken.Replace("\"", string.Empty);
-                await LocalStorage.SetItemAsync("token", parsedToken);
-                await LocalStorage.SetItemAsync("token_expires", response.AccessTokenExpiresAt);
+                await LocalStorage.SetItemAsync("refresh_token", response.Value.RefreshToken);
+                await LocalStorage.SetItemAsync("refresh_token_expires", response.Value.RefreshTokenExpiresAt);
+            }
 
-                // Store refresh token if it's provided
-                if (!string.IsNullOrEmpty(response.RefreshToken))
-                {
-                    await LocalStorage.SetItemAsync("refresh_token", response.RefreshToken);
-                    await LocalStorage.SetItemAsync("refresh_token_expires", response.RefreshTokenExpiresAt);
-                }
-
-                await AuthStateProvider.GetAuthenticationStateAsync();
-                NavigationManager.NavigateTo("/");
-            }
-        }
-        catch (HttpRequestException ex)
-        {
-            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-            {
-                _statusMessage = "Nieprawidłowy email lub hasło";
-            }
-            else if (ex.StatusCode == System.Net.HttpStatusCode.BadRequest)
-            {
-                _statusMessage = "Twój email nie został jeszcze potwierdzony. Sprawdź swoją skrzynkę mailową.";
-            }
-            else
-            {
-                _statusMessage = "Wystąpił błąd podczas logowania. Spróbuj ponownie.";
-            }
-            _statusSuccess = false;
-        }
-        catch (Exception)
-        {
-            _statusMessage = "Wystąpił nieoczekiwany błąd. Spróbuj ponownie później.";
-            _statusSuccess = false;
-        }
-        finally
-        {
+            await AuthStateProvider.GetAuthenticationStateAsync();
+            NavigationManager.NavigateTo("/");
             _isProcessing = false;
-            StateHasChanged();
+        }
+
+        if (response.IsInvalid())
+        {
+            (bool isInvalid, ICollection<string> errors) ProcessFieldErrors(string propertyName)
+            {
+                ICollection<string> fieldErrors = response.ExtractErrorMessagesForProperty(propertyName);
+                bool hasErrors = fieldErrors.Count > 0;
+                return (hasErrors, fieldErrors);
+            }
+            (_emailIsInvalid, _emailErrors) = ProcessFieldErrors(nameof(LoginRequest.Email));
+            (_passwordIsInvalid, _passwordErrors) = ProcessFieldErrors(nameof(LoginRequest.Password));
+            
+            _everyRegisterErrorList = [];
+            foreach (ICollection<string> errorList in new[]
+                     {
+                         _emailErrors, _passwordErrors
+                     })
+            {
+                foreach (string error in errorList)
+                {
+                    _everyRegisterErrorList.Add(error);
+                }
+            }
+
+            if (_everyRegisterErrorList.Count == 0)
+            {
+                _everyRegisterErrorList.AddRange(response.Errors);
+                _everyRegisterErrorList.AddRange(response.ValidationErrors.Select(x=>x.ErrorMessage));
+            }
+            _isProcessing = false;
         }
     }
 

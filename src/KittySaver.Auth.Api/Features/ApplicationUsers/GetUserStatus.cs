@@ -1,6 +1,7 @@
 ﻿using KittySaver.Auth.Api.Shared.Abstractions;
 using KittySaver.Auth.Api.Shared.Domain.Entites;
 using KittySaver.Auth.Api.Shared.Endpoints;
+using KittySaver.Auth.Api.Shared.Exceptions;
 using KittySaver.Auth.Api.Shared.Infrastructure.Services;
 using KittySaver.Shared.Responses;
 using MediatR;
@@ -25,7 +26,7 @@ public sealed class GetUserStatus : IEndpoint
             }
 
             ApplicationUser user = await userManager.FindByIdAsync(userId.ToString())
-                ?? throw new ApplicationUser.Exceptions.ApplicationUserNotFoundException();
+                ?? throw new NotFoundExceptions.ApplicationUserNotFoundException();
 
             bool isEmailConfirmed = await userManager.IsEmailConfirmedAsync(user);
             IList<string> roles = await userManager.GetRolesAsync(user);

@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using Riok.Mapperly.Abstractions;
 using System.Text;
+using KittySaver.Auth.Api.Shared.Exceptions;
 
 namespace KittySaver.Auth.Api.Features.ApplicationUsers;
 
@@ -39,25 +40,22 @@ public sealed class ResendEmailConfirmation : IEndpoint
         public async Task Handle(ResendEmailConfirmationCommand request, CancellationToken cancellationToken)
         {
             ApplicationUser? user = await userManager.FindByEmailAsync(request.Email);
-            
-            // Ze względów bezpieczeństwa, nie informujemy czy użytkownik istnieje
-            if (user == null) return;
 
-            // Sprawdzamy czy email został już potwierdzony
+            if (user is null)
+            {
+                throw new NotFoundExceptions.ApplicationUserNotFoundException();
+            }
+
             if (await userManager.IsEmailConfirmedAsync(user))
             {
-                // Email już potwierdzony, nie musimy nic robić
                 return;
             }
 
-            // Generujemy token potwierdzenia email
             string token = await userManager.GenerateEmailConfirmationTokenAsync(user);
             string encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
             
-            // Tworzymy link potwierdzający
             string confirmationLink = $"{emailSettings.Value.WebsiteBaseUrl}/confirm-email?userId={user.Id}&token={encodedToken}";
             
-            // Wysyłamy email z potwierdzeniem
             await emailService.SendEmailConfirmationAsync(user.Email!, confirmationLink);
         }
     }

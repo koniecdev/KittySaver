@@ -42,7 +42,7 @@ public sealed class ResetPassword : IEndpoint
         public async Task Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
         {
             ApplicationUser user = await userManager.FindByEmailAsync(request.Email)
-                ?? throw new ApplicationUser.Exceptions.ApplicationUserNotFoundException();
+                ?? throw new NotFoundExceptions.ApplicationUserNotFoundException();
 
             string decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.Token));
             

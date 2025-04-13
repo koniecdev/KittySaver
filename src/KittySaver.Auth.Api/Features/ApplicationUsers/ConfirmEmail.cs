@@ -7,6 +7,7 @@ using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
+using KittySaver.Auth.Api.Shared.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Riok.Mapperly.Abstractions;
 
@@ -36,11 +37,11 @@ public sealed class ConfirmEmail : IEndpoint
         {
             if (!Guid.TryParse(request.UserId, out Guid userId))
             {
-                throw new ApplicationUser.Exceptions.ApplicationUserNotFoundException();
+                throw new UnauthorizedAccessException();
             }
 
             ApplicationUser user = await userManager.FindByIdAsync(userId.ToString())
-                ?? throw new ApplicationUser.Exceptions.ApplicationUserNotFoundException();
+                                   ?? throw new NotFoundExceptions.ApplicationUserNotFoundException();
 
             string decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.Token));
             

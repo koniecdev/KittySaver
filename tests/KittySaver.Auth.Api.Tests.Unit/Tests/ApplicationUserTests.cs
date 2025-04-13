@@ -2,6 +2,7 @@
 using FluentAssertions;
 using KittySaver.Auth.Api.Shared.Domain.Entites;
 using KittySaver.Tests.Shared;
+using Microsoft.SqlServer.Server;
 
 namespace KittySaver.Auth.Api.Tests.Unit.Tests;
 
@@ -47,7 +48,7 @@ public class ApplicationUserTests
         };
         
         //Assert
-        creation.Should().Throw<ApplicationUser.Exceptions.Email.InvalidFormatException>();
+        creation.Should().Throw<FormatException>();
     }
     
     [Theory]
