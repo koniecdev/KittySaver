@@ -28,7 +28,7 @@ else
                     <br>
                     @if (!string.IsNullOrWhiteSpace(_advertisement.PickupAddress.Street) || !string.IsNullOrWhiteSpace(_advertisement.PickupAddress.BuildingNumber))
                     {
-                        @_advertisement.PickupAddress.Street @_advertisement.PickupAddress.BuildingNumber
+                        @($"{_advertisement.PickupAddress.Street} {_advertisement.PickupAddress.BuildingNumber}")
                         <br>
                     }
                     @_advertisement.PickupAddress.ZipCode @(_advertisement.PickupAddress.State is not null ? $"- {_advertisement.PickupAddress.State}" : "")
