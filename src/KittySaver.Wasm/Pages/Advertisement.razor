@@ -26,6 +26,11 @@ else
                 <p class="listing_element">
                     @_advertisement.PickupAddress.City
                     <br>
+                    @if (!string.IsNullOrWhiteSpace(_advertisement.PickupAddress.Street) || !string.IsNullOrWhiteSpace(_advertisement.PickupAddress.BuildingNumber))
+                    {
+                        @_advertisement.PickupAddress.Street @_advertisement.PickupAddress.BuildingNumber
+                        <br>
+                    }
                     @_advertisement.PickupAddress.ZipCode @(_advertisement.PickupAddress.State is not null ? $"- {_advertisement.PickupAddress.State}" : "")
                 </p>
                 <div class="subpage_advertiser listing_element">
