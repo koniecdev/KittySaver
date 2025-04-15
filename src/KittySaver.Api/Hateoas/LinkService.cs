@@ -50,7 +50,7 @@ public sealed class LinkService(LinkGenerator linkGenerator, IHttpContextAccesso
         }
 
         bool isLoggedInPersonAnOwner = currentlyLoggedInPerson.PersonId == personId;
-        if (currentlyLoggedInPerson.Role is not PersonRole.Admin && isLoggedInPersonAnOwner)
+        if (!isLoggedInPersonAnOwner && currentlyLoggedInPerson.Role is not PersonRole.Admin)
         {
             return links;
         }
