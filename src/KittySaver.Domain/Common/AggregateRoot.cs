@@ -1,4 +1,4 @@
-﻿namespace KittySaver.Domain.Common.Primitives;
+﻿namespace KittySaver.Domain.Common;
 
 public interface IAggregateRoot
 {

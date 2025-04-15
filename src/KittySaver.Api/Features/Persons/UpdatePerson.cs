@@ -141,7 +141,7 @@ public sealed class UpdatePerson : IEndpoint
     {
         public async Task<PersonHateoasResponse> Handle(UpdatePersonCommand request, CancellationToken cancellationToken)
         {
-            Person person = await personRepository.GetPersonByIdAsync(request.Id, cancellationToken);
+            Person person = await personRepository.GetByIdAsync(request.Id, cancellationToken);
 
             Nickname nickname = Nickname.Create(request.Nickname);
             Email email = Email.Create(request.Email);

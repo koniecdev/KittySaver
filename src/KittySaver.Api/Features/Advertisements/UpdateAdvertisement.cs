@@ -115,7 +115,7 @@ public sealed class UpdateAdvertisement : IEndpoint
     {
         public async Task<AdvertisementHateoasResponse> Handle(UpdateAdvertisementCommand request, CancellationToken cancellationToken)
         {
-            Person owner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
+            Person owner = await personRepository.GetByIdAsync(request.PersonId, cancellationToken);
 
             Address pickupAddress = Address.Create(
                 country: request.PickupAddressCountry,

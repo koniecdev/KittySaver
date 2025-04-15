@@ -44,7 +44,7 @@ public sealed class ReassignCatsToAdvertisement : IEndpoint
     {
         public async Task<AdvertisementHateoasResponse> Handle(ReassignCatsToAdvertisementCommand request, CancellationToken cancellationToken)
         {
-            Person owner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
+            Person owner = await personRepository.GetByIdAsync(request.PersonId, cancellationToken);
             owner.ReplaceCatsOfAdvertisement(request.Id, request.CatIds);
             await unitOfWork.SaveChangesAsync(cancellationToken);
             AdvertisementStatus advertisementStatus = owner.Advertisements.First(x => x.Id == request.Id).Status;

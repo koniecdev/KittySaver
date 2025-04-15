@@ -32,7 +32,7 @@ public sealed class DeletePerson : IEndpoint
     {
         public async Task Handle(DeletePersonCommand request, CancellationToken cancellationToken)
         {
-            Person person = await personRepository.GetPersonByIdAsync(request.Id, cancellationToken);
+            Person person = await personRepository.GetByIdAsync(request.Id, cancellationToken);
             
             personRepository.Remove(person);
             

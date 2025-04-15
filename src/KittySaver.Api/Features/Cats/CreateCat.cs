@@ -74,7 +74,7 @@ public sealed class CreateCat : IEndpoint
     {
         public async Task<CatHateoasResponse> Handle(CreateCatCommand request, CancellationToken cancellationToken)
         {
-            Person person = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
+            Person person = await personRepository.GetByIdAsync(request.PersonId, cancellationToken);
         
             CatName catName = CatName.Create(request.Name);
             Description additionalRequirements = Description.Create(request.AdditionalRequirements);

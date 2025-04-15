@@ -36,7 +36,7 @@ public sealed class DeleteCat : IEndpoint
     {
         public async Task Handle(DeleteCatCommand request, CancellationToken cancellationToken)
         {
-            Person catOwner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
+            Person catOwner = await personRepository.GetByIdAsync(request.PersonId, cancellationToken);
             catOwner.RemoveCat(request.Id);
             await unitOfWork.SaveChangesAsync(cancellationToken);
         }

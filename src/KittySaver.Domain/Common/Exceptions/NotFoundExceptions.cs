@@ -7,6 +7,9 @@ public abstract class NotFoundException(string entity, string identifier, bool s
     : Exception(shouldBeInPolish 
         ? $"Nie znaleziono zasobu '{entity}' z identyfikatorem '{identifier}'" 
         : $"'{entity}' with identifier '{identifier}' was not found.");
+public class NotFoundException<TId>(string entity, TId identifier)
+    : NotFoundException(entity, identifier.ToString() ?? "", true)
+    where TId : notnull;
 
 public static class NotFoundExceptions
 {

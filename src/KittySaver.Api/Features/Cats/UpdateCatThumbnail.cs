@@ -59,7 +59,7 @@ public sealed class UpdateCatThumbnail : IEndpoint
     {
         public async Task<CatHateoasResponse> Handle(UpdateCatThumbnailCommand request, CancellationToken cancellationToken)
         {
-            Person catOwner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
+            Person catOwner = await personRepository.GetByIdAsync(request.PersonId, cancellationToken);
 
             catOwner.MarkCatAsThumbnailUploaded(request.Id);
             

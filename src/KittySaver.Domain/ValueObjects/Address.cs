@@ -1,4 +1,4 @@
-﻿using KittySaver.Domain.Common.Primitives;
+﻿using KittySaver.Domain.Common;
 
 // ReSharper disable EntityFramework.ModelValidation.UnlimitedStringLength - String Length properties limits are always set in entity that contains value object. 
 
