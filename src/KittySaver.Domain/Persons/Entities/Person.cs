@@ -1,5 +1,5 @@
-﻿using KittySaver.Domain.Common.Exceptions;
-using KittySaver.Domain.Common.Primitives;
+﻿using KittySaver.Domain.Common;
+using KittySaver.Domain.Common.Exceptions;
 using KittySaver.Domain.Persons.DomainServices;
 using KittySaver.Domain.Persons.ValueObjects;
 using KittySaver.Domain.ValueObjects;

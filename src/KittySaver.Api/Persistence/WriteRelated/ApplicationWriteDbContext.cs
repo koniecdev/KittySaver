@@ -1,6 +1,6 @@
 ﻿using KittySaver.Api.Infrastructure.Services;
 using KittySaver.Domain;
-using KittySaver.Domain.Common.Primitives;
+using KittySaver.Domain.Common;
 using KittySaver.Domain.EntityFramework;
 using KittySaver.Domain.Persons.Entities;
 using MediatR;

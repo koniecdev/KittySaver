@@ -1,11 +1,7 @@
-﻿using KittySaver.Domain.Persons.Entities;
+﻿using KittySaver.Domain.Common;
+using KittySaver.Domain.Persons.Entities;
 using KittySaver.Shared.TypedIds;
 
 namespace KittySaver.Domain.Persons.DomainRepositories;
 
-public interface IPersonRepository
-{
-    public Task<Person> GetPersonByIdAsync(PersonId id, CancellationToken cancellationToken);
-    public void Insert(Person person);
-    public void Remove(Person person);
-}
+public interface IPersonRepository : IRepository<Person, PersonId>;

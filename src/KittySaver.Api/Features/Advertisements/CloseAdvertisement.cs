@@ -35,7 +35,7 @@ public sealed class CloseAdvertisement : IEndpoint
     {
         public async Task<AdvertisementHateoasResponse> Handle(CloseAdvertisementCommand request, CancellationToken cancellationToken)
         {
-            Person owner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
+            Person owner = await personRepository.GetByIdAsync(request.PersonId, cancellationToken);
             owner.CloseAdvertisement(request.Id, dateTimeService.Now);
             await unitOfWork.SaveChangesAsync(cancellationToken);
             AdvertisementStatus advertisementStatus = owner.Advertisements.First(x => x.Id == request.Id).Status;

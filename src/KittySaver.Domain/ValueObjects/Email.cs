@@ -1,5 +1,5 @@
 ﻿using System.Text.RegularExpressions;
-using KittySaver.Domain.Common.Primitives;
+using KittySaver.Domain.Common;
 
 namespace KittySaver.Domain.ValueObjects;
 

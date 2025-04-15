@@ -81,7 +81,7 @@ public sealed class UpdateCat : IEndpoint
     {
         public async Task<CatHateoasResponse> Handle(UpdateCatCommand request, CancellationToken cancellationToken)
         {
-            Person catOwner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
+            Person catOwner = await personRepository.GetByIdAsync(request.PersonId, cancellationToken);
             
             CatName catName = CatName.Create(request.Name);
             Description additionalRequirements = Description.Create(request.AdditionalRequirements);

@@ -65,7 +65,7 @@ public sealed class AddPicturesToCatGallery : IEndpoint
     {
         public async Task<CatHateoasResponse> Handle(AddPicturesToCatGalleryCommand request, CancellationToken cancellationToken)
         {
-            Person catOwner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
+            Person catOwner = await personRepository.GetByIdAsync(request.PersonId, cancellationToken);
 
             if (catOwner.Cats.All(x => x.Id != request.Id))
             {

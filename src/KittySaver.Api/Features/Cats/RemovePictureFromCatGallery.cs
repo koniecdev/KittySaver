@@ -45,7 +45,7 @@ public sealed class RemovePictureFromCatGallery : IEndpoint
     {
         public async Task<CatHateoasResponse> Handle(RemovePictureFromCatGalleryCommand request, CancellationToken cancellationToken)
         {
-            Person catOwner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
+            Person catOwner = await personRepository.GetByIdAsync(request.PersonId, cancellationToken);
 
             if (catOwner.Cats.All(x => x.Id != request.Id))
             {

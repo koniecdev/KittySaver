@@ -1,4 +1,4 @@
-﻿using KittySaver.Domain.Common.Primitives;
+﻿using KittySaver.Domain.Common;
 using KittySaver.Domain.ValueObjects;
 using KittySaver.Shared.Common.Enums;
 using KittySaver.Shared.TypedIds;

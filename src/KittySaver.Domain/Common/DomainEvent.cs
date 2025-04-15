@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace KittySaver.Domain.Common.Primitives;
+namespace KittySaver.Domain.Common;
 
 public record DomainEvent : INotification
 {

@@ -39,7 +39,7 @@ public sealed class DeleteAdvertisement : IEndpoint
     {
         public async Task Handle(DeleteAdvertisementCommand request, CancellationToken cancellationToken)
         {
-            Person owner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
+            Person owner = await personRepository.GetByIdAsync(request.PersonId, cancellationToken);
             owner.RemoveAdvertisement(request.Id);
             
             advertisementFileStorageService.DeleteThumbnail(request.Id);

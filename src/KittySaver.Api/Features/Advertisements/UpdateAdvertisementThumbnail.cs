@@ -62,7 +62,7 @@ public sealed class UpdateAdvertisementThumbnail : IEndpoint
             UpdateAdvertisementThumbnailCommand request, 
             CancellationToken cancellationToken)
         {
-            Person owner = await personRepository.GetPersonByIdAsync(request.PersonId, cancellationToken);
+            Person owner = await personRepository.GetByIdAsync(request.PersonId, cancellationToken);
 
             owner.ActivateAdvertisementIfThumbnailIsUploadedForTheFirstTime(request.Id);
             
